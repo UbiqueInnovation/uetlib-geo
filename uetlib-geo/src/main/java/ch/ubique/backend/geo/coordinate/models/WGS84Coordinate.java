@@ -1,0 +1,86 @@
+package ch.ubique.backend.geo.coordinate.models;
+
+import java.util.Objects;
+
+/**
+ * World Geodetic System 1984 (also known as WGS84, WGS 1984, EPSG:4326)
+ * Most common coordinate System
+ * Also referred to as Lat/Lon-Coordinate
+ */
+public class WGS84Coordinate implements Coordinate {
+
+	// For equality testing
+	private static final double EPSILON = 0.001;
+
+	private double latitude;
+
+	private double longitude;
+
+	private Double elevation;
+
+	public WGS84Coordinate(double latitude, double longitude) {
+		this(latitude, longitude, null);
+	}
+
+	public WGS84Coordinate(double latitude, double longitude, Double elevation) {
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.elevation = elevation;
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public WGS84Coordinate setLatitude(double latitude) {
+		this.latitude = latitude;
+		return this;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public WGS84Coordinate setLongitude(double longitude) {
+		this.longitude = longitude;
+		return this;
+	}
+
+	public Double getElevation() {
+		return elevation;
+	}
+
+	public WGS84Coordinate setElevation(Double elevation) {
+		this.elevation = elevation;
+		return this;
+	}
+
+	@Override
+	public String toString() {
+		return "WGS84(lat=" + latitude + ", lon=" + longitude + ')';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		WGS84Coordinate that = (WGS84Coordinate) o;
+
+		if (Math.abs(that.latitude - latitude) > EPSILON) return false;
+		if (Math.abs(that.longitude - longitude) > EPSILON) return false;
+		return Objects.equals(elevation, that.elevation);
+	}
+
+	@Override
+	public int hashCode() {
+		int result;
+		long temp;
+		temp = Double.doubleToLongBits(latitude);
+		result = (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(longitude);
+		result = 31 * result + (int) (temp ^ (temp >>> 32));
+		result = 31 * result + (elevation != null ? elevation.hashCode() : 0);
+		return result;
+	}
+}

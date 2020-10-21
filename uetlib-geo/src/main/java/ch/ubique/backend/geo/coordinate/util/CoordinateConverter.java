@@ -1,6 +1,68 @@
-package ch.ubique.backend.geo.utils.coordinate;
+package ch.ubique.backend.geo.coordinate.util;
+
+import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
+import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
+import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 
 public class CoordinateConverter {
+
+
+    // Convert to LV95 Coordinate
+
+    public static LV95Coordinate toLV95(LV03Coordinate lv03) {
+        double east = lv03.getEast() + 2e6;
+        double north = lv03.getNorth() + 1e6;
+        return new LV95Coordinate(east, north, lv03.getElevation());
+    }
+
+    public static LV95Coordinate toLV95(WGS84Coordinate wgs84) {
+        double north = WGStoCHx(wgs84.getLatitude(), wgs84.getLongitude()) + 1e6;
+        double east = WGStoCHy(wgs84.getLatitude(), wgs84.getLongitude()) + 2e6;
+        Double elevation = null;
+        if (wgs84.getElevation() != null) {
+            elevation = WGStoCHh(wgs84.getLatitude(), wgs84.getLongitude(), wgs84.getElevation());
+        }
+        return new LV95Coordinate(east, north, elevation);
+    }
+
+
+    // Convert to LV03 Coordinate
+
+    public static LV03Coordinate toLV03(LV95Coordinate lv95) {
+        double east = lv95.getEast() - 2e6;
+        double north = lv95.getNorth() - 1e6;
+        return new LV03Coordinate(east, north, lv95.getElevation());
+    }
+
+    public static LV03Coordinate toLV03(WGS84Coordinate wgs84) {
+        return toLV03(toLV95(wgs84));
+    }
+
+
+    // Convert to WGS84 Coordinate
+
+    public static WGS84Coordinate toWGS84(LV95Coordinate lv95) {
+        double east = lv95.getEast() - 2e6;
+        double north = lv95.getNorth() - 1e6;
+        Double elevation = lv95.getElevation();
+
+        double latitude = CHtoWGSlat(east, north);
+        double longitude = CHtoWGSlng(east, north);
+        if (elevation != null) {
+            elevation = CHtoWGSheight(east, north, elevation);
+        }
+        return new WGS84Coordinate(latitude, longitude, elevation);
+    }
+
+    public static WGS84Coordinate toWGS84(LV03Coordinate lv03) {
+        return toWGS84(toLV95(lv03));
+    }
+
+
+    // WARNING!
+    // The following code consistently uses x for north and y for east
+    // The following code was copied:
+
 
     // The MIT License (MIT)
     //
@@ -81,7 +143,7 @@ public class CoordinateConverter {
     }
 
     // Convert decimal angle (degrees) to sexagesimal angle (seconds)
-    public static double DecToSexAngle(double dec) {
+    private static double DecToSexAngle(double dec) {
         int deg = (int) Math.floor(dec);
         int min = (int) Math.floor((dec - deg) * 60);
         double sec = (((dec - deg) * 60) - min) * 60;
@@ -98,7 +160,7 @@ public class CoordinateConverter {
      * @param height
      * @return
      */
-    public static double[] swissToInternational(double east, double north, double height) {
+    private static double[] swissToInternational(double east, double north, double height) {
 
         double d[] = new double[3];
 
@@ -118,7 +180,7 @@ public class CoordinateConverter {
      * @param ellHeight
      * @return
      */
-    public static double[] internationalToSwiss(double latitude, double longitude, double ellHeight) {
+    private static double[] internationalToSwiss(double latitude, double longitude, double ellHeight) {
         // , ref double east, ref double north, ref double height
         double d[] = new double[3];
 
@@ -182,11 +244,7 @@ public class CoordinateConverter {
         return y;
     }
 
-    private CoordinateConverter() {
-        // Only static
-    }
-
-    public static double[] swiss1903plusToInternational(double x, double y, double z) {
+    private static double[] swiss1903plusToInternational(double x, double y, double z) {
         return swissToInternational(x-2000000, y-1000000, z);
     }
 }
