@@ -2,11 +2,14 @@ package ch.ubique.backend.geo.coordinate.models;
 
 import java.util.Objects;
 
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
+
 /**
  * Swiss coordinates (1903)
  * Imprecise, use LV95 instead if possible
  */
-public class LV03Coordinate implements Coordinate {
+public class LV03Coordinate implements Coordinate<LV03Coordinate> {
 
 	// For equality testing
 	private static final double EPSILON = 0.1; // = 10 cm
@@ -53,6 +56,19 @@ public class LV03Coordinate implements Coordinate {
 	public LV03Coordinate setElevation(Double elevation) {
 		this.elevation = elevation;
 		return this;
+	}
+
+	@Override
+	public double distanceTo(LV03Coordinate other) {
+		if (elevation == null || other.elevation == null) {
+			return flatDistanceTo(other);
+		}
+		return sqrt(pow(east - other.east, 2) + pow(north - other.north, 2) + pow(elevation - other.elevation, 2));
+	}
+
+	@Override
+	public double flatDistanceTo(LV03Coordinate other) {
+		return sqrt(pow(east - other.east, 2) + pow(north - other.north, 2));
 	}
 
 	@Override
