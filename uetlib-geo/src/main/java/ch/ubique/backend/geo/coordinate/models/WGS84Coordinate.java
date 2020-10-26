@@ -2,12 +2,14 @@ package ch.ubique.backend.geo.coordinate.models;
 
 import java.util.Objects;
 
+import static java.lang.Math.*;
+
 /**
  * World Geodetic System 1984 (also known as WGS84, WGS 1984, EPSG:4326)
  * Most common coordinate System
  * Also referred to as Lat/Lon-Coordinate
  */
-public class WGS84Coordinate implements Coordinate {
+public class WGS84Coordinate implements Coordinate<WGS84Coordinate> {
 
 	// For equality testing
 	private static final double EPSILON = 0.001;
@@ -53,6 +55,22 @@ public class WGS84Coordinate implements Coordinate {
 	public WGS84Coordinate setElevation(Double elevation) {
 		this.elevation = elevation;
 		return this;
+	}
+
+	@Override
+	public double distanceTo(WGS84Coordinate other) {
+		return flatDistanceTo(other);
+	}
+
+	@Override
+	public double flatDistanceTo(WGS84Coordinate other) {
+		var R = 6371; // Radius of the earth in km
+		var dLat = toRadians(other.latitude - latitude);
+		var dLon = toRadians(other.longitude - longitude);
+		var a = sin(dLat/2) * sin(dLat/2) + cos(toRadians(latitude)) * cos(toRadians(other.latitude)) * sin(dLon/2) * sin(dLon/2);
+		var c = 2 * atan2(Math.sqrt(a), sqrt(1 - a));
+		var d = R * c; // Distance in [km]
+		return d * 1000; // Distance in [m]
 	}
 
 	@Override
