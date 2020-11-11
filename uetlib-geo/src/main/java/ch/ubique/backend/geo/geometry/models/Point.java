@@ -75,7 +75,7 @@ public abstract class Point <P extends Point<P>> {
     }
 
     public P copy() {
-        return plus(0);
+        return create(coordinates);
     }
 
     public double distanceTo(P b) {
