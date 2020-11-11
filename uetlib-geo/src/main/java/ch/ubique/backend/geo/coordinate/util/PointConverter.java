@@ -21,11 +21,11 @@ public class PointConverter {
         return Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth());
     }
 
-    public static List<LV95Coordinate> toLv95Coordinate(List<Point<?>> points) {
+    public static <P extends Point<P>>  List<LV95Coordinate> toLv95Coordinate(List<P> points) {
         return points.stream().map(PointConverter::toLv95Coordinate).collect(Collectors.toList());
     }
 
-    public static LV95Coordinate toLv95Coordinate(Point<?> point) {
+    public static <P extends Point<P>> LV95Coordinate toLv95Coordinate(P point) {
         if (point.getDimension() == 2) {
             return new LV95Coordinate(point.get(0), point.get(1));
         }
@@ -44,11 +44,11 @@ public class PointConverter {
         return Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth());
     }
 
-    public static List<LV03Coordinate> toLv03Coordinate(List<Point<?>> points) {
+    public static <P extends Point<P>> List<LV03Coordinate> toLv03Coordinate(List<P> points) {
         return points.stream().map(PointConverter::toLv03Coordinate).collect(Collectors.toList());
     }
 
-    public static LV03Coordinate toLv03Coordinate(Point<?> point) {
+    public static <P extends Point<P>>  LV03Coordinate toLv03Coordinate(P point) {
         if (point.getDimension() == 2) {
             return new LV03Coordinate(point.get(0), point.get(1));
         }
@@ -67,11 +67,11 @@ public class PointConverter {
         return Point.newInstance(cls, coordinate.getLatitude(), coordinate.getLongitude());
     }
 
-    public static List<WGS84Coordinate> toWgs84Coordinate(List<Point<?>> points) {
+    public static <P extends Point<P>> List<WGS84Coordinate> toWgs84Coordinate(List<P> points) {
         return points.stream().map(PointConverter::toWgs84Coordinate).collect(Collectors.toList());
     }
 
-    public static WGS84Coordinate toWgs84Coordinate(Point<?> point) {
+    public static <P extends Point<P>>  WGS84Coordinate toWgs84Coordinate(P point) {
         if (point.getDimension() == 2) {
             return new WGS84Coordinate(point.get(0), point.get(1));
         }
