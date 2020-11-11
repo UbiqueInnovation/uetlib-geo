@@ -4,23 +4,21 @@ import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.geometry.models.Point;
-import ch.ubique.backend.geo.geometry.models.Point2d;
-import ch.ubique.backend.geo.geometry.models.Point3d;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PointConverter {
 
-    public static List<Point<?>> lv95toPoints(List<LV95Coordinate> coordinates) {
-        return coordinates.stream().map(PointConverter::toPoint).collect(Collectors.toList());
+    public static <P extends Point<P>> List<P> lv95toPoints(Class<P> cls, List<LV95Coordinate> coordinates) {
+        return coordinates.stream().map(c -> toPoint(cls, c)).collect(Collectors.toList());
     }
 
-    public static Point<?> toPoint(LV95Coordinate coordinate) {
+    public static <P extends Point<P>> P toPoint(Class<P> cls, LV95Coordinate coordinate) {
         if (coordinate.getElevation() != null) {
-            return new Point3d(coordinate.getEast(), coordinate.getNorth(), coordinate.getElevation());
+            return Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth(), coordinate.getElevation());
         }
-        return new Point2d(coordinate.getEast(), coordinate.getNorth());
+        return Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth());
     }
 
     public static List<LV95Coordinate> toLv95Coordinate(List<Point<?>> points) {
@@ -35,15 +33,15 @@ public class PointConverter {
     }
 
 
-    public static List<Point<?>> lv03toPoints(List<LV03Coordinate> coordinates) {
-        return coordinates.stream().map(PointConverter::toPoint).collect(Collectors.toList());
+    public static <P extends Point<P>> List<P> lv03toPoints(Class<P> cls, List<LV03Coordinate> coordinates) {
+        return coordinates.stream().map(c -> toPoint(cls, c)).collect(Collectors.toList());
     }
 
-    public static Point<?> toPoint(LV03Coordinate coordinate) {
+    public static <P extends Point<P>> P toPoint(Class<P> cls, LV03Coordinate coordinate) {
         if (coordinate.getElevation() != null) {
-            return new Point3d(coordinate.getEast(), coordinate.getNorth(), coordinate.getElevation());
+            return Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth(), coordinate.getElevation());
         }
-        return new Point2d(coordinate.getEast(), coordinate.getNorth());
+        return Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth());
     }
 
     public static List<LV03Coordinate> toLv03Coordinate(List<Point<?>> points) {
@@ -58,15 +56,15 @@ public class PointConverter {
     }
 
 
-    public static List<Point<?>> wgs84toPoints(List<WGS84Coordinate> coordinates) {
-        return coordinates.stream().map(PointConverter::toPoint).collect(Collectors.toList());
+    public static <P extends Point<P>> List<P> wgs84toPoints(Class<P> cls, List<WGS84Coordinate> coordinates) {
+        return coordinates.stream().map(c -> toPoint(cls, c)).collect(Collectors.toList());
     }
 
-    public static Point<?> toPoint(WGS84Coordinate coordinate) {
+    public static <P extends Point<P>> P toPoint(Class<P> cls, WGS84Coordinate coordinate) {
         if (coordinate.getElevation() != null) {
-            return new Point3d(coordinate.getLatitude(), coordinate.getLongitude(), coordinate.getElevation());
+            return Point.newInstance(cls, coordinate.getLatitude(), coordinate.getLongitude(), coordinate.getElevation());
         }
-        return new Point2d(coordinate.getLatitude(), coordinate.getLongitude());
+        return Point.newInstance(cls, coordinate.getLatitude(), coordinate.getLongitude());
     }
 
     public static List<WGS84Coordinate> toWgs84Coordinate(List<Point<?>> points) {

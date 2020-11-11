@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.geometry.models;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 public abstract class Point <P extends Point<P>> {
@@ -8,6 +9,15 @@ public abstract class Point <P extends Point<P>> {
 
     public Point(double... coordinates) {
         this.coordinates = coordinates;
+    }
+
+    public static <P extends Point<P>> P newInstance(Class<P> cls, double... coordinates) {
+        try {
+            return cls.getDeclaredConstructor(double[].class).newInstance(coordinates);
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     protected abstract P create(double... coordinates);
