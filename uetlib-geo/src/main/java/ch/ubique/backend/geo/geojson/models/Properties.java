@@ -4,8 +4,8 @@ package ch.ubique.backend.geo.geojson.models;
 public class Properties {
 
     private String type;
-
     private Style style;
+    private String txtRmk;
 
     public String getType() {
         return type;
@@ -21,5 +21,13 @@ public class Properties {
 
     public void setStyle(Style style) {
         this.style = style;
+    }
+
+    public String getTxtRmk() {
+        return txtRmk;
+    }
+
+    public void setTxtRmk(String txtRmk) {
+        this.txtRmk = txtRmk;
     }
 }
