@@ -30,7 +30,7 @@ public class Line2d extends Line<Point2d> {
         double x = (b2 * c1 - b1 * c2) / delta;
         double y = (a1 * c2 - a2 * c1) / delta;
 
-        if (delta == 0 || outOfBounds(new Point2d(x, y)) || other.outOfBounds(new Point2d(x, y))) {
+        if (outOfBounds(new Point2d(x, y)) || other.outOfBounds(new Point2d(x, y))) {
             return null;
         }
 

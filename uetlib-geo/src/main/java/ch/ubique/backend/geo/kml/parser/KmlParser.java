@@ -1,26 +1,36 @@
 package ch.ubique.backend.geo.kml.parser;
 
 
+import static ch.ubique.backend.geo.coordinate.util.CoordinateConverter.toLV95;
+
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
-import ch.ubique.backend.geo.kml.models.*;
-
+import ch.ubique.backend.geo.kml.models.Icon;
+import ch.ubique.backend.geo.kml.models.ItemStyle;
+import ch.ubique.backend.geo.kml.models.KmlDocument;
+import ch.ubique.backend.geo.kml.models.Placemark;
+import ch.ubique.backend.geo.kml.models.Style;
+import ch.ubique.backend.geo.kml.models.StyleMap;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import static ch.ubique.backend.geo.coordinate.util.CoordinateConverter.toLV95;
 
 public class KmlParser {
 
     private static final Logger logger = Logger.getLogger(KmlParser.class.getName());
+
+    private KmlParser() {}
 
     public static KmlDocument parse(String path) throws XMLStreamException, FileNotFoundException {
         return parse(new FileInputStream(path));
@@ -195,20 +205,18 @@ public class KmlParser {
     }
 
     private static void addPairToStyleMap(XMLStreamReader reader, StyleMap styleMap) throws XMLStreamException {
-        String key = null, value = null;
+        String key = null;
+        String value = null;
         while (reader.hasNext()) {
             reader.next();
             int eventType = reader.getEventType();
             String elementName;
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
-                switch (elementName) {
-                    case "key":
-                        key = reader.getElementText();
-                        break;
-                    case "styleUrl":
-                        value = reader.getElementText().replace("#", "");
-                        break;
+                if ("key".equals(elementName)) {
+                    key = reader.getElementText();
+                } else if ("styleUrl".equals(elementName)) {
+                    value = reader.getElementText().replace("#", "");
                 }
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                 elementName = reader.getLocalName();

@@ -1,10 +1,6 @@
 package ch.ubique.backend.geo.geometry.models;
 
 
-import ch.ubique.backend.geo.geometry.utils.BoundingBoxHelper;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class Polygon2d extends Polygon<Point2d> {
@@ -33,7 +29,7 @@ public class Polygon2d extends Polygon<Point2d> {
     public boolean contains(Point2d point) {
         BoundingBox2d boundingBox = new BoundingBox2d(getBoundingBox());
         Point2d rayOrigin = boundingBox.getMin().minus(0.1 * boundingBox.getWidth());
-        Line<Point2d> ray = new Line<Point2d>(rayOrigin, point);
+        Line<Point2d> ray = new Line<>(rayOrigin, point);
         int count = countBoundaryIntersections(ray) % 2;
         // Odd count => inside => point contained
         return (count % 2) == 1;

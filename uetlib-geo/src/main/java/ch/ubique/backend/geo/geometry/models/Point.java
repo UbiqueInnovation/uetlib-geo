@@ -7,7 +7,7 @@ public abstract class Point <P extends Point<P>> {
 
     protected final double[] coordinates;
 
-    public Point(double... coordinates) {
+    protected Point(double... coordinates) {
         this.coordinates = coordinates;
     }
 

@@ -6,6 +6,7 @@ import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 
 public class CoordinateConverter {
 
+    private CoordinateConverter() {}
 
     // Convert to LV95 Coordinate
 
@@ -95,51 +96,45 @@ public class CoordinateConverter {
     private static double CHtoWGSheight(double y, double x, double h) {
         // Converts military to civil and to unit = 1000km
         // Auxiliary values (% Bern)
-        double y_aux = (y - 600000) / 1000000;
-        double x_aux = (x - 200000) / 1000000;
+        double yAux = (y - 600000) / 1000000;
+        double xAux = (x - 200000) / 1000000;
 
         // Process height
-        h = (h + 49.55) - (12.60 * y_aux) - (22.64 * x_aux);
-
-        return h;
+        return (h + 49.55) - (12.60 * yAux) - (22.64 * xAux);
     }
 
     // Convert CH y/x to WGS lat
     private static double CHtoWGSlat(double y, double x) {
         // Converts military to civil and to unit = 1000km
         // Auxiliary values (% Bern)
-        double y_aux = (y - 600000) / 1000000;
-        double x_aux = (x - 200000) / 1000000;
+        double yAux = (y - 600000) / 1000000;
+        double xAux = (x - 200000) / 1000000;
 
         // Process lat
-        double lat = (16.9023892 + (3.238272 * x_aux))
-                - (0.270978 * Math.pow(y_aux, 2))
-                - (0.002528 * Math.pow(x_aux, 2))
-                - (0.0447 * Math.pow(y_aux, 2) * x_aux)
-                - (0.0140 * Math.pow(x_aux, 3));
+        double lat = (16.9023892 + (3.238272 * xAux))
+                - (0.270978 * Math.pow(yAux, 2))
+                - (0.002528 * Math.pow(xAux, 2))
+                - (0.0447 * Math.pow(yAux, 2) * xAux)
+                - (0.0140 * Math.pow(xAux, 3));
 
         // Unit 10000" to 1 " and converts seconds to degrees (dec)
-        lat = (lat * 100) / 36;
-
-        return lat;
+        return (lat * 100) / 36;
     }
 
     // Convert CH y/x to WGS long
     private static double CHtoWGSlng(double y, double x) {
         // Converts military to civil and to unit = 1000km
         // Auxiliary values (% Bern)
-        double y_aux = (y - 600000) / 1000000;
-        double x_aux = (x - 200000) / 1000000;
+        double yAux = (y - 600000) / 1000000;
+        double xAux = (x - 200000) / 1000000;
 
         // Process long
-        double lng = (2.6779094 + (4.728982 * y_aux)
-                + (0.791484 * y_aux * x_aux) + (0.1306 * y_aux * Math.pow(
-                x_aux, 2))) - (0.0436 * Math.pow(y_aux, 3));
+        double lng = (2.6779094 + (4.728982 * yAux)
+                + (0.791484 * yAux * xAux) + (0.1306 * yAux * Math.pow(
+                xAux, 2))) - (0.0436 * Math.pow(yAux, 3));
 
-        // Unit 10000" to 1 " and converts seconds to degrees (dec)
-        lng = (lng * 100) / 36;
-
-        return lng;
+        // Unit 10000" to 1" and converts seconds to degrees (dec)
+        return (lng * 100) / 36;
     }
 
     // Convert decimal angle (degrees) to sexagesimal angle (seconds)
@@ -162,8 +157,7 @@ public class CoordinateConverter {
      */
     private static double[] swissToInternational(double east, double north, double height) {
 
-        double d[] = new double[3];
-
+        double[] d = new double[3];
         d[0] = CHtoWGSlat(east, north);
         d[1] = CHtoWGSlng(east, north);
         d[2] = CHtoWGSheight(east, north, height);
@@ -182,7 +176,7 @@ public class CoordinateConverter {
      */
     private static double[] internationalToSwiss(double latitude, double longitude, double ellHeight) {
         // , ref double east, ref double north, ref double height
-        double d[] = new double[3];
+        double[] d = new double[3];
 
         d[0] = 2e6 + WGStoCHy(latitude, longitude);
         d[1] = 1e6 + WGStoCHx(latitude, longitude);
@@ -197,13 +191,11 @@ public class CoordinateConverter {
         lng = DecToSexAngle(lng);
 
         // Auxiliary values (% Bern)
-        double lat_aux = (lat - 169028.66) / 10000;
-        double lng_aux = (lng - 26782.5) / 10000;
+        double latAux = (lat - 169028.66) / 10000;
+        double lngAux = (lng - 26782.5) / 10000;
 
         // Process h
-        h = (h - 49.55) + (2.73 * lng_aux) + (6.94 * lat_aux);
-
-        return h;
+        return (h - 49.55) + (2.73 * lngAux) + (6.94 * latAux);
     }
 
     // Convert WGS lat/long (° dec) to CH x
@@ -213,16 +205,14 @@ public class CoordinateConverter {
         lng = DecToSexAngle(lng);
 
         // Auxiliary values (% Bern)
-        double lat_aux = (lat - 169028.66) / 10000;
-        double lng_aux = (lng - 26782.5) / 10000;
+        double latAux = (lat - 169028.66) / 10000;
+        double lngAux = (lng - 26782.5) / 10000;
 
         // Process X
-        double x = ((200147.07 + (308807.95 * lat_aux)
-                + (3745.25 * Math.pow(lng_aux, 2)) + (76.63 * Math.pow(lat_aux,
-                2))) - (194.56 * Math.pow(lng_aux, 2) * lat_aux))
-                + (119.79 * Math.pow(lat_aux, 3));
-
-        return x;
+        return ((200147.07 + (308807.95 * latAux)
+                + (3745.25 * Math.pow(lngAux, 2)) + (76.63 * Math.pow(latAux,
+                2))) - (194.56 * Math.pow(lngAux, 2) * latAux))
+                + (119.79 * Math.pow(latAux, 3));
     }
 
     // Convert WGS lat/long (° dec) to CH y
@@ -232,16 +222,14 @@ public class CoordinateConverter {
         lng = DecToSexAngle(lng);
 
         // Auxiliary values (% Bern)
-        double lat_aux = (lat - 169028.66) / 10000;
-        double lng_aux = (lng - 26782.5) / 10000;
+        double latAux = (lat - 169028.66) / 10000;
+        double lngAux = (lng - 26782.5) / 10000;
 
         // Process Y
-        double y = (600072.37 + (211455.93 * lng_aux))
-                - (10938.51 * lng_aux * lat_aux)
-                - (0.36 * lng_aux * Math.pow(lat_aux, 2))
-                - (44.54 * Math.pow(lng_aux, 3));
-
-        return y;
+        return (600072.37 + (211455.93 * lngAux))
+                - (10938.51 * lngAux * latAux)
+                - (0.36 * lngAux * Math.pow(latAux, 2))
+                - (44.54 * Math.pow(lngAux, 3));
     }
 
     private static double[] swiss1903plusToInternational(double x, double y, double z) {
