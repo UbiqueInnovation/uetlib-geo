@@ -4,11 +4,12 @@ import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.geometry.models.Point;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PointConverter {
+
+    private PointConverter() {}
 
     public static <P extends Point<P>> List<P> lv95toPoints(Class<P> cls, List<LV95Coordinate> coordinates) {
         return coordinates.stream().map(c -> toPoint(cls, c)).collect(Collectors.toList());

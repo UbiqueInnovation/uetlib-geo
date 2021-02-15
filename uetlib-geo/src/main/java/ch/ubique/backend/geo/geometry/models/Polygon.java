@@ -30,7 +30,7 @@ public class Polygon<P extends Point<P>> {
     public List<Line<P>> getLines() {
         List<Line<P>> lines = new ArrayList<>(points.size());
         for (int i = 0; i < points.size(); ++i) {
-            lines.add(new Line<P>(points.get(i), points.get((i + 1) % points.size())));
+            lines.add(new Line<>(points.get(i), points.get((i + 1) % points.size())));
         }
         return lines;
     }

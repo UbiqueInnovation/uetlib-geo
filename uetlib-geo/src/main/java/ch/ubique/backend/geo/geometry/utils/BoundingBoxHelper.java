@@ -11,6 +11,8 @@ import static java.lang.Math.min;
 
 public class BoundingBoxHelper {
 
+    private BoundingBoxHelper() {}
+
     public static <P extends Point<P>> BoundingBox<P> getBoundingBox(P point) {
         return getBoundingBox(Collections.singletonList(point));
     }

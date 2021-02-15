@@ -1,8 +1,12 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import java.util.Objects;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.toRadians;
 
-import static java.lang.Math.*;
+import java.util.Objects;
 
 /**
  * World Geodetic System 1984 (also known as WGS84, WGS 1984, EPSG:4326)
@@ -64,12 +68,12 @@ public class WGS84Coordinate implements Coordinate<WGS84Coordinate> {
 
 	@Override
 	public double flatDistanceTo(WGS84Coordinate other) {
-		var R = 6371; // Radius of the earth in km
+		var r = 6371; // Radius of the earth in km
 		var dLat = toRadians(other.latitude - latitude);
 		var dLon = toRadians(other.longitude - longitude);
 		var a = sin(dLat/2) * sin(dLat/2) + cos(toRadians(latitude)) * cos(toRadians(other.latitude)) * sin(dLon/2) * sin(dLon/2);
 		var c = 2 * atan2(Math.sqrt(a), sqrt(1 - a));
-		var d = R * c; // Distance in [km]
+		var d = r * c; // Distance in [km]
 		return d * 1000; // Distance in [m]
 	}
 

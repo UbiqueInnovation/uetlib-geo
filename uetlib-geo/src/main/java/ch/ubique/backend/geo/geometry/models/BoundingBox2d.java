@@ -1,7 +1,6 @@
 package ch.ubique.backend.geo.geometry.models;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 public class BoundingBox2d extends BoundingBox<Point2d> {
 

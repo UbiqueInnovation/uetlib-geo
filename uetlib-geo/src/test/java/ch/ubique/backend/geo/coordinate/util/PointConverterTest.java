@@ -6,7 +6,7 @@ import ch.ubique.backend.geo.geometry.models.Point3d;
 import org.junit.jupiter.api.Test;
 
 
-public class PointConverterTest {
+class PointConverterTest {
 
     @Test
     void testPointConverter() {
@@ -18,5 +18,4 @@ public class PointConverterTest {
         System.out.println(point2d);
         System.out.println(point3d);
     }
-
 }

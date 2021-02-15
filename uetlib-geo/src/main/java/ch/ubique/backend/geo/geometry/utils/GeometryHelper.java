@@ -1,16 +1,22 @@
 package ch.ubique.backend.geo.geometry.utils;
 
-import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
-import ch.ubique.backend.geo.geometry.models.*;
-
+import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
+import ch.ubique.backend.geo.geometry.models.Line;
+import ch.ubique.backend.geo.geometry.models.Line2d;
+import ch.ubique.backend.geo.geometry.models.Point;
+import ch.ubique.backend.geo.geometry.models.Point2d;
+import ch.ubique.backend.geo.geometry.models.Polygon2d;
+import ch.ubique.backend.geo.geometry.models.Tuple;
+import ch.ubique.backend.geo.geometry.models.Vector;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 public class GeometryHelper {
+
+    private GeometryHelper() {}
 
     public static Polygon2d intersection(Polygon2d polygon, BoundingBox2d boundingBox) {
 
@@ -84,7 +90,7 @@ public class GeometryHelper {
                 newPolygon.getPoints().add(end);
             } else {
                 // Outgoing line
-                Tuple<Point2d, Line<Point2d>> closest = intersections.stream().min(Comparator.comparingDouble(t -> end.distanceTo(t.first))).get();
+                Tuple<Point2d, Line<Point2d>> closest = intersections.stream().min(Comparator.comparingDouble(t -> end.distanceTo(t.first))).orElseThrow();
                 newPolygon.getPoints().add(closest.first);
 
                 // add corners if needed
@@ -99,7 +105,7 @@ public class GeometryHelper {
                 }
             } else {
                 // Incoming line
-                Tuple<Point2d, Line<Point2d>> closest = intersections.stream().min(Comparator.comparingDouble(t -> start.distanceTo(t.first))).get();
+                Tuple<Point2d, Line<Point2d>> closest = intersections.stream().min(Comparator.comparingDouble(t -> start.distanceTo(t.first))).orElseThrow();
                 newPolygon.getPoints().add(closest.first);
 
                 // add corners if needed
