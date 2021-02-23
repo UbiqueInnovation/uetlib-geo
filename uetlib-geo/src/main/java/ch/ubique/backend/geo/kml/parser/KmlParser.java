@@ -104,7 +104,7 @@ public class KmlParser {
                                 .filter(v -> !v.isEmpty())
                                 .map(KmlParser::toSwissCoordinate)
                                 .collect(Collectors.toList());
-                        placemark.setCoordinates(coordinates);
+                        placemark.addCoordinates(coordinates);
                         break;
                     case "SimpleData":
                         String key = reader.getAttributeValue(0);
