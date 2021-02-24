@@ -76,6 +76,17 @@ public class LV95Coordinate implements Coordinate<LV95Coordinate> {
 	public String toString() {
 		return "LV95(east=" + east + ", north=" + north + ')';
 	}
+	
+    public boolean equalsExact(LV95Coordinate o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		LV95Coordinate that = (LV95Coordinate) o;
+
+		if (Math.abs(that.east - east) > 0.0) return false;
+		if (Math.abs(that.north - north) > 0.0) return false;
+		return Objects.equals(elevation, that.elevation);
+    }
 
 	@Override
 	public boolean equals(Object o) {

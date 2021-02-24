@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -80,6 +81,7 @@ public class KmlParser {
 
     private static Placemark parsePlacemark(XMLStreamReader reader) throws XMLStreamException {
         Placemark placemark = new Placemark();
+        boolean isPolygon = false;
         while (reader.hasNext()) {
             reader.next();
             int eventType = reader.getEventType();
@@ -89,6 +91,9 @@ public class KmlParser {
                 switch (elementName) {
                     case "name":
                         placemark.setName(reader.getElementText());
+                        if (placemark.getName().equals("286-TI-40015")) {
+                        	logger.info("debug");
+                        }
                         break;
                     case "description":
                         placemark.setDescription(reader.getElementText());
@@ -104,6 +109,14 @@ public class KmlParser {
                                 .filter(v -> !v.isEmpty())
                                 .map(KmlParser::toSwissCoordinate)
                                 .collect(Collectors.toList());
+                        if (isPolygon && !coordinates.isEmpty()) {
+                        	// make sure first and last coordinate are the same. If not, replace last with first.
+                        	LV95Coordinate first = coordinates.get(0);
+                        	LV95Coordinate last = coordinates.get(coordinates.size() -1);
+                        	if (!first.equalsExact(last)) {
+                        		coordinates.set(coordinates.size() - 1, new LV95Coordinate(first.getEast(), first.getNorth(), first.getElevation()));
+                        	}
+                        }
                         placemark.addCoordinates(coordinates);
                         break;
                     case "SimpleData":
@@ -111,11 +124,17 @@ public class KmlParser {
                         String value = reader.getElementText();
                         placemark.getExtendedData().put(key, value);
                         break;
+                    case "Polygon":
+                    	isPolygon = true;
+                    	break;
+                    	
                 }
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                 elementName = reader.getLocalName();
                 if (elementName.equals("Placemark")) {
                     return placemark;
+                } else if (elementName.equals("Polygon")) {
+                	isPolygon = false;
                 }
             }
         }
