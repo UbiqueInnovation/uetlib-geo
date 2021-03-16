@@ -2,8 +2,8 @@ package ch.ubique.backend.geo.vectortile.uploader;
 
 import static java.lang.Math.max;
 
-import ch.ubique.backend.core.blobstorage.BlobStorageService;
 import ch.ubique.backend.geo.vectortile.models.BinaryTile;
+import ch.ubique.backend.output.blob.service.BlobStorageService;
 import com.azure.core.http.rest.Response;
 import com.azure.storage.blob.models.BlockBlobItem;
 import java.nio.file.Paths;
@@ -19,7 +19,7 @@ public class BlobStorageVectorTileUploader implements VectorTileUploader {
 
     private final String container;
     private final BlobStorageService blobStorageService;
-    
+
     private static final Logger logger = LoggerFactory.getLogger(BlobStorageVectorTileUploader.class);
 
     public BlobStorageVectorTileUploader(BlobStorageService blobStorageService, String container) {
@@ -58,7 +58,7 @@ public class BlobStorageVectorTileUploader implements VectorTileUploader {
         String contentType = "application/protobuf";
         return blobStorageService.uploadAsync(tile.getBytes(), container, tilePath, contentType);
     }
-    
+
     private void upload(String path, BinaryTile tile) {
         String tilePath = Paths.get(path, tile.getPath()).toString();
         String contentType = "application/protobuf";
