@@ -31,6 +31,28 @@ public class LocalStorageVectorTileUploader implements VectorTileUploader {
 	}
 
 	@Override
+	public void prepareUpload(String path) {
+		Path destinationPath = outputBaseDir.resolve(path);
+		try {
+			Files.createDirectories(destinationPath);
+		} catch (IOException ioe) {
+			logger.error("Could not write file: {}", path, ioe);
+		}
+	}
+
+	@Override
+	public void upload(String path, BinaryTile binaryTile) {
+		Path destinationPath = outputBaseDir.resolve(path);
+		Path tileDestination = destinationPath.resolve(binaryTile.getPath());
+		try {
+			Files.createDirectories(tileDestination.getParent());
+			Files.write(tileDestination, binaryTile.getBytes());
+		} catch (IOException e) {
+			logger.error("Could not write file: {}", tileDestination, e);
+		}
+	}
+
+	@Override
 	public void upload(String path, Collection<BinaryTile> binaryTiles) {
 		Path destinationPath = outputBaseDir.resolve(path);
 		try {
@@ -46,7 +68,7 @@ public class LocalStorageVectorTileUploader implements VectorTileUploader {
 					Files.createDirectories(tileDestination.getParent());
 					Files.write(tileDestination, tile.getBytes());
 				} catch (IOException e) {
-					logger.error("Could not write file: " + tileDestination, e);
+					logger.error("Could not write file: {}", tileDestination, e);
 				}
 
 				// Log progress
@@ -58,7 +80,7 @@ public class LocalStorageVectorTileUploader implements VectorTileUploader {
 			});
 			logger.info("Upload done");
 		} catch (IOException ioe) {
-			logger.error("Could not write file: " + path, ioe);
+			logger.error("Could not write file: {}", path, ioe);
 		}
 	}
 
