@@ -7,10 +7,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Vertex {
+
     private final long id;
     private WGS84Coordinate coordinate;
 
     private final Set<Edge> edges;
+
+    private VertexProperties properties;
 
     public Vertex(long id) {
         this.id = id;
@@ -38,6 +41,14 @@ public class Vertex {
         return edges.stream().map(e -> this.equals(e.getU()) ? e.getV() : e.getU()).collect(Collectors.toList());
     }
 
+    public VertexProperties getProperties() {
+        return properties;
+    }
+
+    public Vertex setProperties(VertexProperties properties) {
+        this.properties = properties;
+        return this;
+    }
 
     public int degree() {
         return edges.size();
