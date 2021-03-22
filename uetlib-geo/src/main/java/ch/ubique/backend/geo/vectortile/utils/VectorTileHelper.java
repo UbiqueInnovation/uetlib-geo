@@ -22,7 +22,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import no.ecc.vectortile.VectorTileEncoder;
@@ -54,7 +56,7 @@ public class VectorTileHelper<T extends TileElement> {
             tileElements = tileElements
                     .stream()
                     .sorted(Comparator.comparingDouble(TileElement::getScore).reversed())
-                    .filter(t -> config.filter(t))
+                    .filter(config::filter)
                     .limit(config.getMaxElementsPerTile(zoomLevel.getLevel()))
                     .collect(Collectors.toList());
         }
@@ -68,9 +70,9 @@ public class VectorTileHelper<T extends TileElement> {
             long id = element.getId();
             GeometryWithAttributes item = element.getGeometry(boundingBox, extend);
             if (item == null || item.getGeometry() == null) {
-            	logger.warn("Item or geometry is null: " + element.toString());
+            	logger.warn("Item or geometry is null: {}", element);
             } else if (!item.getGeometry().isValid()) {
-                logger.warn("Geometry not valid: " + item.getAttributes());
+                logger.warn("Geometry not valid: {}", item.getAttributes());
             } else {
             	encoder.addFeature(layer, item.getAttributes(), item.getGeometry(), id);
             }
@@ -78,19 +80,21 @@ public class VectorTileHelper<T extends TileElement> {
         return encoder.encode();
     }
 
+    public void generateTiles(Consumer<BinaryTile> tileConsumer) {
+        config.getZoomLevels().stream()
+            .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
+            .forEach(level -> {
+                ZoomLevel zoomLevel = gridInfo.getZoomLevel(level);
+                if (config.simplify()) {
+                    simplifyElements(zoomLevel);
+                }
+                generateTilesForLevel(zoomLevel, tileConsumer);
+            });
+    }
+
     public Collection<BinaryTile> generateTiles() {
-        Collection<BinaryTile> binaryTiles = new ArrayList<>();
-        List<Integer> sortedLevels = config.getZoomLevels();
-        Collections.sort(sortedLevels);
-        Collections.reverse(sortedLevels);
-        for (Integer level : sortedLevels) {
-            ZoomLevel zoomLevel = gridInfo.getZoomLevel(level);
-            if (config.simplify()) {
-                simplifyElements(zoomLevel);
-            }
-            var tiles = generateTilesForLevel(zoomLevel);
-            binaryTiles.addAll(tiles);
-        }
+        Collection<BinaryTile> binaryTiles = new ConcurrentLinkedQueue<>();
+        generateTiles(binaryTiles::add);
         return binaryTiles;
     }
 
@@ -103,41 +107,46 @@ public class VectorTileHelper<T extends TileElement> {
         logger.info("Relative size after simplifying (avg): {}", sum / elements.size());
     }
 
-    private Collection<BinaryTile> generateTilesForLevel(ZoomLevel zoomLevel) {
+    private void generateTilesForLevel(ZoomLevel zoomLevel, Consumer<BinaryTile> tileConsumer) {
         Collection<Tile<T>> tiles = getTiles(zoomLevel);
         final AtomicInteger count = new AtomicInteger();
         int onePercent = max(1, tiles.size() / 100);
         final long startTime = System.currentTimeMillis();
 
-        List<BinaryTile> binaryTiles = tiles.parallelStream()
-                .map(tile -> {
-                    String path = getFileName(tile);
-                    byte[] bytes = generateBinary(tile, zoomLevel);
-                    // Log progress
-                    int countValue = count.incrementAndGet();
-                    if (countValue % onePercent == 0) {
-                        int percent = 100 * countValue / tiles.size();
-                        long currentTime = System.currentTimeMillis();
-                        double tilesPerSecond = countValue / ((double) (currentTime - startTime)) * 1000.0;
-                        logger.info("Generated {}% ({} tiles per second)", percent, tilesPerSecond);
-                    }
-                    return new BinaryTile(path, bytes);
-                }).collect(Collectors.toList());
+        List<Integer> tileSizes = tiles
+            .parallelStream()
+            .map(tile -> {
+                String path = getFileName(tile);
+                byte[] bytes = generateBinary(tile, zoomLevel);
 
-        printStats(tiles, binaryTiles, zoomLevel);
-        return binaryTiles;
+                // Log progress
+                int countValue = count.incrementAndGet();
+                if (countValue % onePercent == 0) {
+                    int percent = 100 * countValue / tiles.size();
+                    long currentTime = System.currentTimeMillis();
+                    double tilesPerSecond = countValue / ((double) (currentTime - startTime)) * 1000.0;
+                    logger.info("Processed {}% ({} tiles per second)", percent, tilesPerSecond);
+                }
+
+                var binaryTile = new BinaryTile(path, bytes);
+                tileConsumer.accept(binaryTile);
+
+                return bytes.length;
+            }).collect(Collectors.toList());
+
+        printStats(tiles, tileSizes, zoomLevel);
     }
 
-    private void printStats(Collection<Tile<T>> tiles, List<BinaryTile> binaryTiles, ZoomLevel zoomLevel) {
+    private void printStats(Collection<Tile<T>> tiles, List<Integer> tileSizes, ZoomLevel zoomLevel) {
 
         StringBuilder stats = new StringBuilder();
         stats.append('\n');
 
-        double nonEmptyPercent = 100. * binaryTiles.stream().mapToInt(t -> t.getBytes().length > 0 ? 1 : 0).sum() / binaryTiles.size();
+        double nonEmptyPercent = 100. * tileSizes.stream().mapToInt(size -> size > 0 ? 1 : 0).sum() / tileSizes.size();
         stats.append(String.format("  Non empty tiles: %.2f%%%n", nonEmptyPercent));
 
-        int maxBytes = binaryTiles.stream().mapToInt(binaryTile -> binaryTile.getBytes().length).max().orElse(-1);
-        double avgBytes = binaryTiles.stream().mapToInt(binaryTile -> binaryTile.getBytes().length).average().orElse(-1);
+        int maxBytes = tileSizes.stream().mapToInt(size -> size).max().orElse(-1);
+        double avgBytes = tileSizes.stream().mapToInt(size -> size).average().orElse(-1);
         stats.append(String.format("  Tile size: avg = %,.1fB, max = %,dB%n", avgBytes, maxBytes));
 
         if (config.limitElementsPerTile(zoomLevel.getLevel())) {
@@ -171,7 +180,7 @@ public class VectorTileHelper<T extends TileElement> {
                 Point2d max = min.plus(tileWidth, tileWidth);
                 TileInfo tileInfo = new TileInfo(x, y, level);
                 BoundingBox2d boundingBox = new BoundingBox2d(min, max);
-                tiles.add(new Tile<T>(tileInfo, boundingBox));
+                tiles.add(new Tile<>(tileInfo, boundingBox));
             }
         }
 

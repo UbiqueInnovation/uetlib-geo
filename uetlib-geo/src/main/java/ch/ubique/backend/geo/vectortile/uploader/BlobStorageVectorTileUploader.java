@@ -34,22 +34,24 @@ public class BlobStorageVectorTileUploader implements VectorTileUploader {
         logger.info("Starting upload. {} tiles in total", binaryTiles.size());
         ForkJoinPool customThreadPool = new ForkJoinPool(12);
         try {
-			customThreadPool.submit(() -> binaryTiles.parallelStream().forEach(tile -> { // Parallel for-each loop
-			        // Upload tile
-					upload(path, tile);
+            customThreadPool.submit(
+                () -> binaryTiles.parallelStream().forEach(tile -> { // Parallel for-each loop
+                    // Upload tile
+                    upload(path, tile);
 
-			        // Log progress
-			        int countValue = count.incrementAndGet();
-			        if (countValue % onePercent == 0) {
-			            int percent = 100 * countValue / binaryTiles.size();
-			            long currentTime = System.currentTimeMillis();
-			            double tilesPerSecond = countValue / ((double) (currentTime - startTime)) * 1000.0;
-			            logger.info("Uploaded {}% ({} tiles per second)", percent, tilesPerSecond);
-			        }
-			    })).get();
-		} catch (InterruptedException | ExecutionException e) {
-			logger.error("Exception uploading tiles: ", e);
-		}
+                    // Log progress
+                    int countValue = count.incrementAndGet();
+                    if (countValue % onePercent == 0) {
+                        int percent = 100 * countValue / binaryTiles.size();
+                        long currentTime = System.currentTimeMillis();
+                        double tilesPerSecond =
+                            countValue / ((double) (currentTime - startTime)) * 1000.0;
+                        logger.info("Uploaded {}% ({} tiles per second)", percent, tilesPerSecond);
+                    }
+                })).get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Exception uploading tiles: ", e);
+        }
         logger.info("Upload done");
     }
 
@@ -59,7 +61,12 @@ public class BlobStorageVectorTileUploader implements VectorTileUploader {
         return blobStorageService.uploadAsync(tile.getBytes(), container, tilePath, contentType);
     }
 
-    private void upload(String path, BinaryTile tile) {
+    @Override
+    public void prepareUpload(String path) {
+        /* Nothing to do here */
+    }
+
+    public void upload(String path, BinaryTile tile) {
         String tilePath = Paths.get(path, tile.getPath()).toString();
         String contentType = "application/protobuf";
         blobStorageService.upload(tile.getBytes(), container, tilePath, contentType);
