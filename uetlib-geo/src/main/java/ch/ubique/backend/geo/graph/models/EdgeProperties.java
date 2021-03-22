@@ -1,6 +1,5 @@
 package ch.ubique.backend.geo.graph.models;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class EdgeProperties {
@@ -9,10 +8,6 @@ public class EdgeProperties {
     private Vertex direction;
 
     private Map<String, String> tags;
-
-    public EdgeProperties() {
-        this.tags = new HashMap<>();
-    }
 
     public Map<String, String> getTags() {
         return tags;
