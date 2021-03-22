@@ -4,12 +4,15 @@ import javax.validation.constraints.NotNull;
 
 public class Edge {
 
+    private final long id;
+
     private final Vertex u;
     private final Vertex v;
 
     private EdgeProperties properties;
 
-    public Edge(@NotNull Vertex u, @NotNull Vertex v) {
+    public Edge(long id, @NotNull Vertex u, @NotNull Vertex v) {
+        this.id = id;
         if (u.getId() < v.getId()) {
             this.u = u;
             this.v = v;
@@ -33,6 +36,10 @@ public class Edge {
             return v;
         }
         return u;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public EdgeProperties getProperties() {

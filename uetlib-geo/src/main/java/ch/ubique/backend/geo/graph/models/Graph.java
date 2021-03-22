@@ -10,9 +10,12 @@ public class Graph {
     private final Map<Long, Vertex> vertices;
     private final Set<Edge> edges;
 
+    private long lastEdgeId;
+
     public Graph() {
         vertices = new HashMap<>();
         edges = new HashSet<>();
+        lastEdgeId = 0;
     }
 
     public Vertex addVertex(long id) {
@@ -31,26 +34,28 @@ public class Graph {
         return vertices.computeIfAbsent(vertexId, Vertex::new);
     }
 
-    public void addEdge(long u, long v) {
-        addEdge(u, v, null);
+    public Edge addEdge(long u, long v) {
+        return addEdge(u, v, null);
     }
 
-    public void addEdge(Vertex u, Vertex v) {
-        addEdge(u, v, null);
+    public Edge addEdge(Vertex u, Vertex v) {
+        return addEdge(u, v, null);
     }
 
-    public void addEdge(long u, long v, EdgeProperties properties) {
-        addEdge(getVertex(u), getVertex(v), properties);
+    public Edge addEdge(long u, long v, EdgeProperties properties) {
+        return addEdge(getVertex(u), getVertex(v), properties);
     }
 
-    public void addEdge(Vertex u, Vertex v, EdgeProperties properties) {
-        Edge edge = new Edge(u, v);
+    public Edge addEdge(Vertex u, Vertex v, EdgeProperties properties) {
+        Edge edge = new Edge(lastEdgeId++, u, v);
         edge.setProperties(properties);
 
         edges.add(edge);
 
         u.getEdges().add(edge);
         v.getEdges().add(edge);
+
+        return edge;
     }
     
     public Collection<Vertex> getVertices() {
