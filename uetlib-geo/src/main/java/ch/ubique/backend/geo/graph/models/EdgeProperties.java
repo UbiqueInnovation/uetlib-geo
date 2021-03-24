@@ -6,6 +6,7 @@ public class EdgeProperties {
 
     private Double distance;
     private Vertex direction;
+    private Long routingEdgeId;
 
     private Map<String, String> tags;
 
@@ -33,6 +34,15 @@ public class EdgeProperties {
 
     public EdgeProperties setDirection(Vertex direction) {
         this.direction = direction;
+        return this;
+    }
+
+    public Long getRoutingEdgeId() {
+        return routingEdgeId;
+    }
+
+    public EdgeProperties setRoutingEdgeId(Long routingEdgeId) {
+        this.routingEdgeId = routingEdgeId;
         return this;
     }
 }
