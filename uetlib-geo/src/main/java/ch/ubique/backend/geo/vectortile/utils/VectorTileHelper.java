@@ -17,10 +17,8 @@ import ch.ubique.backend.geo.vectortile.models.TileElement;
 import ch.ubique.backend.geo.vectortile.models.TileInfo;
 import ch.ubique.backend.geo.vectortile.models.VectorTileConfig;
 import ch.ubique.backend.geo.vectortile.models.ZoomLevel;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -47,22 +45,11 @@ public class VectorTileHelper<T extends TileElement> {
         this.gridInfo = swissGridInfo();
     }
 
-    private byte[] generateBinary(Tile<T> tile, ZoomLevel zoomLevel) {
+    private byte[] generateBinary(Tile<T> tile) {
         int extend = 4096;
         VectorTileEncoder encoder = new VectorTileEncoder(extend, 0, false, false);
 
-        // Show only the most important elements
-        Collection<T> tileElements = tile.getElements();
-        if (config.limitElementsPerTile(zoomLevel.getLevel())) {
-            tileElements = tileElements
-                    .stream()
-                    .sorted(Comparator.comparingDouble(TileElement::getScore).reversed())
-                    .filter(config::filter)
-                    .limit(config.getMaxElementsPerTile(zoomLevel.getLevel()))
-                    .collect(Collectors.toList());
-        }
-
-        for (TileElement element : tileElements) {
+        for (TileElement element : tile.getElements()) {
             if (!element.showElement(tile.getTileInfo().getZoomLevel())) {
                 continue;
             }
@@ -128,7 +115,7 @@ public class VectorTileHelper<T extends TileElement> {
                 .parallelStream()
                 .map(tile -> {
                     String path = getFileName(tile);
-                    byte[] bytes = generateBinary(tile, zoomLevel);
+                    byte[] bytes = generateBinary(tile);
 
                     // Log progress
                     int countValue = count.incrementAndGet();
@@ -225,8 +212,51 @@ public class VectorTileHelper<T extends TileElement> {
             }
         }
         logger.info("Number of tiles for zoom level {}: {}", level, tiles.size());
-        return tiles;
+        return limitElementsPerTile(tiles, zoomLevel);
     }
+
+    private Collection<Tile<T>> limitElementsPerTile(Collection<Tile<T>> tiles, ZoomLevel zoomLevel) {
+
+        if (!config.limitElementsPerTile(zoomLevel.getLevel())) {
+            return tiles;
+        }
+
+        var maxElementsPerTile = config.getMaxElementsPerTile(zoomLevel.getLevel());
+        logger.info("Limiting number of elements per tile to: {}", maxElementsPerTile);
+
+        // Mark all elements that need to be visible
+        var visibleElements = new HashSet<Long>();
+        for (var tile : tiles) {
+            // only the most important elements are visible
+            var visibleElementsForTile = tile
+                    .getElements()
+                    .stream()
+                    .sorted(Comparator.comparingDouble(TileElement::getScore).reversed())
+                    .filter(config::filter)
+                    .limit(config.getMaxElementsPerTile(zoomLevel.getLevel()))
+                    .map(TileElement::getId)
+                    .collect(Collectors.toSet());
+
+            visibleElements.addAll(visibleElementsForTile);
+        }
+
+        // Generate tiles that contain only visible elements
+        var limitedTiles = new ArrayList<Tile<T>>(tiles.size());
+        for (var tile : tiles) {
+            Collection<T> visibleElementsForTile = tile.getElements()
+                    .stream()
+                    .filter(t -> visibleElements.contains(t.getId()))
+                    .collect(Collectors.toList());
+
+            var limitedTile = new Tile<T>(tile.getTileInfo(), tile.getBoundingBox());
+            limitedTile.getElements().addAll(visibleElementsForTile);
+            limitedTiles.add(limitedTile);
+        }
+
+        logger.info("Filtered elements per tile for zoom level {}", zoomLevel.getLevel());
+        return limitedTiles;
+    }
+
 
     private String getFileName(Tile<T> tile) {
         TileInfo tileInfo = tile.getTileInfo();
