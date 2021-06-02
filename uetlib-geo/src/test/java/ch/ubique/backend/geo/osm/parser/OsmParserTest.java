@@ -16,7 +16,12 @@ class OsmParserTest {
     @Disabled("Depends on local file")
     void testParsingOSM() throws FileNotFoundException {
         File file = new File("/home/daniel/Downloads/all.pbf");
-        Graph graph = OsmParser.parse(new FileInputStream(file), true, false);
+        var config = OsmParserConfig.builder()
+                .parseNodeTags(true)
+                .parseWayTags(false)
+                .useSourceIds(false)
+                .build();
+        Graph graph = OsmParser.parse(new FileInputStream(file), config);
         Assertions.assertTrue(graph.getVertices().size() > 0);
         Assertions.assertTrue(graph.getEdges().size() > 0);
 
@@ -28,7 +33,12 @@ class OsmParserTest {
             .stream()
             .allMatch(e -> e.getProperties() != null && e.getProperties().getRoutingEdgeId() != null);
 
+        boolean allVerticesHaveNonNegativeId = graph.getVertices()
+                .stream()
+                .allMatch(v -> v.getId() >= 0);
+
         Assertions.assertTrue(allEdgesHaveRoutingId);
+        Assertions.assertTrue(allVerticesHaveNonNegativeId);
     }
 
 }
