@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
+
 import no.ecc.vectortile.VectorTileEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,35 +59,38 @@ public class VectorTileHelper<T extends TileElement> {
             long id = element.getId();
             GeometryWithAttributes item = element.getGeometry(boundingBox, extend);
             if (item == null || item.getGeometry() == null) {
-            	logger.warn("Item or geometry is null: {}", element);
+                logger.warn("Item or geometry is null: {}", element);
             } else if (!item.getGeometry().isValid()) {
                 logger.warn("Geometry not valid: {}", item.getAttributes());
             } else {
-            	encoder.addFeature(layer, item.getAttributes(), item.getGeometry(), id);
+                encoder.addFeature(layer, item.getAttributes(), item.getGeometry(), id);
             }
         }
         return encoder.encode();
     }
 
-    public void generateTiles(Consumer<BinaryTile> tileConsumer, int numThreads) {
-        config.getZoomLevels().stream()
-            .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
-            .forEach(level -> {
-                ZoomLevel zoomLevel = gridInfo.getZoomLevel(level);
-                if (config.simplify()) {
-                    simplifyElements(zoomLevel);
-                }
-                generateTilesForLevel(zoomLevel, tileConsumer, numThreads);
-            });
+    public void generateTiles(Consumer<BinaryTile> tileConsumer, int numThreads) throws ExecutionException, InterruptedException {
+        var levels = config.getZoomLevels()
+                .stream()
+                .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
+                .collect(Collectors.toList());
+
+        for (var level : levels) {
+            ZoomLevel zoomLevel = gridInfo.getZoomLevel(level);
+            if (config.simplify()) {
+                simplifyElements(zoomLevel);
+            }
+            generateTilesForLevel(zoomLevel, tileConsumer, numThreads);
+        }
     }
 
-    public Collection<BinaryTile> generateTiles() {
+    public Collection<BinaryTile> generateTiles() throws ExecutionException, InterruptedException {
         Collection<BinaryTile> binaryTiles = new ConcurrentLinkedQueue<>();
         generateTiles(binaryTiles::add, 4);
         return binaryTiles;
     }
 
-    public Collection<BinaryTile> generateTiles(int numThreads) {
+    public Collection<BinaryTile> generateTiles(int numThreads) throws ExecutionException, InterruptedException {
         Collection<BinaryTile> binaryTiles = new ConcurrentLinkedQueue<>();
         generateTiles(binaryTiles::add, numThreads);
         return binaryTiles;
@@ -101,7 +105,7 @@ public class VectorTileHelper<T extends TileElement> {
         logger.info("Relative size after simplifying (avg): {}", sum / elements.size());
     }
 
-    private void generateTilesForLevel(ZoomLevel zoomLevel, Consumer<BinaryTile> tileConsumer, int numThreads) {
+    private void generateTilesForLevel(ZoomLevel zoomLevel, Consumer<BinaryTile> tileConsumer, int numThreads) throws ExecutionException, InterruptedException {
         Collection<Tile<T>> tiles = getTiles(zoomLevel);
         final AtomicInteger count = new AtomicInteger();
         int onePercent = max(1, tiles.size() / 100);
@@ -109,35 +113,29 @@ public class VectorTileHelper<T extends TileElement> {
 
         var forkJoinPool = new ForkJoinPool(numThreads);
 
-        try {
-            var tileSizes = forkJoinPool.submit(() ->
-            tiles
-                .parallelStream()
-                .map(tile -> {
-                    String path = getFileName(tile);
-                    byte[] bytes = generateBinary(tile);
+        var tileSizes = forkJoinPool.submit(() ->
+                tiles
+                        .parallelStream()
+                        .map(tile -> {
+                            String path = getFileName(tile);
+                            byte[] bytes = generateBinary(tile);
 
-                    // Log progress
-                    int countValue = count.incrementAndGet();
-                    if (countValue % onePercent == 0) {
-                        int percent = 100 * countValue / tiles.size();
-                        long currentTime = System.currentTimeMillis();
-                        double tilesPerSecond = countValue / ((double) (currentTime - startTime)) * 1000.0;
-                        logger.info("Processed {}% ({} tiles per second)", percent, tilesPerSecond);
-                    }
+                            // Log progress
+                            int countValue = count.incrementAndGet();
+                            if (countValue % onePercent == 0) {
+                                int percent = 100 * countValue / tiles.size();
+                                long currentTime = System.currentTimeMillis();
+                                double tilesPerSecond = countValue / ((double) (currentTime - startTime)) * 1000.0;
+                                logger.info("Processed {}% ({} tiles per second)", percent, tilesPerSecond);
+                            }
 
-                    var binaryTile = new BinaryTile(path, bytes);
-                    tileConsumer.accept(binaryTile);
+                            var binaryTile = new BinaryTile(path, bytes);
+                            tileConsumer.accept(binaryTile);
 
-                    return bytes.length;
-                }).collect(Collectors.toList())).get();
+                            return bytes.length;
+                        }).collect(Collectors.toList())).get();
 
-            printStats(tiles, tileSizes, zoomLevel);
-
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("Generating tiles failed.", e);
-            Thread.currentThread().interrupt();
-        }
+        printStats(tiles, tileSizes, zoomLevel);
 
         forkJoinPool.shutdown();
     }
