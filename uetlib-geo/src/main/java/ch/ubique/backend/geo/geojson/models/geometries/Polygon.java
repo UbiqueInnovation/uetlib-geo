@@ -1,10 +1,11 @@
 package ch.ubique.backend.geo.geojson.models.geometries;
 
+import ch.ubique.backend.geo.geojson.models.Coordinate;
 import ch.ubique.backend.geo.geojson.models.Geometry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,31 +13,33 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Polygon extends Geometry {
 
-    private List<List<double[]>> coordinates;
+    @JsonProperty("coordinates")
+    private List<List<Coordinate>> coordinateArray;
 
-
-    public List<List<double[]>> getCoordinates() {
-        return coordinates;
+    @JsonIgnore
+    public List<List<Coordinate>> getCoordinateArray() {
+        return coordinateArray;
     }
 
-    public Polygon setCoordinates(List<List<double[]>> coordinates) {
-        this.coordinates = coordinates;
+    @JsonIgnore
+    public Polygon setCoordinateArray(List<List<Coordinate>> array) {
+        this.coordinateArray = array;
         return this;
     }
 
     @JsonIgnore
-    public List<double[]> getExteriorRing() {
-        return coordinates.get(0);
+    public List<Coordinate> getExteriorRing() {
+        return coordinateArray.get(0);
     }
 
     @JsonIgnore
-    public List<List<double[]>> getInteriorRings() {
-        return coordinates.subList(1, coordinates.size());
+    public List<List<Coordinate>> getInteriorRings() {
+        return coordinateArray.subList(1, coordinateArray.size());
     }
 
     @Override
-    public List<double[]> getAllCoordinates() {
-        return coordinates.stream()
+    public List<Coordinate> getAllCoordinates() {
+        return coordinateArray.stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
@@ -44,8 +47,8 @@ public class Polygon extends Geometry {
     @Override
     public String toString() {
         return  getClass().getSimpleName() + "("
-                + coordinates.stream()
-                .map(ring -> "[" + ring.stream().map(Arrays::toString).collect(Collectors.joining(", ")) + "]")
+                + coordinateArray.stream()
+                .map(ring -> "[" + ring.stream().map(List::toString).collect(Collectors.joining(", ")) + "]")
                 .collect(Collectors.joining(", "))
                 + ")";
     }
