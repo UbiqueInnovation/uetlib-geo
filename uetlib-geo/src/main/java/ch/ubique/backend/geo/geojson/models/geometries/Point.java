@@ -1,28 +1,31 @@
 package ch.ubique.backend.geo.geojson.models.geometries;
 
+import ch.ubique.backend.geo.geojson.models.Coordinate;
 import ch.ubique.backend.geo.geojson.models.Geometry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Point extends Geometry {
 
-    private double[] coordinates;
+    @JsonProperty(value = "coordinates")
+    private Coordinate coordinate;
 
-    public Point setCoordinates(double[] coordinates) {
-        this.coordinates = coordinates;
+    public Point setCoordinate(Coordinate coordinate) {
+        this.coordinate = coordinate;
         return this;
     }
 
-    public double[] getCoordinates() {
-        return coordinates;
+    public Coordinate getCoordinate() {
+        return coordinate;
     }
 
     @Override
     @JsonIgnore
-    public List<double[]> getAllCoordinates() {
-        return List.of(coordinates);
+    public List<Coordinate> getAllCoordinates() {
+        return List.of(coordinate);
     }
 }

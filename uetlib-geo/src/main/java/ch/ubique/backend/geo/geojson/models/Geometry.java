@@ -3,7 +3,6 @@ package ch.ubique.backend.geo.geojson.models;
 import ch.ubique.backend.geo.geojson.models.geometries.*;
 import com.fasterxml.jackson.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,11 +21,11 @@ import java.util.stream.Collectors;
 public abstract class Geometry {
 
     @JsonIgnore
-    public abstract List<double[]> getAllCoordinates();
+    public abstract List<Coordinate> getAllCoordinates();
 
     @Override
     public String toString() {
-        String coordinates = getAllCoordinates().stream().map(Arrays::toString).collect(Collectors.joining(", "));
+        String coordinates = getAllCoordinates().stream().map(List::toString).collect(Collectors.joining(", "));
         return String.format("%s(%s)", getClass().getSimpleName(), coordinates);
     }
 }

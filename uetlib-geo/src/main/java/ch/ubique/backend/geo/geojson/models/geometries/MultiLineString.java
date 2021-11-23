@@ -1,8 +1,10 @@
 package ch.ubique.backend.geo.geojson.models.geometries;
 
+import ch.ubique.backend.geo.geojson.models.Coordinate;
 import ch.ubique.backend.geo.geojson.models.Geometry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Collection;
 import java.util.List;
@@ -11,16 +13,8 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MultiLineString extends Geometry {
 
-    private List<List<double[]>> coordinates;
-
-    public MultiLineString setCoordinates(List<List<double[]>> coordinates) {
-        this.coordinates = coordinates;
-        return this;
-    }
-
-    public List<List<double[]>> getCoordinates() {
-        return coordinates;
-    }
+    @JsonProperty("coordinates")
+    private List<List<Coordinate>> coordinates;
 
     @JsonIgnore
     public List<LineString> getLineStrings() {
@@ -39,7 +33,7 @@ public class MultiLineString extends Geometry {
 
     @Override
     @JsonIgnore
-    public List<double[]> getAllCoordinates() {
+    public List<Coordinate> getAllCoordinates() {
         return coordinates.stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());

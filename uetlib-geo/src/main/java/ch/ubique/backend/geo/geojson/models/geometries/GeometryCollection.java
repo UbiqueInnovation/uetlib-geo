@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.geojson.models.geometries;
 
+import ch.ubique.backend.geo.geojson.models.Coordinate;
 import ch.ubique.backend.geo.geojson.models.Geometry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -23,7 +24,7 @@ public class GeometryCollection extends Geometry {
 
     @Override
     @JsonIgnore
-    public List<double[]> getAllCoordinates() {
+    public List<Coordinate> getAllCoordinates() {
         return geometries.stream()
                 .flatMap(geometry -> geometry.getAllCoordinates().stream())
                 .collect(Collectors.toList());
