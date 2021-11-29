@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ch.ubique.backend.geo.coordinate.util.PointConverter.*;
 import static java.lang.Math.abs;
@@ -45,8 +46,6 @@ public abstract class TileElement {
 
 	/**
 	 * Return a score for this element. The higher, the more important.
-	 * 
-	 * @return
 	 */
 	public abstract double getScore();
 
@@ -69,16 +68,7 @@ public abstract class TileElement {
 	}
 
 	public GeometryWithAttributes getGeometry(BoundingBox2d tileBoundingBox, int extend) {
-		TileElementType type = this.elementType;
-		if (type == TileElementType.INFERRED) {
-			if (getCoordinates().size() == 1) {
-				type = TileElementType.POINT;
-			} else {
-				// Last point equals first point => closed
-				boolean isPolygon = getCoordinates().get(0).equals(getCoordinates().get(getCoordinates().size() - 1));
-				type = isPolygon ? TileElementType.POLYGON : TileElementType.LINE;
-			}
-		}
+		var type = inferGeometryType();
 
 		switch (type) {
 		case POINT:
@@ -90,6 +80,21 @@ public abstract class TileElement {
 		default:
 			throw new RuntimeException("TileElementType " + type + " not implemented");
 		}
+	}
+
+	private TileElementType inferGeometryType() {
+		var type = this.elementType;
+		if (type != TileElementType.INFERRED) {
+			return type;
+		}
+
+		if (getCoordinates().size() == 1) {
+			return TileElementType.POINT;
+		}
+
+		// Last point equals first point => closed
+		boolean isPolygon = getCoordinates().get(0).equals(getCoordinates().get(getCoordinates().size() - 1));
+		return isPolygon ? TileElementType.POLYGON : TileElementType.LINE;
 	}
 
 	public double simplify(ZoomLevel zoomLevel) {
@@ -134,7 +139,7 @@ public abstract class TileElement {
 	}
 
 	private GeometryWithAttributes getLine(BoundingBox2d tileBoundingBox, int extend) {
-		List<Point2d> points = lv95toPoints(Point2d.class, getCoordinates());
+		var points = lv95toPoints(Point2d.class, getCoordinates());
 		Coordinate[] coordinates = toTileCoordinateArray(points, tileBoundingBox, extend);
 		Geometry geometry = geometryFactory.createLineString(coordinates);
 		Map<String, Object> attributes = getAttributes();
@@ -143,8 +148,8 @@ public abstract class TileElement {
 	}
 
 	private GeometryWithAttributes getPolygon(BoundingBox2d tileBoundingBox, int extend) {
-		Coordinate[] shell = toTileCoordinateArray(lv95toPoints(Point2d.class, getCoordinates()), tileBoundingBox,
-				extend);
+		var points = lv95toPoints(Point2d.class, getCoordinates());
+		Coordinate[] shell = toTileCoordinateArray(points, tileBoundingBox, extend);
 		Geometry geometry;
 		if (shell.length == 1 || (shell.length == 2 && shell[0].equals(shell[1]))) { // Point. Some points come as
 																						// linestring with two equal
@@ -159,7 +164,7 @@ public abstract class TileElement {
 		}
 
 		if (!geometry.isValid()) {
-			logger.debug("Geometry  " + this.getAttributes() + "  not valid, try to created fixed version");
+			logger.debug("Geometry  {}  not valid, try to created fixed version", this.getAttributes());
 			geometry = validate(geometry);
 		}
 
@@ -222,22 +227,40 @@ public abstract class TileElement {
 	}
 
 	private Coordinate getCoordinateOnTile(Point2d point, BoundingBox2d boundingBox, int extend) {
-		double x = (point.getX() - boundingBox.getMin().getX()) / boundingBox.getWidth() * extend;
-		double y = (point.getY() - boundingBox.getMin().getY()) / boundingBox.getHeight() * extend;
+		double x = Math.round((point.getX() - boundingBox.getMin().getX()) / boundingBox.getWidth() * extend);
+		double y = Math.round((point.getY() - boundingBox.getMin().getY()) / boundingBox.getHeight() * extend);
 		return new Coordinate(x, y);
 	}
 
 	private Coordinate[] toTileCoordinateArray(List<Point2d> points, BoundingBox2d boundingBox, int extend) {
-		return points.stream().map(coordinate -> getCoordinateOnTile(coordinate, boundingBox, extend))
-				.toArray((Coordinate[]::new));
+		var rawPoints =  points.stream()
+				.map(coordinate -> getCoordinateOnTile(coordinate, boundingBox, extend))
+				.collect(Collectors.toList());
+
+		if (rawPoints.isEmpty()) {
+			return new Coordinate[0];
+		}
+
+		// Remove duplicates
+		var finalPoints = new ArrayList<Coordinate>();
+		finalPoints.add(rawPoints.get(0));
+
+		for (var i = 1; i < rawPoints.size(); ++i) {
+			var lastPoint = rawPoints.get(i - 1);
+			var currentPoint = rawPoints.get(i);
+
+			if (!currentPoint.equals2D(lastPoint)) {
+				finalPoints.add(currentPoint);
+			}
+		}
+
+		return finalPoints.toArray((Coordinate[]::new));
 	}
 
 	/**
 	 * Get / create a valid version of the geometry given. If the geometry is a
 	 * polygon or multi polygon, self intersections / inconsistencies are fixed.
 	 * Otherwise the geometry is returned.
-	 * 
-	 * @param geom
 	 * @return a geometry
 	 */
 	private Geometry validate(Geometry geom) {
@@ -280,7 +303,7 @@ public abstract class TileElement {
 	/**
 	 * Add the linestring given to the polygonizer
 	 * 
-	 * @param linestring  line string
+	 * @param lineString  line string
 	 * @param polygonizer polygonizer
 	 */
 	private void addLineString(LineString lineString, Polygonizer polygonizer) {
