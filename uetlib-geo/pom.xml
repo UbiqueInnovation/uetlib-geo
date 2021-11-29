@@ -5,7 +5,7 @@
     <parent>
         <artifactId>backend-jvm-lib</artifactId>
         <groupId>ch.ubique</groupId>
-        <version>0.2.8-SNAPSHOT</version>
+        <version>0.2.10-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -41,7 +41,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
-            <version>3.12.2</version>
+            <version>3.19.1</version>
         </dependency>
         <dependency>
             <groupId>no.ecc.vectortile</groupId>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-storage-blob</artifactId>
-            <version>12.8.0</version>
+            <version>12.14.2</version>
         </dependency>
         <dependency>
             <groupId>com.wolt.osm</groupId>
