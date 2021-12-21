@@ -7,25 +7,12 @@ import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.geometry.models.Point3d;
 import ch.ubique.backend.geo.geometry.utils.BoundingBoxHelper;
 import ch.ubique.backend.geo.geometry.utils.GeometryHelper;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.LinearRing;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ch.ubique.backend.geo.coordinate.util.PointConverter.*;
@@ -141,7 +128,9 @@ public abstract class TileElement {
 	private GeometryWithAttributes getLine(BoundingBox2d tileBoundingBox, int extend) {
 		var points = lv95toPoints(Point2d.class, getCoordinates());
 		Coordinate[] coordinates = toTileCoordinateArray(points, tileBoundingBox, extend);
-		Geometry geometry = geometryFactory.createLineString(coordinates);
+		Geometry geometry = coordinates.length == 1 ?
+				geometryFactory.createPoint(coordinates[0]) :
+				geometryFactory.createLineString(coordinates);
 		Map<String, Object> attributes = getAttributes();
 		addElevationAttributes(getCoordinates(), attributes);
 		return new GeometryWithAttributes(geometry, attributes);
