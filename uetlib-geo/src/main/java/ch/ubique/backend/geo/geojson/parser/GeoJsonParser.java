@@ -2,14 +2,15 @@ package ch.ubique.backend.geo.geojson.parser;
 
 import ch.ubique.backend.geo.geojson.models.FeatureCollection;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
 public class GeoJsonParser {
 
-    private final static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private GeoJsonParser() {}
 
     public static FeatureCollection parse(InputStream inputStream) throws IOException {
         return objectMapper.readValue(inputStream, FeatureCollection.class);
@@ -26,5 +27,4 @@ public class GeoJsonParser {
     public static FeatureCollection parse(String content) throws IOException {
         return objectMapper.readValue(content, FeatureCollection.class);
     }
-
 }

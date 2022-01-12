@@ -1,6 +1,5 @@
 package ch.ubique.backend.geo.vectortile.constants;
 
-
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.vectortile.models.GridInfo;
 import ch.ubique.backend.geo.vectortile.models.ZoomLevel;
@@ -9,12 +8,14 @@ import java.util.List;
 
 public class SwissConstants {
 
+    private SwissConstants() {}
+
     public static GridInfo swissGridInfo() {
-        LV95Coordinate origin = new LV95Coordinate(2420000,1350000);
+        LV95Coordinate origin = new LV95Coordinate(2420000, 1350000);
         return new GridInfo(origin, 256, swisstopoZoomLevels());
     }
 
-    public static List<ZoomLevel> swisstopoZoomLevels()  {
+    public static List<ZoomLevel> swisstopoZoomLevels() {
         List<ZoomLevel> zoomLevels = new ArrayList<>();
         zoomLevels.add(new ZoomLevel(0, 1, 1, 4000));
         zoomLevels.add(new ZoomLevel(1, 1, 1, 3750));
@@ -47,5 +48,4 @@ public class SwissConstants {
         zoomLevels.add(new ZoomLevel(28, 18750, 12500, 0.1));
         return zoomLevels;
     }
-
 }
