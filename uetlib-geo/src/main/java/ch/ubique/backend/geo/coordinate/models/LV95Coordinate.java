@@ -81,7 +81,7 @@ public class LV95Coordinate implements Coordinate<LV95Coordinate> {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		LV95Coordinate that = (LV95Coordinate) o;
+		LV95Coordinate that = o;
 
 		if (Math.abs(that.east - east) > 0.0) return false;
 		if (Math.abs(that.north - north) > 0.0) return false;

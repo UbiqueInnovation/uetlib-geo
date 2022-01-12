@@ -17,10 +17,10 @@ import reactor.core.publisher.Mono;
 
 public class BlobStorageVectorTileUploader implements VectorTileUploader {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(BlobStorageVectorTileUploader.class);
     private final String container;
     private final BlobStorageService blobStorageService;
-
-    private static final Logger logger = LoggerFactory.getLogger(BlobStorageVectorTileUploader.class);
 
     public BlobStorageVectorTileUploader(BlobStorageService blobStorageService, String container) {
         this.blobStorageService = blobStorageService;
@@ -34,21 +34,36 @@ public class BlobStorageVectorTileUploader implements VectorTileUploader {
         logger.info("Starting upload. {} tiles in total", binaryTiles.size());
         ForkJoinPool customThreadPool = new ForkJoinPool(12);
         try {
-            customThreadPool.submit(
-                () -> binaryTiles.parallelStream().forEach(tile -> { // Parallel for-each loop
-                    // Upload tile
-                    upload(path, tile);
+            customThreadPool
+                    .submit(
+                            () ->
+                                    binaryTiles.parallelStream()
+                                            .forEach(
+                                                    tile -> { // Parallel for-each loop
+                                                        // Upload tile
+                                                        upload(path, tile);
 
-                    // Log progress
-                    int countValue = count.incrementAndGet();
-                    if (countValue % onePercent == 0) {
-                        int percent = 100 * countValue / binaryTiles.size();
-                        long currentTime = System.currentTimeMillis();
-                        double tilesPerSecond =
-                            countValue / ((double) (currentTime - startTime)) * 1000.0;
-                        logger.info("Uploaded {}% ({} tiles per second)", percent, tilesPerSecond);
-                    }
-                })).get();
+                                                        // Log progress
+                                                        int countValue = count.incrementAndGet();
+                                                        if (countValue % onePercent == 0) {
+                                                            int percent =
+                                                                    100
+                                                                            * countValue
+                                                                            / binaryTiles.size();
+                                                            long currentTime =
+                                                                    System.currentTimeMillis();
+                                                            double tilesPerSecond =
+                                                                    countValue
+                                                                            / ((double)
+                                                                                    (currentTime
+                                                                                            - startTime))
+                                                                            * 1000.0;
+                                                            logger.info(
+                                                                    "Uploaded {}% ({} tiles per second)",
+                                                                    percent, tilesPerSecond);
+                                                        }
+                                                    }))
+                    .get();
         } catch (InterruptedException | ExecutionException e) {
             logger.error("Exception uploading tiles: ", e);
         }
@@ -71,5 +86,4 @@ public class BlobStorageVectorTileUploader implements VectorTileUploader {
         String contentType = "application/protobuf";
         blobStorageService.upload(tile.getBytes(), container, tilePath, contentType);
     }
-
 }

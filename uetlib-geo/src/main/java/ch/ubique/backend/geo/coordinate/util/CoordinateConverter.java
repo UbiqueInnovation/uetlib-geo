@@ -47,10 +47,10 @@ public class CoordinateConverter {
         double north = lv95.getNorth() - 1e6;
         Double elevation = lv95.getElevation();
 
-        double latitude = CHtoWGSlat(east, north);
-        double longitude = CHtoWGSlng(east, north);
+        double latitude = chToWGSlat(east, north);
+        double longitude = chToWGSlng(east, north);
         if (elevation != null) {
-            elevation = CHtoWGSheight(east, north, elevation);
+            elevation = chToWGSheight(east, north, elevation);
         }
         return new WGS84Coordinate(latitude, longitude, elevation);
     }
@@ -93,7 +93,7 @@ public class CoordinateConverter {
     // Please validate your results with NAVREF on-line service: http://www.swisstopo.admin.ch/internet/swisstopo/en/home/apps/calc/navref.html (difference ~ 1-2m)
 
     // Convert CH y/x/h to WGS height
-    private static double CHtoWGSheight(double y, double x, double h) {
+    private static double chToWGSheight(double y, double x, double h) {
         // Converts military to civil and to unit = 1000km
         // Auxiliary values (% Bern)
         double yAux = (y - 600000) / 1000000;
@@ -104,7 +104,7 @@ public class CoordinateConverter {
     }
 
     // Convert CH y/x to WGS lat
-    private static double CHtoWGSlat(double y, double x) {
+    private static double chToWGSlat(double y, double x) {
         // Converts military to civil and to unit = 1000km
         // Auxiliary values (% Bern)
         double yAux = (y - 600000) / 1000000;
@@ -122,7 +122,7 @@ public class CoordinateConverter {
     }
 
     // Convert CH y/x to WGS long
-    private static double CHtoWGSlng(double y, double x) {
+    private static double chToWGSlng(double y, double x) {
         // Converts military to civil and to unit = 1000km
         // Auxiliary values (% Bern)
         double yAux = (y - 600000) / 1000000;
@@ -158,9 +158,9 @@ public class CoordinateConverter {
     private static double[] swissToInternational(double east, double north, double height) {
 
         double[] d = new double[3];
-        d[0] = CHtoWGSlat(east, north);
-        d[1] = CHtoWGSlng(east, north);
-        d[2] = CHtoWGSheight(east, north, height);
+        d[0] = chToWGSlat(east, north);
+        d[1] = chToWGSlng(east, north);
+        d[2] = chToWGSheight(east, north, height);
         return d;
     }
 
