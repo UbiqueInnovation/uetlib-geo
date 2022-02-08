@@ -3,6 +3,9 @@ package ch.ubique.backend.geo.coordinate.models;
 import java.util.Objects;
 import org.apache.commons.lang3.NotImplementedException;
 
+/**
+ * https://epsg.io/3857 Pseudo-Mercator, Web Mercator
+ */
 public class WebMercatorCoordinate implements Coordinate<WebMercatorCoordinate> {
 
     // For equality testing
