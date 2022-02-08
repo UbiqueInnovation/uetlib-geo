@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
 import org.junit.jupiter.api.Test;
 
 class CoordinateConverterTest {
@@ -25,5 +26,13 @@ class CoordinateConverterTest {
 
         assertEquals(bernWgs84, CoordinateConverter.toWGS84(bernLv95));
         assertEquals(bernLv95, CoordinateConverter.toLV95(bernWgs84));
+    }
+
+    @Test
+    void testWebMercatorWGS84() {
+        var webMercator = new WebMercatorCoordinate(958207.0, 5847040.0);
+        var wgs84 = new WGS84Coordinate(46.4146005, 8.60772);
+
+        assertEquals(wgs84, CoordinateConverter.toWGS84(webMercator));
     }
 }
