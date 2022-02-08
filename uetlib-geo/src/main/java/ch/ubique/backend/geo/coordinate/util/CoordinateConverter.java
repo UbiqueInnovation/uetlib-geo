@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.coordinate.util;
 import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
 
 public class CoordinateConverter {
 
@@ -26,6 +27,9 @@ public class CoordinateConverter {
         return new LV95Coordinate(east, north, elevation);
     }
 
+    public static LV95Coordinate toLV95(WebMercatorCoordinate webMercatorCoordinate) {
+        return toLV95(toWGS84(webMercatorCoordinate));
+    }
 
     // Convert to LV03 Coordinate
 
@@ -39,6 +43,9 @@ public class CoordinateConverter {
         return toLV03(toLV95(wgs84));
     }
 
+    public static LV03Coordinate toLV03(WebMercatorCoordinate webMercatorCoordinate) {
+        return toLV03(toWGS84(webMercatorCoordinate));
+    }
 
     // Convert to WGS84 Coordinate
 
@@ -59,6 +66,18 @@ public class CoordinateConverter {
         return toWGS84(toLV95(lv03));
     }
 
+    public static WGS84Coordinate toWGS84(WebMercatorCoordinate webMercatorCoordinate) {
+        // The following code was adapted from
+        // https://github.com/openmobilemaps/maps-core/blob/dfabe5f5573cad4078beac73c93ebb0eb4b2152f/shared/src/map/coordinates/EPSG3857ToEPSG4326Converter.h
+        // Appreciation for Christoph Maurhofer (https://github.com/maurhofer-ubique) to helping me on a sunny winter day.
+        double lon = webMercatorCoordinate.getX() * 180 / 20037508.34;
+        double lat =
+                Math.atan(Math.exp(webMercatorCoordinate.getY() * Math.PI / 20037508.34))
+                                * 360
+                                / Math.PI
+                        - 90;
+        return new WGS84Coordinate(lat, lon);
+    }
 
     // WARNING!
     // The following code consistently uses x for north and y for east
