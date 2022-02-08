@@ -6,7 +6,7 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
 /**
- * Swiss coordinates (1995)
+ * Swiss coordinates (1995) https://epsg.io/2056
  * Most recent coordinate system for Switzerland
  */
 public class LV95Coordinate implements Coordinate<LV95Coordinate> {
