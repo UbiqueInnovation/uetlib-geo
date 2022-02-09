@@ -6,7 +6,7 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
 /**
- * Swiss coordinates (1903)
+ * Swiss coordinates (1903) https://epsg.io/21781
  * Imprecise, use LV95 instead if possible
  */
 public class LV03Coordinate implements Coordinate<LV03Coordinate> {
