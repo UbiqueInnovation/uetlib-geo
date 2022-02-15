@@ -1,6 +1,10 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-public interface Coordinate <C extends Coordinate<C>> {
+import org.locationtech.jts.geom.Point;
+
+public interface Coordinate<C extends Coordinate<C>> {
+
+    Point toJtsPoint();
 
     double distanceTo(C other);
 

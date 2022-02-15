@@ -1,18 +1,20 @@
 package ch.ubique.backend.geo.coordinate.models;
 
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import java.util.Objects;
 import org.apache.commons.lang3.NotImplementedException;
+import org.locationtech.jts.geom.Point;
 
-/**
- * https://epsg.io/3857 Pseudo-Mercator, Web Mercator
- */
+/** https://epsg.io/3857 Pseudo-Mercator, Web Mercator */
 public class WebMercatorCoordinate implements Coordinate<WebMercatorCoordinate> {
 
     // For equality testing
     private static final double EPSILON = 0.1;
 
     private double x;
+
     private double y;
+
     private Double elevation;
 
     public WebMercatorCoordinate(double x, double y, Double elevation) {
@@ -27,29 +29,45 @@ public class WebMercatorCoordinate implements Coordinate<WebMercatorCoordinate> 
     }
 
     @Override
+    public Point toJtsPoint() {
+        return JtsConverter.toJtsPoint(this);
+    }
+
+    @Override
     public double distanceTo(WebMercatorCoordinate other) {
-        throw new NotImplementedException("distancTo not implemented");
+        throw new NotImplementedException("distanceTo not implemented");
     }
 
     @Override
     public double flatDistanceTo(WebMercatorCoordinate other) {
-        throw new NotImplementedException("flatDistancTo not implemented");
+        throw new NotImplementedException("flatDistanceTo not implemented");
     }
 
     public double getX() {
         return x;
     }
 
-    public void setX(double x) {
+    public WebMercatorCoordinate setX(double x) {
         this.x = x;
+        return this;
     }
 
     public double getY() {
         return y;
     }
 
-    public void setY(double y) {
+    public WebMercatorCoordinate setY(double y) {
         this.y = y;
+        return this;
+    }
+
+    public Double getElevation() {
+        return elevation;
+    }
+
+    public WebMercatorCoordinate setElevation(final Double elevation) {
+        this.elevation = elevation;
+        return this;
     }
 
     @Override
@@ -62,7 +80,7 @@ public class WebMercatorCoordinate implements Coordinate<WebMercatorCoordinate> 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        WebMercatorCoordinate that = (WebMercatorCoordinate) o;
+        final var that = (WebMercatorCoordinate) o;
 
         if (Math.abs(that.x - x) > EPSILON) return false;
         if (Math.abs(that.y - y) > EPSILON) return false;
