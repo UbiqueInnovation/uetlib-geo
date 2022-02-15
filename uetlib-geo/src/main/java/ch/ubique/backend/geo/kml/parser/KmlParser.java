@@ -1,6 +1,5 @@
 package ch.ubique.backend.geo.kml.parser;
 
-
 import static ch.ubique.backend.geo.coordinate.util.CoordinateConverter.toLV95;
 
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -36,7 +34,6 @@ public class KmlParser {
     public static KmlDocument parse(String path) throws XMLStreamException, FileNotFoundException {
         return parse(new FileInputStream(path));
     }
-
 
     public static KmlDocument parse(InputStream inputStream) throws XMLStreamException {
 
@@ -92,7 +89,7 @@ public class KmlParser {
                     case "name":
                         placemark.setName(reader.getElementText());
                         if (placemark.getName().equals("286-TI-40015")) {
-                        	logger.info("debug");
+                            logger.info("debug");
                         }
                         break;
                     case "description":
@@ -103,19 +100,25 @@ public class KmlParser {
                         break;
                     case "coordinates":
                         String coordinateList = reader.getElementText();
-                        List<LV95Coordinate> coordinates = Arrays
-                                .stream(coordinateList.split("\\s"))
-                                .map(String::trim)
-                                .filter(v -> !v.isEmpty())
-                                .map(KmlParser::toSwissCoordinate)
-                                .collect(Collectors.toList());
+                        List<LV95Coordinate> coordinates =
+                                Arrays.stream(coordinateList.split("\\s"))
+                                        .map(String::trim)
+                                        .filter(v -> !v.isEmpty())
+                                        .map(KmlParser::toSwissCoordinate)
+                                        .collect(Collectors.toList());
                         if (isPolygon && !coordinates.isEmpty()) {
-                        	// make sure first and last coordinate are the same. If not, replace last with first.
-                        	LV95Coordinate first = coordinates.get(0);
-                        	LV95Coordinate last = coordinates.get(coordinates.size() -1);
-                        	if (!first.equalsExact(last)) {
-                        		coordinates.set(coordinates.size() - 1, new LV95Coordinate(first.getEast(), first.getNorth(), first.getElevation()));
-                        	}
+                            // make sure first and last coordinate are the same. If not, replace
+                            // last with first.
+                            LV95Coordinate first = coordinates.get(0);
+                            LV95Coordinate last = coordinates.get(coordinates.size() - 1);
+                            if (!first.equalsExact(last)) {
+                                coordinates.set(
+                                        coordinates.size() - 1,
+                                        new LV95Coordinate(
+                                                first.getEast(),
+                                                first.getNorth(),
+                                                first.getElevation()));
+                            }
                         }
                         placemark.addCoordinates(coordinates);
                         break;
@@ -125,16 +128,15 @@ public class KmlParser {
                         placemark.getExtendedData().put(key, value);
                         break;
                     case "Polygon":
-                    	isPolygon = true;
-                    	break;
-                    	
+                        isPolygon = true;
+                        break;
                 }
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                 elementName = reader.getLocalName();
                 if (elementName.equals("Placemark")) {
                     return placemark;
                 } else if (elementName.equals("Polygon")) {
-                	isPolygon = false;
+                    isPolygon = false;
                 }
             }
         }
@@ -170,7 +172,8 @@ public class KmlParser {
         return null;
     }
 
-    private static ItemStyle parseItemStyle(XMLStreamReader reader, String endTag) throws XMLStreamException {
+    private static ItemStyle parseItemStyle(XMLStreamReader reader, String endTag)
+            throws XMLStreamException {
         ItemStyle style = new ItemStyle();
         while (reader.hasNext()) {
             reader.next();
@@ -223,7 +226,8 @@ public class KmlParser {
         return null;
     }
 
-    private static void addPairToStyleMap(XMLStreamReader reader, StyleMap styleMap) throws XMLStreamException {
+    private static void addPairToStyleMap(XMLStreamReader reader, StyleMap styleMap)
+            throws XMLStreamException {
         String key = null;
         String value = null;
         while (reader.hasNext()) {
@@ -271,10 +275,10 @@ public class KmlParser {
     }
 
     private static LV95Coordinate toSwissCoordinate(String value) {
-        String[] split = value.split(",");
+        final var split = value.split(",");
         double lon = Double.parseDouble(split[0]);
         double lat = Double.parseDouble(split[1]);
-        WGS84Coordinate wgs84Coordinate = new WGS84Coordinate(lat, lon);
+        final var wgs84Coordinate = new WGS84Coordinate(lat, lon);
 
         if (split.length > 2) {
             double elevation = Double.parseDouble(split[2]);
