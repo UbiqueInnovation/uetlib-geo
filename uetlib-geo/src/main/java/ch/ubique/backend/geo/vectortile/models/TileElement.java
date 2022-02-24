@@ -116,9 +116,12 @@ public abstract class TileElement {
 
 	private GeometryWithAttributes getPoint(LV95Coordinate position, BoundingBox2d tileBoundingBox, int extend) {
 		Coordinate coordinate = getCoordinateOnTile(toPoint(Point2d.class, position), tileBoundingBox, extend);
+		return getPoint(coordinate, position.getElevation());
+	}
+
+	private GeometryWithAttributes getPoint(Coordinate coordinate, Double elevation) {
 		Geometry geometry = geometryFactory.createPoint(coordinate);
 		Map<String, Object> attributes = getAttributes();
-		Double elevation = position.getElevation();
 		if (elevation != null) {
 			attributes.put("elevation", elevation);
 		}
@@ -128,9 +131,10 @@ public abstract class TileElement {
 	private GeometryWithAttributes getLine(BoundingBox2d tileBoundingBox, int extend) {
 		var points = lv95toPoints(Point2d.class, getCoordinates());
 		Coordinate[] coordinates = toTileCoordinateArray(points, tileBoundingBox, extend);
-		Geometry geometry = coordinates.length == 1 ?
-				geometryFactory.createPoint(coordinates[0]) :
-				geometryFactory.createLineString(coordinates);
+		if (coordinates.length == 1) {
+			return getPoint(coordinates[0], getCoordinates().get(0).getElevation());
+		}
+		Geometry geometry = geometryFactory.createLineString(coordinates);
 		Map<String, Object> attributes = getAttributes();
 		addElevationAttributes(getCoordinates(), attributes);
 		return new GeometryWithAttributes(geometry, attributes);
