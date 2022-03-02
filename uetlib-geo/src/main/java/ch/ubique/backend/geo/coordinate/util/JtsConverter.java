@@ -34,7 +34,7 @@ public class JtsConverter {
 
     @NotNull
     public static WGS84Coordinate toWgs84(final Point point) {
-        return new WGS84Coordinate(point.getX(), point.getY());
+        return new WGS84Coordinate(point.getY(), point.getX());
     }
 
     @NotNull
