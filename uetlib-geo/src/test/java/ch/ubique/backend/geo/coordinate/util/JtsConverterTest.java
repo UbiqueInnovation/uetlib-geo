@@ -62,18 +62,18 @@ class JtsConverterTest {
     @Test
     void toWgs84() {
         final var wgs84Coordinate = JtsConverter.toWgs84(JtsConverter.createPointWgs84(2.8, 4.2));
-        Assertions.assertEquals(4.2, wgs84Coordinate.getLongitude());
-        Assertions.assertEquals(2.8, wgs84Coordinate.getLatitude());
+        Assertions.assertEquals(2.8, wgs84Coordinate.getLongitude());
+        Assertions.assertEquals(4.2, wgs84Coordinate.getLatitude());
         Assertions.assertNull(wgs84Coordinate.getElevation());
     }
 
     @Test
     void toWebMercator() {
-        final var wgs84Coordinate =
-                JtsConverter.toWgs84(JtsConverter.createPointWebMercator(2.8, 4.2));
-        Assertions.assertEquals(4.2, wgs84Coordinate.getLongitude());
-        Assertions.assertEquals(2.8, wgs84Coordinate.getLatitude());
-        Assertions.assertNull(wgs84Coordinate.getElevation());
+        final var webMercator =
+                JtsConverter.toWebMercator(JtsConverter.createPointWebMercator(2.8, 4.2));
+        Assertions.assertEquals(2.8, webMercator.getX());
+        Assertions.assertEquals(4.2, webMercator.getY());
+        Assertions.assertNull(webMercator.getElevation());
     }
 
     @Test
