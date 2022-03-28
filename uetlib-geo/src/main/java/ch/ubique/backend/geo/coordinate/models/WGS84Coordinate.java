@@ -7,6 +7,7 @@ import static java.lang.Math.sqrt;
 import static java.lang.Math.toRadians;
 
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Objects;
 import org.locationtech.jts.geom.Point;
 
@@ -31,6 +32,7 @@ public class WGS84Coordinate implements Coordinate<WGS84Coordinate> {
         this(latitude, longitude, null);
     }
 
+    @JsonCreator
     public WGS84Coordinate(double latitude, double longitude, Double elevation) {
         this.latitude = latitude;
         this.longitude = longitude;

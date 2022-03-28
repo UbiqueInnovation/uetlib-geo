@@ -4,6 +4,7 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Objects;
 import org.locationtech.jts.geom.Point;
 
@@ -25,6 +26,7 @@ public class LV95Coordinate implements Coordinate<LV95Coordinate> {
         this(east, north, null);
     }
 
+    @JsonCreator
     public LV95Coordinate(double east, double north, Double elevation) {
         this.east = east;
         this.north = north;
