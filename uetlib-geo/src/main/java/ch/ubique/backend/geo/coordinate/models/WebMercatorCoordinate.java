@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.coordinate.models;
 
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Objects;
 import org.apache.commons.lang3.NotImplementedException;
 import org.locationtech.jts.geom.Point;
@@ -17,6 +18,7 @@ public class WebMercatorCoordinate implements Coordinate<WebMercatorCoordinate> 
 
     private Double elevation;
 
+    @JsonCreator
     public WebMercatorCoordinate(double x, double y, Double elevation) {
         this.x = x;
         this.y = y;
@@ -24,8 +26,7 @@ public class WebMercatorCoordinate implements Coordinate<WebMercatorCoordinate> 
     }
 
     public WebMercatorCoordinate(double x, double y) {
-        this.x = x;
-        this.y = y;
+        this(x, y, null);
     }
 
     @Override
