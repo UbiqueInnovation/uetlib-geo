@@ -41,7 +41,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
-            <version>3.19.1</version>
+            <version>3.20.1</version>
         </dependency>
         <dependency>
             <groupId>no.ecc.vectortile</groupId>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-storage-blob</artifactId>
-            <version>12.14.3</version>
+            <version>12.16.0</version>
         </dependency>
         <dependency>
             <groupId>com.wolt.osm</groupId>
