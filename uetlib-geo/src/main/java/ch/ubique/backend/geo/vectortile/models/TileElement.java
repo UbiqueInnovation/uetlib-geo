@@ -1,5 +1,11 @@
 package ch.ubique.backend.geo.vectortile.models;
 
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.lv95toPoints;
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.toLv95Coordinate;
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
+import static java.lang.Math.abs;
+import static java.lang.Math.toRadians;
+
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.geometry.models.BoundingBox;
 import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
@@ -7,17 +13,25 @@ import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.geometry.models.Point3d;
 import ch.ubique.backend.geo.geometry.utils.BoundingBoxHelper;
 import ch.ubique.backend.geo.geometry.utils.GeometryHelper;
-import org.locationtech.jts.geom.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.*;
-import static java.lang.Math.abs;
-import static java.lang.Math.toRadians;
 
 public abstract class TileElement {
 
@@ -41,6 +55,10 @@ public abstract class TileElement {
 	public abstract List<LV95Coordinate> getCoordinates();
 
 	public abstract void setCoordinates(List<LV95Coordinate> coordinates);
+
+    public abstract List<List<LV95Coordinate>> getHoles();
+
+    public abstract void setHoles(List<List<LV95Coordinate>> holes);
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -100,10 +118,32 @@ public abstract class TileElement {
 			List<Point3d> simplified = GeometryHelper.simplify(lv95toPoints(Point3d.class, getCoordinates()), minAngle,
 					minDistance);
 			setCoordinates(toLv95Coordinate(simplified));
+
+			setHoles(
+					getHoles().stream()
+							.map(
+									h ->
+											toLv95Coordinate(
+													GeometryHelper.simplify(
+															lv95toPoints(Point3d.class, h),
+															minAngle,
+															minDistance)))
+							.collect(Collectors.toList()));
 		} else {
 			List<Point2d> simplified = GeometryHelper.simplify(lv95toPoints(Point2d.class, getCoordinates()), minAngle,
 					minDistance);
 			setCoordinates(toLv95Coordinate(simplified));
+
+            setHoles(
+                    getHoles().stream()
+                            .map(
+                                    h ->
+                                            toLv95Coordinate(
+                                                    GeometryHelper.simplify(
+                                                            lv95toPoints(Point2d.class, h),
+                                                            minAngle,
+                                                            minDistance)))
+                            .collect(Collectors.toList()));
 		}
 
 		// Calculate size reduction
@@ -152,9 +192,21 @@ public abstract class TileElement {
 				|| (shell.length == 3 && shell[0].equals(shell[2]))) { // Line. Some lines come with tree coordinates,
 																		// where start and end are equal :(
 			geometry = geometryFactory.createLineString(shell);
-		} else {
-			geometry = geometryFactory.createPolygon(shell);
-		}
+        } else {
+            geometry =
+                    geometryFactory.createPolygon(
+                            geometryFactory.createLinearRing(shell),
+                            getHoles().stream()
+                                    .map(
+                                            h ->
+                                                    toTileCoordinateArray(
+                                                            lv95toPoints(Point2d.class, h),
+                                                            tileBoundingBox,
+                                                            extend))
+                                    .filter(h -> h.length > 2)
+                                    .map(h -> geometryFactory.createLinearRing(h))
+                                    .toArray(LinearRing[]::new));
+        }
 
 		if (!geometry.isValid()) {
 			logger.debug("Geometry  {}  not valid, try to created fixed version", this.getAttributes());
@@ -282,7 +334,7 @@ public abstract class TileElement {
 
 	/**
 	 * Add all line strings from the polygon given to the polygonizer given
-	 * 
+	 *
 	 * @param polygon     polygon from which to extract line strings
 	 * @param polygonizer polygonizer
 	 */
@@ -295,7 +347,7 @@ public abstract class TileElement {
 
 	/**
 	 * Add the linestring given to the polygonizer
-	 * 
+	 *
 	 * @param lineString  line string
 	 * @param polygonizer polygonizer
 	 */
@@ -316,7 +368,7 @@ public abstract class TileElement {
 
 	/**
 	 * Get a geometry from a collection of polygons.
-	 * 
+	 *
 	 * @param polygons collection
 	 * @param factory  factory to generate MultiPolygon if required
 	 * @return null if there were no polygons, the polygon if there was only one, or
@@ -332,9 +384,27 @@ public abstract class TileElement {
 			// polygons may still overlap! Need to sym difference them
 			Iterator<Polygon> iter = polygons.iterator();
 			Geometry ret = iter.next();
-			while (iter.hasNext()) {
-				ret = ret.symDifference(iter.next());
-			}
+                while (iter.hasNext()) {
+                    if (ret instanceof GeometryCollection) {
+						// symDifference can't handle geometry collections. only keep polygons
+                        List<Geometry> symDifPolygons = new ArrayList<>();
+                        for (int i = 0; i < ret.getNumGeometries(); i++) {
+                            final Geometry geometry = ret.getGeometryN(i);
+                            if (geometry instanceof Polygon) {
+                                symDifPolygons.add(geometry);
+                            }
+                        }
+                        if (symDifPolygons.size() == 1) {
+                            ret = symDifPolygons.get(0);
+                        } else {
+                            ret =
+                                    new MultiPolygon(
+                                            symDifPolygons.stream().toArray(Polygon[]::new),
+                                            geometryFactory);
+                        }
+                    }
+                    ret = ret.symDifference(iter.next());
+                }
 			return ret;
 		}
 	}
