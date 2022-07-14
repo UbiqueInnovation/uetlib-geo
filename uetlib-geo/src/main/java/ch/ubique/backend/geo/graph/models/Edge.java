@@ -16,8 +16,7 @@ public class Edge {
         if (u.getId() < v.getId()) {
             this.u = u;
             this.v = v;
-        }
-        else {
+        } else {
             this.u = v;
             this.v = u;
         }

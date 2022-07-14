@@ -45,11 +45,16 @@ public class ItemStyle {
 
     @Override
     public String toString() {
-        return "ItemStyle{" +
-                "color='" + color + '\'' +
-                ", scale=" + scale +
-                ", width=" + width +
-                ", icon=" + icon +
-                '}';
+        return "ItemStyle{"
+                + "color='"
+                + color
+                + '\''
+                + ", scale="
+                + scale
+                + ", width="
+                + width
+                + ", icon="
+                + icon
+                + '}';
     }
 }

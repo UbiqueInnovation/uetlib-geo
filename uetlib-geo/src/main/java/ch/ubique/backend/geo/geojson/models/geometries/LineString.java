@@ -5,11 +5,10 @@ import ch.ubique.backend.geo.geojson.models.Geometry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LineString extends Geometry  {
+public class LineString extends Geometry {
 
     @JsonProperty("coordinates")
     private List<Coordinate> coordinates;

@@ -38,7 +38,9 @@ public class Vertex {
     }
 
     public List<Vertex> getNeighbors() {
-        return edges.stream().map(e -> this.equals(e.getU()) ? e.getV() : e.getU()).collect(Collectors.toList());
+        return edges.stream()
+                .map(e -> this.equals(e.getU()) ? e.getV() : e.getU())
+                .collect(Collectors.toList());
     }
 
     public VertexProperties getProperties() {

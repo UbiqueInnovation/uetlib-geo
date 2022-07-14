@@ -69,7 +69,8 @@ public class CoordinateConverter {
     public static WGS84Coordinate toWGS84(WebMercatorCoordinate webMercatorCoordinate) {
         // The following code was adapted from
         // https://github.com/openmobilemaps/maps-core/blob/dfabe5f5573cad4078beac73c93ebb0eb4b2152f/shared/src/map/coordinates/EPSG3857ToEPSG4326Converter.h
-        // Appreciation for Christoph Maurhofer (https://github.com/maurhofer-ubique) to helping me on a sunny winter day.
+        // Appreciation for Christoph Maurhofer (https://github.com/maurhofer-ubique) to helping me
+        // on a sunny winter day.
         double lon = webMercatorCoordinate.getX() * 180 / 20037508.34;
         double lat =
                 Math.atan(Math.exp(webMercatorCoordinate.getY() * Math.PI / 20037508.34))
@@ -82,7 +83,6 @@ public class CoordinateConverter {
     // WARNING!
     // The following code consistently uses x for north and y for east
     // The following code was copied:
-
 
     // The MIT License (MIT)
     //
@@ -107,9 +107,12 @@ public class CoordinateConverter {
     //  THE SOFTWARE.
     //
 
-    // Source: http://www.swisstopo.admin.ch/internet/swisstopo/en/home/topics/survey/sys/refsys/projections.html (see PDFs under "Documentation")
+    // Source:
+    // http://www.swisstopo.admin.ch/internet/swisstopo/en/home/topics/survey/sys/refsys/projections.html (see PDFs under "Documentation")
     // Updated 9 dec 2014
-    // Please validate your results with NAVREF on-line service: http://www.swisstopo.admin.ch/internet/swisstopo/en/home/apps/calc/navref.html (difference ~ 1-2m)
+    // Please validate your results with NAVREF on-line service:
+    // http://www.swisstopo.admin.ch/internet/swisstopo/en/home/apps/calc/navref.html (difference ~
+    // 1-2m)
 
     // Convert CH y/x/h to WGS height
     private static double chToWGSheight(double y, double x, double h) {
@@ -130,11 +133,12 @@ public class CoordinateConverter {
         double xAux = (x - 200000) / 1000000;
 
         // Process lat
-        double lat = (16.9023892 + (3.238272 * xAux))
-                - (0.270978 * Math.pow(yAux, 2))
-                - (0.002528 * Math.pow(xAux, 2))
-                - (0.0447 * Math.pow(yAux, 2) * xAux)
-                - (0.0140 * Math.pow(xAux, 3));
+        double lat =
+                (16.9023892 + (3.238272 * xAux))
+                        - (0.270978 * Math.pow(yAux, 2))
+                        - (0.002528 * Math.pow(xAux, 2))
+                        - (0.0447 * Math.pow(yAux, 2) * xAux)
+                        - (0.0140 * Math.pow(xAux, 3));
 
         // Unit 10000" to 1 " and converts seconds to degrees (dec)
         return (lat * 100) / 36;
@@ -148,9 +152,12 @@ public class CoordinateConverter {
         double xAux = (x - 200000) / 1000000;
 
         // Process long
-        double lng = (2.6779094 + (4.728982 * yAux)
-                + (0.791484 * yAux * xAux) + (0.1306 * yAux * Math.pow(
-                xAux, 2))) - (0.0436 * Math.pow(yAux, 3));
+        double lng =
+                (2.6779094
+                                + (4.728982 * yAux)
+                                + (0.791484 * yAux * xAux)
+                                + (0.1306 * yAux * Math.pow(xAux, 2)))
+                        - (0.0436 * Math.pow(yAux, 3));
 
         // Unit 10000" to 1" and converts seconds to degrees (dec)
         return (lng * 100) / 36;
@@ -162,12 +169,11 @@ public class CoordinateConverter {
         int min = (int) Math.floor((dec - deg) * 60);
         double sec = (((dec - deg) * 60) - min) * 60;
 
-        return sec + min*60.0 + deg*3600.0;
+        return sec + min * 60.0 + deg * 3600.0;
     }
 
     /**
-     * Convert LV03 to WGS84 Return a array of double that contain lat, long,
-     * and height
+     * Convert LV03 to WGS84 Return a array of double that contain lat, long, and height
      *
      * @param east
      * @param north
@@ -183,17 +189,16 @@ public class CoordinateConverter {
         return d;
     }
 
-
     /**
-     * Convert WGS84 to LV03 Return an array of double that contain east,
-     * north, and height
+     * Convert WGS84 to LV03 Return an array of double that contain east, north, and height
      *
      * @param latitude
      * @param longitude
      * @param ellHeight
      * @return
      */
-    private static double[] internationalToSwiss(double latitude, double longitude, double ellHeight) {
+    private static double[] internationalToSwiss(
+            double latitude, double longitude, double ellHeight) {
         // , ref double east, ref double north, ref double height
         double[] d = new double[3];
 
@@ -228,9 +233,11 @@ public class CoordinateConverter {
         double lngAux = (lng - 26782.5) / 10000;
 
         // Process X
-        return ((200147.07 + (308807.95 * latAux)
-                + (3745.25 * Math.pow(lngAux, 2)) + (76.63 * Math.pow(latAux,
-                2))) - (194.56 * Math.pow(lngAux, 2) * latAux))
+        return ((200147.07
+                                + (308807.95 * latAux)
+                                + (3745.25 * Math.pow(lngAux, 2))
+                                + (76.63 * Math.pow(latAux, 2)))
+                        - (194.56 * Math.pow(lngAux, 2) * latAux))
                 + (119.79 * Math.pow(latAux, 3));
     }
 
@@ -252,6 +259,6 @@ public class CoordinateConverter {
     }
 
     private static double[] swiss1903plusToInternational(double x, double y, double z) {
-        return swissToInternational(x-2000000, y-1000000, z);
+        return swissToInternational(x - 2000000, y - 1000000, z);
     }
 }

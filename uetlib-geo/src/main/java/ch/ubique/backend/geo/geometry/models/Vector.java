@@ -4,7 +4,7 @@ public class Vector<P extends Point<P>> {
 
     private final double[] coefficients;
 
-    public Vector(double...coefficients) {
+    public Vector(double... coefficients) {
         this.coefficients = coefficients;
     }
 
@@ -31,6 +31,4 @@ public class Vector<P extends Point<P>> {
     public double norm() {
         return Math.sqrt(dot(this));
     }
-
-
 }

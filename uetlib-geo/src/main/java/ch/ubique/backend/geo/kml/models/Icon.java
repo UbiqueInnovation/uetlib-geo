@@ -14,8 +14,6 @@ public class Icon {
 
     @Override
     public String toString() {
-        return "Icon{" +
-                "href='" + href + '\'' +
-                '}';
+        return "Icon{" + "href='" + href + '\'' + '}';
     }
 }

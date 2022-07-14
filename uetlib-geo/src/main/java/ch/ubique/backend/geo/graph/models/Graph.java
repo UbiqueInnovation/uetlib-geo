@@ -57,7 +57,7 @@ public class Graph {
 
         return edge;
     }
-    
+
     public Collection<Vertex> getVertices() {
         return vertices.values();
     }

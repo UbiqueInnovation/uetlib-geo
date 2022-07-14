@@ -2,26 +2,16 @@ package ch.ubique.backend.geo.vectortile.models;
 
 public class ZoomLevel {
 
-    /**
-     * Level identifier
-     */
+    /** Level identifier */
     private int level;
 
-    /**
-     * Number of tiles in Y direction
-     */
+    /** Number of tiles in Y direction */
     private int tilesY;
 
-
-    /**
-     * Number of tiles in X direction
-     */
+    /** Number of tiles in X direction */
     private int tilesX;
 
-    /**
-     * Resolution in [m], mainly applicable for pixel data
-     * I.e. width of one pixel
-     */
+    /** Resolution in [m], mainly applicable for pixel data I.e. width of one pixel */
     private double resolution;
 
     public ZoomLevel(int level, int tilesX, int tilesY, double resolution) {

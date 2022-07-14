@@ -5,7 +5,6 @@ import ch.ubique.backend.geo.geojson.models.Geometry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,17 +38,22 @@ public class Polygon extends Geometry {
 
     @Override
     public List<Coordinate> getAllCoordinates() {
-        return coordinateArray.stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+        return coordinateArray.stream().flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     @Override
     public String toString() {
-        return  getClass().getSimpleName() + "("
+        return getClass().getSimpleName()
+                + "("
                 + coordinateArray.stream()
-                .map(ring -> "[" + ring.stream().map(List::toString).collect(Collectors.joining(", ")) + "]")
-                .collect(Collectors.joining(", "))
+                        .map(
+                                ring ->
+                                        "["
+                                                + ring.stream()
+                                                        .map(List::toString)
+                                                        .collect(Collectors.joining(", "))
+                                                + "]")
+                        .collect(Collectors.joining(", "))
                 + ")";
     }
 }

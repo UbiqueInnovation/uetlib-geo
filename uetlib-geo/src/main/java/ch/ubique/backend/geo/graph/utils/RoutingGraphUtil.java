@@ -24,7 +24,6 @@ public class RoutingGraphUtil {
         return routingGraphUtil.routingGraph;
     }
 
-
     private final Graph graph;
     private final Graph routingGraph;
 
@@ -37,7 +36,9 @@ public class RoutingGraphUtil {
     }
 
     private boolean isRoutingVertex(Vertex vertex) {
-        return vertex.degree() == 1 || vertex.degree() > 2 || additionalRoutingVertices.contains(vertex);
+        return vertex.degree() == 1
+                || vertex.degree() > 2
+                || additionalRoutingVertices.contains(vertex);
     }
 
     private void createRoutingGraph() {
@@ -49,10 +50,10 @@ public class RoutingGraphUtil {
             additionalRoutingVertices.add(cycle.get(0));
         }
 
-        var routingVertices = graph.getVertices()
-            .stream()
-            .filter(this::isRoutingVertex)
-            .collect(Collectors.toList());
+        var routingVertices =
+                graph.getVertices().stream()
+                        .filter(this::isRoutingVertex)
+                        .collect(Collectors.toList());
 
         logger.info("Creating routing vertices");
         routingVertices.forEach(vertex -> routingGraph.addVertex(vertex.copyWithoutEdges()));
@@ -98,7 +99,8 @@ public class RoutingGraphUtil {
             }
 
             // Continue walking on path
-            Optional<Edge> unvisitedEdge = to.getEdges().stream().filter(edge -> !visitedEdges.contains(edge)).findAny();
+            Optional<Edge> unvisitedEdge =
+                    to.getEdges().stream().filter(edge -> !visitedEdges.contains(edge)).findAny();
             assert unvisitedEdge.isPresent();
 
             Edge next = unvisitedEdge.get();
@@ -107,7 +109,8 @@ public class RoutingGraphUtil {
         }
     }
 
-    private Edge upsertRoutingNodeNeighbor(Vertex vertex, Vertex routingNeighbor, Vertex direction, double distance) {
+    private Edge upsertRoutingNodeNeighbor(
+            Vertex vertex, Vertex routingNeighbor, Vertex direction, double distance) {
         boolean foundExisting = false;
 
         Vertex routingVertex = routingGraph.getVertex(vertex.getId());
@@ -118,7 +121,7 @@ public class RoutingGraphUtil {
         // Update existing routing neighbor if the new path is shorter
         for (Edge existingRoutingEdge : routingVertex.getEdges()) {
             if (existingRoutingEdge.getV().equals(routingNeighbor)
-                && existingRoutingEdge.getProperties().getDistance() > distance) {
+                    && existingRoutingEdge.getProperties().getDistance() > distance) {
                 foundExisting = true;
                 routingEdge = existingRoutingEdge;
                 routingEdge.getProperties().setDistance(distance);
@@ -162,7 +165,8 @@ public class RoutingGraphUtil {
                 potentialCycle.add(current);
 
                 final Vertex prev = previous;
-                Optional<Vertex> unvisitedVertex = current.getNeighbors().stream().filter(v -> !v.equals(prev)).findAny();
+                Optional<Vertex> unvisitedVertex =
+                        current.getNeighbors().stream().filter(v -> !v.equals(prev)).findAny();
 
                 assert unvisitedVertex.isPresent();
 
@@ -170,7 +174,6 @@ public class RoutingGraphUtil {
                 previous = current;
                 current = next;
             }
-
         }
         return cycles;
     }

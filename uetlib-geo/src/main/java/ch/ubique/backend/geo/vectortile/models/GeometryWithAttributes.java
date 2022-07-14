@@ -1,8 +1,7 @@
 package ch.ubique.backend.geo.vectortile.models;
 
-import org.locationtech.jts.geom.Geometry;
-
 import java.util.Map;
+import org.locationtech.jts.geom.Geometry;
 
 public class GeometryWithAttributes {
 
