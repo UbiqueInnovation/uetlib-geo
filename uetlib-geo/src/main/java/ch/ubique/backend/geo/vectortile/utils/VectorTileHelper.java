@@ -1,6 +1,5 @@
 package ch.ubique.backend.geo.vectortile.utils;
 
-
 import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
 import static ch.ubique.backend.geo.vectortile.constants.SwissConstants.swissGridInfo;
 import static java.lang.Math.max;
@@ -17,8 +16,11 @@ import ch.ubique.backend.geo.vectortile.models.TileElement;
 import ch.ubique.backend.geo.vectortile.models.TileInfo;
 import ch.ubique.backend.geo.vectortile.models.VectorTileConfig;
 import ch.ubique.backend.geo.vectortile.models.ZoomLevel;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -26,7 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
-
 import no.ecc.vectortile.VectorTileEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,11 +70,12 @@ public class VectorTileHelper<T extends TileElement> {
         return encoder.encode();
     }
 
-    public void generateTiles(Consumer<BinaryTile> tileConsumer, int numThreads) throws ExecutionException, InterruptedException {
-        var levels = config.getZoomLevels()
-                .stream()
-                .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
-                .collect(Collectors.toList());
+    public void generateTiles(Consumer<BinaryTile> tileConsumer, int numThreads)
+            throws ExecutionException, InterruptedException {
+        var levels =
+                config.getZoomLevels().stream()
+                        .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
+                        .collect(Collectors.toList());
 
         for (var level : levels) {
             ZoomLevel zoomLevel = gridInfo.getZoomLevel(level);
@@ -90,7 +92,8 @@ public class VectorTileHelper<T extends TileElement> {
         return binaryTiles;
     }
 
-    public Collection<BinaryTile> generateTiles(int numThreads) throws ExecutionException, InterruptedException {
+    public Collection<BinaryTile> generateTiles(int numThreads)
+            throws ExecutionException, InterruptedException {
         Collection<BinaryTile> binaryTiles = new ConcurrentLinkedQueue<>();
         generateTiles(binaryTiles::add, numThreads);
         return binaryTiles;
@@ -105,7 +108,9 @@ public class VectorTileHelper<T extends TileElement> {
         logger.info("Relative size after simplifying (avg): {}", sum / elements.size());
     }
 
-    private void generateTilesForLevel(ZoomLevel zoomLevel, Consumer<BinaryTile> tileConsumer, int numThreads) throws ExecutionException, InterruptedException {
+    private void generateTilesForLevel(
+            ZoomLevel zoomLevel, Consumer<BinaryTile> tileConsumer, int numThreads)
+            throws ExecutionException, InterruptedException {
         Collection<Tile<T>> tiles = getTiles(zoomLevel);
         final AtomicInteger count = new AtomicInteger();
         int onePercent = max(1, tiles.size() / 100);
@@ -113,39 +118,61 @@ public class VectorTileHelper<T extends TileElement> {
 
         var forkJoinPool = new ForkJoinPool(numThreads);
 
-        var tileSizes = forkJoinPool.submit(() ->
-                tiles
-                        .parallelStream()
-                        .map(tile -> {
-                            String path = getFileName(tile);
-                            byte[] bytes = generateBinary(tile);
+        var tileSizes =
+                forkJoinPool
+                        .submit(
+                                () ->
+                                        tiles.parallelStream()
+                                                .map(
+                                                        tile -> {
+                                                            String path = getFileName(tile);
+                                                            byte[] bytes = generateBinary(tile);
 
-                            // Log progress
-                            int countValue = count.incrementAndGet();
-                            if (countValue % onePercent == 0) {
-                                int percent = 100 * countValue / tiles.size();
-                                long currentTime = System.currentTimeMillis();
-                                double tilesPerSecond = countValue / ((double) (currentTime - startTime)) * 1000.0;
-                                logger.info("Processed {}% ({} tiles per second)", percent, tilesPerSecond);
-                            }
+                                                            // Log progress
+                                                            int countValue =
+                                                                    count.incrementAndGet();
+                                                            if (countValue % onePercent == 0) {
+                                                                int percent =
+                                                                        100
+                                                                                * countValue
+                                                                                / tiles.size();
+                                                                long currentTime =
+                                                                        System.currentTimeMillis();
+                                                                double tilesPerSecond =
+                                                                        countValue
+                                                                                / ((double)
+                                                                                        (currentTime
+                                                                                                - startTime))
+                                                                                * 1000.0;
+                                                                logger.info(
+                                                                        "Processed {}% ({} tiles per second)",
+                                                                        percent, tilesPerSecond);
+                                                            }
 
-                            var binaryTile = new BinaryTile(path, bytes);
-                            tileConsumer.accept(binaryTile);
+                                                            var binaryTile =
+                                                                    new BinaryTile(path, bytes);
+                                                            tileConsumer.accept(binaryTile);
 
-                            return bytes.length;
-                        }).collect(Collectors.toList())).get();
+                                                            return bytes.length;
+                                                        })
+                                                .collect(Collectors.toList()))
+                        .get();
 
         printStats(tiles, tileSizes, zoomLevel);
 
         forkJoinPool.shutdown();
     }
 
-    private void printStats(Collection<Tile<T>> tiles, List<Integer> tileSizes, ZoomLevel zoomLevel) {
+    private void printStats(
+            Collection<Tile<T>> tiles, List<Integer> tileSizes, ZoomLevel zoomLevel) {
 
         StringBuilder stats = new StringBuilder();
         stats.append('\n');
 
-        double nonEmptyPercent = 100. * tileSizes.stream().mapToInt(size -> size > 0 ? 1 : 0).sum() / tileSizes.size();
+        double nonEmptyPercent =
+                100.
+                        * tileSizes.stream().mapToInt(size -> size > 0 ? 1 : 0).sum()
+                        / tileSizes.size();
         stats.append(String.format("  Non empty tiles: %.2f%%%n", nonEmptyPercent));
 
         int maxBytes = tileSizes.stream().mapToInt(size -> size).max().orElse(-1);
@@ -153,14 +180,40 @@ public class VectorTileHelper<T extends TileElement> {
         stats.append(String.format("  Tile size: avg = %,.1fB, max = %,dB%n", avgBytes, maxBytes));
 
         if (config.limitElementsPerTile(zoomLevel.getLevel())) {
-            int maxElementsWithLimit = tiles.stream().mapToInt(tile -> min(config.getMaxElementsPerTile(zoomLevel.getLevel()), tile.getElements().size())).max().orElse(-1);
-            double avgElementsWithLimit = tiles.stream().mapToInt(tile -> min(config.getMaxElementsPerTile(zoomLevel.getLevel()), tile.getElements().size())).average().orElse(-1);
-            stats.append(String.format("  Elements per tile (with limit): avg = %.2f, max = %d%n", avgElementsWithLimit, maxElementsWithLimit));
+            int maxElementsWithLimit =
+                    tiles.stream()
+                            .mapToInt(
+                                    tile ->
+                                            min(
+                                                    config.getMaxElementsPerTile(
+                                                            zoomLevel.getLevel()),
+                                                    tile.getElements().size()))
+                            .max()
+                            .orElse(-1);
+            double avgElementsWithLimit =
+                    tiles.stream()
+                            .mapToInt(
+                                    tile ->
+                                            min(
+                                                    config.getMaxElementsPerTile(
+                                                            zoomLevel.getLevel()),
+                                                    tile.getElements().size()))
+                            .average()
+                            .orElse(-1);
+            stats.append(
+                    String.format(
+                            "  Elements per tile (with limit): avg = %.2f, max = %d%n",
+                            avgElementsWithLimit, maxElementsWithLimit));
         }
 
-        int maxElements = tiles.stream().mapToInt(tile -> tile.getElements().size()).max().orElse(-1);
-        double avgElements = tiles.stream().mapToInt(tile -> tile.getElements().size()).average().orElse(-1);
-        stats.append(String.format("  Elements per tile (without limit): avg = %.2f, max = %d", avgElements, maxElements));
+        int maxElements =
+                tiles.stream().mapToInt(tile -> tile.getElements().size()).max().orElse(-1);
+        double avgElements =
+                tiles.stream().mapToInt(tile -> tile.getElements().size()).average().orElse(-1);
+        stats.append(
+                String.format(
+                        "  Elements per tile (without limit): avg = %.2f, max = %d",
+                        avgElements, maxElements));
 
         logger.info("Statistic for level {}: {}", zoomLevel.getLevel(), stats);
     }
@@ -176,7 +229,6 @@ public class VectorTileHelper<T extends TileElement> {
 
         List<Tile<T>> tiles = new ArrayList<>(tilesX * tilesY);
 
-
         for (int x = 0; x < tilesX; ++x) {
             for (int y = 0; y < tilesY; ++y) {
                 Point2d min = origin.plus(tileWidth * x, -tileWidth * (y + 1));
@@ -188,11 +240,10 @@ public class VectorTileHelper<T extends TileElement> {
         }
 
         // Given a coordinate, return corresponding tile coordinates
-        ToIntFunction<Point2d> getX = coordinate ->
-                (int) ((coordinate.getX() - origin.getX()) / tileWidth);
-        ToIntFunction<Point2d> getY = coordinate ->
-                (int) ((origin.getY() - coordinate.getY()) / tileWidth);
-
+        ToIntFunction<Point2d> getX =
+                coordinate -> (int) ((coordinate.getX() - origin.getX()) / tileWidth);
+        ToIntFunction<Point2d> getY =
+                coordinate -> (int) ((origin.getY() - coordinate.getY()) / tileWidth);
 
         // Add elements to tiles that lie within bounding box of element
         for (T element : elements) {
@@ -213,7 +264,8 @@ public class VectorTileHelper<T extends TileElement> {
         return limitElementsPerTile(tiles, zoomLevel);
     }
 
-    private Collection<Tile<T>> limitElementsPerTile(Collection<Tile<T>> tiles, ZoomLevel zoomLevel) {
+    private Collection<Tile<T>> limitElementsPerTile(
+            Collection<Tile<T>> tiles, ZoomLevel zoomLevel) {
 
         if (!config.limitElementsPerTile(zoomLevel.getLevel())) {
             return tiles;
@@ -226,14 +278,13 @@ public class VectorTileHelper<T extends TileElement> {
         var visibleElements = new HashSet<Long>();
         for (var tile : tiles) {
             // only the most important elements are visible
-            var visibleElementsForTile = tile
-                    .getElements()
-                    .stream()
-                    .sorted(Comparator.comparingDouble(TileElement::getScore).reversed())
-                    .filter(config::filter)
-                    .limit(config.getMaxElementsPerTile(zoomLevel.getLevel()))
-                    .map(TileElement::getId)
-                    .collect(Collectors.toSet());
+            var visibleElementsForTile =
+                    tile.getElements().stream()
+                            .sorted(Comparator.comparingDouble(TileElement::getScore).reversed())
+                            .filter(config::filter)
+                            .limit(config.getMaxElementsPerTile(zoomLevel.getLevel()))
+                            .map(TileElement::getId)
+                            .collect(Collectors.toSet());
 
             visibleElements.addAll(visibleElementsForTile);
         }
@@ -241,10 +292,10 @@ public class VectorTileHelper<T extends TileElement> {
         // Generate tiles that contain only visible elements
         var limitedTiles = new ArrayList<Tile<T>>(tiles.size());
         for (var tile : tiles) {
-            Collection<T> visibleElementsForTile = tile.getElements()
-                    .stream()
-                    .filter(t -> visibleElements.contains(t.getId()))
-                    .collect(Collectors.toList());
+            Collection<T> visibleElementsForTile =
+                    tile.getElements().stream()
+                            .filter(t -> visibleElements.contains(t.getId()))
+                            .collect(Collectors.toList());
 
             var limitedTile = new Tile<T>(tile.getTileInfo(), tile.getBoundingBox());
             limitedTile.getElements().addAll(visibleElementsForTile);
@@ -254,7 +305,6 @@ public class VectorTileHelper<T extends TileElement> {
         logger.info("Filtered elements per tile for zoom level {}", zoomLevel.getLevel());
         return limitedTiles;
     }
-
 
     private String getFileName(Tile<T> tile) {
         TileInfo tileInfo = tile.getTileInfo();

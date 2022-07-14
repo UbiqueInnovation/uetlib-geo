@@ -1,8 +1,6 @@
 package ch.ubique.backend.geo.geometry.models;
 
-
 import ch.ubique.backend.geo.geometry.utils.BoundingBoxHelper;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,5 +37,4 @@ public class Polygon<P extends Point<P>> {
     public String toString() {
         return points.size() + " points";
     }
-
 }

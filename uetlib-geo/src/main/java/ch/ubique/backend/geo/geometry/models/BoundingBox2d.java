@@ -9,11 +9,16 @@ public class BoundingBox2d extends BoundingBox<Point2d> {
     }
 
     public BoundingBox2d(Point2d min, Point2d max) {
-       super(min, max);
+        super(min, max);
     }
 
-    public double getWidth() { return  getMax().getX() - getMin().getX(); }
-    public double getHeight() { return  getMax().getY() - getMin().getY(); }
+    public double getWidth() {
+        return getMax().getX() - getMin().getX();
+    }
+
+    public double getHeight() {
+        return getMax().getY() - getMin().getY();
+    }
 
     public Polygon2d toPolygon() {
         Point2d bottomLeft = getMin().copy();

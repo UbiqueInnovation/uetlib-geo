@@ -56,5 +56,4 @@ public class OsmParserConfig {
             return new OsmParserConfig(parseNodeTags, parseWayTags, useSourceIds);
         }
     }
-
 }

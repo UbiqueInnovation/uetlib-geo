@@ -3,7 +3,7 @@ package ch.ubique.backend.geo.geometry.models;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-public class Line <P extends Point<P>> {
+public class Line<P extends Point<P>> {
 
     protected final P start;
     protected final P end;
@@ -44,6 +44,4 @@ public class Line <P extends Point<P>> {
     public String toString() {
         return String.format("%s, %s", start, end);
     }
-
-
 }

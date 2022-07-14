@@ -3,24 +3,19 @@ package ch.ubique.backend.geo.geojson.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Feature {
 
-    @JsonInclude
-    private String id;
+    @JsonInclude private String id;
 
-    @JsonInclude
-    private String type;
+    @JsonInclude private String type;
 
-    @JsonInclude
-    private Map<String, Object> properties;
+    @JsonInclude private Map<String, Object> properties;
 
-    @JsonInclude
-    private Geometry geometry;
+    @JsonInclude private Geometry geometry;
 
     @JsonIgnore
     public <T> T getProperty(String key) {
@@ -68,11 +63,21 @@ public class Feature {
 
     @Override
     public String toString() {
-        return "Feature{\n" +
-                "  id: \"" + id + "\",\n" +
-                "  type: \"" + type + "\",\n" +
-                "  properties: {\n    " + properties.entrySet().stream().map(entry -> entry.getKey() +  ": \"" + entry.getValue() + "\"").collect(Collectors.joining("\n    ")) + "\n},\n" +
-                "  geometry: \"" + geometry.getClass().getSimpleName() + "\",\n" +
-                "}";
+        return "Feature{\n"
+                + "  id: \""
+                + id
+                + "\",\n"
+                + "  type: \""
+                + type
+                + "\",\n"
+                + "  properties: {\n    "
+                + properties.entrySet().stream()
+                        .map(entry -> entry.getKey() + ": \"" + entry.getValue() + "\"")
+                        .collect(Collectors.joining("\n    "))
+                + "\n},\n"
+                + "  geometry: \""
+                + geometry.getClass().getSimpleName()
+                + "\",\n"
+                + "}";
     }
 }

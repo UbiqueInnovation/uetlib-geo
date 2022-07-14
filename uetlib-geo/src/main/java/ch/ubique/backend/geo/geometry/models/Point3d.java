@@ -6,7 +6,6 @@ public class Point3d extends Point<Point3d> {
         this(coordinates[0], coordinates[1], coordinates[2]);
     }
 
-
     public Point3d(double x, double y, double z) {
         super(x, y, z);
     }

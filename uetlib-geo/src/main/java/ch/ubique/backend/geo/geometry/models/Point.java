@@ -3,7 +3,7 @@ package ch.ubique.backend.geo.geometry.models;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
-public abstract class Point <P extends Point<P>> {
+public abstract class Point<P extends Point<P>> {
 
     protected final double[] coordinates;
 
@@ -14,7 +14,10 @@ public abstract class Point <P extends Point<P>> {
     public static <P extends Point<P>> P newInstance(Class<P> cls, double... coordinates) {
         try {
             return cls.getDeclaredConstructor(double[].class).newInstance(coordinates);
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (NoSuchMethodException
+                | InstantiationException
+                | IllegalAccessException
+                | InvocationTargetException e) {
             e.printStackTrace();
             return null;
         }
@@ -45,7 +48,6 @@ public abstract class Point <P extends Point<P>> {
         return coordinates[i] = value;
     }
 
-
     public P multiply(double multiplier) {
         double[] newValues = new double[coordinates.length];
         for (int i = 0; i < coordinates.length; ++i) {
@@ -62,11 +64,11 @@ public abstract class Point <P extends Point<P>> {
         return multiply(1 / divisor);
     }
 
-    public P minus(double...delta) {
+    public P minus(double... delta) {
         return minus(create(delta));
     }
 
-    public P plus(double...delta) {
+    public P plus(double... delta) {
         return plus(create(delta));
     }
 

@@ -59,7 +59,8 @@ public class GeometryHelper {
 
         for (Line<Point2d> line : polygon.getLines()) {
             List<Line<Point2d>> boundingBoxLines = boundingBox.toPolygon().getLines();
-            List<Tuple<Point2d, Line<Point2d>>> intersections = new Line2d(line).intersections(boundingBoxLines);
+            List<Tuple<Point2d, Line<Point2d>>> intersections =
+                    new Line2d(line).intersections(boundingBoxLines);
 
             if (intersections.isEmpty()) {
                 continue;
@@ -69,28 +70,32 @@ public class GeometryHelper {
             Point2d end = line.getEnd();
 
             // Add corners if needed
-            BiConsumer<Line<Point2d>, Line<Point2d>> addCorners = (last, current) -> {
-                if (last != null && last != current) {
-                    boolean forwards = polygon.contains(last.getEnd());
-                    int firstIndex = boundingBoxLines.indexOf(last);
-                    int lastIndex = boundingBoxLines.indexOf(current);
-                    if (forwards) {
-                        for (int i = firstIndex; i != lastIndex; i = (i + 1) % 4) {
-                            newPolygon.getPoints().add(polygon.getLines().get(i).getEnd());
+            BiConsumer<Line<Point2d>, Line<Point2d>> addCorners =
+                    (last, current) -> {
+                        if (last != null && last != current) {
+                            boolean forwards = polygon.contains(last.getEnd());
+                            int firstIndex = boundingBoxLines.indexOf(last);
+                            int lastIndex = boundingBoxLines.indexOf(current);
+                            if (forwards) {
+                                for (int i = firstIndex; i != lastIndex; i = (i + 1) % 4) {
+                                    newPolygon.getPoints().add(polygon.getLines().get(i).getEnd());
+                                }
+                            } else {
+                                for (int i = lastIndex; i != firstIndex; i = (i + 1) % 4) {
+                                    newPolygon.getPoints().add(polygon.getLines().get(i).getEnd());
+                                }
+                            }
                         }
-                    } else {
-                        for (int i = lastIndex; i != firstIndex; i = (i + 1) % 4) {
-                            newPolygon.getPoints().add(polygon.getLines().get(i).getEnd());
-                        }
-                    }
-                }
-            };
+                    };
 
             if (boundingBox.contains(end)) {
                 newPolygon.getPoints().add(end);
             } else {
                 // Outgoing line
-                Tuple<Point2d, Line<Point2d>> closest = intersections.stream().min(Comparator.comparingDouble(t -> end.distanceTo(t.first))).orElseThrow();
+                Tuple<Point2d, Line<Point2d>> closest =
+                        intersections.stream()
+                                .min(Comparator.comparingDouble(t -> end.distanceTo(t.first)))
+                                .orElseThrow();
                 newPolygon.getPoints().add(closest.first);
 
                 // add corners if needed
@@ -105,7 +110,10 @@ public class GeometryHelper {
                 }
             } else {
                 // Incoming line
-                Tuple<Point2d, Line<Point2d>> closest = intersections.stream().min(Comparator.comparingDouble(t -> start.distanceTo(t.first))).orElseThrow();
+                Tuple<Point2d, Line<Point2d>> closest =
+                        intersections.stream()
+                                .min(Comparator.comparingDouble(t -> start.distanceTo(t.first)))
+                                .orElseThrow();
                 newPolygon.getPoints().add(closest.first);
 
                 // add corners if needed
@@ -117,7 +125,8 @@ public class GeometryHelper {
         return newPolygon;
     }
 
-    public static <P extends Point<P>> List<P> simplify(final List<P> points, double minAngle, double minDistance) {
+    public static <P extends Point<P>> List<P> simplify(
+            final List<P> points, double minAngle, double minDistance) {
 
         if (points.size() <= 2) {
             return points;
@@ -160,7 +169,6 @@ public class GeometryHelper {
 
         return newPoints;
     }
-
 
     public static <P extends Point<P>> double angle(P start, P middle, P end) {
         return new Vector<>(start, middle).angle(new Vector<>(middle, end));

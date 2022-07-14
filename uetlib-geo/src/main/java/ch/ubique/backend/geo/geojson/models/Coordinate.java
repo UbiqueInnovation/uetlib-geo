@@ -5,29 +5,27 @@ import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.ArrayList;
 import java.util.Optional;
 
 /**
  * From RFC:
  *
- *  A coordinate is an array of numbers. There MUST be two or more elements.
- *  The first two elements are longitude and latitude, or easting and northing,
- *  precisely in that order and using decimal numbers.
- *  Altitude or elevation MAY be included as an optional third element.
+ * <p>A coordinate is an array of numbers. There MUST be two or more elements. The first two
+ * elements are longitude and latitude, or easting and northing, precisely in that order and using
+ * decimal numbers. Altitude or elevation MAY be included as an optional third element.
  */
 public class Coordinate extends ArrayList<Double> {
 
     @JsonIgnore
-    public LV03Coordinate asLv03Coordinate(){
+    public LV03Coordinate asLv03Coordinate() {
         var east = get(0);
         var north = get(1);
         return new LV03Coordinate(east, north, elevation().orElse(null));
     }
 
     @JsonIgnore
-    public LV95Coordinate asLv95Coordinate(){
+    public LV95Coordinate asLv95Coordinate() {
         var east = get(0);
         var north = get(1);
         return new LV95Coordinate(east, north, elevation().orElse(null));

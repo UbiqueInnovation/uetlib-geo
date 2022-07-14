@@ -4,7 +4,6 @@ import ch.ubique.backend.geo.geojson.models.Coordinate;
 import ch.ubique.backend.geo.geojson.models.Geometry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,9 +22,8 @@ public class MultiPolygon extends Geometry {
 
     @JsonIgnore
     public MultiPolygon setPolygons(List<Polygon> polygons) {
-        this.coordinates = polygons.stream()
-                .map(Polygon::getCoordinateArray)
-                .collect(Collectors.toList());
+        this.coordinates =
+                polygons.stream().map(Polygon::getCoordinateArray).collect(Collectors.toList());
         return this;
     }
 
@@ -40,7 +38,8 @@ public class MultiPolygon extends Geometry {
 
     @Override
     public String toString() {
-        return  getClass().getSimpleName() + "("
+        return getClass().getSimpleName()
+                + "("
                 + getPolygons().stream().map(Geometry::toString).collect(Collectors.joining(", "))
                 + ")";
     }

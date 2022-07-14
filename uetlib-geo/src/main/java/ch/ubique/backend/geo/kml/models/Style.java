@@ -35,10 +35,13 @@ public class Style {
 
     @Override
     public String toString() {
-        return "Style{" +
-                "iconStyle=" + iconStyle +
-                ", labelStyle=" + labelStyle +
-                ", lineStyle=" + lineStyle +
-                '}';
+        return "Style{"
+                + "iconStyle="
+                + iconStyle
+                + ", labelStyle="
+                + labelStyle
+                + ", lineStyle="
+                + lineStyle
+                + '}';
     }
 }

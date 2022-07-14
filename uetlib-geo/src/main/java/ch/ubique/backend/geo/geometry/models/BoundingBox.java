@@ -32,7 +32,8 @@ public class BoundingBox<P extends Point<P>> {
             throw new RuntimeException("Dimensions do not match");
         }
         for (int i = 0; i < min.getDimension(); ++i) {
-            if (point.coordinates[i] < min.coordinates[i] || point.coordinates[i] > max.coordinates[i]) {
+            if (point.coordinates[i] < min.coordinates[i]
+                    || point.coordinates[i] > max.coordinates[i]) {
                 return false;
             }
         }
@@ -61,9 +62,6 @@ public class BoundingBox<P extends Point<P>> {
 
     @Override
     public String toString() {
-        return "BoundingBox{" +
-                "min=" + min +
-                ", max=" + max +
-                '}';
+        return "BoundingBox{" + "min=" + min + ", max=" + max + '}';
     }
 }

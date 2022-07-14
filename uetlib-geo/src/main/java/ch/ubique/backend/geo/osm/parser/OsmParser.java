@@ -7,13 +7,12 @@ import ch.ubique.backend.geo.graph.models.VertexProperties;
 import com.wolt.osm.parallelpbf.ParallelBinaryParser;
 import com.wolt.osm.parallelpbf.entity.Node;
 import com.wolt.osm.parallelpbf.entity.Way;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OsmParser {
 

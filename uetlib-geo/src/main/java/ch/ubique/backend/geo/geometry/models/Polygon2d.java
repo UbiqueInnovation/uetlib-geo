@@ -1,10 +1,8 @@
 package ch.ubique.backend.geo.geometry.models;
 
-
 import java.util.List;
 
 public class Polygon2d extends Polygon<Point2d> {
-
 
     public Polygon2d(Polygon<Point2d> polygon) {
         this(polygon.getPoints());
@@ -18,7 +16,7 @@ public class Polygon2d extends Polygon<Point2d> {
         super();
     }
 
-    public int countBoundaryIntersections(Line<Point2d>  line) {
+    public int countBoundaryIntersections(Line<Point2d> line) {
         return new Line2d(line).intersections(this).size();
     }
 

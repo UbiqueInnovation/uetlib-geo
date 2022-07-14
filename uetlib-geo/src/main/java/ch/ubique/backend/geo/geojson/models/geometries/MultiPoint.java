@@ -5,7 +5,6 @@ import ch.ubique.backend.geo.geojson.models.Geometry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,9 +23,8 @@ public class MultiPoint extends Geometry {
 
     @JsonIgnore
     public MultiPoint setPoints(List<Point> lineStrings) {
-        this.coordinates = lineStrings.stream()
-                .map(Point::getCoordinate)
-                .collect(Collectors.toList());
+        this.coordinates =
+                lineStrings.stream().map(Point::getCoordinate).collect(Collectors.toList());
         return this;
     }
 
@@ -38,7 +36,8 @@ public class MultiPoint extends Geometry {
 
     @Override
     public String toString() {
-        return  getClass().getSimpleName() + "("
+        return getClass().getSimpleName()
+                + "("
                 + getPoints().stream().map(Geometry::toString).collect(Collectors.joining(", "))
                 + ")";
     }

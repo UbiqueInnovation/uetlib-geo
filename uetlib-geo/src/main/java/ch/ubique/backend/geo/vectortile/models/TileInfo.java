@@ -26,10 +26,6 @@ public class TileInfo {
 
     @Override
     public String toString() {
-        return "TileInfo{" +
-                "x=" + x +
-                ", y=" + y +
-                ", zoomLevel=" + zoomLevel +
-                '}';
+        return "TileInfo{" + "x=" + x + ", y=" + y + ", zoomLevel=" + zoomLevel + '}';
     }
 }

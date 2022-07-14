@@ -1,8 +1,6 @@
 package ch.ubique.backend.geo.kml.models;
 
-
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,9 +46,9 @@ public class Placemark {
     public void setCoordinates(List<List<LV95Coordinate>> coordinates) {
         this.coordinates = coordinates;
     }
-    
+
     public void addCoordinates(List<LV95Coordinate> coordinates) {
-    	this.coordinates.add(coordinates);
+        this.coordinates.add(coordinates);
     }
 
     public Map<String, String> getExtendedData() {
