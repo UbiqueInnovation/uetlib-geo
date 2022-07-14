@@ -58,7 +58,8 @@ public class VectorTileHelper<T extends TileElement> {
             BoundingBox2d boundingBox = tile.getBoundingBox();
             String layer = element.getLayer();
             long id = element.getId();
-            GeometryWithAttributes item = element.getGeometry(boundingBox, extend);
+            GeometryWithAttributes item =
+                    element.getGeometry(boundingBox, extend, config.getYAxisDirection());
             if (item == null || item.getGeometry() == null) {
                 logger.warn("Item or geometry is null: {}", element);
             } else if (!item.getGeometry().isValid()) {

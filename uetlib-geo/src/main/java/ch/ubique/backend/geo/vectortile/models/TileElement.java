@@ -71,16 +71,17 @@ public abstract class TileElement {
         return BoundingBoxHelper.getBoundingBox(lv95toPoints(Point2d.class, getCoordinates()));
     }
 
-    public GeometryWithAttributes getGeometry(BoundingBox2d tileBoundingBox, int extend) {
+    public GeometryWithAttributes getGeometry(
+            BoundingBox2d tileBoundingBox, int extend, YAxisDirection yAxisDirection) {
         var type = inferGeometryType();
 
         switch (type) {
             case POINT:
-                return getPoint(getCoordinates().get(0), tileBoundingBox, extend);
+                return getPoint(getCoordinates().get(0), tileBoundingBox, extend, yAxisDirection);
             case LINE:
-                return getLine(tileBoundingBox, extend);
+                return getLine(tileBoundingBox, extend, yAxisDirection);
             case POLYGON:
-                return getPolygon(tileBoundingBox, extend);
+                return getPolygon(tileBoundingBox, extend, yAxisDirection);
             default:
                 throw new RuntimeException("TileElementType " + type + " not implemented");
         }
@@ -157,9 +158,13 @@ public abstract class TileElement {
     }
 
     private GeometryWithAttributes getPoint(
-            LV95Coordinate position, BoundingBox2d tileBoundingBox, int extend) {
+            LV95Coordinate position,
+            BoundingBox2d tileBoundingBox,
+            int extend,
+            YAxisDirection yAxisDirection) {
         Coordinate coordinate =
-                getCoordinateOnTile(toPoint(Point2d.class, position), tileBoundingBox, extend);
+                getCoordinateOnTile(
+                        toPoint(Point2d.class, position), tileBoundingBox, extend, yAxisDirection);
         return getPoint(coordinate, position.getElevation());
     }
 
@@ -172,9 +177,11 @@ public abstract class TileElement {
         return new GeometryWithAttributes(geometry, attributes);
     }
 
-    private GeometryWithAttributes getLine(BoundingBox2d tileBoundingBox, int extend) {
+    private GeometryWithAttributes getLine(
+            BoundingBox2d tileBoundingBox, int extend, YAxisDirection yAxisDirection) {
         var points = lv95toPoints(Point2d.class, getCoordinates());
-        Coordinate[] coordinates = toTileCoordinateArray(points, tileBoundingBox, extend);
+        Coordinate[] coordinates =
+                toTileCoordinateArray(points, tileBoundingBox, extend, yAxisDirection);
         if (coordinates.length == 1) {
             return getPoint(coordinates[0], getCoordinates().get(0).getElevation());
         }
@@ -184,9 +191,10 @@ public abstract class TileElement {
         return new GeometryWithAttributes(geometry, attributes);
     }
 
-    private GeometryWithAttributes getPolygon(BoundingBox2d tileBoundingBox, int extend) {
+    private GeometryWithAttributes getPolygon(
+            BoundingBox2d tileBoundingBox, int extend, YAxisDirection yAxisDirection) {
         var points = lv95toPoints(Point2d.class, getCoordinates());
-        Coordinate[] shell = toTileCoordinateArray(points, tileBoundingBox, extend);
+        Coordinate[] shell = toTileCoordinateArray(points, tileBoundingBox, extend, yAxisDirection);
         Geometry geometry;
         if (shell.length == 1
                 || (shell.length == 2 && shell[0].equals(shell[1]))) { // Point. Some points come as
@@ -210,7 +218,8 @@ public abstract class TileElement {
                                                     toTileCoordinateArray(
                                                             lv95toPoints(Point2d.class, h),
                                                             tileBoundingBox,
-                                                            extend))
+                                                            extend,
+                                                            yAxisDirection))
                                     .filter(h -> h.length > 2)
                                     .map(h -> geometryFactory.createLinearRing(h))
                                     .toArray(LinearRing[]::new));
@@ -281,25 +290,40 @@ public abstract class TileElement {
         return abs(a.getElevation() - b.getElevation()) / a.distanceTo(b);
     }
 
-    private Coordinate getCoordinateOnTile(Point2d point, BoundingBox2d boundingBox, int extend) {
+    private Coordinate getCoordinateOnTile(
+            Point2d point, BoundingBox2d boundingBox, int extend, YAxisDirection yAxisDirection) {
         double x =
                 Math.round(
                         (point.getX() - boundingBox.getMin().getX())
                                 / boundingBox.getWidth()
                                 * extend);
+
+        /**
+         * currently y is only correct when using LV95 or LV03 coordinates, which increase in UPward
+         * direction
+         */
         double y =
                 Math.round(
                         (point.getY() - boundingBox.getMin().getY())
                                 / boundingBox.getHeight()
                                 * extend);
+        if (YAxisDirection.DOWN.equals(yAxisDirection)) {
+            y = extend - y;
+        }
         return new Coordinate(x, y);
     }
 
     private Coordinate[] toTileCoordinateArray(
-            List<Point2d> points, BoundingBox2d boundingBox, int extend) {
+            List<Point2d> points,
+            BoundingBox2d boundingBox,
+            int extend,
+            YAxisDirection yAxisDirection) {
         var rawPoints =
                 points.stream()
-                        .map(coordinate -> getCoordinateOnTile(coordinate, boundingBox, extend))
+                        .map(
+                                coordinate ->
+                                        getCoordinateOnTile(
+                                                coordinate, boundingBox, extend, yAxisDirection))
                         .collect(Collectors.toList());
 
         if (rawPoints.isEmpty()) {
@@ -331,9 +355,8 @@ public abstract class TileElement {
     private Geometry validate(Geometry geom) {
         if (geom instanceof Polygon) {
             if (geom.isValid()) {
-                geom
-                        .normalize(); // validate does not pick up rings in the wrong order - this
-                                      // will fix that
+                geom.normalize(); // validate does not pick up rings in the wrong order - this
+                // will fix that
                 return geom; // If the polygon is valid just return it
             }
             Polygonizer polygonizer = new Polygonizer();
@@ -341,9 +364,8 @@ public abstract class TileElement {
             return toPolygonGeometry(polygonizer.getPolygons(), geom.getFactory());
         } else if (geom instanceof MultiPolygon) {
             if (geom.isValid()) {
-                geom
-                        .normalize(); // validate does not pick up rings in the wrong order - this
-                                      // will fix that
+                geom.normalize(); // validate does not pick up rings in the wrong order - this
+                // will fix that
                 return geom; // If the multipolygon is valid just return it
             }
             Polygonizer polygonizer = new Polygonizer();
