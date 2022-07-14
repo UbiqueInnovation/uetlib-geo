@@ -9,6 +9,14 @@ public class VectorTileConfig<T extends TileElement> {
     private String path;
     private int maxElementsPerTile;
     private boolean simplify;
+
+    /**
+     * technically DOWN is the correct default, as this corresponds with the vector tile specs.
+     * however, the first implementation used UP as default, so we are now stuck with the incorrect
+     * default
+     */
+    private YAxisDirection yAxisDirection = YAxisDirection.UP;
+
     private List<Integer> zoomLevels;
     private VectorTileFilter<T> filter;
 
@@ -94,6 +102,15 @@ public class VectorTileConfig<T extends TileElement> {
 
     public boolean isSimplify() {
         return simplify;
+    }
+
+    public YAxisDirection getYAxisDirection() {
+        return yAxisDirection;
+    }
+
+    public VectorTileConfig<T> setYAxisDirection(YAxisDirection yAxisDirection) {
+        this.yAxisDirection = yAxisDirection;
+        return this;
     }
 
     public boolean filter(T t) {
