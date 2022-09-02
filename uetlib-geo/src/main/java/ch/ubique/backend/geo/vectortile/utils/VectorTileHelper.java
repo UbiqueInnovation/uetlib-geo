@@ -246,18 +246,20 @@ public class VectorTileHelper<T extends TileElement> {
         ToIntFunction<Point2d> getY =
                 coordinate -> (int) ((origin.getY() - coordinate.getY()) / tileWidth);
 
-        // Add elements to tiles that lie within bounding box of element
+        // Add elements to tiles that lie within bounding box of element and are visible at the
+        // current zoom level
         for (T element : elements) {
+            if (element.isVisibleAtZoomLevel(zoomLevel)) {
+                BoundingBox<Point2d> box = element.getBoundingBox();
+                int minX = max(0, getX.applyAsInt(box.getMin()));
+                int minY = max(0, getY.applyAsInt(box.getMax()));
+                int maxX = min(tilesX - 1, getX.applyAsInt(box.getMax()));
+                int maxY = min(tilesY - 1, getY.applyAsInt(box.getMin()));
 
-            BoundingBox<Point2d> box = element.getBoundingBox();
-            int minX = max(0, getX.applyAsInt(box.getMin()));
-            int minY = max(0, getY.applyAsInt(box.getMax()));
-            int maxX = min(tilesX - 1, getX.applyAsInt(box.getMax()));
-            int maxY = min(tilesY - 1, getY.applyAsInt(box.getMin()));
-
-            for (int x = minX; x <= maxX; ++x) {
-                for (int y = minY; y <= maxY; ++y) {
-                    tiles.get(x * tilesY + y).getElements().add(element);
+                for (int x = minX; x <= maxX; ++x) {
+                    for (int y = minY; y <= maxY; ++y) {
+                        tiles.get(x * tilesY + y).getElements().add(element);
+                    }
                 }
             }
         }

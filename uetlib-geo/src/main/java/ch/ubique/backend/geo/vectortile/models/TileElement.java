@@ -15,9 +15,11 @@ import ch.ubique.backend.geo.geometry.utils.BoundingBoxHelper;
 import ch.ubique.backend.geo.geometry.utils.GeometryHelper;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -45,6 +47,37 @@ public abstract class TileElement {
     public abstract long getId();
 
     public abstract String getLayer();
+
+    /**
+     * this set controls which zoom levels the element is added to. if null (default) the element is
+     * included in all zoom levels
+     */
+    private Set<Integer> zoomLevels;
+
+    public void setZoomLevels(Set<Integer> zoomLevels) {
+        this.zoomLevels = zoomLevels;
+    }
+
+    public void includeZoomLevel(Integer zoomLevel) {
+        if (zoomLevels == null) {
+            zoomLevels = new HashSet<>();
+        }
+        zoomLevels.add(zoomLevel);
+    }
+
+    public void excludeZoomLevel(Integer zoomLevel) {
+        if (zoomLevels != null) {
+            zoomLevels.remove(zoomLevel);
+        }
+    }
+
+    public boolean isVisibleAtZoomLevel(ZoomLevel zoomLevel) {
+        return isVisibleAtZoomLevel(zoomLevel.getLevel());
+    }
+
+    public boolean isVisibleAtZoomLevel(Integer zoomLevel) {
+        return zoomLevels == null || zoomLevels.contains(zoomLevel);
+    }
 
     /** Return a score for this element. The higher, the more important. */
     public abstract double getScore();
