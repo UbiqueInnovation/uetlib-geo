@@ -29,6 +29,8 @@ import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import no.ecc.vectortile.VectorTileEncoder;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -250,21 +252,49 @@ public class VectorTileHelper<T extends TileElement> {
         // current zoom level
         for (T element : elements) {
             if (element.isVisibleAtZoomLevel(zoomLevel)) {
-                BoundingBox<Point2d> box = element.getBoundingBox();
-                int minX = max(0, getX.applyAsInt(box.getMin()));
-                int minY = max(0, getY.applyAsInt(box.getMax()));
-                int maxX = min(tilesX - 1, getX.applyAsInt(box.getMax()));
-                int maxY = min(tilesY - 1, getY.applyAsInt(box.getMin()));
-
-                for (int x = minX; x <= maxX; ++x) {
-                    for (int y = minY; y <= maxY; ++y) {
-                        tiles.get(x * tilesY + y).getElements().add(element);
-                    }
-                }
+                getXYsElementIsIn(tilesX, tilesY, getX, getY, element)
+                        .forEach(
+                                xy ->
+                                        tiles.get(xy.getLeft() * tilesY + xy.getRight())
+                                                .getElements()
+                                                .add(element));
             }
         }
         logger.info("Number of tiles for zoom level {}: {}", level, tiles.size());
         return limitElementsPerTile(tiles, zoomLevel);
+    }
+
+    public List<Pair<Integer, Integer>> getXYsElementIsIn(T element, int z) {
+        final ZoomLevel zoomLevel = gridInfo.getZoomLevel(z);
+        final double tileWidth = gridInfo.getTileWidth(zoomLevel);
+        final Point2d origin = toPoint(Point2d.class, gridInfo.getOrigin());
+        ToIntFunction<Point2d> getX =
+                coordinate -> (int) ((coordinate.getX() - origin.getX()) / tileWidth);
+        ToIntFunction<Point2d> getY =
+                coordinate -> (int) ((origin.getY() - coordinate.getY()) / tileWidth);
+        return getXYsElementIsIn(zoomLevel.getTilesX(), zoomLevel.getTilesY(), getX, getY, element);
+    }
+
+    private List<Pair<Integer, Integer>> getXYsElementIsIn(
+            int tilesX,
+            int tilesY,
+            ToIntFunction<Point2d> getX,
+            ToIntFunction<Point2d> getY,
+            T element) {
+        final List<Pair<Integer, Integer>> xyList = new ArrayList<>();
+
+        BoundingBox<Point2d> box = element.getBoundingBox();
+        int minX = max(0, getX.applyAsInt(box.getMin()));
+        int minY = max(0, getY.applyAsInt(box.getMax()));
+        int maxX = min(tilesX - 1, getX.applyAsInt(box.getMax()));
+        int maxY = min(tilesY - 1, getY.applyAsInt(box.getMin()));
+
+        for (int x = minX; x <= maxX; ++x) {
+            for (int y = minY; y <= maxY; ++y) {
+                xyList.add(new ImmutablePair<>(x, y));
+            }
+        }
+        return xyList;
     }
 
     private Collection<Tile<T>> limitElementsPerTile(
