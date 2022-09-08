@@ -1,11 +1,5 @@
 package ch.ubique.backend.geo.vectortile.models;
 
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.lv95toPoints;
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.toLv95Coordinate;
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
-import static java.lang.Math.abs;
-import static java.lang.Math.toRadians;
-
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.geometry.models.BoundingBox;
 import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
@@ -13,27 +7,18 @@ import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.geometry.models.Point3d;
 import ch.ubique.backend.geo.geometry.utils.BoundingBoxHelper;
 import ch.ubique.backend.geo.geometry.utils.GeometryHelper;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.LinearRing;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.PrecisionModel;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.*;
+import static java.lang.Math.abs;
+import static java.lang.Math.toRadians;
 
 public abstract class TileElement {
 
@@ -82,7 +67,9 @@ public abstract class TileElement {
     /** Return a score for this element. The higher, the more important. */
     public abstract double getScore();
 
-    public abstract Map<String, Object> getAttributes();
+    protected abstract Map<String, Object> getAttributes();
+
+    public abstract Object getMetadata();
 
     public abstract List<LV95Coordinate> getCoordinates();
 
@@ -104,20 +91,33 @@ public abstract class TileElement {
         return BoundingBoxHelper.getBoundingBox(lv95toPoints(Point2d.class, getCoordinates()));
     }
 
+    public Map<String, Object> getFinalAttributes() {
+        final var attributes = getAttributes();
+        final var metadata = getMetadata();
+
+        if (metadata != null) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                String metadataJson = objectMapper.writeValueAsString(metadata);
+                attributes.put("metadata", metadataJson);
+            } catch (JsonProcessingException e) {
+                logger.error("Could not serialize metadata to JSON");
+            }
+        }
+
+        return attributes;
+    }
+
     public GeometryWithAttributes getGeometry(
             BoundingBox2d tileBoundingBox, int extend, YAxisDirection yAxisDirection) {
         var type = inferGeometryType();
 
-        switch (type) {
-            case POINT:
-                return getPoint(getCoordinates().get(0), tileBoundingBox, extend, yAxisDirection);
-            case LINE:
-                return getLine(tileBoundingBox, extend, yAxisDirection);
-            case POLYGON:
-                return getPolygon(tileBoundingBox, extend, yAxisDirection);
-            default:
-                throw new RuntimeException("TileElementType " + type + " not implemented");
-        }
+        return switch (type) {
+            case POINT -> getPoint(getCoordinates().get(0), tileBoundingBox, extend, yAxisDirection);
+            case LINE -> getLine(tileBoundingBox, extend, yAxisDirection);
+            case POLYGON -> getPolygon(tileBoundingBox, extend, yAxisDirection);
+            default -> throw new RuntimeException("TileElementType " + type + " not implemented");
+        };
     }
 
     private TileElementType inferGeometryType() {
@@ -163,7 +163,7 @@ public abstract class TileElement {
                                                             lv95toPoints(Point3d.class, h),
                                                             minAngle,
                                                             minDistance)))
-                            .collect(Collectors.toList()));
+                            .toList());
         } else {
             List<Point2d> simplified =
                     GeometryHelper.simplify(
@@ -179,7 +179,7 @@ public abstract class TileElement {
                                                             lv95toPoints(Point2d.class, h),
                                                             minAngle,
                                                             minDistance)))
-                            .collect(Collectors.toList()));
+                            .toList());
         }
 
         // Calculate size reduction
@@ -203,7 +203,7 @@ public abstract class TileElement {
 
     private GeometryWithAttributes getPoint(Coordinate coordinate, Double elevation) {
         Geometry geometry = geometryFactory.createPoint(coordinate);
-        Map<String, Object> attributes = getAttributes();
+        Map<String, Object> attributes = getFinalAttributes();
         if (elevation != null) {
             attributes.put("elevation", elevation);
         }
@@ -219,7 +219,7 @@ public abstract class TileElement {
             return getPoint(coordinates[0], getCoordinates().get(0).getElevation());
         }
         Geometry geometry = geometryFactory.createLineString(coordinates);
-        Map<String, Object> attributes = getAttributes();
+        Map<String, Object> attributes = getFinalAttributes();
         addElevationAttributes(getCoordinates(), attributes);
         return new GeometryWithAttributes(geometry, attributes);
     }
@@ -254,17 +254,17 @@ public abstract class TileElement {
                                                             extend,
                                                             yAxisDirection))
                                     .filter(h -> h.length > 2)
-                                    .map(h -> geometryFactory.createLinearRing(h))
+                                    .map(geometryFactory::createLinearRing)
                                     .toArray(LinearRing[]::new));
         }
 
         if (!geometry.isValid()) {
             logger.debug(
-                    "Geometry  {}  not valid, try to created fixed version", this.getAttributes());
+                    "Geometry  {}  not valid, try to created fixed version", this.getFinalAttributes());
             geometry = validate(geometry);
         }
 
-        Map<String, Object> attributes = getAttributes();
+        Map<String, Object> attributes = getFinalAttributes();
         addElevationAttributes(getCoordinates(), attributes);
         return new GeometryWithAttributes(geometry, attributes);
     }
@@ -331,7 +331,7 @@ public abstract class TileElement {
                                 / boundingBox.getWidth()
                                 * extend);
 
-        /**
+        /*
          * currently y is only correct when using LV95 or LV03 coordinates, which increase in UPward
          * direction
          */
@@ -357,7 +357,7 @@ public abstract class TileElement {
                                 coordinate ->
                                         getCoordinateOnTile(
                                                 coordinate, boundingBox, extend, yAxisDirection))
-                        .collect(Collectors.toList());
+                        .toList();
 
         if (rawPoints.isEmpty()) {
             return new Coordinate[0];
@@ -386,26 +386,26 @@ public abstract class TileElement {
      * @return a geometry
      */
     private Geometry validate(Geometry geom) {
-        if (geom instanceof Polygon) {
-            if (geom.isValid()) {
-                geom.normalize(); // validate does not pick up rings in the wrong order - this
+        if (geom instanceof Polygon polygon) {
+            if (polygon.isValid()) {
+                polygon.normalize(); // validate does not pick up rings in the wrong order - this
                 // will fix that
-                return geom; // If the polygon is valid just return it
+                return polygon; // If the polygon is valid just return it
             }
             Polygonizer polygonizer = new Polygonizer();
-            addPolygon((Polygon) geom, polygonizer);
-            return toPolygonGeometry(polygonizer.getPolygons(), geom.getFactory());
-        } else if (geom instanceof MultiPolygon) {
-            if (geom.isValid()) {
-                geom.normalize(); // validate does not pick up rings in the wrong order - this
+            addPolygon(polygon, polygonizer);
+            return toPolygonGeometry(polygonizer.getPolygons(), polygon.getFactory());
+        } else if (geom instanceof MultiPolygon multiPolygon) {
+            if (multiPolygon.isValid()) {
+                multiPolygon.normalize(); // validate does not pick up rings in the wrong order - this
                 // will fix that
-                return geom; // If the multipolygon is valid just return it
+                return multiPolygon; // If the multipolygon is valid just return it
             }
             Polygonizer polygonizer = new Polygonizer();
-            for (int n = geom.getNumGeometries(); n-- > 0; ) {
-                addPolygon((Polygon) geom.getGeometryN(n), polygonizer);
+            for (int n = multiPolygon.getNumGeometries(); n-- > 0; ) {
+                addPolygon((Polygon) multiPolygon.getGeometryN(n), polygonizer);
             }
-            return toPolygonGeometry(polygonizer.getPolygons(), geom.getFactory());
+            return toPolygonGeometry(polygonizer.getPolygons(), multiPolygon.getFactory());
         } else {
             return geom; // In my case, I only care about polygon / multipolygon geometries
         }
@@ -469,11 +469,11 @@ public abstract class TileElement {
                 while (iter.hasNext()) {
                     if (ret instanceof GeometryCollection) {
                         // symDifference can't handle geometry collections. only keep polygons
-                        List<Geometry> symDifPolygons = new ArrayList<>();
+                        List<Polygon> symDifPolygons = new ArrayList<>();
                         for (int i = 0; i < ret.getNumGeometries(); i++) {
                             final Geometry geometry = ret.getGeometryN(i);
-                            if (geometry instanceof Polygon) {
-                                symDifPolygons.add(geometry);
+                            if (geometry instanceof Polygon polygon) {
+                                symDifPolygons.add(polygon);
                             }
                         }
                         if (symDifPolygons.size() == 1) {
@@ -481,7 +481,7 @@ public abstract class TileElement {
                         } else {
                             ret =
                                     new MultiPolygon(
-                                            symDifPolygons.stream().toArray(Polygon[]::new),
+                                            symDifPolygons.toArray(Polygon[]::new),
                                             geometryFactory);
                         }
                     }
