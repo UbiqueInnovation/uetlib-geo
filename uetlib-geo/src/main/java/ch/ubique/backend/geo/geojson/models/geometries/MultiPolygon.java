@@ -17,13 +17,13 @@ public class MultiPolygon extends Geometry {
     public List<Polygon> getPolygons() {
         return coordinates.stream()
                 .map(coordinateArray -> new Polygon().setCoordinateArray(coordinateArray))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @JsonIgnore
     public MultiPolygon setPolygons(List<Polygon> polygons) {
         this.coordinates =
-                polygons.stream().map(Polygon::getCoordinateArray).collect(Collectors.toList());
+                polygons.stream().map(Polygon::getCoordinateArray).toList();
         return this;
     }
 
@@ -33,7 +33,13 @@ public class MultiPolygon extends Geometry {
         return coordinates.stream()
                 .flatMap(Collection::stream)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    @Override
+    @JsonIgnore
+    public Collection<Geometry> getSimpleGeometries() {
+        return getPolygons().stream().map(Geometry.class::cast).toList();
     }
 
     @Override

@@ -38,7 +38,12 @@ public class Polygon extends Geometry {
 
     @Override
     public List<Coordinate> getAllCoordinates() {
-        return coordinateArray.stream().flatMap(Collection::stream).collect(Collectors.toList());
+        return coordinateArray.stream().flatMap(Collection::stream).toList();
+    }
+
+    @Override
+    public Collection<Geometry> getSimpleGeometries() {
+        return List.of(this);
     }
 
     @Override
