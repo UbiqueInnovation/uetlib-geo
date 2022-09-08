@@ -19,20 +19,25 @@ public class MultiLineString extends Geometry {
     public List<LineString> getLineStrings() {
         return coordinates.stream()
                 .map(list -> new LineString().setCoordinates(list))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @JsonIgnore
     public MultiLineString setLineStrings(List<LineString> lineStrings) {
-        this.coordinates =
-                lineStrings.stream().map(LineString::getCoordinates).collect(Collectors.toList());
+        this.coordinates = lineStrings.stream().map(LineString::getCoordinates).toList();
         return this;
     }
 
     @Override
     @JsonIgnore
     public List<Coordinate> getAllCoordinates() {
-        return coordinates.stream().flatMap(Collection::stream).collect(Collectors.toList());
+        return coordinates.stream().flatMap(Collection::stream).toList();
+    }
+
+    @Override
+    @JsonIgnore
+    public Collection<Geometry> getSimpleGeometries() {
+        return getLineStrings().stream().map(Geometry.class::cast).toList();
     }
 
     @Override

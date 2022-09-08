@@ -1,17 +1,9 @@
 package ch.ubique.backend.geo.geojson.models;
 
-import ch.ubique.backend.geo.geojson.models.geometries.GeometryCollection;
-import ch.ubique.backend.geo.geojson.models.geometries.LineString;
-import ch.ubique.backend.geo.geojson.models.geometries.MultiLineString;
-import ch.ubique.backend.geo.geojson.models.geometries.MultiPoint;
-import ch.ubique.backend.geo.geojson.models.geometries.MultiPolygon;
-import ch.ubique.backend.geo.geojson.models.geometries.Point;
-import ch.ubique.backend.geo.geojson.models.geometries.Polygon;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import ch.ubique.backend.geo.geojson.models.geometries.*;
+import com.fasterxml.jackson.annotation.*;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +23,14 @@ public abstract class Geometry {
 
     @JsonIgnore
     public abstract List<Coordinate> getAllCoordinates();
+
+    /**
+     * Returns a list of simple geometries.
+     * I.e. MultiGeometries are converted to a list of Geometries.
+     * E.g. A MultiPolygon is converted to a list of Polygons.
+     */
+    @JsonIgnore
+    public abstract Collection<Geometry> getSimpleGeometries();
 
     @Override
     public String toString() {
