@@ -1,10 +1,13 @@
 package ch.ubique.backend.geo.coordinate.models;
 
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
-import java.util.Objects;
+
 import org.apache.commons.lang3.NotImplementedException;
 import org.locationtech.jts.geom.Point;
+
+import java.util.Objects;
 
 /** https://epsg.io/3857 Pseudo-Mercator, Web Mercator */
 public class WebMercatorCoordinate implements Coordinate<WebMercatorCoordinate> {

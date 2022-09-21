@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.vectortile.constants;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.vectortile.models.GridInfo;
 import ch.ubique.backend.geo.vectortile.models.ZoomLevel;
+
 import java.util.ArrayList;
 import java.util.List;
 

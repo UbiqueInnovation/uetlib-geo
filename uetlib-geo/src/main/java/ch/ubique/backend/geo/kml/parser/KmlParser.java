@@ -10,6 +10,7 @@ import ch.ubique.backend.geo.kml.models.KmlDocument;
 import ch.ubique.backend.geo.kml.models.Placemark;
 import ch.ubique.backend.geo.kml.models.Style;
 import ch.ubique.backend.geo.kml.models.StyleMap;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;

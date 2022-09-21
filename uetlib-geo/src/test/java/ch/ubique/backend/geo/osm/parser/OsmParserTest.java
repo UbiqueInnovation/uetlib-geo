@@ -1,12 +1,14 @@
 package ch.ubique.backend.geo.osm.parser;
 
 import ch.ubique.backend.geo.graph.utils.RoutingGraphUtil;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 class OsmParserTest {
 

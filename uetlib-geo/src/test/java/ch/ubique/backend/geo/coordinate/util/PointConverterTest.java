@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.coordinate.util;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.geometry.models.Point3d;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

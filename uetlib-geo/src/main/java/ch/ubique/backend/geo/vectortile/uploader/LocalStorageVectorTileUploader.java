@@ -3,13 +3,15 @@ package ch.ubique.backend.geo.vectortile.uploader;
 import static java.lang.Math.max;
 
 import ch.ubique.backend.geo.vectortile.models.BinaryTile;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LocalStorageVectorTileUploader implements VectorTileUploader {
 

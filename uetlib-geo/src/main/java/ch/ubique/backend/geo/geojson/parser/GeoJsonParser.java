@@ -1,7 +1,9 @@
 package ch.ubique.backend.geo.geojson.parser;
 
 import ch.ubique.backend.geo.geojson.models.FeatureCollection;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;

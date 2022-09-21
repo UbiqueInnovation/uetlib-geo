@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.geojson.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Map;
 import java.util.stream.Collectors;
 

@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.kml.models;
 
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

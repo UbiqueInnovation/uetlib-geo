@@ -8,6 +8,7 @@ import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.geometry.models.Polygon2d;
 import ch.ubique.backend.geo.geometry.models.Tuple;
 import ch.ubique.backend.geo.geometry.models.Vector;
+
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;

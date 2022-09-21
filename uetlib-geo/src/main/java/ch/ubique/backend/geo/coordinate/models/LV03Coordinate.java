@@ -4,9 +4,12 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
-import java.util.Objects;
+
 import org.locationtech.jts.geom.Point;
+
+import java.util.Objects;
 
 /** Swiss coordinates (1903) https://epsg.io/21781 Imprecise, use LV95 instead if possible */
 public class LV03Coordinate implements Coordinate<LV03Coordinate> {

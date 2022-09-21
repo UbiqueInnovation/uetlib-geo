@@ -1,5 +1,10 @@
 package ch.ubique.backend.geo.vectortile.models;
 
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.*;
+
+import static java.lang.Math.abs;
+import static java.lang.Math.toRadians;
+
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.geometry.models.BoundingBox;
 import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
@@ -7,18 +12,16 @@ import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.geometry.models.Point3d;
 import ch.ubique.backend.geo.geometry.utils.BoundingBoxHelper;
 import ch.ubique.backend.geo.geometry.utils.GeometryHelper;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.*;
-import static java.lang.Math.abs;
-import static java.lang.Math.toRadians;
 
 public abstract class TileElement {
 
@@ -113,7 +116,8 @@ public abstract class TileElement {
         var type = inferGeometryType();
 
         return switch (type) {
-            case POINT -> getPoint(getCoordinates().get(0), tileBoundingBox, extend, yAxisDirection);
+            case POINT -> getPoint(
+                    getCoordinates().get(0), tileBoundingBox, extend, yAxisDirection);
             case LINE -> getLine(tileBoundingBox, extend, yAxisDirection);
             case POLYGON -> getPolygon(tileBoundingBox, extend, yAxisDirection);
             default -> throw new RuntimeException("TileElementType " + type + " not implemented");
@@ -260,7 +264,8 @@ public abstract class TileElement {
 
         if (!geometry.isValid()) {
             logger.debug(
-                    "Geometry  {}  not valid, try to created fixed version", this.getFinalAttributes());
+                    "Geometry  {}  not valid, try to created fixed version",
+                    this.getFinalAttributes());
             geometry = validate(geometry);
         }
 
@@ -397,7 +402,8 @@ public abstract class TileElement {
             return toPolygonGeometry(polygonizer.getPolygons(), polygon.getFactory());
         } else if (geom instanceof MultiPolygon multiPolygon) {
             if (multiPolygon.isValid()) {
-                multiPolygon.normalize(); // validate does not pick up rings in the wrong order - this
+                multiPolygon
+                        .normalize(); // validate does not pick up rings in the wrong order - this
                 // will fix that
                 return multiPolygon; // If the multipolygon is valid just return it
             }

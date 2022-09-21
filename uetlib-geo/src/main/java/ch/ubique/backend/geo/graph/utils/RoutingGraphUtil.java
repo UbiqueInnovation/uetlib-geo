@@ -4,6 +4,10 @@ import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.EdgeProperties;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -11,8 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RoutingGraphUtil {
 
@@ -31,8 +33,8 @@ public class RoutingGraphUtil {
 
     private RoutingGraphUtil(Graph graph) {
         this.graph = graph;
-        this.routingGraph = new Graph();
-        this.additionalRoutingVertices = new HashSet<>();
+        routingGraph = new Graph();
+        additionalRoutingVertices = new HashSet<>();
     }
 
     private boolean isRoutingVertex(Vertex vertex) {

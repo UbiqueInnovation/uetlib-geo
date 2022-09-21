@@ -4,16 +4,20 @@ import static java.lang.Math.max;
 
 import ch.ubique.backend.geo.vectortile.models.BinaryTile;
 import ch.ubique.backend.output.blob.service.BlobStorageService;
+
 import com.azure.core.http.rest.Response;
 import com.azure.storage.blob.models.BlockBlobItem;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import reactor.core.publisher.Mono;
+
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Mono;
 
 public class BlobStorageVectorTileUploader implements VectorTileUploader {
 
@@ -59,7 +63,8 @@ public class BlobStorageVectorTileUploader implements VectorTileUploader {
                                                                                             - startTime))
                                                                             * 1000.0;
                                                             logger.info(
-                                                                    "Uploaded {}% ({} tiles per second)",
+                                                                    "Uploaded {}% ({} tiles per"
+                                                                        + " second)",
                                                                     percent, tilesPerSecond);
                                                         }
                                                     }))

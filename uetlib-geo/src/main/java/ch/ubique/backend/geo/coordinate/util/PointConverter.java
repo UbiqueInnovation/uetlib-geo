@@ -4,6 +4,7 @@ import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.geometry.models.Point;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
