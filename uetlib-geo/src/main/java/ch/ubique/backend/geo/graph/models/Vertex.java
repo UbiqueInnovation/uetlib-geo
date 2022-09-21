@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.graph.models;
 
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,7 +18,7 @@ public class Vertex {
 
     public Vertex(long id) {
         this.id = id;
-        this.edges = new HashSet<>(2);
+        edges = new HashSet<>(2);
     }
 
     public long getId() {

@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.geojson.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

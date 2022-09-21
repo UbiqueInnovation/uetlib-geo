@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.vectortile.utils;
 
 import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
 import static ch.ubique.backend.geo.vectortile.constants.SwissConstants.swissGridInfo;
+
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -16,6 +17,14 @@ import ch.ubique.backend.geo.vectortile.models.TileElement;
 import ch.ubique.backend.geo.vectortile.models.TileInfo;
 import ch.ubique.backend.geo.vectortile.models.VectorTileConfig;
 import ch.ubique.backend.geo.vectortile.models.ZoomLevel;
+
+import no.ecc.vectortile.VectorTileEncoder;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -28,11 +37,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
-import no.ecc.vectortile.VectorTileEncoder;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class VectorTileHelper<T extends TileElement> {
 
@@ -148,7 +152,8 @@ public class VectorTileHelper<T extends TileElement> {
                                                                                                 - startTime))
                                                                                 * 1000.0;
                                                                 logger.info(
-                                                                        "Processed {}% ({} tiles per second)",
+                                                                        "Processed {}% ({} tiles"
+                                                                            + " per second)",
                                                                         percent, tilesPerSecond);
                                                             }
 

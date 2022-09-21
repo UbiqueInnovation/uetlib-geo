@@ -4,15 +4,18 @@ import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.graph.models.EdgeProperties;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.VertexProperties;
+
 import com.wolt.osm.parallelpbf.ParallelBinaryParser;
 import com.wolt.osm.parallelpbf.entity.Node;
 import com.wolt.osm.parallelpbf.entity.Way;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class OsmParser {
 
@@ -33,13 +36,12 @@ public class OsmParser {
 
     private final Map<Long, Long> nodeIdToVertexId;
 
-    private final Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(OsmParser.class);
 
     private OsmParser(InputStream inputStream, OsmParserConfig config) {
         this.inputStream = inputStream;
         this.config = config;
         this.nodeIdToVertexId = new HashMap<>();
-        logger = LoggerFactory.getLogger(getClass());
     }
 
     private Graph parse() {

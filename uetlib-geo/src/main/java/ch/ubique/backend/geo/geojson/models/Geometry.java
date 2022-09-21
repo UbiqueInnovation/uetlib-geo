@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.geojson.models;
 
 import ch.ubique.backend.geo.geojson.models.geometries.*;
+
 import com.fasterxml.jackson.annotation.*;
 
 import java.util.Collection;
@@ -25,9 +26,8 @@ public abstract class Geometry {
     public abstract List<Coordinate> getAllCoordinates();
 
     /**
-     * Returns a list of simple geometries.
-     * I.e. MultiGeometries are converted to a list of Geometries.
-     * E.g. A MultiPolygon is converted to a list of Polygons.
+     * Returns a list of simple geometries. I.e. MultiGeometries are converted to a list of
+     * Geometries. E.g. A MultiPolygon is converted to a list of Polygons.
      */
     @JsonIgnore
     public abstract Collection<Geometry> getSimpleGeometries();
