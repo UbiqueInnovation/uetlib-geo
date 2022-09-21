@@ -64,7 +64,7 @@ public class BlobStorageVectorTileUploader implements VectorTileUploader {
                                                                             * 1000.0;
                                                             logger.info(
                                                                     "Uploaded {}% ({} tiles per"
-                                                                        + " second)",
+                                                                            + " second)",
                                                                     percent, tilesPerSecond);
                                                         }
                                                     }))
