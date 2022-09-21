@@ -153,7 +153,7 @@ public class VectorTileHelper<T extends TileElement> {
                                                                                 * 1000.0;
                                                                 logger.info(
                                                                         "Processed {}% ({} tiles"
-                                                                            + " per second)",
+                                                                                + " per second)",
                                                                         percent, tilesPerSecond);
                                                             }
 
