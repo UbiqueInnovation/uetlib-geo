@@ -2,6 +2,8 @@ package ch.ubique.backend.geo.osm.parser;
 
 import ch.ubique.backend.geo.graph.utils.RoutingGraphUtil;
 
+import ch.ubique.backend.geo.osm.parser.graph.OsmGraphParser;
+import ch.ubique.backend.geo.osm.parser.graph.OsmParserConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -10,7 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-class OsmParserTest {
+class OsmGraphParserTest {
 
     @Test
     @Disabled("Depends on local file")
@@ -22,7 +24,7 @@ class OsmParserTest {
                         .parseWayTags(false)
                         .useSourceIds(false)
                         .build();
-        final var graph = OsmParser.parse(new FileInputStream(file), config);
+        final var graph = OsmGraphParser.parse(new FileInputStream(file), config);
         Assertions.assertTrue(graph.getVertices().size() > 0);
         Assertions.assertTrue(graph.getEdges().size() > 0);
 

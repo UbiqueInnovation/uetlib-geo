@@ -1,4 +1,4 @@
-package ch.ubique.backend.geo.osm.parser;
+package ch.ubique.backend.geo.osm.parser.graph;
 
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.graph.models.EdgeProperties;
@@ -17,10 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OsmParser {
+public class OsmGraphParser {
 
     public static Graph parse(InputStream inputStream, OsmParserConfig config) {
-        var osmParser = new OsmParser(inputStream, config);
+        var osmParser = new OsmGraphParser(inputStream, config);
         return osmParser.parse();
     }
 
@@ -36,9 +36,9 @@ public class OsmParser {
 
     private final Map<Long, Long> nodeIdToVertexId;
 
-    private static final Logger logger = LoggerFactory.getLogger(OsmParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(OsmGraphParser.class);
 
-    private OsmParser(InputStream inputStream, OsmParserConfig config) {
+    private OsmGraphParser(InputStream inputStream, OsmParserConfig config) {
         this.inputStream = inputStream;
         this.config = config;
         this.nodeIdToVertexId = new HashMap<>();

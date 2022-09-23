@@ -1,4 +1,4 @@
-package ch.ubique.backend.geo.osm.parser;
+package ch.ubique.backend.geo.osm.parser.graph;
 
 public class OsmParserConfig {
 
