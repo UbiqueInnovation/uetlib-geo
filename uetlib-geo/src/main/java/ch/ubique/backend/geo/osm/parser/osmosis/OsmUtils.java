@@ -22,7 +22,15 @@ public class OsmUtils {
     }
 
     public static WGS84Coordinate getCoordinate(Node node) {
-        return new WGS84Coordinate(node.getLatitude(), node.getLongitude());
+        final var tags = getTags(node);
+        final var elevationTagValue = tags.get("ele");
+        Double elevation = null;
+        if (elevationTagValue != null) {
+            try {
+                elevation = Double.parseDouble(elevationTagValue);
+            } catch (NumberFormatException e) { /* Nothing to do here*/}
+        }
+        return new WGS84Coordinate(node.getLatitude(), node.getLongitude(), elevation);
     }
 
     public static <T> Collection<T> parseNodes(InputStream inputStream, Function<Node, Optional<T>> nodeMapper) {
