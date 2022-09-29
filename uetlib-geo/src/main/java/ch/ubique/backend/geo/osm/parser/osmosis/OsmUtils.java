@@ -19,16 +19,27 @@ public class OsmUtils {
         return entity.getTags().stream().collect(Collectors.toMap(Tag::getKey, Tag::getValue));
     }
 
-    public static Map<String, String> getLocalized(final Entity entity, final String tagName) {
+    public static Map<Locale, String> getLocalized(final Entity entity, final String tagName) {
         return entity.getTags().stream()
-                .filter(tag -> tag.getKey().startsWith(tagName + ":"))
-                .map(tag -> Map.entry(getLocale(tag.getKey().split(":")[1]), tag.getValue()))
-                .filter(tag -> tag.getKey().isPresent())
-                .map(tag -> Map.entry(tag.getKey().get().toString(), tag.getValue()))
+                .map(tag -> tryToMapTagToLocalizedString(tag, tagName))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.groupingBy(Map.Entry::getKey))
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get(0).getValue()));
+    }
+
+    private static Optional<Map.Entry<Locale, String>> tryToMapTagToLocalizedString(final Tag tag, final String field) {
+        final var key = tag.getKey();
+        if (!key.startsWith(field + ":")) {
+            return Optional.empty();
+        }
+
+        return Arrays.stream(key.split(":"))
+                .skip(1).findFirst() // get first part after ':'
+                .flatMap(OsmUtils::getLocale)
+                .map(locale -> Map.entry(locale, tag.getValue()));
     }
 
     private static Optional<Locale> getLocale(String key) {
