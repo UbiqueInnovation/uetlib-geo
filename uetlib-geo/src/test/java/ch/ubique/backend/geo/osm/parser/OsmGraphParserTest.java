@@ -1,9 +1,9 @@
 package ch.ubique.backend.geo.osm.parser;
 
 import ch.ubique.backend.geo.graph.utils.RoutingGraphUtil;
-
 import ch.ubique.backend.geo.osm.parser.graph.OsmGraphParser;
 import ch.ubique.backend.geo.osm.parser.graph.OsmParserConfig;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

@@ -18,11 +18,11 @@ public class CoordinateConverter {
     }
 
     public static LV95Coordinate toLV95(WGS84Coordinate wgs84) {
-        double north = WGStoCHx(wgs84.getLatitude(), wgs84.getLongitude()) + 1e6;
-        double east = WGStoCHy(wgs84.getLatitude(), wgs84.getLongitude()) + 2e6;
+        double north = wgsToChX(wgs84.getLatitude(), wgs84.getLongitude()) + 1e6;
+        double east = wgsToChY(wgs84.getLatitude(), wgs84.getLongitude()) + 2e6;
         Double elevation = null;
         if (wgs84.getElevation() != null) {
-            elevation = WGStoCHh(wgs84.getLatitude(), wgs84.getLongitude(), wgs84.getElevation());
+            elevation = wgsToChH(wgs84.getLatitude(), wgs84.getLongitude(), wgs84.getElevation());
         }
         return new LV95Coordinate(east, north, elevation);
     }
@@ -164,7 +164,7 @@ public class CoordinateConverter {
     }
 
     // Convert decimal angle (degrees) to sexagesimal angle (seconds)
-    private static double DecToSexAngle(double dec) {
+    private static double decToSexAngle(double dec) {
         int deg = (int) Math.floor(dec);
         int min = (int) Math.floor((dec - deg) * 60);
         double sec = (((dec - deg) * 60) - min) * 60;
@@ -197,22 +197,23 @@ public class CoordinateConverter {
      * @param ellHeight
      * @return
      */
+    @SuppressWarnings("unused")
     private static double[] internationalToSwiss(
             double latitude, double longitude, double ellHeight) {
         // , ref double east, ref double north, ref double height
         double[] d = new double[3];
 
-        d[0] = 2e6 + WGStoCHy(latitude, longitude);
-        d[1] = 1e6 + WGStoCHx(latitude, longitude);
-        d[2] = WGStoCHh(latitude, longitude, ellHeight);
+        d[0] = 2e6 + wgsToChY(latitude, longitude);
+        d[1] = 1e6 + wgsToChX(latitude, longitude);
+        d[2] = wgsToChH(latitude, longitude, ellHeight);
         return d;
     }
 
     // Convert WGS lat/long (° dec) and height to CH h
-    private static double WGStoCHh(double lat, double lng, double h) {
+    private static double wgsToChH(double lat, double lng, double h) {
         // Converts dec degrees to sex seconds
-        lat = DecToSexAngle(lat);
-        lng = DecToSexAngle(lng);
+        lat = decToSexAngle(lat);
+        lng = decToSexAngle(lng);
 
         // Auxiliary values (% Bern)
         double latAux = (lat - 169028.66) / 10000;
@@ -223,10 +224,10 @@ public class CoordinateConverter {
     }
 
     // Convert WGS lat/long (° dec) to CH x
-    private static double WGStoCHx(double lat, double lng) {
+    private static double wgsToChX(double lat, double lng) {
         // Converts dec degrees to sex seconds
-        lat = DecToSexAngle(lat);
-        lng = DecToSexAngle(lng);
+        lat = decToSexAngle(lat);
+        lng = decToSexAngle(lng);
 
         // Auxiliary values (% Bern)
         double latAux = (lat - 169028.66) / 10000;
@@ -242,10 +243,10 @@ public class CoordinateConverter {
     }
 
     // Convert WGS lat/long (° dec) to CH y
-    private static double WGStoCHy(double lat, double lng) {
+    private static double wgsToChY(double lat, double lng) {
         // Converts dec degrees to sex seconds
-        lat = DecToSexAngle(lat);
-        lng = DecToSexAngle(lng);
+        lat = decToSexAngle(lat);
+        lng = decToSexAngle(lng);
 
         // Auxiliary values (% Bern)
         double latAux = (lat - 169028.66) / 10000;
@@ -258,6 +259,7 @@ public class CoordinateConverter {
                 - (44.54 * Math.pow(lngAux, 3));
     }
 
+    @SuppressWarnings("unused")
     private static double[] swiss1903plusToInternational(double x, double y, double z) {
         return swissToInternational(x - 2000000, y - 1000000, z);
     }

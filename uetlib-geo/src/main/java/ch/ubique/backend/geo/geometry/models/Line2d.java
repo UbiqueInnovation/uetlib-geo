@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.geometry.models;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,16 +40,16 @@ public class Line2d extends Line<Point2d> {
         return start.interpolate(end, t);
     }
 
-    public List<Tuple<Point2d, Line<Point2d>>> intersections(Polygon2d polygon) {
+    public List<Pair<Point2d, Line<Point2d>>> intersections(Polygon2d polygon) {
         return intersections(polygon.getLines());
     }
 
-    public List<Tuple<Point2d, Line<Point2d>>> intersections(List<Line<Point2d>> lines) {
-        List<Tuple<Point2d, Line<Point2d>>> intersections = new LinkedList<>();
+    public List<Pair<Point2d, Line<Point2d>>> intersections(List<Line<Point2d>> lines) {
+        List<Pair<Point2d, Line<Point2d>>> intersections = new LinkedList<>();
         for (Line<Point2d> line : lines) {
             Point2d intersection = this.intersection(line);
             if (intersection != null) {
-                intersections.add(new Tuple<>(intersection, line));
+                intersections.add(Pair.of(intersection, line));
             }
         }
         return intersections;

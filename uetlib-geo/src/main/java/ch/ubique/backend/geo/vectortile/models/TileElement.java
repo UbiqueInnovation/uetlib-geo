@@ -390,6 +390,7 @@ public abstract class TileElement {
      *
      * @return a geometry
      */
+    @SuppressWarnings("unchecked")
     private Geometry validate(Geometry geom) {
         if (geom instanceof Polygon polygon) {
             if (polygon.isValid()) {
@@ -399,7 +400,7 @@ public abstract class TileElement {
             }
             Polygonizer polygonizer = new Polygonizer();
             addPolygon(polygon, polygonizer);
-            return toPolygonGeometry(polygonizer.getPolygons(), polygon.getFactory());
+            return toPolygonGeometry(polygonizer.getPolygons());
         } else if (geom instanceof MultiPolygon multiPolygon) {
             if (multiPolygon.isValid()) {
                 multiPolygon
@@ -411,7 +412,7 @@ public abstract class TileElement {
             for (int n = multiPolygon.getNumGeometries(); n-- > 0; ) {
                 addPolygon((Polygon) multiPolygon.getGeometryN(n), polygonizer);
             }
-            return toPolygonGeometry(polygonizer.getPolygons(), multiPolygon.getFactory());
+            return toPolygonGeometry(polygonizer.getPolygons());
         } else {
             return geom; // In my case, I only care about polygon / multipolygon geometries
         }
@@ -458,17 +459,14 @@ public abstract class TileElement {
      * Get a geometry from a collection of polygons.
      *
      * @param polygons collection
-     * @param factory factory to generate MultiPolygon if required
      * @return null if there were no polygons, the polygon if there was only one, or a MultiPolygon
      *     containing all polygons otherwise
      */
-    private Geometry toPolygonGeometry(Collection<Polygon> polygons, GeometryFactory factory) {
-        switch (polygons.size()) {
-            case 0:
-                return null; // No valid polygons!
-            case 1:
-                return polygons.iterator().next(); // single polygon - no need to wrap
-            default:
+    private Geometry toPolygonGeometry(Collection<Polygon> polygons) {
+        return switch (polygons.size()) {
+            case 0 -> null; // No valid polygons!
+            case 1 -> polygons.iterator().next(); // single polygon - no need to wrap
+            default -> {
                 // polygons may still overlap! Need to sym difference them
                 Iterator<Polygon> iter = polygons.iterator();
                 Geometry ret = iter.next();
@@ -493,7 +491,8 @@ public abstract class TileElement {
                     }
                     ret = ret.symDifference(iter.next());
                 }
-                return ret;
-        }
+                yield ret;
+            }
+        };
     }
 }
