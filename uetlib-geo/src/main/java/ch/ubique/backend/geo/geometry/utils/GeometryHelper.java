@@ -6,7 +6,6 @@ import ch.ubique.backend.geo.geometry.models.Line2d;
 import ch.ubique.backend.geo.geometry.models.Point;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.geometry.models.Polygon2d;
-import ch.ubique.backend.geo.geometry.models.Tuple;
 import ch.ubique.backend.geo.geometry.models.Vector;
 
 import java.util.Comparator;
@@ -55,20 +54,19 @@ public class GeometryHelper {
 
         // Edges of Polygon and BoundingBox overlap
         // Build new Polygon
-        Polygon2d newPolygon = new Polygon2d();
+        final var newPolygon = new Polygon2d();
         Line<Point2d> lastIntersection = null;
 
         for (Line<Point2d> line : polygon.getLines()) {
-            List<Line<Point2d>> boundingBoxLines = boundingBox.toPolygon().getLines();
-            List<Tuple<Point2d, Line<Point2d>>> intersections =
-                    new Line2d(line).intersections(boundingBoxLines);
+            final var boundingBoxLines = boundingBox.toPolygon().getLines();
+            final var intersections = new Line2d(line).intersections(boundingBoxLines);
 
             if (intersections.isEmpty()) {
                 continue;
             }
 
-            Point2d start = line.getStart();
-            Point2d end = line.getEnd();
+            final var start = line.getStart();
+            final var end = line.getEnd();
 
             // Add corners if needed
             BiConsumer<Line<Point2d>, Line<Point2d>> addCorners =
@@ -93,14 +91,14 @@ public class GeometryHelper {
                 newPolygon.getPoints().add(end);
             } else {
                 // Outgoing line
-                Tuple<Point2d, Line<Point2d>> closest =
+                final var closest =
                         intersections.stream()
-                                .min(Comparator.comparingDouble(t -> end.distanceTo(t.first)))
+                                .min(Comparator.comparingDouble(t -> end.distanceTo(t.getLeft())))
                                 .orElseThrow();
-                newPolygon.getPoints().add(closest.first);
+                newPolygon.getPoints().add(closest.getLeft());
 
                 // add corners if needed
-                Line<Point2d> currentIntersection = closest.second;
+                final var currentIntersection = closest.getRight();
                 addCorners.accept(lastIntersection, currentIntersection);
                 lastIntersection = currentIntersection;
             }
@@ -111,14 +109,14 @@ public class GeometryHelper {
                 }
             } else {
                 // Incoming line
-                Tuple<Point2d, Line<Point2d>> closest =
+                final var closest =
                         intersections.stream()
-                                .min(Comparator.comparingDouble(t -> start.distanceTo(t.first)))
+                                .min(Comparator.comparingDouble(t -> start.distanceTo(t.getLeft())))
                                 .orElseThrow();
-                newPolygon.getPoints().add(closest.first);
+                newPolygon.getPoints().add(closest.getLeft());
 
                 // add corners if needed
-                Line<Point2d> currentIntersection = closest.second;
+                final var currentIntersection = closest.getRight();
                 addCorners.accept(lastIntersection, currentIntersection);
                 lastIntersection = currentIntersection;
             }

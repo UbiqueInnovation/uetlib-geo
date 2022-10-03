@@ -5,7 +5,6 @@ import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Vertex {
 
@@ -39,9 +38,7 @@ public class Vertex {
     }
 
     public List<Vertex> getNeighbors() {
-        return edges.stream()
-                .map(e -> this.equals(e.getU()) ? e.getV() : e.getU())
-                .collect(Collectors.toList());
+        return edges.stream().map(e -> this.equals(e.getU()) ? e.getV() : e.getU()).toList();
     }
 
     public VertexProperties getProperties() {

@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.osm.parser.osmosis;
 
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+
 import org.apache.commons.lang3.LocaleUtils;
 import org.openstreetmap.osmosis.core.domain.v0_6.Entity;
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
@@ -27,17 +28,21 @@ public class OsmUtils {
                 .collect(Collectors.groupingBy(Map.Entry::getKey))
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get(0).getValue()));
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey, entry -> entry.getValue().get(0).getValue()));
     }
 
-    private static Optional<Map.Entry<Locale, String>> tryToMapTagToLocalizedString(final Tag tag, final String field) {
+    private static Optional<Map.Entry<Locale, String>> tryToMapTagToLocalizedString(
+            final Tag tag, final String field) {
         final var key = tag.getKey();
         if (!key.startsWith(field + ":")) {
             return Optional.empty();
         }
 
         return Arrays.stream(key.split(":"))
-                .skip(1).findFirst() // get first part after ':'
+                .skip(1)
+                .findFirst() // get first part after ':'
                 .flatMap(OsmUtils::getLocale)
                 .map(locale -> Map.entry(locale, tag.getValue()));
     }
@@ -58,18 +63,22 @@ public class OsmUtils {
         if (elevationTagValue != null) {
             try {
                 elevation = Double.parseDouble(elevationTagValue);
-            } catch (NumberFormatException e) { /* Nothing to do here*/}
+            } catch (NumberFormatException e) {
+                /* Nothing to do here*/
+            }
         }
         return new WGS84Coordinate(node.getLatitude(), node.getLongitude(), elevation);
     }
 
-    public static <T> Collection<T> parseNodes(final InputStream inputStream, final Function<Node, Optional<T>> nodeMapper) {
+    public static <T> Collection<T> parseNodes(
+            final InputStream inputStream, final Function<Node, Optional<T>> nodeMapper) {
         final var results = new ArrayList<T>();
         OsmParser.from(inputStream)
-                .onNode(node -> {
-                    final var result = nodeMapper.apply(node);
-                    result.ifPresent(results::add);
-                })
+                .onNode(
+                        node -> {
+                            final var result = nodeMapper.apply(node);
+                            result.ifPresent(results::add);
+                        })
                 .parse();
         return results;
     }

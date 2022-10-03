@@ -14,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class RoutingGraphUtil {
 
@@ -52,10 +51,7 @@ public class RoutingGraphUtil {
             additionalRoutingVertices.add(cycle.get(0));
         }
 
-        var routingVertices =
-                graph.getVertices().stream()
-                        .filter(this::isRoutingVertex)
-                        .collect(Collectors.toList());
+        var routingVertices = graph.getVertices().stream().filter(this::isRoutingVertex).toList();
 
         logger.info("Creating routing vertices");
         routingVertices.forEach(vertex -> routingGraph.addVertex(vertex.copyWithoutEdges()));

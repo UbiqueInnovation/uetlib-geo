@@ -81,8 +81,8 @@ public class VectorTileHelper<T extends TileElement> {
             throws ExecutionException, InterruptedException {
         var levels =
                 config.getZoomLevels().stream()
-                        .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
-                        .collect(Collectors.toList());
+                        .sorted(Comparator.comparingInt(int.class::cast).reversed())
+                        .toList();
 
         for (var level : levels) {
             ZoomLevel zoomLevel = gridInfo.getZoomLevel(level);
@@ -163,7 +163,7 @@ public class VectorTileHelper<T extends TileElement> {
 
                                                             return bytes.length;
                                                         })
-                                                .collect(Collectors.toList()))
+                                                .toList())
                         .get();
 
         printStats(tiles, tileSizes, zoomLevel);
@@ -333,7 +333,7 @@ public class VectorTileHelper<T extends TileElement> {
             Collection<T> visibleElementsForTile =
                     tile.getElements().stream()
                             .filter(t -> visibleElements.contains(t.getId()))
-                            .collect(Collectors.toList());
+                            .toList();
 
             var limitedTile = new Tile<T>(tile.getTileInfo(), tile.getBoundingBox());
             limitedTile.getElements().addAll(visibleElementsForTile);

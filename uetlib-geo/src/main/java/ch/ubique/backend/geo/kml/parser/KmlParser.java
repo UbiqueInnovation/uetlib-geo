@@ -53,20 +53,23 @@ public class KmlParser {
             if (type == XMLStreamConstants.START_ELEMENT) {
                 String elementName = reader.getLocalName();
                 switch (elementName) {
-                    case "Placemark":
+                    case "Placemark" -> {
                         Placemark placemark = parsePlacemark(reader);
                         placemarks.add(placemark);
-                        break;
-                    case "Style":
+                    }
+                    case "Style" -> {
                         String styleId = reader.getAttributeValue(0);
                         Style style = parseStyle(reader);
                         styles.put(styleId, style);
-                        break;
-                    case "StyleMap":
+                    }
+                    case "StyleMap" -> {
                         String id = reader.getAttributeValue(0);
                         StyleMap styleMap = parseStyleMap(reader);
                         styleMaps.put(id, styleMap);
-                        break;
+                    }
+                    default -> {
+                        /* NO-OP */
+                    }
                 }
             }
         }
@@ -88,19 +91,16 @@ public class KmlParser {
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
                 switch (elementName) {
-                    case "name":
+                    case "name" -> {
                         placemark.setName(reader.getElementText());
                         if (placemark.getName().equals("286-TI-40015")) {
                             logger.info("debug");
                         }
-                        break;
-                    case "description":
-                        placemark.setDescription(reader.getElementText());
-                        break;
-                    case "styleUrl":
-                        placemark.setStyleId(reader.getElementText().replace("#", ""));
-                        break;
-                    case "coordinates":
+                    }
+                    case "description" -> placemark.setDescription(reader.getElementText());
+                    case "styleUrl" -> placemark.setStyleId(
+                            reader.getElementText().replace("#", ""));
+                    case "coordinates" -> {
                         String coordinateList = reader.getElementText();
                         List<LV95Coordinate> coordinates =
                                 Arrays.stream(coordinateList.split("\\s"))
@@ -123,15 +123,16 @@ public class KmlParser {
                             }
                         }
                         placemark.addCoordinates(coordinates);
-                        break;
-                    case "SimpleData":
+                    }
+                    case "SimpleData" -> {
                         String key = reader.getAttributeValue(0);
                         String value = reader.getElementText();
                         placemark.getExtendedData().put(key, value);
-                        break;
-                    case "Polygon":
-                        isPolygon = true;
-                        break;
+                    }
+                    case "Polygon" -> isPolygon = true;
+                    default -> {
+                        /* NO-OP */
+                    }
                 }
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                 elementName = reader.getLocalName();
@@ -154,15 +155,12 @@ public class KmlParser {
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
                 switch (elementName) {
-                    case "IconStyle":
-                        style.setIconStyle(parseItemStyle(reader, elementName));
-                        break;
-                    case "LabelStyle":
-                        style.setLabelStyle(parseItemStyle(reader, elementName));
-                        break;
-                    case "LineStyle":
-                        style.setLineStyle(parseItemStyle(reader, elementName));
-                        break;
+                    case "IconStyle" -> style.setIconStyle(parseItemStyle(reader, elementName));
+                    case "LabelStyle" -> style.setLabelStyle(parseItemStyle(reader, elementName));
+                    case "LineStyle" -> style.setLineStyle(parseItemStyle(reader, elementName));
+                    default -> {
+                        /* NO-OP */
+                    }
                 }
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                 elementName = reader.getLocalName();
@@ -184,18 +182,13 @@ public class KmlParser {
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
                 switch (elementName) {
-                    case "color":
-                        style.setColor(reader.getElementText());
-                        break;
-                    case "scale":
-                        style.setScale(Double.parseDouble(reader.getElementText()));
-                        break;
-                    case "width":
-                        style.setWidth(Double.parseDouble(reader.getElementText()));
-                        break;
-                    case "Icon":
-                        style.setIcon(parseIcon(reader));
-                        break;
+                    case "color" -> style.setColor(reader.getElementText());
+                    case "scale" -> style.setScale(Double.parseDouble(reader.getElementText()));
+                    case "width" -> style.setWidth(Double.parseDouble(reader.getElementText()));
+                    case "Icon" -> style.setIcon(parseIcon(reader));
+                    default -> {
+                        /* NO-OP */
+                    }
                 }
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                 elementName = reader.getLocalName();
