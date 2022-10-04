@@ -2,7 +2,7 @@ package ch.ubique.backend.geo.vectortile.uploader;
 
 import ch.ubique.backend.geo.vectortile.models.BinaryTile;
 import ch.ubique.backend.output.StorageClient;
-import ch.ubique.backend.output.data.ByteOutput;
+import ch.ubique.backend.output.output.ByteOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
