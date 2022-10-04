@@ -2,11 +2,13 @@ package ch.ubique.backend.geo.vectortile.models;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class VectorTileConfig<T extends TileElement> {
 
     private String key;
-    private String path;
+
+    private Consumer<BinaryTile> onTileGenerated;
     private int maxElementsPerTile;
     private boolean simplify;
 
@@ -82,12 +84,12 @@ public class VectorTileConfig<T extends TileElement> {
         return this;
     }
 
-    public String getPath() {
-        return path;
+    public Consumer<BinaryTile> getOnTileGenerated() {
+        return onTileGenerated;
     }
 
-    public VectorTileConfig<T> setPath(String path) {
-        this.path = path;
+    public VectorTileConfig<T> setOnTileGenerated(Consumer<BinaryTile> onTileGenerated) {
+        this.onTileGenerated = onTileGenerated;
         return this;
     }
 
