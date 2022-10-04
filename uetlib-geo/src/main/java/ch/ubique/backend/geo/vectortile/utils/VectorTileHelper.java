@@ -1,34 +1,16 @@
 package ch.ubique.backend.geo.vectortile.utils;
 
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
-import static ch.ubique.backend.geo.vectortile.constants.SwissConstants.swissGridInfo;
-
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
 import ch.ubique.backend.geo.geometry.models.BoundingBox;
 import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
 import ch.ubique.backend.geo.geometry.models.Point2d;
-import ch.ubique.backend.geo.vectortile.models.BinaryTile;
-import ch.ubique.backend.geo.vectortile.models.GridInfo;
-import ch.ubique.backend.geo.vectortile.models.Tile;
-import ch.ubique.backend.geo.vectortile.models.TileElement;
-import ch.ubique.backend.geo.vectortile.models.TileInfo;
-import ch.ubique.backend.geo.vectortile.models.VectorTileConfig;
-import ch.ubique.backend.geo.vectortile.models.ZoomLevel;
-
+import ch.ubique.backend.geo.vectortile.models.*;
 import no.ecc.vectortile.VectorTileEncoder;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -36,6 +18,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
+
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
+import static ch.ubique.backend.geo.vectortile.constants.SwissConstants.swissGridInfo;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public class VectorTileHelper<T extends TileElement> {
 
@@ -57,7 +44,7 @@ public class VectorTileHelper<T extends TileElement> {
         final var encoder = new VectorTileEncoder(extend, 0, false, false);
 
         for (TileElement element : tile.getElements()) {
-            if (!element.showElement(tile.getTileInfo().getZoomLevel())) {
+            if (!element.showElement(tile.getTileInfo().zoomLevel())) {
                 continue;
             }
             final var boundingBox = tile.getBoundingBox();
@@ -77,10 +64,9 @@ public class VectorTileHelper<T extends TileElement> {
 
     public void generateTiles(Consumer<BinaryTile> tileConsumer, int numThreads)
             throws ExecutionException, InterruptedException {
-        final var levels =
-                config.getZoomLevels().stream()
-                        .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
-                        .toList();
+        final var levels = config.getZoomLevels().stream()
+                .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
+                .toList();
 
         for (var level : levels) {
             final var zoomLevel = gridInfo.getZoomLevel(level);
@@ -127,7 +113,6 @@ public class VectorTileHelper<T extends TileElement> {
                                         tiles.parallelStream()
                                                 .map(
                                                         tile -> {
-                                                            String path = getFileName(tile);
                                                             byte[] bytes = generateBinary(tile);
 
                                                             // Log progress
@@ -154,7 +139,7 @@ public class VectorTileHelper<T extends TileElement> {
                                                             }
 
                                                             var binaryTile =
-                                                                    new BinaryTile(path, bytes);
+                                                                    new BinaryTile(tile.getTileInfo(), bytes);
                                                             tileConsumer.accept(binaryTile);
 
                                                             return bytes.length;
@@ -339,10 +324,5 @@ public class VectorTileHelper<T extends TileElement> {
 
         logger.info("Filtered elements per tile for zoom level {}", zoomLevel.getLevel());
         return limitedTiles;
-    }
-
-    private String getFileName(Tile<T> tile) {
-        final var tileInfo = tile.getTileInfo();
-        return tileInfo.getZoomLevel() + "/" + tileInfo.getX() + "/" + tileInfo.getY() + ".pbf";
     }
 }

@@ -1,8 +1,8 @@
 package ch.ubique.backend.geo.vectortile.uploader;
 
 import ch.ubique.backend.geo.vectortile.models.BinaryTile;
-import ch.ubique.backend.output.StorageClient;
-import ch.ubique.backend.output.output.ByteOutput;
+import ch.ubique.backend.storage.StorageClient;
+import ch.ubique.backend.storage.output.ByteOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,8 +73,8 @@ public class VectorTileUploader {
     }
 
     public void upload(String path, BinaryTile tile) throws IOException {
-        String tilePath = Paths.get(path, tile.getPath()).toString();
+        String tilePath = Paths.get(path, tile.info().path()).toString();
         String contentType = "application/protobuf";
-        storageClient.write(new ByteOutput(tile.getBytes(), contentType), tilePath);
+        storageClient.write(new ByteOutput<>(tile.bytes(), contentType), tilePath);
     }
 }

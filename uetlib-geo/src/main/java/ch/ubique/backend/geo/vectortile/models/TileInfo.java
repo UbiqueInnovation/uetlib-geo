@@ -1,27 +1,9 @@
 package ch.ubique.backend.geo.vectortile.models;
 
-public class TileInfo {
+public record TileInfo(int x, int y, int zoomLevel) {
 
-    private final int x;
-    private final int y;
-    private final int zoomLevel;
-
-    public TileInfo(int x, int y, int zoomLevel) {
-        this.x = x;
-        this.y = y;
-        this.zoomLevel = zoomLevel;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public int getZoomLevel() {
-        return zoomLevel;
+    public String path() {
+        return zoomLevel + "/" + x + "/" + y + ".pbf";
     }
 
     @Override

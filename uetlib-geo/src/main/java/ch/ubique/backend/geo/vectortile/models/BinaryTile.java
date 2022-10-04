@@ -1,20 +1,17 @@
 package ch.ubique.backend.geo.vectortile.models;
 
-public class BinaryTile {
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-    private final String path;
-    private final byte[] bytes;
+public record BinaryTile(TileInfo info, byte[] bytes) {
 
-    public BinaryTile(String path, byte[] bytes) {
-        this.path = path;
-        this.bytes = bytes;
-    }
+    public static final String contentType = "application/protobuf";
 
-    public String getPath() {
-        return path;
-    }
-
-    public byte[] getBytes() {
-        return bytes;
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("info", info)
+                .append("bytes.length", bytes.length)
+                .toString();
     }
 }
