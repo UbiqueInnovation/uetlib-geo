@@ -1,14 +1,16 @@
 package ch.ubique.backend.geo.vectortile.models;
 
+import com.pivovarit.function.ThrowingConsumer;
+
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class VectorTileConfig<T extends TileElement> {
 
     private String key;
 
-    private Consumer<BinaryTile> onTileGenerated;
+    private ThrowingConsumer<BinaryTile, IOException> onTileGenerated;
     private int maxElementsPerTile;
     private boolean simplify;
 
@@ -21,9 +23,6 @@ public class VectorTileConfig<T extends TileElement> {
 
     private List<Integer> zoomLevels;
     private VectorTileFilter<T> filter;
-
-    // computed value
-    private int maxZoomLevel;
 
     public VectorTileConfig() {
         this.maxElementsPerTile = -1;
@@ -38,12 +37,10 @@ public class VectorTileConfig<T extends TileElement> {
      * Returns the maximum allowed elements per tile. This depends on the zoomlevel, meaning that on
      * the maximum level we never limit the allowed number of elements so we never miss any
      * elements.
-     *
-     * @param zoomLevel
-     * @return
      */
     public int getMaxElementsPerTile(int zoomLevel) {
-        if (zoomLevel == this.maxZoomLevel) {
+        final var isMaxZoomLevel = zoomLevels.stream().allMatch(level -> zoomLevel >= level);
+        if (isMaxZoomLevel) {
             return -1;
         } else {
             return this.maxElementsPerTile;
@@ -69,14 +66,11 @@ public class VectorTileConfig<T extends TileElement> {
 
     public VectorTileConfig<T> setZoomLevels(List<Integer> zoomLevels) {
         this.zoomLevels = zoomLevels;
-        this.maxZoomLevel = this.zoomLevels.stream().mapToInt(v -> v).max().getAsInt();
         return this;
     }
 
     public VectorTileConfig<T> setZoomLevels(Integer... zoomLevels) {
-        this.zoomLevels = Arrays.asList(zoomLevels);
-        this.maxZoomLevel = this.zoomLevels.stream().mapToInt(v -> v).max().getAsInt();
-        return this;
+        return setZoomLevels(Arrays.asList(zoomLevels));
     }
 
     public VectorTileConfig<T> setFilter(VectorTileFilter<T> filter) {
@@ -84,11 +78,11 @@ public class VectorTileConfig<T extends TileElement> {
         return this;
     }
 
-    public Consumer<BinaryTile> getOnTileGenerated() {
+    public ThrowingConsumer<BinaryTile, IOException> getOnTileGenerated() {
         return onTileGenerated;
     }
 
-    public VectorTileConfig<T> setOnTileGenerated(Consumer<BinaryTile> onTileGenerated) {
+    public VectorTileConfig<T> setOnTileGenerated(ThrowingConsumer<BinaryTile, IOException> onTileGenerated) {
         this.onTileGenerated = onTileGenerated;
         return this;
     }

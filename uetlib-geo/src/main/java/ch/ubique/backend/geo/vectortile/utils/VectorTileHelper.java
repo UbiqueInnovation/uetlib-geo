@@ -4,18 +4,19 @@ import ch.ubique.backend.geo.geometry.models.BoundingBox;
 import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.vectortile.models.*;
+import com.pivovarit.function.ThrowingConsumer;
 import no.ecc.vectortile.VectorTileEncoder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
@@ -62,7 +63,7 @@ public class VectorTileHelper<T extends TileElement> {
         return encoder.encode();
     }
 
-    public void generateTiles(Consumer<BinaryTile> tileConsumer, int numThreads)
+    public void generateTiles(ThrowingConsumer<BinaryTile, IOException> tileConsumer, int numThreads)
             throws ExecutionException, InterruptedException {
         final var levels = config.getZoomLevels().stream()
                 .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
@@ -97,7 +98,7 @@ public class VectorTileHelper<T extends TileElement> {
     }
 
     private void generateTilesForLevel(
-            ZoomLevel zoomLevel, Consumer<BinaryTile> tileConsumer, int numThreads)
+            ZoomLevel zoomLevel, ThrowingConsumer<BinaryTile, IOException> tileConsumer, int numThreads)
             throws ExecutionException, InterruptedException {
         final var tiles = getTiles(zoomLevel);
         final var count = new AtomicInteger();
@@ -107,45 +108,29 @@ public class VectorTileHelper<T extends TileElement> {
         final var forkJoinPool = new ForkJoinPool(numThreads);
 
         var tileSizes =
-                forkJoinPool
-                        .submit(
-                                () ->
-                                        tiles.parallelStream()
-                                                .map(
-                                                        tile -> {
-                                                            byte[] bytes = generateBinary(tile);
+            forkJoinPool
+                .submit(() -> tiles.parallelStream()
+                    .map(tile -> {
+                            byte[] bytes = generateBinary(tile);
 
-                                                            // Log progress
-                                                            int countValue =
-                                                                    count.incrementAndGet();
-                                                            if (countValue % onePercent == 0) {
-                                                                int percent =
-                                                                        100
-                                                                                * countValue
-                                                                                / tiles.size();
-                                                                long currentTime =
-                                                                        System.currentTimeMillis();
-                                                                double tilesPerSecond =
-                                                                        countValue
-                                                                                / ((double)
-                                                                                        (currentTime
-                                                                                                - startTime))
-                                                                                * 1000.0;
-                                                                logger.info(
-                                                                        "Processed {}% ({}"
-                                                                                + " tiles per"
-                                                                                + " second)",
-                                                                        percent, tilesPerSecond);
-                                                            }
+                            // Log progress
+                            int countValue = count.incrementAndGet();
+                            if (countValue % onePercent == 0) {
+                                int percent = 100 * countValue / tiles.size();
+                                long currentTime = System.currentTimeMillis();
+                                double tilesPerSecond = countValue / ((double) (currentTime - startTime)) * 1000.0;
+                                logger.info("Processed {}% ({} tiles per second)", percent, tilesPerSecond);
+                            }
 
-                                                            var binaryTile =
-                                                                    new BinaryTile(tile.getTileInfo(), bytes);
-                                                            tileConsumer.accept(binaryTile);
+                            var binaryTile = new BinaryTile(tile.getTileInfo(), bytes);
+                            if (tileConsumer != null) {
+                                tileConsumer.uncheck().accept(binaryTile);
+                            }
 
-                                                            return bytes.length;
-                                                        })
-                                                .toList())
-                        .get();
+                            return bytes.length;
+                        })
+                    .toList())
+                .get();
 
         printStats(tiles, tileSizes, zoomLevel);
 
