@@ -10,7 +10,6 @@ import ch.ubique.backend.geo.geometry.models.BoundingBox;
 import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.vectortile.models.BinaryTile;
-import ch.ubique.backend.geo.vectortile.models.GeometryWithAttributes;
 import ch.ubique.backend.geo.vectortile.models.GridInfo;
 import ch.ubique.backend.geo.vectortile.models.Tile;
 import ch.ubique.backend.geo.vectortile.models.TileElement;
@@ -54,18 +53,17 @@ public class VectorTileHelper<T extends TileElement> {
     }
 
     private byte[] generateBinary(Tile<T> tile) {
-        int extend = 4096;
-        VectorTileEncoder encoder = new VectorTileEncoder(extend, 0, false, false);
+        final int extend = 4096;
+        final var encoder = new VectorTileEncoder(extend, 0, false, false);
 
         for (TileElement element : tile.getElements()) {
             if (!element.showElement(tile.getTileInfo().getZoomLevel())) {
                 continue;
             }
-            BoundingBox2d boundingBox = tile.getBoundingBox();
-            String layer = element.getLayer();
-            long id = element.getId();
-            GeometryWithAttributes item =
-                    element.getGeometry(boundingBox, extend, config.getYAxisDirection());
+            final var boundingBox = tile.getBoundingBox();
+            final var layer = element.getLayer();
+            final long id = element.getId();
+            final var item = element.getGeometry(boundingBox, extend, config.getYAxisDirection());
             if (item == null || item.getGeometry() == null) {
                 logger.warn("Item or geometry is null: {}", element);
             } else if (!item.getGeometry().isValid()) {
@@ -79,13 +77,13 @@ public class VectorTileHelper<T extends TileElement> {
 
     public void generateTiles(Consumer<BinaryTile> tileConsumer, int numThreads)
             throws ExecutionException, InterruptedException {
-        var levels =
+        final var levels =
                 config.getZoomLevels().stream()
-                        .sorted(Comparator.comparingInt(int.class::cast).reversed())
+                        .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
                         .toList();
 
         for (var level : levels) {
-            ZoomLevel zoomLevel = gridInfo.getZoomLevel(level);
+            final var zoomLevel = gridInfo.getZoomLevel(level);
             if (config.simplify()) {
                 simplifyElements(zoomLevel);
             }
@@ -94,36 +92,33 @@ public class VectorTileHelper<T extends TileElement> {
     }
 
     public Collection<BinaryTile> generateTiles() throws ExecutionException, InterruptedException {
-        Collection<BinaryTile> binaryTiles = new ConcurrentLinkedQueue<>();
+        final Collection<BinaryTile> binaryTiles = new ConcurrentLinkedQueue<>();
         generateTiles(binaryTiles::add, 4);
         return binaryTiles;
     }
 
     public Collection<BinaryTile> generateTiles(int numThreads)
             throws ExecutionException, InterruptedException {
-        Collection<BinaryTile> binaryTiles = new ConcurrentLinkedQueue<>();
+        final Collection<BinaryTile> binaryTiles = new ConcurrentLinkedQueue<>();
         generateTiles(binaryTiles::add, numThreads);
         return binaryTiles;
     }
 
     private void simplifyElements(ZoomLevel zoomLevel) {
         logger.info("Simplifying elements");
-        double sum = 0;
-        for (T element : elements) {
-            sum += element.simplify(zoomLevel);
-        }
+        double sum = elements.stream().mapToDouble(element -> element.simplify(zoomLevel)).sum();
         logger.info("Relative size after simplifying (avg): {}", sum / elements.size());
     }
 
     private void generateTilesForLevel(
             ZoomLevel zoomLevel, Consumer<BinaryTile> tileConsumer, int numThreads)
             throws ExecutionException, InterruptedException {
-        Collection<Tile<T>> tiles = getTiles(zoomLevel);
-        final AtomicInteger count = new AtomicInteger();
-        int onePercent = max(1, tiles.size() / 100);
+        final var tiles = getTiles(zoomLevel);
+        final var count = new AtomicInteger();
+        final int onePercent = max(1, tiles.size() / 100);
         final long startTime = System.currentTimeMillis();
 
-        var forkJoinPool = new ForkJoinPool(numThreads);
+        final var forkJoinPool = new ForkJoinPool(numThreads);
 
         var tileSizes =
                 forkJoinPool
@@ -152,8 +147,9 @@ public class VectorTileHelper<T extends TileElement> {
                                                                                                 - startTime))
                                                                                 * 1000.0;
                                                                 logger.info(
-                                                                        "Processed {}% ({} tiles"
-                                                                                + " per second)",
+                                                                        "Processed {}% ({}"
+                                                                                + " tiles per"
+                                                                                + " second)",
                                                                         percent, tilesPerSecond);
                                                             }
 
@@ -296,6 +292,7 @@ public class VectorTileHelper<T extends TileElement> {
 
         for (int x = minX; x <= maxX; ++x) {
             for (int y = minY; y <= maxY; ++y) {
+                //noinspection SuspiciousNameCombination
                 xyList.add(new ImmutablePair<>(x, y));
             }
         }
@@ -328,7 +325,7 @@ public class VectorTileHelper<T extends TileElement> {
         }
 
         // Generate tiles that contain only visible elements
-        var limitedTiles = new ArrayList<Tile<T>>(tiles.size());
+        final var limitedTiles = new ArrayList<Tile<T>>(tiles.size());
         for (var tile : tiles) {
             Collection<T> visibleElementsForTile =
                     tile.getElements().stream()
@@ -345,7 +342,7 @@ public class VectorTileHelper<T extends TileElement> {
     }
 
     private String getFileName(Tile<T> tile) {
-        TileInfo tileInfo = tile.getTileInfo();
+        final var tileInfo = tile.getTileInfo();
         return tileInfo.getZoomLevel() + "/" + tileInfo.getX() + "/" + tileInfo.getY() + ".pbf";
     }
 }
