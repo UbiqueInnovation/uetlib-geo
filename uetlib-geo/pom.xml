@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>ch.ubique</groupId>
-            <artifactId>backend-jvm-lib-output</artifactId>
+            <artifactId>backend-jvm-lib-storage</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
