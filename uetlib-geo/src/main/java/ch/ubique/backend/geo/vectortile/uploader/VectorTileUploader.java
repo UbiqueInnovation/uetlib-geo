@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -41,7 +42,7 @@ public class VectorTileUploader {
                                                         try {
                                                             upload(path, tile);
                                                         } catch (IOException e) {
-                                                            throw new RuntimeException(e);
+                                                            throw new UncheckedIOException(e);
                                                         }
 
                                                         // Log progress
@@ -66,7 +67,10 @@ public class VectorTileUploader {
                                                         }
                                                     }))
                     .get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
+            logger.error("Exception uploading tiles: ", e);
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException e) {
             logger.error("Exception uploading tiles: ", e);
         }
         logger.info("Upload done");
@@ -75,6 +79,6 @@ public class VectorTileUploader {
     public void upload(String path, BinaryTile tile) throws IOException {
         String tilePath = Paths.get(path, tile.info().path()).toString();
         String contentType = "application/protobuf";
-        storageClient.write(new ByteOutput<>(tile.bytes(), contentType), tilePath);
+        storageClient.write(new ByteOutput(tile.bytes(), contentType), tilePath);
     }
 }
