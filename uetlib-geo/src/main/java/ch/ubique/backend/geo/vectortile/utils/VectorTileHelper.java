@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 public class VectorTileHelper<T extends TileElement> {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger logger = LoggerFactory.getLogger(VectorTileHelper.class);
 
     private final GridInfo gridInfo;
 
@@ -142,7 +142,7 @@ public class VectorTileHelper<T extends TileElement> {
                                                                                 * 1000.0;
                                                                 logger.info(
                                                                         "Processed {}% ({} tiles"
-                                                                            + " per second)",
+                                                                                + " per second)",
                                                                         percent, tilesPerSecond);
                                                             }
 
