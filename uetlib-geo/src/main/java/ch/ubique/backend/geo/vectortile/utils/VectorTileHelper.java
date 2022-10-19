@@ -1,11 +1,20 @@
 package ch.ubique.backend.geo.vectortile.utils;
 
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
+import static ch.ubique.backend.geo.vectortile.constants.SwissConstants.swissGridInfo;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import ch.ubique.backend.geo.geometry.models.BoundingBox;
 import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.vectortile.models.*;
+
 import com.pivovarit.function.ThrowingConsumer;
+
 import no.ecc.vectortile.VectorTileEncoder;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -19,11 +28,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
-
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
-import static ch.ubique.backend.geo.vectortile.constants.SwissConstants.swissGridInfo;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 
 public class VectorTileHelper<T extends TileElement> {
 
@@ -63,11 +67,13 @@ public class VectorTileHelper<T extends TileElement> {
         return encoder.encode();
     }
 
-    public void generateTiles(ThrowingConsumer<BinaryTile, IOException> tileConsumer, int numThreads)
+    public void generateTiles(
+            ThrowingConsumer<BinaryTile, IOException> tileConsumer, int numThreads)
             throws ExecutionException, InterruptedException {
-        final var levels = config.getZoomLevels().stream()
-                .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
-                .toList();
+        final var levels =
+                config.getZoomLevels().stream()
+                        .sorted(Comparator.comparingInt((Integer i) -> i).reversed())
+                        .toList();
 
         for (var level : levels) {
             final var zoomLevel = gridInfo.getZoomLevel(level);
@@ -98,7 +104,9 @@ public class VectorTileHelper<T extends TileElement> {
     }
 
     private void generateTilesForLevel(
-            ZoomLevel zoomLevel, ThrowingConsumer<BinaryTile, IOException> tileConsumer, int numThreads)
+            ZoomLevel zoomLevel,
+            ThrowingConsumer<BinaryTile, IOException> tileConsumer,
+            int numThreads)
             throws ExecutionException, InterruptedException {
         final var tiles = getTiles(zoomLevel);
         final var count = new AtomicInteger();
@@ -108,29 +116,50 @@ public class VectorTileHelper<T extends TileElement> {
         final var forkJoinPool = new ForkJoinPool(numThreads);
 
         var tileSizes =
-            forkJoinPool
-                .submit(() -> tiles.parallelStream()
-                    .map(tile -> {
-                            byte[] bytes = generateBinary(tile);
+                forkJoinPool
+                        .submit(
+                                () ->
+                                        tiles.parallelStream()
+                                                .map(
+                                                        tile -> {
+                                                            byte[] bytes = generateBinary(tile);
 
-                            // Log progress
-                            int countValue = count.incrementAndGet();
-                            if (countValue % onePercent == 0) {
-                                int percent = 100 * countValue / tiles.size();
-                                long currentTime = System.currentTimeMillis();
-                                double tilesPerSecond = countValue / ((double) (currentTime - startTime)) * 1000.0;
-                                logger.info("Processed {}% ({} tiles per second)", percent, tilesPerSecond);
-                            }
+                                                            // Log progress
+                                                            int countValue =
+                                                                    count.incrementAndGet();
+                                                            if (countValue % onePercent == 0) {
+                                                                int percent =
+                                                                        100
+                                                                                * countValue
+                                                                                / tiles.size();
+                                                                long currentTime =
+                                                                        System.currentTimeMillis();
+                                                                double tilesPerSecond =
+                                                                        countValue
+                                                                                / ((double)
+                                                                                        (currentTime
+                                                                                                - startTime))
+                                                                                * 1000.0;
+                                                                logger.info(
+                                                                        "Processed {}% ({} tiles"
+                                                                            + " per second)",
+                                                                        percent, tilesPerSecond);
+                                                            }
 
-                            var binaryTile = new BinaryTile(tile.getTileInfo(), bytes);
-                            if (tileConsumer != null) {
-                                tileConsumer.uncheck().accept(binaryTile);
-                            }
+                                                            var binaryTile =
+                                                                    new BinaryTile(
+                                                                            tile.getTileInfo(),
+                                                                            bytes);
+                                                            if (tileConsumer != null) {
+                                                                tileConsumer
+                                                                        .uncheck()
+                                                                        .accept(binaryTile);
+                                                            }
 
-                            return bytes.length;
-                        })
-                    .toList())
-                .get();
+                                                            return bytes.length;
+                                                        })
+                                                .toList())
+                        .get();
 
         printStats(tiles, tileSizes, zoomLevel);
 

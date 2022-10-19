@@ -82,7 +82,8 @@ public class VectorTileConfig<T extends TileElement> {
         return onTileGenerated;
     }
 
-    public VectorTileConfig<T> setOnTileGenerated(ThrowingConsumer<BinaryTile, IOException> onTileGenerated) {
+    public VectorTileConfig<T> setOnTileGenerated(
+            ThrowingConsumer<BinaryTile, IOException> onTileGenerated) {
         this.onTileGenerated = onTileGenerated;
         return this;
     }
