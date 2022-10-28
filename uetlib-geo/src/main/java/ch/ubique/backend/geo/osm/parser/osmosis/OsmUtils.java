@@ -1,8 +1,7 @@
 package ch.ubique.backend.geo.osm.parser.osmosis;
 
+import ch.ubique.backend.core.utils.LocaleHelper;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
-
-import org.apache.commons.lang3.LocaleUtils;
 import org.openstreetmap.osmosis.core.domain.v0_6.Entity;
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
@@ -21,39 +20,7 @@ public class OsmUtils {
     }
 
     public static Map<Locale, String> getLocalized(final Entity entity, final String tagName) {
-        return entity.getTags().stream()
-                .map(tag -> tryToMapTagToLocalizedString(tag, tagName))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.groupingBy(Map.Entry::getKey))
-                .entrySet()
-                .stream()
-                .collect(
-                        Collectors.toMap(
-                                Map.Entry::getKey, entry -> entry.getValue().get(0).getValue()));
-    }
-
-    private static Optional<Map.Entry<Locale, String>> tryToMapTagToLocalizedString(
-            final Tag tag, final String field) {
-        final var key = tag.getKey();
-        if (!key.startsWith(field + ":")) {
-            return Optional.empty();
-        }
-
-        return Arrays.stream(key.split(":"))
-                .skip(1)
-                .findFirst() // get first part after ':'
-                .flatMap(OsmUtils::getLocale)
-                .map(locale -> Map.entry(locale, tag.getValue()));
-    }
-
-    private static Optional<Locale> getLocale(String key) {
-        try {
-            final var locale = LocaleUtils.toLocale(key);
-            return LocaleUtils.isAvailableLocale(locale) ? Optional.of(locale) : Optional.empty();
-        } catch (IllegalArgumentException e) {
-            return Optional.empty();
-        }
+        return LocaleHelper.getLocalizedStrings(getTags(entity), tagName, ":");
     }
 
     public static WGS84Coordinate getCoordinate(final Node node) {
