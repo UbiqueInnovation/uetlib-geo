@@ -2,7 +2,6 @@ package ch.ubique.backend.geo.geojson.models.geometries;
 
 import ch.ubique.backend.geo.geojson.models.Coordinate;
 import ch.ubique.backend.geo.geojson.models.Geometry;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -46,6 +45,11 @@ public class Polygon extends Geometry {
     @Override
     public Collection<Geometry> getSimpleGeometries() {
         return List.of(this);
+    }
+
+    @JsonIgnore
+    public MultiPolygon multi() {
+        return new MultiPolygon().setPolygons(List.of(this));
     }
 
     @Override

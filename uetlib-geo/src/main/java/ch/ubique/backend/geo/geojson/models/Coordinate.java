@@ -4,7 +4,6 @@ import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
@@ -45,6 +44,12 @@ public class Coordinate extends ArrayList<Double> {
         var x = get(0);
         var y = get(1);
         return new WebMercatorCoordinate(x, y, elevation().orElse(null));
+    }
+
+    @JsonIgnore
+    public org.locationtech.jts.geom.Coordinate asJts() {
+        return new org.locationtech.jts.geom.Coordinate(get(0), get(1),
+                elevation().orElse(org.locationtech.jts.geom.Coordinate.NULL_ORDINATE));
     }
 
     @JsonIgnore
