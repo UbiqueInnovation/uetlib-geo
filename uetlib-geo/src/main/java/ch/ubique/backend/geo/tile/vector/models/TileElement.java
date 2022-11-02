@@ -1,9 +1,4 @@
-package ch.ubique.backend.geo.vectortile.models;
-
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.*;
-
-import static java.lang.Math.abs;
-import static java.lang.Math.toRadians;
+package ch.ubique.backend.geo.tile.vector.models;
 
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.geometry.models.BoundingBox;
@@ -12,16 +7,20 @@ import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.geometry.models.Point3d;
 import ch.ubique.backend.geo.geometry.utils.BoundingBoxHelper;
 import ch.ubique.backend.geo.geometry.utils.GeometryHelper;
-
+import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
+import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.*;
+import static java.lang.Math.abs;
+import static java.lang.Math.toRadians;
 
 public abstract class TileElement {
 
@@ -60,7 +59,7 @@ public abstract class TileElement {
     }
 
     public boolean isVisibleAtZoomLevel(ZoomLevel zoomLevel) {
-        return isVisibleAtZoomLevel(zoomLevel.getLevel());
+        return isVisibleAtZoomLevel(zoomLevel.level());
     }
 
     public boolean isVisibleAtZoomLevel(Integer zoomLevel) {
@@ -147,7 +146,7 @@ public abstract class TileElement {
         }
 
         double minAngle = toRadians(5);
-        double minDistance = zoomLevel.getResolution() / 10;
+        double minDistance = zoomLevel.tileWidth() / 1000;
 
         int initialSize = getCoordinates().size();
 

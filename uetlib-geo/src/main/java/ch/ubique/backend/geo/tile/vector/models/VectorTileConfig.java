@@ -1,5 +1,6 @@
-package ch.ubique.backend.geo.vectortile.models;
+package ch.ubique.backend.geo.tile.vector.models;
 
+import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import com.pivovarit.function.ThrowingConsumer;
 
 import java.io.IOException;

@@ -1,6 +1,7 @@
-package ch.ubique.backend.geo.vectortile.models;
+package ch.ubique.backend.geo.tile.vector.models;
 
 import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
+import ch.ubique.backend.geo.tile.common.models.TileInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
