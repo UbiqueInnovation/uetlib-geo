@@ -1,5 +1,6 @@
-package ch.ubique.backend.geo.vectortile.models;
+package ch.ubique.backend.geo.tile.vector.models;
 
+import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 

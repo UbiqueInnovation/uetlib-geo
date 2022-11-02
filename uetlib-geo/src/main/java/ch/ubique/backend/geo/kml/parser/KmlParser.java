@@ -1,31 +1,21 @@
 package ch.ubique.backend.geo.kml.parser;
 
-import static ch.ubique.backend.geo.coordinate.util.CoordinateConverter.toLV95;
-
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
-import ch.ubique.backend.geo.kml.models.Icon;
-import ch.ubique.backend.geo.kml.models.ItemStyle;
-import ch.ubique.backend.geo.kml.models.KmlDocument;
-import ch.ubique.backend.geo.kml.models.Placemark;
-import ch.ubique.backend.geo.kml.models.Style;
-import ch.ubique.backend.geo.kml.models.StyleMap;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import ch.ubique.backend.geo.kml.models.*;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import static ch.ubique.backend.geo.coordinate.util.CoordinateConverter.toLV95;
 
 public class KmlParser {
 
@@ -184,7 +174,7 @@ public class KmlParser {
                 switch (elementName) {
                     case "color" -> style.setColor(reader.getElementText());
                     case "scale" -> style.setScale(Double.parseDouble(reader.getElementText()));
-                    case "width" -> style.setWidth(Double.parseDouble(reader.getElementText()));
+                    case "tileWidth" -> style.setWidth(Double.parseDouble(reader.getElementText()));
                     case "Icon" -> style.setIcon(parseIcon(reader));
                     default -> {
                         /* NO-OP */

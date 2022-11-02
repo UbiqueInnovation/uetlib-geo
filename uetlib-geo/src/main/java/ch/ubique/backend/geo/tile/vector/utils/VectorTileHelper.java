@@ -1,20 +1,18 @@
-package ch.ubique.backend.geo.vectortile.utils;
-
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
-import static ch.ubique.backend.geo.vectortile.constants.SwissConstants.swissGridInfo;
-
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+package ch.ubique.backend.geo.tile.vector.utils;
 
 import ch.ubique.backend.geo.geometry.models.BoundingBox;
 import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
 import ch.ubique.backend.geo.geometry.models.Point2d;
-import ch.ubique.backend.geo.vectortile.models.*;
-
+import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
+import ch.ubique.backend.geo.tile.common.models.TileInfo;
+import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
+import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
+import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
+import ch.ubique.backend.geo.tile.vector.models.Tile;
+import ch.ubique.backend.geo.tile.vector.models.TileElement;
+import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import com.pivovarit.function.ThrowingConsumer;
-
 import no.ecc.vectortile.VectorTileEncoder;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -29,11 +27,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 public class VectorTileHelper<T extends TileElement> {
 
     private static final Logger logger = LoggerFactory.getLogger(VectorTileHelper.class);
 
-    private final GridInfo gridInfo;
+    private final TileLevelsDefinition gridInfo;
 
     private final VectorTileConfig<T> config;
     private final Collection<T> elements;
@@ -41,7 +43,7 @@ public class VectorTileHelper<T extends TileElement> {
     public VectorTileHelper(Collection<T> elements, VectorTileConfig<T> config) {
         this.config = config;
         this.elements = elements;
-        this.gridInfo = swissGridInfo();
+        this.gridInfo = SwissConstants.swissTileDefinition();
     }
 
     private byte[] generateBinary(Tile<T> tile) {
@@ -49,7 +51,7 @@ public class VectorTileHelper<T extends TileElement> {
         final var encoder = new VectorTileEncoder(extend, 0, false, false);
 
         for (TileElement element : tile.getElements()) {
-            if (!element.showElement(tile.getTileInfo().zoomLevel())) {
+            if (!element.showElement(tile.getTileInfo().zoomLevel().level())) {
                 continue;
             }
             final var boundingBox = tile.getBoundingBox();
@@ -182,14 +184,14 @@ public class VectorTileHelper<T extends TileElement> {
         double avgBytes = tileSizes.stream().mapToInt(size -> size).average().orElse(-1);
         stats.append(String.format("  Tile size: avg = %,.1fB, max = %,dB%n", avgBytes, maxBytes));
 
-        if (config.limitElementsPerTile(zoomLevel.getLevel())) {
+        if (config.limitElementsPerTile(zoomLevel.level())) {
             int maxElementsWithLimit =
                     tiles.stream()
                             .mapToInt(
                                     tile ->
                                             min(
                                                     config.getMaxElementsPerTile(
-                                                            zoomLevel.getLevel()),
+                                                            zoomLevel.level()),
                                                     tile.getElements().size()))
                             .max()
                             .orElse(-1);
@@ -199,7 +201,7 @@ public class VectorTileHelper<T extends TileElement> {
                                     tile ->
                                             min(
                                                     config.getMaxElementsPerTile(
-                                                            zoomLevel.getLevel()),
+                                                            zoomLevel.level()),
                                                     tile.getElements().size()))
                             .average()
                             .orElse(-1);
@@ -218,15 +220,15 @@ public class VectorTileHelper<T extends TileElement> {
                         "  Elements per tile (without limit): avg = %.2f, max = %d",
                         avgElements, maxElements));
 
-        logger.info("Statistic for level {}: {}", zoomLevel.getLevel(), stats);
+        logger.info("Statistic for level {}: {}", zoomLevel.level(), stats);
     }
 
     private Collection<Tile<T>> getTiles(ZoomLevel zoomLevel) {
-        int tilesX = zoomLevel.getTilesX();
-        int tilesY = zoomLevel.getTilesY();
-        int level = zoomLevel.getLevel();
-        double tileWidth = gridInfo.getTileWidth(zoomLevel);
-        Point2d origin = toPoint(Point2d.class, gridInfo.getOrigin());
+        int tilesX = zoomLevel.tilesX();
+        int tilesY = zoomLevel.tilesY();
+        int level = zoomLevel.level();
+        double tileWidth = zoomLevel.tileWidth();
+        Point2d origin = toPoint(Point2d.class, gridInfo.origin());
 
         logger.info("Generate tiles for zoom level {}", level);
 
@@ -236,7 +238,7 @@ public class VectorTileHelper<T extends TileElement> {
             for (int y = 0; y < tilesY; ++y) {
                 Point2d min = origin.plus(tileWidth * x, -tileWidth * (y + 1));
                 Point2d max = min.plus(tileWidth, tileWidth);
-                TileInfo tileInfo = new TileInfo(x, y, level);
+                TileInfo tileInfo = new TileInfo(x, y, zoomLevel);
                 BoundingBox2d boundingBox = new BoundingBox2d(min, max);
                 tiles.add(new Tile<>(tileInfo, boundingBox));
             }
@@ -266,13 +268,13 @@ public class VectorTileHelper<T extends TileElement> {
 
     public List<Pair<Integer, Integer>> getXYsElementIsIn(T element, int z) {
         final ZoomLevel zoomLevel = gridInfo.getZoomLevel(z);
-        final double tileWidth = gridInfo.getTileWidth(zoomLevel);
-        final Point2d origin = toPoint(Point2d.class, gridInfo.getOrigin());
+        final double tileWidth = zoomLevel.tileWidth();
+        final Point2d origin = toPoint(Point2d.class, gridInfo.origin());
         ToIntFunction<Point2d> getX =
                 coordinate -> (int) ((coordinate.getX() - origin.getX()) / tileWidth);
         ToIntFunction<Point2d> getY =
                 coordinate -> (int) ((origin.getY() - coordinate.getY()) / tileWidth);
-        return getXYsElementIsIn(zoomLevel.getTilesX(), zoomLevel.getTilesY(), getX, getY, element);
+        return getXYsElementIsIn(zoomLevel.tilesX(), zoomLevel.tilesY(), getX, getY, element);
     }
 
     private List<Pair<Integer, Integer>> getXYsElementIsIn(
@@ -301,11 +303,11 @@ public class VectorTileHelper<T extends TileElement> {
     private Collection<Tile<T>> limitElementsPerTile(
             Collection<Tile<T>> tiles, ZoomLevel zoomLevel) {
 
-        if (!config.limitElementsPerTile(zoomLevel.getLevel())) {
+        if (!config.limitElementsPerTile(zoomLevel.level())) {
             return tiles;
         }
 
-        var maxElementsPerTile = config.getMaxElementsPerTile(zoomLevel.getLevel());
+        var maxElementsPerTile = config.getMaxElementsPerTile(zoomLevel.level());
         logger.info("Limiting number of elements per tile to: {}", maxElementsPerTile);
 
         // Mark all elements that need to be visible
@@ -316,7 +318,7 @@ public class VectorTileHelper<T extends TileElement> {
                     tile.getElements().stream()
                             .sorted(Comparator.comparingDouble(TileElement::getScore).reversed())
                             .filter(config::filter)
-                            .limit(config.getMaxElementsPerTile(zoomLevel.getLevel()))
+                            .limit(config.getMaxElementsPerTile(zoomLevel.level()))
                             .map(TileElement::getId)
                             .collect(Collectors.toSet());
 
@@ -336,7 +338,7 @@ public class VectorTileHelper<T extends TileElement> {
             limitedTiles.add(limitedTile);
         }
 
-        logger.info("Filtered elements per tile for zoom level {}", zoomLevel.getLevel());
+        logger.info("Filtered elements per tile for zoom level {}", zoomLevel.level());
         return limitedTiles;
     }
 }

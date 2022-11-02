@@ -51,7 +51,7 @@ public class ItemStyle {
                 + '\''
                 + ", scale="
                 + scale
-                + ", width="
+                + ", tileWidth="
                 + width
                 + ", icon="
                 + icon

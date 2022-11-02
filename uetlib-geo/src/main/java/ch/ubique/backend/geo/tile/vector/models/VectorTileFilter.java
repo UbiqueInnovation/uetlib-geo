@@ -1,4 +1,4 @@
-package ch.ubique.backend.geo.vectortile.models;
+package ch.ubique.backend.geo.tile.vector.models;
 
 public interface VectorTileFilter<T> {
 
