@@ -1,13 +1,11 @@
 package ch.ubique.backend.geo.coordinate.models;
 
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 import org.apache.commons.lang3.NotImplementedException;
 import org.locationtech.jts.geom.Point;
-
-import java.util.Objects;
 
 /** https://epsg.io/3857 Pseudo-Mercator, Web Mercator */
 public class WebMercatorCoordinate implements Coordinate<WebMercatorCoordinate> {
@@ -22,7 +20,10 @@ public class WebMercatorCoordinate implements Coordinate<WebMercatorCoordinate> 
     private Double elevation;
 
     @JsonCreator
-    public WebMercatorCoordinate(double x, double y, Double elevation) {
+    public WebMercatorCoordinate(
+            @JsonProperty("x") double x,
+            @JsonProperty("y") double y,
+            @JsonProperty("elevation") Double elevation) {
         this.x = x;
         this.y = y;
         this.elevation = elevation;
