@@ -148,6 +148,9 @@ public abstract class RasterTileGenerator {
     }
 
     private void validateSourceTile(final TileInfo tileInfo, final RasterTile sourceTile) {
+        if (sourceTile.data() == null) {
+            throw new AssertionError("getSourceTile(tileInfo).data() must not be null.");
+        }
         if (!tileInfo.equals(sourceTile.tileInfo())) {
             throw new AssertionError("Expected getSourceTile(tileInfo).tileInfo() == " + tileInfo + ". " +
                     "But got " + sourceTile.tileInfo());

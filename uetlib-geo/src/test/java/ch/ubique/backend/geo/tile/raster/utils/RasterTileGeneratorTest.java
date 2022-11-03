@@ -33,7 +33,7 @@ class RasterTileGeneratorTest {
             protected RasterTile getSourceTile(TileInfo tileInfo) {
                 Assertions.assertFalse(queriedSourceTiles.contains(tileInfo));
                 queriedSourceTiles.add(tileInfo);
-                return new RasterTile(tileInfo, null);
+                return new RasterTile(tileInfo, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
             }
         };
 
