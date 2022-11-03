@@ -13,8 +13,15 @@ public record ZoomLevel(
         int tilesY,
         double tileWidth
 ) {
+    public static ZoomLevel unbounded(int level, double tileWidth) {
+        return new ZoomLevel(level, Integer.MAX_VALUE, Integer.MAX_VALUE, tileWidth);
+    }
+
     @Override
     public String toString() {
+        if (level == Integer.MAX_VALUE) {
+            return "max";
+        }
         return String.valueOf(level);
     }
 
