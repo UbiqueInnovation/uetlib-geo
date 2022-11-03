@@ -44,7 +44,7 @@ class RasterTileGeneratorTest {
         Assertions.assertEquals(tileLevelsDefinition.numberOfTiles(), generatedTiles.size());
     }
 
-    @Test
+//    @Test
     @Disabled("Only for visualizing locally. ")
     void testImages() {
         final var tileLevelsDefinition = SwissConstants.swissTileDefinition().onlyWithLevels(15);
