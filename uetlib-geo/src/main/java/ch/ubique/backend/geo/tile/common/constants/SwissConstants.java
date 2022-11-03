@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.tile.common.constants;
 
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
+import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public class SwissConstants {
 
     public static TileLevelsDefinition swissTileDefinition() {
         final var origin = new LV95Coordinate(2420000, 1350000);
-        return new TileLevelsDefinition(origin, swisstopoZoomLevels());
+        return new TileLevelsDefinition(origin, YAxisDirection.UP, swisstopoZoomLevels());
     }
 
     public static List<ZoomLevel> swisstopoZoomLevels() {

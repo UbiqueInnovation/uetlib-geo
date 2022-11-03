@@ -12,6 +12,6 @@ public record TileInfo(int x, int y, ZoomLevel zoomLevel) {
 
     @Override
     public String toString() {
-        return level() + "_" + x + "_" + y;
+        return zoomLevel.toString() + "_" + x + "_" + y;
     }
 }
