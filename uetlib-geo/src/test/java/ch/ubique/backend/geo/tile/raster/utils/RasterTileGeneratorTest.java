@@ -5,19 +5,19 @@ import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.raster.models.RasterTile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 
+@Disabled("For local testing only")
 class RasterTileGeneratorTest {
 
-    @Test
+//    @Test
     void test() {
-        final var tileLevelsDefinition = SwissConstants.swissTileDefinition().withMaxLevel(24);
-        final var sourceTileSize = 1000;
+        final var tileLevelsDefinition = SwissConstants.swissTileDefinition().withMaxLevel(20);
+        final var sourceTileSize = 10000;
 
         final var generatedTiles = new HashSet<TileInfo>();
         final var queriedSourceTiles = new HashSet<TileInfo>();
