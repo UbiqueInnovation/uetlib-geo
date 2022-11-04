@@ -6,9 +6,12 @@ import ch.ubique.backend.geo.tile.raster.models.RasterTile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 
 @Disabled("For local testing only")
@@ -16,8 +19,8 @@ class RasterTileGeneratorTest {
 
 //    @Test
     void test() {
-        final var tileLevelsDefinition = SwissConstants.swissTileDefinition().withMaxLevel(20);
-        final var sourceTileSize = 10000;
+        final var tileLevelsDefinition = SwissConstants.swissTileDefinition().withMaxLevel(23);
+        final var sourceTileSize = 1000;
 
         final var generatedTiles = new HashSet<TileInfo>();
         final var queriedSourceTiles = new HashSet<TileInfo>();
@@ -33,7 +36,7 @@ class RasterTileGeneratorTest {
             protected RasterTile getSourceTile(TileInfo tileInfo) {
                 Assertions.assertFalse(queriedSourceTiles.contains(tileInfo));
                 queriedSourceTiles.add(tileInfo);
-                return new RasterTile(tileInfo, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
+                return tileWithRandomColor(tileInfo);
             }
         };
 
@@ -46,9 +49,9 @@ class RasterTileGeneratorTest {
 
 //    @Test
     @Disabled("Only for visualizing locally. ")
-    void testImages() {
-        final var tileLevelsDefinition = SwissConstants.swissTileDefinition().onlyWithLevels(15);
-        final var sourceTileSize = 5000;
+    void testImages() throws IOException {
+        final var tileLevelsDefinition = SwissConstants.swissTileDefinition().withMinMaxLevel(8, 20);
+        final var sourceTileSize = 100 * 1000;
 
         final var generatedTiles = new HashSet<RasterTile>();
 
@@ -62,11 +65,7 @@ class RasterTileGeneratorTest {
 
             @Override
             protected RasterTile getSourceTile(TileInfo tileInfo) {
-                final var data = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g = (Graphics2D) data.getGraphics();
-                g.setColor(new Color((int)(Math.random() * 255), (int)(Math.random() * 255), (int)(Math.random() * 255)));
-                g.fillRect(0, 0, data.getWidth(), data.getHeight());
-                return new RasterTile(tileInfo, data);
+                return tileWithRandomColor(tileInfo);
             }
         };
 
@@ -77,13 +76,24 @@ class RasterTileGeneratorTest {
         frame.setSize(new Dimension(outputResolution * 3 + 20, outputResolution * 2 + 100));
         frame.setLayout(null);
         for (final var rasterTile : generatedTiles) {
-            final var panel = new JPanel();
-            final var image = new JLabel(new ImageIcon(rasterTile.data()));
-            image.setBounds(0, 0, outputResolution, outputResolution);
-            panel.add(image);
-            panel.setLayout(null);
-            panel.setBounds(rasterTile.tileInfo().x() * outputResolution,  (1 - rasterTile.tileInfo().y()) * outputResolution, outputResolution, outputResolution);
-            frame.add(panel);
+
+            if (tileLevelsDefinition.isMin(rasterTile.tileInfo().zoomLevel())) {
+                final var panel = new JPanel();
+                final var image = new JLabel(new ImageIcon(rasterTile.data()));
+                image.setBounds(0, 0, outputResolution, outputResolution);
+                panel.add(image);
+                panel.setLayout(null);
+                panel.setBounds(rasterTile.tileInfo().x() * outputResolution,  rasterTile.tileInfo().y() * outputResolution, outputResolution, outputResolution);
+                frame.add(panel);
+            }
+
+            try {
+                final var output = new File("/tmp/" + getClass().getName() + '/' + rasterTile.tileInfo().path() + ".png");
+                output.mkdirs();
+                ImageIO.write(rasterTile.data(), "png", output);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         frame.setModal(true);
@@ -91,5 +101,18 @@ class RasterTileGeneratorTest {
         frame.setVisible(true);
 
         Assertions.assertTrue(true);
+    }
+
+    private RasterTile tileWithRandomColor(TileInfo tileInfo) {
+        final var data = new BufferedImage(5, 5, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = (Graphics2D) data.getGraphics();
+        g.setPaint(new GradientPaint(new Point(0, 0), randomColor(), new Point(data.getHeight(), data.getWidth()), Color.black));
+        g.fillRect(0, 0, data.getWidth(), data.getHeight());
+        g.dispose();
+        return new RasterTile(tileInfo, data);
+    }
+
+    private Color randomColor() {
+        return new Color((int)(Math.random() * 255), (int)(Math.random() * 255), (int)(Math.random() * 255));
     }
 }

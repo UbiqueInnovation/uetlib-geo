@@ -7,10 +7,16 @@ import ch.ubique.backend.geo.tile.raster.models.RasterTile;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static java.awt.image.AffineTransformOp.TYPE_BILINEAR;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Generates raster tiles for all zoom levels specified in the {@link TileLevelsDefinition}.
@@ -164,8 +170,7 @@ public abstract class RasterTileGenerator {
             return RasterTile.empty(currentInfo);
         }
 
-        final var data = new BufferedImage(outputResolution, outputResolution, BufferedImage.TYPE_4BYTE_ABGR);
-        final var graphics2d = data.createGraphics();
+        final var data = new BufferedImage(outputResolution, outputResolution, nonEmptyChildren.get(0).data().getType());
 
         final var currentTileWidth = currentInfo.zoomLevel().tileWidth();
 
@@ -173,23 +178,39 @@ public abstract class RasterTileGenerator {
             final var childInfo = child.tileInfo();
             final var childTileWidth = childInfo.zoomLevel().tileWidth();
 
+            // Calculate scaling and where tile needs to go
             final var xOffset = (int) Math.round((childInfo.x() * childTileWidth - currentInfo.x() * currentTileWidth) / currentTileWidth * outputResolution);
             final var xNextOffset = (int) Math.round(((childInfo.x() + 1) * childTileWidth - currentInfo.x() * currentTileWidth) / currentTileWidth * outputResolution);
-            final var yOffset = (int) Math.round((childInfo.y() * childTileWidth - currentInfo.y() * currentTileWidth) / currentTileWidth * outputResolution);
-            final var yNextOffset = (int) Math.round(((childInfo.y() + 1) * childTileWidth - currentInfo.y() * currentTileWidth) / currentTileWidth * outputResolution);
+            final var yOffsetDown = (int) Math.round((childInfo.y() * childTileWidth - currentInfo.y() * currentTileWidth) / currentTileWidth * outputResolution);
+            final var yNextOffsetDown = (int) Math.round(((childInfo.y() + 1) * childTileWidth - currentInfo.y() * currentTileWidth) / currentTileWidth * outputResolution);
 
             final var scaledWidth = xNextOffset - xOffset;
-            final var scaledHeight = yNextOffset - yOffset;
+            final var scaledHeight = yNextOffsetDown - yOffsetDown;
 
-            final var finalYOffset = switch (levelsDefinition.yAxisDirection()) {
-                case DOWN -> yOffset;
-                case UP -> outputResolution - scaledHeight - yOffset;
+            final var yOffset = switch (levelsDefinition.yAxisDirection()) {
+                case DOWN -> yOffsetDown;
+                case UP -> outputResolution - scaledHeight - yOffsetDown;
             };
 
-            final var scaledImage = child.data().getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_DEFAULT);
-            graphics2d.drawImage(scaledImage, xOffset, finalYOffset, null);
+            final var leftCrop = Math.max(0, -xOffset);
+            final var topCrop = Math.max(0, -yOffset);
+            final var rightCrop = Math.max(0, scaledWidth - (outputResolution - xOffset));
+            final var bottomCrop = Math.max(0, scaledHeight - (outputResolution - yOffset));
+
+            final var croppedWidth = scaledWidth - leftCrop - rightCrop;
+            final var croppedHeight = scaledHeight - topCrop - bottomCrop;
+
+            if (croppedWidth == 0 || croppedHeight == 0) {
+                continue;
+            }
+
+            // Actually scale the child data
+            final var target = data.getSubimage(Math.max(0, xOffset), Math.max(0, yOffset), croppedWidth, croppedHeight);
+            final var affineTransform =     new AffineTransform();
+            affineTransform.translate(-leftCrop, -topCrop);
+            affineTransform.scale(1. * scaledWidth / child.data().getWidth(), 1. * scaledHeight /  child.data().getHeight());
+            new AffineTransformOp(affineTransform, TYPE_BILINEAR).filter(child.data(), target);
         }
-        graphics2d.dispose();
 
         return new RasterTile(currentInfo, data);
     }
