@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.toMap;
-
 /**
  * Generates raster tiles for all zoom levels specified in the {@link TileLevelsDefinition}.
  * For this, the highest zoom level is computed based on the source tiles.
@@ -103,7 +101,7 @@ public abstract class RasterTileGenerator {
                     validateSourceTile(current, rasterTile);
                 } else {
                     // Generate a raster tile based on all children of the current element
-                    rasterTile = createFromChildren(current, children.stream().collect(toMap(c -> c, ready::get)));
+                    rasterTile = createFromChildren(current, children.stream().map(ready::get).toList());
                     onTileGenerated(rasterTile);
 
                     // Clean up ready elements that are no longer needed
@@ -148,9 +146,6 @@ public abstract class RasterTileGenerator {
     }
 
     private void validateSourceTile(final TileInfo tileInfo, final RasterTile sourceTile) {
-        if (sourceTile.data() == null) {
-            throw new AssertionError("getSourceTile(tileInfo).data() must not be null.");
-        }
         if (!tileInfo.equals(sourceTile.tileInfo())) {
             throw new AssertionError("Expected getSourceTile(tileInfo).tileInfo() == " + tileInfo + ". " +
                     "But got " + sourceTile.tileInfo());
@@ -161,13 +156,20 @@ public abstract class RasterTileGenerator {
         }
     }
 
-    private RasterTile createFromChildren(final TileInfo currentInfo, final Map<TileInfo, RasterTile> children) {
+    private RasterTile createFromChildren(final TileInfo currentInfo, final Collection<RasterTile> children) {
+
+        final var nonEmptyChildren = children.stream().filter(tile -> !tile.isEmpty()).toList();
+        if (nonEmptyChildren.isEmpty()) {
+            // All children are empty -> tile will be empty
+            return RasterTile.empty(currentInfo);
+        }
+
         final var data = new BufferedImage(outputResolution, outputResolution, BufferedImage.TYPE_4BYTE_ABGR);
         final var graphics2d = data.createGraphics();
 
         final var currentTileWidth = currentInfo.zoomLevel().tileWidth();
 
-        for (final var child : children.values()) {
+        for (final var child : nonEmptyChildren) {
             final var childInfo = child.tileInfo();
             final var childTileWidth = childInfo.zoomLevel().tileWidth();
 
