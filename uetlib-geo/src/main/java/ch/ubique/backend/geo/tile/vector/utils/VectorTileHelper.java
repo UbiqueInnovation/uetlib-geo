@@ -1,5 +1,9 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import ch.ubique.backend.geo.geometry.models.BoundingBox;
 import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
 import ch.ubique.backend.geo.geometry.models.Point2d;
@@ -12,24 +16,23 @@ import ch.ubique.backend.geo.tile.vector.models.Tile;
 import ch.ubique.backend.geo.tile.vector.models.TileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import com.pivovarit.function.ThrowingConsumer;
-import no.ecc.vectortile.VectorTileEncoder;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
-
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import no.ecc.vectortile.VectorTileEncoder;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VectorTileHelper<T extends TileElement> {
 
@@ -47,8 +50,8 @@ public class VectorTileHelper<T extends TileElement> {
     }
 
     private byte[] generateBinary(Tile<T> tile) {
-        final int extend = 4096;
-        final var encoder = new VectorTileEncoder(extend, 0, false, false);
+        final var encoder =
+                new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
 
         for (TileElement element : tile.getElements()) {
             if (!element.showElement(tile.getTileInfo().zoomLevel().level())) {
@@ -57,7 +60,9 @@ public class VectorTileHelper<T extends TileElement> {
             final var boundingBox = tile.getBoundingBox();
             final var layer = element.getLayer();
             final long id = element.getId();
-            final var item = element.getGeometry(boundingBox, extend, config.getYAxisDirection());
+            final var item =
+                    element.getGeometry(
+                            boundingBox, config.getExtent(), config.getYAxisDirection());
             if (item == null || item.getGeometry() == null) {
                 logger.warn("Item or geometry is null: {}", element);
             } else if (!item.getGeometry().isValid()) {
@@ -190,8 +195,7 @@ public class VectorTileHelper<T extends TileElement> {
                             .mapToInt(
                                     tile ->
                                             min(
-                                                    config.getMaxElementsPerTile(
-                                                            zoomLevel.level()),
+                                                    config.getMaxElementsPerTile(zoomLevel.level()),
                                                     tile.getElements().size()))
                             .max()
                             .orElse(-1);
@@ -200,8 +204,7 @@ public class VectorTileHelper<T extends TileElement> {
                             .mapToInt(
                                     tile ->
                                             min(
-                                                    config.getMaxElementsPerTile(
-                                                            zoomLevel.level()),
+                                                    config.getMaxElementsPerTile(zoomLevel.level()),
                                                     tile.getElements().size()))
                             .average()
                             .orElse(-1);

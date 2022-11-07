@@ -2,7 +2,6 @@ package ch.ubique.backend.geo.tile.vector.models;
 
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import com.pivovarit.function.ThrowingConsumer;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -14,6 +13,8 @@ public class VectorTileConfig<T extends TileElement> {
     private ThrowingConsumer<BinaryTile, IOException> onTileGenerated;
     private int maxElementsPerTile;
     private boolean simplify;
+    private int clipBuffer = 0;
+    private int extent = 4096;
 
     /**
      * technically DOWN is the correct default, as this corresponds with the vector tile specs.
@@ -58,6 +59,24 @@ public class VectorTileConfig<T extends TileElement> {
 
     public VectorTileConfig<T> setSimplify(boolean simplify) {
         this.simplify = simplify;
+        return this;
+    }
+
+    public int getClipBuffer() {
+        return clipBuffer;
+    }
+
+    public VectorTileConfig<T> setClipBuffer(int clipBuffer) {
+        this.clipBuffer = clipBuffer;
+        return this;
+    }
+
+    public int getExtent() {
+        return extent;
+    }
+
+    public VectorTileConfig<T> setExtent(int extent) {
+        this.extent = extent;
         return this;
     }
 
