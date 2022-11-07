@@ -7,12 +7,10 @@ import static java.lang.Math.sqrt;
 import static java.lang.Math.toRadians;
 
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
-
-import org.locationtech.jts.geom.Point;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
+import org.locationtech.jts.geom.Point;
 
 /**
  * World Geodetic System 1984 (also known as WGS84, WGS 1984, EPSG:4326) Most common coordinate
@@ -36,7 +34,10 @@ public class WGS84Coordinate implements Coordinate<WGS84Coordinate> {
     }
 
     @JsonCreator
-    public WGS84Coordinate(double latitude, double longitude, Double elevation) {
+    public WGS84Coordinate(
+            @JsonProperty("latitude") double latitude,
+            @JsonProperty("longitude") double longitude,
+            @JsonProperty("elevation") Double elevation) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.elevation = elevation;

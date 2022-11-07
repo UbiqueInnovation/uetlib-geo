@@ -4,12 +4,10 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
-
-import org.locationtech.jts.geom.Point;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
+import org.locationtech.jts.geom.Point;
 
 /** Swiss coordinates (1995) https://epsg.io/2056 Most recent coordinate system for Switzerland */
 public class LV95Coordinate implements Coordinate<LV95Coordinate> {
@@ -30,7 +28,10 @@ public class LV95Coordinate implements Coordinate<LV95Coordinate> {
     }
 
     @JsonCreator
-    public LV95Coordinate(double east, double north, Double elevation) {
+    public LV95Coordinate(
+            @JsonProperty("east") double east,
+            @JsonProperty("north") double north,
+            @JsonProperty("elevation") Double elevation) {
         this.east = east;
         this.north = north;
         this.elevation = elevation;
