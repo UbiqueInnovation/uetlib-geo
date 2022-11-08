@@ -8,7 +8,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.locationtech.jts.geom.Point;
 
 /** https://epsg.io/3857 Pseudo-Mercator, Web Mercator */
-public class WebMercatorCoordinate implements Coordinate<WebMercatorCoordinate> {
+public class WebMercatorCoordinate implements Coordinate {
 
     // For equality testing
     private static final double EPSILON = 0.1;
@@ -39,12 +39,12 @@ public class WebMercatorCoordinate implements Coordinate<WebMercatorCoordinate> 
     }
 
     @Override
-    public double distanceTo(WebMercatorCoordinate other) {
+    public double distanceTo(Coordinate other) {
         throw new NotImplementedException("distanceTo not implemented");
     }
 
     @Override
-    public double flatDistanceTo(WebMercatorCoordinate other) {
+    public double flatDistanceTo(Coordinate other) {
         throw new NotImplementedException("flatDistanceTo not implemented");
     }
 

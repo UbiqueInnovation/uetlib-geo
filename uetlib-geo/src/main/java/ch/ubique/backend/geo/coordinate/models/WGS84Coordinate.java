@@ -1,22 +1,18 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import static java.lang.Math.atan2;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
-import static java.lang.Math.sqrt;
-import static java.lang.Math.toRadians;
-
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import org.locationtech.jts.geom.Point;
 
+import static java.lang.Math.*;
+
 /**
  * World Geodetic System 1984 (also known as WGS84, WGS 1984, EPSG:4326) Most common coordinate
  * System Also referred to as Lat/Lon-Coordinate
  */
-public class WGS84Coordinate implements Coordinate<WGS84Coordinate> {
+public class WGS84Coordinate implements Coordinate {
 
     // For equality testing
     private static final double EPSILON = 0.001;
@@ -76,24 +72,28 @@ public class WGS84Coordinate implements Coordinate<WGS84Coordinate> {
     }
 
     @Override
-    public double distanceTo(WGS84Coordinate other) {
+    public double distanceTo(Coordinate other) {
         return flatDistanceTo(other);
     }
 
     @Override
-    public double flatDistanceTo(WGS84Coordinate other) {
-        var r = 6371; // Radius of the earth in km
-        var dLat = toRadians(other.latitude - latitude);
-        var dLon = toRadians(other.longitude - longitude);
-        var a =
-                sin(dLat / 2) * sin(dLat / 2)
-                        + cos(toRadians(latitude))
-                                * cos(toRadians(other.latitude))
-                                * sin(dLon / 2)
-                                * sin(dLon / 2);
-        var c = 2 * atan2(Math.sqrt(a), sqrt(1 - a));
-        var d = r * c; // Distance in [km]
-        return d * 1000; // Distance in [m]
+    public double flatDistanceTo(Coordinate other) {
+        if (other instanceof WGS84Coordinate otherWgs84) {
+            var r = 6371; // Radius of the earth in km
+            var dLat = toRadians(otherWgs84.latitude - latitude);
+            var dLon = toRadians(otherWgs84.longitude - longitude);
+            var a =
+                    sin(dLat / 2) * sin(dLat / 2)
+                            + cos(toRadians(latitude))
+                            * cos(toRadians(otherWgs84.latitude))
+                            * sin(dLon / 2)
+                            * sin(dLon / 2);
+            var c = 2 * atan2(Math.sqrt(a), sqrt(1 - a));
+            var d = r * c; // Distance in [km]
+            return d * 1000; // Distance in [m]
+        }
+
+        throw new IllegalArgumentException("Calculating the distance between different coordinate systems is not possible.");
     }
 
     @Override

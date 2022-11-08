@@ -1,48 +1,48 @@
 package ch.ubique.backend.geo.osm.parser;
 
-import ch.ubique.backend.geo.graph.utils.RoutingGraphUtil;
+import ch.ubique.backend.geo.graph.routing.RoutingGraphUtil;
 import ch.ubique.backend.geo.osm.parser.graph.OsmGraphParser;
-import ch.ubique.backend.geo.osm.parser.graph.OsmParserConfig;
-
+import ch.ubique.backend.geo.osm.parser.graph.OsmGraphParserConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
 
 class OsmGraphParserTest {
 
     @Test
     @Disabled("Depends on local file")
-    void testParsingOSM() throws FileNotFoundException {
-        final var file = new File("/home/daniel/Downloads/all.pbf");
+    void testParsingOSM() throws IOException {
         final var config =
-                OsmParserConfig.builder()
+                OsmGraphParserConfig.builder()
                         .parseNodeTags(true)
-                        .parseWayTags(false)
-                        .useSourceIds(false)
+                        .parseWayTags(true)
+                        .useSourceIds(true)
                         .build();
-        final var graph = OsmGraphParser.parse(new FileInputStream(file), config);
-        Assertions.assertTrue(graph.getVertices().size() > 0);
-        Assertions.assertTrue(graph.getEdges().size() > 0);
 
-        final var routingGraph = RoutingGraphUtil.createRoutingGraph(graph);
-        Assertions.assertTrue(routingGraph.getVertices().size() > 0);
-        Assertions.assertTrue(routingGraph.getEdges().size() > 0);
+        try (final var inputStream = new URL("https://download.geofabrik.de/europe/liechtenstein-latest.osm.pbf").openStream()){
+            final var graph = OsmGraphParser.parse(inputStream, config);
+            Assertions.assertTrue(graph.getVertices().size() > 0);
+            Assertions.assertTrue(graph.getEdges().size() > 0);
 
-        boolean allEdgesHaveRoutingId =
-                graph.getEdges().stream()
-                        .allMatch(
-                                e ->
-                                        e.getProperties() != null
-                                                && e.getProperties().getRoutingEdgeId() != null);
+            final var routingGraphs = RoutingGraphUtil.createRoutingGraph(graph);
+            Assertions.assertTrue(routingGraphs.routingGraph().getVertices().size() > 0);
+            Assertions.assertTrue(routingGraphs.routingGraph().getEdges().size() > 0);
 
-        boolean allVerticesHaveNonNegativeId =
-                graph.getVertices().stream().allMatch(v -> v.getId() >= 0);
 
-        Assertions.assertTrue(allEdgesHaveRoutingId);
-        Assertions.assertTrue(allVerticesHaveNonNegativeId);
+
+            final var allVerticesHaveNonNegativeId =
+                    routingGraphs.completeGraph().getVertices().stream().allMatch(v -> v.getId() >= 0);
+            Assertions.assertTrue(allVerticesHaveNonNegativeId);
+
+            final var edgesWithoutRoutingId =
+                    routingGraphs.completeGraph().getEdges().stream()
+                            .filter(e -> e.getProperties().getRoutingEdgeId() == null)
+                            .count();
+            Assertions.assertEquals(0, edgesWithoutRoutingId, "Expected all edges to have a routing id.");
+        }
+
     }
 }

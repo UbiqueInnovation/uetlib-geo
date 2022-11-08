@@ -1,16 +1,16 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
-
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import org.locationtech.jts.geom.Point;
 
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
+
 /** Swiss coordinates (1903) https://epsg.io/21781 Imprecise, use LV95 instead if possible */
-public class LV03Coordinate implements Coordinate<LV03Coordinate> {
+public class LV03Coordinate implements Coordinate {
 
     // For equality testing
     private static final double EPSILON = 0.1; // = 10 cm
@@ -70,19 +70,25 @@ public class LV03Coordinate implements Coordinate<LV03Coordinate> {
     }
 
     @Override
-    public double distanceTo(LV03Coordinate other) {
-        if (elevation == null || other.elevation == null) {
-            return flatDistanceTo(other);
+    public double distanceTo(Coordinate other) {
+        if (other instanceof LV03Coordinate otherLv03) {
+            if (elevation == null || otherLv03.elevation == null) {
+                return flatDistanceTo(otherLv03);
+            }
+            return sqrt(
+                    pow(east - otherLv03.east, 2)
+                            + pow(north - otherLv03.north, 2)
+                            + pow(elevation - otherLv03.elevation, 2));
         }
-        return sqrt(
-                pow(east - other.east, 2)
-                        + pow(north - other.north, 2)
-                        + pow(elevation - other.elevation, 2));
+        throw new IllegalArgumentException("Calculating the distance between different coordinate systems is not possible.");
     }
 
     @Override
-    public double flatDistanceTo(LV03Coordinate other) {
-        return sqrt(pow(east - other.east, 2) + pow(north - other.north, 2));
+    public double flatDistanceTo(Coordinate other) {
+        if (other instanceof LV03Coordinate otherLv03) {
+            return sqrt(pow(east - otherLv03.east, 2) + pow(north - otherLv03.north, 2));
+        }
+        throw new IllegalArgumentException("Calculating the flat distance between different coordinate systems is not possible.");
     }
 
     @Override
