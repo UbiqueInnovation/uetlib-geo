@@ -1,73 +1,142 @@
 package ch.ubique.backend.geo.graph.models;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class Graph {
-    private final Map<Long, Vertex> vertices;
-    private final Set<Edge> edges;
+/**
+ * @param <V> type of the vertex properties
+ * @param <E> type of the edge properties
+ */
+public class Graph<V, E> {
+    private final Map<Long, Vertex<V, E> > vertices;
+    private final Map<Long, Edge<V, E>> edges;
 
     private long lastEdgeId;
 
     public Graph() {
         vertices = new HashMap<>();
-        edges = new HashSet<>();
+        edges = new HashMap<>();
         lastEdgeId = 0;
     }
 
-    public Vertex addVertex(long id) {
-        Vertex v = new Vertex(id);
-        return addVertex(v);
+    public void addVertex(Vertex<V, E>  vertex) {
+        vertices.put(vertex.getId(), vertex);
     }
 
-    public Vertex addVertex(Vertex vertex) {
+    public void addVertex(long vertexId, V properties) {
+        addVertex(new Vertex<>(vertexId, properties));
+    }
+
+    public Vertex<V, E> getOrAddVertex(long vertexId) {
+        return getOrAddVertex(vertexId, null);
+    }
+
+    public Vertex<V, E> getOrAddVertex(long vertexId, V properties) {
+        return getOrAddVertex(new Vertex<>(vertexId, properties));
+    }
+
+
+    public Vertex<V, E> getOrAddVertex(Vertex<V, E>  vertex) {
         if (!vertices.containsKey(vertex.getId())) {
-            vertices.put(vertex.getId(), vertex);
+            addVertex(vertex);
         }
-        return vertex;
+        return vertices.get(vertex.getId());
     }
 
-    public Vertex getVertex(long vertexId) {
-        return vertices.computeIfAbsent(vertexId, Vertex::new);
+    public Vertex<V, E>  getVertex(long vertexId) {
+        return vertices.get(vertexId);
     }
 
-    public Edge addEdge(long u, long v) {
-        return addEdge(u, v, null);
+    public Edge<V, E>  getEdge(long edgeId) {
+        return edges.get(edgeId);
     }
 
-    public Edge addEdge(Vertex u, Vertex v) {
-        return addEdge(u, v, null);
+    public Edge<V, E> getOrAddEdge(long u, long v) {
+        return getOrAddEdge(u, v, null);
     }
 
-    public Edge addEdge(long u, long v, EdgeProperties properties) {
-        return addEdge(getVertex(u), getVertex(v), properties);
+    public Edge<V, E> getOrAddEdge(Vertex<V, E>  u, Vertex<V, E>  v) {
+        return getOrAddEdge(u, v, null);
     }
 
-    public Edge addEdge(Vertex u, Vertex v, EdgeProperties properties) {
-        Edge edge = new Edge(lastEdgeId++, u, v);
-        edge.setProperties(properties);
+    public Edge<V, E> getOrAddEdge(long u, long v, E properties) {
+        return getOrAddEdge(getOrAddVertex(u), getOrAddVertex(v), properties);
+    }
 
-        edges.add(edge);
 
-        u.getEdges().add(edge);
-        v.getEdges().add(edge);
+    public Edge<V, E> getOrAddEdge(Vertex<V, E>  u, Vertex<V, E>  v, E properties) {
+        final var existingEdge = getEdge(u, v);
+        if (existingEdge.isPresent()) {
+            return existingEdge.get();
+        }
+
+        final var edge = new Edge<>(lastEdgeId++, u, v, properties);
+
+        edges.put(edge.getId(), edge);
+
+        u.getModifiableEdges().add(edge);
+        v.getModifiableEdges().add(edge);
 
         return edge;
     }
 
-    public Collection<Vertex> getVertices() {
+    public Optional<Edge<V, E>> getEdge(Edge<V, E> edge) {
+        return getEdge(edge.getU(), edge.getV());
+    }
+
+    public Optional<Edge<V, E>> getEdge(Vertex<V, E> u, Vertex<V, E> v) {
+        return getEdge(u.getId(), v.getId());
+    }
+
+    public Optional<Edge<V, E>> getEdge(long u, long v) {
+        return getVertex(u).getEdgeTo(v);
+    }
+
+    public Collection<Vertex<V, E>> getVertices() {
         return vertices.values();
     }
 
-    public Set<Edge> getEdges() {
-        return edges;
+    public Collection<Edge<V, E>> getEdges() {
+        return edges.values();
     }
 
     @Override
     public String toString() {
         return String.format("Graph(n = %,d, m = %,d)'", vertices.size(), edges.size());
+    }
+
+    public Set<List<Vertex<V, E>>> findCycles() {
+
+        final var visited = new HashSet<Vertex<V, E>>();
+        final var cycles = new HashSet<List<Vertex<V, E>>>();
+
+        for (var start : getVertices()) {
+
+            if (visited.contains(start) || start.degree() != 2) {
+                continue;
+            }
+
+            Vertex<V, E> previous = null;
+            var current = start;
+            final var potentialCycle = new LinkedList<Vertex<V, E>>();
+            while (current.degree() == 2) {
+
+                if (current.equals(start) && !potentialCycle.isEmpty()) {
+                    cycles.add(potentialCycle);
+                    break;
+                }
+
+                visited.add(current);
+                potentialCycle.add(current);
+
+                final var prev = previous;
+                final var next = current.getNeighbors().stream().filter(v -> !v.equals(prev)).findAny();
+
+                assert next.isPresent();
+
+                previous = current;
+                current = next.get();
+            }
+        }
+        return cycles;
     }
 }

@@ -1,0 +1,27 @@
+package ch.ubique.backend.geo.tlm.models;
+
+public enum WegType {
+    AUSFAHRT,
+    AUTOBAHN,
+    AUTOSTRASSE,
+    AUTOZUG,
+    DIENSTZUFAHRT,
+    EINFAHRT,
+    FAEHRE,
+    KLETTERSTEIG,
+    MARKIERTE_SPUR,
+    PLATZ,
+    RASTSTAETTE,
+    STRASSE_3M,
+    STRASSE_4M,
+    STRASSE_6M,
+    STRASSE_8M,
+    STRASSE_10M,
+    VERBINDUNG,
+    WEG_1M,
+    WEG_2M,
+    WEGFRAGMENT_1M,
+    WEGFRAGMENT_2M,
+    ZUFAHRT,
+    PROVISORIUM
+}

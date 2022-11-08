@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.osm.parser.graph;
 
-public class OsmParserConfig {
+public class OsmGraphParserConfig {
 
     private final boolean parseNodeTags;
 
@@ -8,7 +8,7 @@ public class OsmParserConfig {
 
     private final boolean useSourceIds;
 
-    private OsmParserConfig(boolean parseNodeTags, boolean parseWayTags, boolean useSourceIds) {
+    private OsmGraphParserConfig(boolean parseNodeTags, boolean parseWayTags, boolean useSourceIds) {
         this.parseNodeTags = parseNodeTags;
         this.parseWayTags = parseWayTags;
         this.useSourceIds = useSourceIds;
@@ -52,8 +52,8 @@ public class OsmParserConfig {
             return this;
         }
 
-        public OsmParserConfig build() {
-            return new OsmParserConfig(parseNodeTags, parseWayTags, useSourceIds);
+        public OsmGraphParserConfig build() {
+            return new OsmGraphParserConfig(parseNodeTags, parseWayTags, useSourceIds);
         }
     }
 }

@@ -1,33 +1,29 @@
 package ch.ubique.backend.geo.osm.parser.graph;
 
-import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
-import ch.ubique.backend.geo.graph.models.EdgeProperties;
 import ch.ubique.backend.geo.graph.models.Graph;
-import ch.ubique.backend.geo.graph.models.VertexProperties;
-
-import com.wolt.osm.parallelpbf.ParallelBinaryParser;
-import com.wolt.osm.parallelpbf.entity.Node;
-import com.wolt.osm.parallelpbf.entity.Way;
-
+import ch.ubique.backend.geo.osm.parser.osmosis.OsmParser;
+import ch.ubique.backend.geo.osm.parser.osmosis.OsmUtils;
+import org.openstreetmap.osmosis.core.domain.v0_6.Node;
+import org.openstreetmap.osmosis.core.domain.v0_6.Way;
+import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class OsmGraphParser {
 
-    public static Graph parse(InputStream inputStream, OsmParserConfig config) {
+    public static Graph<OsmVertexProperties, OsmEdgeProperties> parse(InputStream inputStream, OsmGraphParserConfig config) {
         var osmParser = new OsmGraphParser(inputStream, config);
         return osmParser.parse();
     }
 
     private final InputStream inputStream;
-    private final OsmParserConfig config;
+    private final OsmGraphParserConfig config;
 
-    private Graph graph;
+    private final Graph<OsmVertexProperties, OsmEdgeProperties> graph;
 
     private long nodeCount;
     private long nodeStartMillis;
@@ -38,96 +34,103 @@ public class OsmGraphParser {
 
     private static final Logger logger = LoggerFactory.getLogger(OsmGraphParser.class);
 
-    private OsmGraphParser(InputStream inputStream, OsmParserConfig config) {
+    private OsmGraphParser(InputStream inputStream, OsmGraphParserConfig config) {
         this.inputStream = inputStream;
         this.config = config;
         this.nodeIdToVertexId = new HashMap<>();
-    }
 
-    private Graph parse() {
         nodeCount = 0;
         nodeStartMillis = -1;
 
         wayCount = 0;
         wayStartMillis = -1;
 
-        graph = new Graph();
+        graph = new Graph<>();
+    }
 
-        var numThreads = 1;
-        var parser = new ParallelBinaryParser(inputStream, numThreads);
-        parser.onNode(this::processNodes);
-        parser.onWay(this::processWays);
-        parser.parse();
+    private Graph<OsmVertexProperties, OsmEdgeProperties> parse() {
+        OsmParser
+                .from(inputStream)
+                .onNode(this::processNodes)
+                .onWay(this::processWays)
+                .parse();
 
         return graph;
     }
 
     private void processNodes(Node node) {
-
-        // Start timer
-        if (nodeStartMillis == -1) {
-            nodeStartMillis = System.currentTimeMillis();
-        }
-
         // Get or create vertex
         var id = config.useSourceIds() ? node.getId() : nodeCount;
         nodeIdToVertexId.put(node.getId(), id);
 
-        var vertex = graph.getVertex(id);
-        nodeCount++;
 
-        // Assign coordinate
-        var coordinate = new WGS84Coordinate(node.getLat(), node.getLon());
-        vertex.setCoordinate(coordinate);
+        // Get coordinate
+        var coordinate = OsmUtils.getCoordinate(node);
 
-        // Assign tags
+        // Get tags
+        final var tags = new HashMap<String, String>();
         if (config.parseNodeTags()) {
-            var properties = new VertexProperties();
-            properties.setTags(node.getTags());
-            vertex.setProperties(properties);
+            tags.putAll(OsmUtils.getTags(node));
         }
 
-        var logInterval = 1000000;
-        if (nodeCount % logInterval == 0) {
-            double secondsPassed = (System.currentTimeMillis() - nodeStartMillis) / 1000.;
-            var count = String.format("%,d", nodeCount);
-            var throughput = String.format("%,.0f", logInterval / secondsPassed);
-            logger.info("Processed {} nodes at a current rate of {} [nodes/s]", count, throughput);
-            nodeStartMillis = System.currentTimeMillis();
-        }
+        final var vertex = graph.getOrAddVertex(id);
+        final var properties = new OsmVertexProperties(coordinate, tags);
+        vertex.setProperties(properties);
+
+        logNodeProgress();
     }
 
     private void processWays(Way way) {
+        final var nodeIds = way.getWayNodes().stream().map(WayNode::getNodeId).toList();
 
-        // Start timer
-        if (wayStartMillis == -1) {
-            wayStartMillis = System.currentTimeMillis();
+        // Get tags tags
+        final var tags = new HashMap<String, String>();
+        if (config.parseWayTags()) {
+            tags.putAll(OsmUtils.getTags(way));
         }
 
-        List<Long> nodeIds = way.getNodes();
+        var properties = new OsmEdgeProperties(tags);
 
         for (var i = 0; i < nodeIds.size() - 1; ++i) {
             var u = nodeIdToVertexId.get(nodeIds.get(i));
             var v = nodeIdToVertexId.get(nodeIds.get(i + 1));
 
-            var edge = graph.addEdge(u, v);
-
-            // Assign tags
-            if (config.parseWayTags()) {
-                var properties = new EdgeProperties();
-                properties.setTags(way.getTags());
-                edge.setProperties(properties);
+            final var existingEdge = graph.getEdge(u, v);
+            if (existingEdge.isPresent()) {
+                existingEdge.get().getProperties().tags().putAll(tags); // Merge tags
+            } else {
+                graph.getOrAddEdge(u, v, properties);
             }
         }
+        logWayProgress();
+    }
 
-        wayCount++;
-        var logInterval = 100000;
-        if (wayCount % logInterval == 0) {
-            double secondsPassed = (System.currentTimeMillis() - wayStartMillis) / 1000.;
-            var count = String.format("%,d", wayCount);
-            var throughput = String.format("%,.0f", logInterval / secondsPassed);
-            logger.info("Processed {} ways at a current rate of {} [ways/s]", count, throughput);
+    private void logNodeProgress() {
+        if (nodeStartMillis == -1) {
+            nodeStartMillis = System.currentTimeMillis();
+        }
+        nodeCount++;
+        if (nodeCount % 1000000 == 0) {
+            logProgress(nodeCount, 1000000, nodeStartMillis, "Processed {} nodes at a current rate of {} [nodes/s]");
+            nodeStartMillis = System.currentTimeMillis();
+        }
+    }
+
+    private void logWayProgress() {
+        if (wayStartMillis == -1) {
             wayStartMillis = System.currentTimeMillis();
         }
+        wayCount++;
+        if (wayCount % 100000 == 0) {
+            logProgress(wayCount, 100000, wayStartMillis, "Processed {} ways at a current rate of {} [ways/s]");
+            wayStartMillis = System.currentTimeMillis();
+        }
+    }
+
+    private void logProgress(long elementCount, int logInterval, long startMillis, String logFormat) {
+        double secondsPassed = (System.currentTimeMillis() - startMillis) / 1000.;
+        var count = String.format("%,d", elementCount);
+        var throughput = String.format("%,.0f", logInterval / secondsPassed);
+        logger.info(logFormat, count, throughput);
     }
 }

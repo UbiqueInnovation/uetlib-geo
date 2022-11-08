@@ -1,22 +1,31 @@
 package ch.ubique.backend.geo.graph.models;
 
-import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class Vertex {
-
+/**
+ * @param <V> type of the vertex properties
+ * @param <E> type of the edge properties
+ */
+public final class Vertex<V, E> {
     private final long id;
-    private WGS84Coordinate coordinate;
 
-    private final Set<Edge> edges;
+    private final Set<Edge<V, E>> edges;
 
-    private VertexProperties properties;
+    private V properties;
 
     public Vertex(long id) {
+        this(id, null);
+    }
+
+    public Vertex(long id, V properties) {
         this.id = id;
+        this.properties = properties;
         edges = new HashSet<>(2);
     }
 
@@ -24,44 +33,40 @@ public class Vertex {
         return id;
     }
 
-    public Vertex setCoordinate(WGS84Coordinate coordinate) {
-        this.coordinate = coordinate;
-        return this;
-    }
-
-    public WGS84Coordinate getCoordinate() {
-        return coordinate;
-    }
-
-    public Set<Edge> getEdges() {
+    Set<Edge<V, E>> getModifiableEdges() {
         return edges;
     }
 
-    public List<Vertex> getNeighbors() {
+    /**
+     * Returns an unmodifiable instance, to prevent getEdges().add() calls.
+     * To add edges, {@linkplain Graph#getOrAddEdge} should be used.
+     */
+    public Set<Edge<V, E>> getEdges() {
+        return edges.stream().collect(Collectors.toUnmodifiableSet());
+    }
+
+    public Optional<Edge<V, E>> getEdgeTo(long neighborId) {
+        return edges.stream().filter(e -> e.connects(id, neighborId)).findFirst();
+    }
+
+    public List<Vertex<V, E>> getNeighbors() {
         return edges.stream().map(e -> this.equals(e.getU()) ? e.getV() : e.getU()).toList();
     }
 
-    public VertexProperties getProperties() {
-        return properties;
+    public void setProperties(V properties) {
+        this.properties = properties;
     }
 
-    public Vertex setProperties(VertexProperties properties) {
-        this.properties = properties;
-        return this;
+    public V getProperties() {
+        return properties;
     }
 
     public int degree() {
         return edges.size();
     }
 
-    public double distanceTo(Vertex other) {
-        return coordinate.distanceTo(other.coordinate);
-    }
-
-    public Vertex copyWithoutEdges() {
-        Vertex copy = new Vertex(id);
-        copy.coordinate = coordinate;
-        return copy;
+    public Vertex<V, E> copyWithoutEdges() {
+        return new Vertex<>(id, properties);
     }
 
     @Override
@@ -71,20 +76,19 @@ public class Vertex {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
 
-        Vertex vertex = (Vertex) o;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        return id == vertex.id;
+        final var vertex = (Vertex<?, ?>) o;
+
+        return new EqualsBuilder().append(id, vertex.id).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return (int) (id ^ (id >>> 32));
+        return Long.hashCode(id);
     }
+
+
 }
