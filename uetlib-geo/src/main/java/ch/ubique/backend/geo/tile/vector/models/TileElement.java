@@ -1,16 +1,11 @@
 package ch.ubique.backend.geo.tile.vector.models;
 
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
-import ch.ubique.backend.geo.geometry.models.BoundingBox;
-import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.geometry.models.Point3d;
 import ch.ubique.backend.geo.geometry.utils.BoundingBoxHelper;
 import ch.ubique.backend.geo.geometry.utils.GeometryHelper;
-import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.slf4j.Logger;
@@ -22,18 +17,18 @@ import static ch.ubique.backend.geo.coordinate.util.PointConverter.*;
 import static java.lang.Math.abs;
 import static java.lang.Math.toRadians;
 
-public abstract class TileElement {
+/**
+ * @deprecated This implementation does not work with JTS geometries all the way,
+ * which introduces some weird behaviour, and bugs. Please use the
+ * {@link VectorTileElement} interface directly.
+ */
+@Deprecated(since = "0.7.11", forRemoval = true)
+public abstract class TileElement implements VectorTileElement<Map<String, Object>, Object> {
 
     private final GeometryFactory geometryFactory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FIXED));
 
     private TileElementType elementType = TileElementType.INFERRED;
-
-    // Abstract methods
-
-    public abstract long getId();
-
-    public abstract String getLayer();
 
     /**
      * this set controls which zoom levels the element is added to. if null (default) the element is
@@ -66,12 +61,7 @@ public abstract class TileElement {
         return zoomLevels == null || zoomLevels.contains(zoomLevel);
     }
 
-    /** Return a score for this element. The higher, the more important. */
-    public abstract double getScore();
-
     protected abstract Map<String, Object> getAttributes();
-
-    public abstract Object getMetadata();
 
     public abstract List<LV95Coordinate> getCoordinates();
 
@@ -86,39 +76,35 @@ public abstract class TileElement {
     // Common implementation
 
     public boolean showElement(int zoomLevel) {
-        return true;
+        return isVisibleAtZoomLevel(zoomLevel);
     }
 
-    public BoundingBox<Point2d> getBoundingBox() {
-        return BoundingBoxHelper.getBoundingBox(lv95toPoints(Point2d.class, getCoordinates()));
+    @Override
+    public Envelope getBoundingBox() {
+        return BoundingBoxHelper.getEnvelope(BoundingBoxHelper.getBoundingBox(lv95toPoints(Point2d.class, getCoordinates())));
     }
 
-    public Map<String, Object> getFinalAttributes() {
-        final var attributes = getAttributes();
-        final var metadata = getMetadata();
-
-        if (metadata != null) {
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                String metadataJson = objectMapper.writeValueAsString(metadata);
-                attributes.put("metadata", metadataJson);
-            } catch (JsonProcessingException e) {
-                logger.error("Could not serialize metadata to JSON");
-            }
-        }
-
-        return attributes;
+    @Override
+    public Map<String, Object> getTags() {
+        return Optional.ofNullable(getGeometryWithAttributes())
+                .map(GeometryWithAttributes::attributes)
+                .orElse(null);
     }
 
-    public GeometryWithAttributes getGeometry(
-            BoundingBox2d tileBoundingBox, int extend, YAxisDirection yAxisDirection) {
+    @Override
+    public Geometry getGeometry() {
+        return Optional.ofNullable(getGeometryWithAttributes())
+                .map(GeometryWithAttributes::geometry)
+                .orElse(null);
+    }
+
+    public GeometryWithAttributes getGeometryWithAttributes() {
         var type = inferGeometryType();
 
         return switch (type) {
-            case POINT -> getPoint(
-                    getCoordinates().get(0), tileBoundingBox, extend, yAxisDirection);
-            case LINE -> getLine(tileBoundingBox, extend, yAxisDirection);
-            case POLYGON -> getPolygon(tileBoundingBox, extend, yAxisDirection);
+            case POINT -> getPoint(getCoordinates().get(0));
+            case LINE -> getLine();
+            case POLYGON -> getPolygon();
             default -> throw new RuntimeException("TileElementType " + type + " not implemented");
         };
     }
@@ -193,44 +179,36 @@ public abstract class TileElement {
         return getCoordinates().stream().allMatch(c -> c.getElevation() != null);
     }
 
-    private GeometryWithAttributes getPoint(
-            LV95Coordinate position,
-            BoundingBox2d tileBoundingBox,
-            int extend,
-            YAxisDirection yAxisDirection) {
-        Coordinate coordinate =
-                getCoordinateOnTile(
-                        toPoint(Point2d.class, position), tileBoundingBox, extend, yAxisDirection);
+    private GeometryWithAttributes getPoint(LV95Coordinate position) {
+        Coordinate coordinate = getCoordinate(toPoint(Point2d.class, position));
         return getPoint(coordinate, position.getElevation());
     }
 
     private GeometryWithAttributes getPoint(Coordinate coordinate, Double elevation) {
         Geometry geometry = geometryFactory.createPoint(coordinate);
-        Map<String, Object> attributes = getFinalAttributes();
+        Map<String, Object> attributes = getAttributes();
         if (elevation != null) {
             attributes.put("elevation", elevation);
         }
         return new GeometryWithAttributes(geometry, attributes);
     }
 
-    private GeometryWithAttributes getLine(
-            BoundingBox2d tileBoundingBox, int extend, YAxisDirection yAxisDirection) {
+    private GeometryWithAttributes getLine() {
         var points = lv95toPoints(Point2d.class, getCoordinates());
         Coordinate[] coordinates =
-                toTileCoordinateArray(points, tileBoundingBox, extend, yAxisDirection);
+                toTileCoordinateArray(points);
         if (coordinates.length == 1) {
             return getPoint(coordinates[0], getCoordinates().get(0).getElevation());
         }
         Geometry geometry = geometryFactory.createLineString(coordinates);
-        Map<String, Object> attributes = getFinalAttributes();
+        Map<String, Object> attributes = getAttributes();
         addElevationAttributes(getCoordinates(), attributes);
         return new GeometryWithAttributes(geometry, attributes);
     }
 
-    private GeometryWithAttributes getPolygon(
-            BoundingBox2d tileBoundingBox, int extend, YAxisDirection yAxisDirection) {
+    private GeometryWithAttributes getPolygon() {
         var points = lv95toPoints(Point2d.class, getCoordinates());
-        Coordinate[] shell = toTileCoordinateArray(points, tileBoundingBox, extend, yAxisDirection);
+        Coordinate[] shell = toTileCoordinateArray(points);
         Geometry geometry;
         if (shell.length == 1
                 || (shell.length == 2 && shell[0].equals(shell[1]))) { // Point. Some points come as
@@ -252,10 +230,7 @@ public abstract class TileElement {
                                     .map(
                                             h ->
                                                     toTileCoordinateArray(
-                                                            lv95toPoints(Point2d.class, h),
-                                                            tileBoundingBox,
-                                                            extend,
-                                                            yAxisDirection))
+                                                            lv95toPoints(Point2d.class, h)))
                                     .filter(h -> h.length > 2)
                                     .map(geometryFactory::createLinearRing)
                                     .toArray(LinearRing[]::new));
@@ -264,11 +239,11 @@ public abstract class TileElement {
         if (!geometry.isValid()) {
             logger.debug(
                     "Geometry  {}  not valid, try to created fixed version",
-                    this.getFinalAttributes());
+                    this.getAttributes());
             geometry = validate(geometry);
         }
 
-        Map<String, Object> attributes = getFinalAttributes();
+        Map<String, Object> attributes = getAttributes();
         addElevationAttributes(getCoordinates(), attributes);
         return new GeometryWithAttributes(geometry, attributes);
     }
@@ -327,40 +302,11 @@ public abstract class TileElement {
         return abs(a.getElevation() - b.getElevation()) / a.distanceTo(b);
     }
 
-    private Coordinate getCoordinateOnTile(
-            Point2d point, BoundingBox2d boundingBox, int extend, YAxisDirection yAxisDirection) {
-        double x =
-                Math.round(
-                        (point.getX() - boundingBox.getMin().getX())
-                                / boundingBox.getWidth()
-                                * extend);
 
-        /*
-         * currently y is only correct when using LV95 or LV03 coordinates, which increase in UPward
-         * direction
-         */
-        double y =
-                Math.round(
-                        (point.getY() - boundingBox.getMin().getY())
-                                / boundingBox.getHeight()
-                                * extend);
-        if (YAxisDirection.DOWN.equals(yAxisDirection)) {
-            y = extend - y;
-        }
-        return new Coordinate(x, y);
-    }
-
-    private Coordinate[] toTileCoordinateArray(
-            List<Point2d> points,
-            BoundingBox2d boundingBox,
-            int extend,
-            YAxisDirection yAxisDirection) {
+    private Coordinate[] toTileCoordinateArray(List<Point2d> points) {
         var rawPoints =
                 points.stream()
-                        .map(
-                                coordinate ->
-                                        getCoordinateOnTile(
-                                                coordinate, boundingBox, extend, yAxisDirection))
+                        .map(this::getCoordinate)
                         .toList();
 
         if (rawPoints.isEmpty()) {
@@ -381,6 +327,10 @@ public abstract class TileElement {
         }
 
         return finalPoints.toArray((Coordinate[]::new));
+    }
+
+    private Coordinate getCoordinate(Point2d point2d) {
+        return new Coordinate(point2d.getX(), point2d.getY());
     }
 
     /**

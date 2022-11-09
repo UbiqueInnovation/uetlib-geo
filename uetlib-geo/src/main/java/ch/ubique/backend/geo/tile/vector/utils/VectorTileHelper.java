@@ -1,11 +1,6 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
-import ch.ubique.backend.geo.geometry.models.BoundingBox;
-import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
+import ch.ubique.backend.core.utils.MathUtils;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
@@ -13,28 +8,32 @@ import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.Tile;
-import ch.ubique.backend.geo.tile.vector.models.TileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
+import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import com.pivovarit.function.ThrowingConsumer;
+import no.ecc.vectortile.VectorTileEncoder;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.operation.valid.IsValidOp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
-import no.ecc.vectortile.VectorTileEncoder;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class VectorTileHelper<T extends TileElement> {
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
+public class VectorTileHelper<T extends VectorTileElement<?, ?>> {
 
     private static final Logger logger = LoggerFactory.getLogger(VectorTileHelper.class);
 
@@ -50,29 +49,50 @@ public class VectorTileHelper<T extends TileElement> {
     }
 
     private byte[] generateBinary(Tile<T> tile) {
-        final var encoder =
-                new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
+        final var encoder = new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
 
-        for (TileElement element : tile.getElements()) {
-            if (!element.showElement(tile.getTileInfo().zoomLevel().level())) {
-                continue;
-            }
-            final var boundingBox = tile.getBoundingBox();
-            final var layer = element.getLayer();
-            final long id = element.getId();
-            final var item =
-                    element.getGeometry(
-                            boundingBox, config.getExtent(), config.getYAxisDirection());
-            if (item == null || item.getGeometry() == null) {
-                logger.warn("Item or geometry is null: {}", element);
-            } else if (!item.getGeometry().isValid()) {
-                logger.warn("Geometry not valid: {}", item.getAttributes());
-            } else {
-                encoder.addFeature(layer, item.getAttributes(), item.getGeometry(), id);
-            }
+        for (final var element : tile.elements()) {
+            addFeature(encoder, tile, element);
         }
         return encoder.encode();
     }
+
+    private void addFeature(final VectorTileEncoder encoder, final Tile<T> tile, final VectorTileElement<?, ?> element) {
+        if (!element.showElement(tile.tileInfo().zoomLevel().level())) {
+            return;
+        }
+        final var boundingBox = tile.boundingBox();
+        final var layer = element.getLayer();
+        final long id = element.getId();
+        final var geometry = element.getGeometry();
+        final var tags = VectorTileElementUtils.getFinalTags(element);
+
+        final var geometryValidator = new IsValidOp(geometry);
+        if (!geometryValidator.isValid()) {
+            logger.warn("Element geometry for {} not valid: {}", tags, geometryValidator.getValidationError());
+            return;
+        }
+
+        final var tileGeometryMaybe = TileGeometryUtils.getTileGeometry(geometry, boundingBox, config.getExtent(), config.getYAxisDirection());
+        if (tileGeometryMaybe.isEmpty()) {
+            logger.warn("Could not get tile geometry for {}", tags);
+            return;
+        }
+
+        final var tileGeometry = tileGeometryMaybe.get();
+        final var tileGeometryValidator = new IsValidOp(tileGeometry);
+        if (!tileGeometry.isValid()) {
+            logger.warn("Tile geometry for {} not valid: {}", tags, tileGeometryValidator.getValidationError());
+            return;
+        }
+
+        final var outputGeometry = config.simplify() ?
+                SimplifyGeometryUtils.simplify(tileGeometry, config.simplifyTolerance()) :
+                tileGeometry;
+
+        encoder.addFeature(layer, tags, outputGeometry, id);
+    }
+
 
     public void generateTiles(
             ThrowingConsumer<BinaryTile, IOException> tileConsumer, int numThreads)
@@ -84,9 +104,6 @@ public class VectorTileHelper<T extends TileElement> {
 
         for (var level : levels) {
             final var zoomLevel = gridInfo.getZoomLevel(level);
-            if (config.simplify()) {
-                simplifyElements(zoomLevel);
-            }
             generateTilesForLevel(zoomLevel, tileConsumer, numThreads);
         }
     }
@@ -102,12 +119,6 @@ public class VectorTileHelper<T extends TileElement> {
         final Collection<BinaryTile> binaryTiles = new ConcurrentLinkedQueue<>();
         generateTiles(binaryTiles::add, numThreads);
         return binaryTiles;
-    }
-
-    private void simplifyElements(ZoomLevel zoomLevel) {
-        logger.info("Simplifying elements");
-        double sum = elements.stream().mapToDouble(element -> element.simplify(zoomLevel)).sum();
-        logger.info("Relative size after simplifying (avg): {}", sum / elements.size());
     }
 
     private void generateTilesForLevel(
@@ -155,7 +166,7 @@ public class VectorTileHelper<T extends TileElement> {
 
                                                             var binaryTile =
                                                                     new BinaryTile(
-                                                                            tile.getTileInfo(),
+                                                                            tile.tileInfo(),
                                                                             bytes);
                                                             if (tileConsumer != null) {
                                                                 tileConsumer
@@ -196,7 +207,7 @@ public class VectorTileHelper<T extends TileElement> {
                                     tile ->
                                             min(
                                                     config.getMaxElementsPerTile(zoomLevel.level()),
-                                                    tile.getElements().size()))
+                                                    tile.elements().size()))
                             .max()
                             .orElse(-1);
             double avgElementsWithLimit =
@@ -205,7 +216,7 @@ public class VectorTileHelper<T extends TileElement> {
                                     tile ->
                                             min(
                                                     config.getMaxElementsPerTile(zoomLevel.level()),
-                                                    tile.getElements().size()))
+                                                    tile.elements().size()))
                             .average()
                             .orElse(-1);
             stats.append(
@@ -215,9 +226,9 @@ public class VectorTileHelper<T extends TileElement> {
         }
 
         int maxElements =
-                tiles.stream().mapToInt(tile -> tile.getElements().size()).max().orElse(-1);
+                tiles.stream().mapToInt(tile -> tile.elements().size()).max().orElse(-1);
         double avgElements =
-                tiles.stream().mapToInt(tile -> tile.getElements().size()).average().orElse(-1);
+                tiles.stream().mapToInt(tile -> tile.elements().size()).average().orElse(-1);
         stats.append(
                 String.format(
                         "  Elements per tile (without limit): avg = %.2f, max = %d",
@@ -242,26 +253,26 @@ public class VectorTileHelper<T extends TileElement> {
                 Point2d min = origin.plus(tileWidth * x, -tileWidth * (y + 1));
                 Point2d max = min.plus(tileWidth, tileWidth);
                 TileInfo tileInfo = new TileInfo(x, y, zoomLevel);
-                BoundingBox2d boundingBox = new BoundingBox2d(min, max);
+                final var boundingBox = new Envelope(min.getX(), max.getX(), min.getY(), max.getY());
                 tiles.add(new Tile<>(tileInfo, boundingBox));
             }
         }
 
         // Given a coordinate, return corresponding tile coordinates
-        ToIntFunction<Point2d> getX =
-                coordinate -> (int) ((coordinate.getX() - origin.getX()) / tileWidth);
-        ToIntFunction<Point2d> getY =
-                coordinate -> (int) ((origin.getY() - coordinate.getY()) / tileWidth);
+        ToIntFunction<Double> getX =
+                xCoordinate -> (int) ((xCoordinate - origin.getX()) / tileWidth);
+        ToIntFunction<Double> getY =
+                yCoordinate -> (int) ((origin.getY() - yCoordinate) / tileWidth);
 
         // Add elements to tiles that lie within bounding box of element and are visible at the
         // current zoom level
         for (T element : elements) {
-            if (element.isVisibleAtZoomLevel(zoomLevel)) {
+            if (element.showElement(zoomLevel.level())) {
                 getXYsElementIsIn(tilesX, tilesY, getX, getY, element)
                         .forEach(
                                 xy ->
                                         tiles.get(xy.getLeft() * tilesY + xy.getRight())
-                                                .getElements()
+                                                .elements()
                                                 .add(element));
             }
         }
@@ -273,26 +284,32 @@ public class VectorTileHelper<T extends TileElement> {
         final ZoomLevel zoomLevel = gridInfo.getZoomLevel(z);
         final double tileWidth = zoomLevel.tileWidth();
         final Point2d origin = toPoint(Point2d.class, gridInfo.origin());
-        ToIntFunction<Point2d> getX =
-                coordinate -> (int) ((coordinate.getX() - origin.getX()) / tileWidth);
-        ToIntFunction<Point2d> getY =
-                coordinate -> (int) ((origin.getY() - coordinate.getY()) / tileWidth);
+        ToIntFunction<Double> getX =
+                coordinateX -> (int) ((coordinateX - origin.getX()) / tileWidth);
+        ToIntFunction<Double> getY =
+                coordinateY -> (int) ((origin.getY() - coordinateY) / tileWidth);
         return getXYsElementIsIn(zoomLevel.tilesX(), zoomLevel.tilesY(), getX, getY, element);
     }
 
     private List<Pair<Integer, Integer>> getXYsElementIsIn(
             int tilesX,
             int tilesY,
-            ToIntFunction<Point2d> getX,
-            ToIntFunction<Point2d> getY,
+            ToIntFunction<Double> getX,
+            ToIntFunction<Double> getY,
             T element) {
         final List<Pair<Integer, Integer>> xyList = new ArrayList<>();
 
-        BoundingBox<Point2d> box = element.getBoundingBox();
-        int minX = max(0, getX.applyAsInt(box.getMin()));
-        int minY = max(0, getY.applyAsInt(box.getMax()));
-        int maxX = min(tilesX - 1, getX.applyAsInt(box.getMax()));
-        int maxY = min(tilesY - 1, getY.applyAsInt(box.getMin()));
+        final var box = element.getBoundingBox();
+
+        final var x1 = MathUtils.clamp(getX.applyAsInt(box.getMinX()),0, tilesX - 1);
+        final var x2 = MathUtils.clamp(getX.applyAsInt(box.getMaxX()),0, tilesX - 1);
+        final var y1 = MathUtils.clamp(getY.applyAsInt(box.getMinY()),0, tilesY - 1);
+        final var y2 = MathUtils.clamp(getY.applyAsInt(box.getMaxY()),0, tilesY - 1);
+
+        final var minX = Math.min(x1, x2);
+        final var maxX = Math.max(x1, x2);
+        final var minY = Math.min(y1, y2);
+        final var maxY = Math.max(y1, y2);
 
         for (int x = minX; x <= maxX; ++x) {
             for (int y = minY; y <= maxY; ++y) {
@@ -317,12 +334,13 @@ public class VectorTileHelper<T extends TileElement> {
         var visibleElements = new HashSet<Long>();
         for (var tile : tiles) {
             // only the most important elements are visible
+            ToDoubleFunction<VectorTileElement<?, ?>> getScore = VectorTileElement::getScore;
             var visibleElementsForTile =
-                    tile.getElements().stream()
-                            .sorted(Comparator.comparingDouble(TileElement::getScore).reversed())
+                    tile.elements().stream()
+                            .sorted(Comparator.comparingDouble(getScore).reversed())
                             .filter(config::filter)
                             .limit(config.getMaxElementsPerTile(zoomLevel.level()))
-                            .map(TileElement::getId)
+                            .map(VectorTileElement::getId)
                             .collect(Collectors.toSet());
 
             visibleElements.addAll(visibleElementsForTile);
@@ -332,12 +350,12 @@ public class VectorTileHelper<T extends TileElement> {
         final var limitedTiles = new ArrayList<Tile<T>>(tiles.size());
         for (var tile : tiles) {
             Collection<T> visibleElementsForTile =
-                    tile.getElements().stream()
+                    tile.elements().stream()
                             .filter(t -> visibleElements.contains(t.getId()))
                             .toList();
 
-            var limitedTile = new Tile<T>(tile.getTileInfo(), tile.getBoundingBox());
-            limitedTile.getElements().addAll(visibleElementsForTile);
+            var limitedTile = new Tile<T>(tile.tileInfo(), tile.boundingBox());
+            limitedTile.elements().addAll(visibleElementsForTile);
             limitedTiles.add(limitedTile);
         }
 

@@ -2,17 +2,18 @@ package ch.ubique.backend.geo.tile.vector.models;
 
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import com.pivovarit.function.ThrowingConsumer;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class VectorTileConfig<T extends TileElement> {
+public class VectorTileConfig<T extends VectorTileElement<?, ?>> {
 
     private String key;
 
     private ThrowingConsumer<BinaryTile, IOException> onTileGenerated;
     private int maxElementsPerTile;
-    private boolean simplify;
+    private double simplifyTolerance;
     private int clipBuffer = 0;
     private int extent = 4096;
 
@@ -54,12 +55,7 @@ public class VectorTileConfig<T extends TileElement> {
     }
 
     public boolean simplify() {
-        return simplify;
-    }
-
-    public VectorTileConfig<T> setSimplify(boolean simplify) {
-        this.simplify = simplify;
-        return this;
+        return simplifyTolerance > 0;
     }
 
     public int getClipBuffer() {
@@ -117,10 +113,6 @@ public class VectorTileConfig<T extends TileElement> {
         return this;
     }
 
-    public boolean isSimplify() {
-        return simplify;
-    }
-
     public YAxisDirection getYAxisDirection() {
         return yAxisDirection;
     }
@@ -136,5 +128,20 @@ public class VectorTileConfig<T extends TileElement> {
         } else {
             return true;
         }
+    }
+
+    /**
+     * All vertices in the simplified geometry will be within this distance of the original geometry
+     * (in output coordinates on of the vector tile, the output coordinates are between 0 and extent).
+     * The tolerance value must be non-negative. A tolerance value of zero is effectively a no-op.
+     */
+    public VectorTileConfig<T> setSimplifyTolerance(double simplifyTolerance) {
+        this.simplifyTolerance = simplifyTolerance;
+        return this;
+    }
+
+
+    public double simplifyTolerance() {
+        return simplifyTolerance;
     }
 }
