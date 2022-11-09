@@ -1,13 +1,14 @@
 package ch.ubique.backend.geo.geometry.utils;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
 import ch.ubique.backend.geo.geometry.models.BoundingBox;
 import ch.ubique.backend.geo.geometry.models.Point;
+import org.locationtech.jts.geom.Envelope;
 
 import java.util.Collections;
 import java.util.List;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public class BoundingBoxHelper {
 
@@ -32,5 +33,19 @@ public class BoundingBoxHelper {
             }
         }
         return new BoundingBox<>(min, max);
+    }
+
+    public static Envelope getEnvelope(BoundingBox<?> boundingBox) {
+        if (boundingBox == null) {
+            return null;
+        }
+
+        final var min = boundingBox.getMin();
+        final var max = boundingBox.getMax();
+
+        final int x = 0;
+        final int y = 1;
+
+        return new Envelope(min.get(x), max.get(x), min.get(y), max.get(y));
     }
 }
