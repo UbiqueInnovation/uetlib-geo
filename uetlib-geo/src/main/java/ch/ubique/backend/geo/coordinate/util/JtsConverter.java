@@ -4,7 +4,6 @@ import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -25,13 +24,18 @@ public class JtsConverter {
     private JtsConverter() {}
 
     @NotNull
-    public static Point createPointWgs84(final double x, final double y) {
-        return GEOMETRY_FACTORY_WGS84.createPoint(new Coordinate(x, y));
+    public static Point createPoint(WGS84Coordinate wgs84Coordinate) {
+        return GEOMETRY_FACTORY_WGS84.createPoint(toJts(wgs84Coordinate));
     }
 
     @NotNull
     public static Point toJtsPoint(final WGS84Coordinate wgs84Coordinate) {
-        return createPointWgs84(wgs84Coordinate.getLongitude(), wgs84Coordinate.getLatitude());
+        return createPoint(wgs84Coordinate);
+    }
+
+    @NotNull
+    public static Coordinate toJts(final WGS84Coordinate coordinate) {
+        return new Coordinate(coordinate.getLongitude(), coordinate.getLatitude());
     }
 
     @NotNull
@@ -40,13 +44,18 @@ public class JtsConverter {
     }
 
     @NotNull
-    public static Point createPointLv03(final double x, final double y) {
-        return GEOMETRY_FACTORY_LV03.createPoint(new Coordinate(x, y));
+    public static Point createPoint(LV03Coordinate coordinate) {
+        return GEOMETRY_FACTORY_LV03.createPoint(toJts(coordinate));
+    }
+
+    @NotNull
+    public static Coordinate toJts(final LV03Coordinate lv03Coordinate) {
+        return new Coordinate(lv03Coordinate.getEast(), lv03Coordinate.getNorth());
     }
 
     @NotNull
     public static Point toJtsPoint(final LV03Coordinate lv03Coordinate) {
-        return createPointLv03(lv03Coordinate.getEast(), lv03Coordinate.getNorth());
+        return createPoint(lv03Coordinate);
     }
 
     @NotNull
@@ -55,13 +64,18 @@ public class JtsConverter {
     }
 
     @NotNull
-    public static Point createPointWebMercator(final double x, final double y) {
-        return GEOMETRY_FACTORY_WM.createPoint(new Coordinate(x, y));
+    public static Point createPoint(WebMercatorCoordinate coordinate) {
+        return GEOMETRY_FACTORY_WM.createPoint(toJts(coordinate));
+    }
+
+    @NotNull
+    public static Coordinate toJts(final WebMercatorCoordinate coordinate) {
+        return new Coordinate(coordinate.getX(), coordinate.getY());
     }
 
     @NotNull
     public static Point toJtsPoint(final WebMercatorCoordinate webMercatorCoordinate) {
-        return createPointWebMercator(webMercatorCoordinate.getX(), webMercatorCoordinate.getY());
+        return createPoint(webMercatorCoordinate);
     }
 
     @NotNull
@@ -70,13 +84,18 @@ public class JtsConverter {
     }
 
     @NotNull
-    public static Point createPointLv95(final double x, final double y) {
-        return GEOMETRY_FACTORY_LV95.createPoint(new Coordinate(x, y));
+    public static Point createPoint(LV95Coordinate coordinate) {
+        return GEOMETRY_FACTORY_LV95.createPoint(toJts(coordinate));
     }
 
     @NotNull
-    public static Point toJtsPoint(final LV95Coordinate lv95Coordinate) {
-        return createPointLv95(lv95Coordinate.getEast(), lv95Coordinate.getNorth());
+    public static Coordinate toJts(final LV95Coordinate lv03Coordinate) {
+        return new Coordinate(lv03Coordinate.getEast(), lv03Coordinate.getNorth());
+    }
+
+    @NotNull
+    public static Point toJtsPoint(final LV95Coordinate coordinate) {
+        return createPoint(coordinate);
     }
 
     @NotNull

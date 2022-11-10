@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.tile.vector.utils;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.geotools.referencing.operation.builder.MissingInfoException;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.renderer.lite.RendererUtilities;
 import org.locationtech.jts.geom.Coordinate;
@@ -19,8 +20,6 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.Optional;
 
-import static org.geotools.referencing.crs.DefaultEngineeringCRS.GENERIC_2D;
-
 public class TileGeometryUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(TileGeometryUtils.class);
@@ -31,13 +30,13 @@ public class TileGeometryUtils {
             final Geometry geometry,
             final Envelope tileEnvelope,
             final int extend,
-            final YAxisDirection yAxisDirection) {
+            final YAxisDirection yAxisDirection) throws FactoryException {
 
         try {
             final var crs = getCrs(geometry);
             final var transformed = JTS.transform(geometry, tileTransform(tileEnvelope, extend, yAxisDirection, crs));
             return Optional.of(transformed);
-        } catch (TransformException | FactoryException e) {
+        } catch (TransformException e) {
             logger.warn("Could not transform geometry for tile", e);
             return Optional.empty();
         }
@@ -46,7 +45,7 @@ public class TileGeometryUtils {
     private static CoordinateReferenceSystem getCrs(Geometry geometry) throws FactoryException {
         final var srid = geometry.getSRID();
         if (srid == 0) {
-            return GENERIC_2D;
+            throw new MissingInfoException("The Spatial Reference ID (SRID) is not set for the given geometry.");
         }
         return CRS.decode("EPSG:" + srid);
     }

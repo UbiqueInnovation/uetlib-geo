@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.tile.vector.models;
 
 import org.locationtech.jts.geom.Geometry;
 
+@SuppressWarnings("ClassCanBeRecord") // We want to allow inheriting from this class -> it can not be a record
 public class BaseVectorTileElement<T, M> implements VectorTileElement<T, M> {
 
     private final long id;
@@ -21,27 +22,27 @@ public class BaseVectorTileElement<T, M> implements VectorTileElement<T, M> {
     }
 
     @Override
-    public final long getId() {
+    public final long id() {
         return id;
     }
 
     @Override
-    public final String getLayer() {
+    public final String layer() {
         return layer;
     }
 
     @Override
-    public final double getScore() {
+    public final double score() {
         return score;
     }
 
     @Override
-    public final T getTags() {
+    public final T tags() {
         return tags;
     }
 
     @Override
-    public final M getMetadata() {
+    public final M metadata() {
         return metadata;
     }
 
@@ -51,7 +52,7 @@ public class BaseVectorTileElement<T, M> implements VectorTileElement<T, M> {
     }
 
     @Override
-    public final Geometry getGeometry() {
+    public final Geometry geometry() {
         return geometry;
     }
 
