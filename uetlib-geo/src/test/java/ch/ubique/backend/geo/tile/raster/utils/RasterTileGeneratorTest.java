@@ -19,7 +19,7 @@ class RasterTileGeneratorTest {
 
 //    @Test
     void test() {
-        final var tileLevelsDefinition = SwissConstants.swissTileDefinition().withMaxLevel(23);
+        final var tileLevelsDefinition = SwissConstants.swissTileDefinition().withMaxLevel(17);
         final var sourceTileSize = 1000;
 
         final var generatedTiles = new HashSet<TileInfo>();
@@ -30,6 +30,7 @@ class RasterTileGeneratorTest {
             protected void onTileGenerated(RasterTile rasterTile) {
                 Assertions.assertFalse(generatedTiles.contains(rasterTile.tileInfo()));
                 generatedTiles.add(rasterTile.tileInfo());
+                writeToFile(rasterTile);
             }
 
             @Override
@@ -49,9 +50,9 @@ class RasterTileGeneratorTest {
 
 //    @Test
     @Disabled("Only for visualizing locally. ")
-    void testImages() throws IOException {
-        final var tileLevelsDefinition = SwissConstants.swissTileDefinition().withMinMaxLevel(8, 20);
-        final var sourceTileSize = 100 * 1000;
+    void testImages() {
+        final var tileLevelsDefinition = SwissConstants.swissTileDefinition().onlyWithLevels(12);
+        final var sourceTileSize = 400 * 1000;
 
         final var generatedTiles = new HashSet<RasterTile>();
 
@@ -87,13 +88,7 @@ class RasterTileGeneratorTest {
                 frame.add(panel);
             }
 
-            try {
-                final var output = new File("/tmp/" + getClass().getName() + '/' + rasterTile.tileInfo().path() + ".png");
-                output.mkdirs();
-                ImageIO.write(rasterTile.data(), "png", output);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            writeToFile(rasterTile);
         }
 
         frame.setModal(true);
@@ -103,8 +98,18 @@ class RasterTileGeneratorTest {
         Assertions.assertTrue(true);
     }
 
+    private void writeToFile(RasterTile rasterTile) {
+        try {
+            final var output = new File("/tmp/" + getClass().getName() + '/' + rasterTile.tileInfo().path() + ".png");
+            output.mkdirs();
+            ImageIO.write(rasterTile.data(), "png", output);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private RasterTile tileWithRandomColor(TileInfo tileInfo) {
-        final var data = new BufferedImage(5, 5, BufferedImage.TYPE_INT_ARGB);
+        final var data = new BufferedImage(20, 20, BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D g = (Graphics2D) data.getGraphics();
         g.setPaint(new GradientPaint(new Point(0, 0), randomColor(), new Point(data.getHeight(), data.getWidth()), Color.black));
         g.fillRect(0, 0, data.getWidth(), data.getHeight());

@@ -6,17 +6,10 @@ import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
 import ch.ubique.backend.geo.tile.raster.models.RasterTile;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.util.List;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static java.awt.image.AffineTransformOp.TYPE_BILINEAR;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * Generates raster tiles for all zoom levels specified in the {@link TileLevelsDefinition}.
@@ -30,9 +23,16 @@ public abstract class RasterTileGenerator {
 
     private final double sourceTileWidth;
 
+    private final double[] customEmptyPixelValue;
+
     protected RasterTileGenerator(final TileLevelsDefinition levelsDefinition, final double sourceTileWidth, int outputResolution) {
+        this(levelsDefinition, sourceTileWidth, outputResolution, null);
+    }
+
+    protected RasterTileGenerator(final TileLevelsDefinition levelsDefinition, final double sourceTileWidth, int outputResolution, double[] customEmptyPixelValue) {
         this.outputResolution = outputResolution;
         this.sourceTileWidth = sourceTileWidth;
+        this.customEmptyPixelValue = customEmptyPixelValue;
 
         // Add a "fake" zoom level for the input.
         // We set the level to Integer.MAX_VALUE, to ensure the level is treated as the base case.
@@ -170,7 +170,18 @@ public abstract class RasterTileGenerator {
             return RasterTile.empty(currentInfo);
         }
 
-        final var data = new BufferedImage(outputResolution, outputResolution, nonEmptyChildren.get(0).data().getType());
+        final var anyChild = nonEmptyChildren.get(0);
+        final var colorModel = anyChild.data().getColorModel();
+        final var raster = colorModel.createCompatibleWritableRaster(outputResolution, outputResolution);
+        final var data = new BufferedImage(colorModel, raster, anyChild.data().isAlphaPremultiplied(), null);
+
+        if (customEmptyPixelValue != null) {
+            for (var x = 0; x < data.getWidth(); ++x) {
+                for (var y = 0; y < data.getHeight(); ++y) {
+                    raster.setPixel(x, y, customEmptyPixelValue);
+                }
+            }
+        }
 
         final var currentTileWidth = currentInfo.zoomLevel().tileWidth();
 
@@ -209,7 +220,7 @@ public abstract class RasterTileGenerator {
             final var affineTransform =     new AffineTransform();
             affineTransform.translate(-leftCrop, -topCrop);
             affineTransform.scale(1. * scaledWidth / child.data().getWidth(), 1. * scaledHeight /  child.data().getHeight());
-            new AffineTransformOp(affineTransform, TYPE_BILINEAR).filter(child.data(), target);
+            RasterTransform.transform(child.data().getData(), target.getRaster(), affineTransform);
         }
 
         return new RasterTile(currentInfo, data);
