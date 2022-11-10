@@ -11,11 +11,13 @@ import ch.ubique.backend.geo.tile.vector.models.Tile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import com.pivovarit.function.ThrowingConsumer;
+import com.pivovarit.function.ThrowingFunction;
 import no.ecc.vectortile.VectorTileEncoder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.operation.valid.IsValidOp;
+import org.opengis.referencing.FactoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +50,7 @@ public class VectorTileHelper<T extends VectorTileElement<?, ?>> {
         this.gridInfo = SwissConstants.swissTileDefinition();
     }
 
-    private byte[] generateBinary(Tile<T> tile) {
+    private byte[] generateBinary(Tile<T> tile) throws FactoryException {
         final var encoder = new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
 
         for (final var element : tile.elements()) {
@@ -57,14 +59,14 @@ public class VectorTileHelper<T extends VectorTileElement<?, ?>> {
         return encoder.encode();
     }
 
-    private void addFeature(final VectorTileEncoder encoder, final Tile<T> tile, final VectorTileElement<?, ?> element) {
+    private void addFeature(final VectorTileEncoder encoder, final Tile<T> tile, final VectorTileElement<?, ?> element) throws FactoryException {
         if (!element.showElement(tile.tileInfo().zoomLevel().level())) {
             return;
         }
         final var boundingBox = tile.boundingBox();
-        final var layer = element.getLayer();
-        final long id = element.getId();
-        final var geometry = element.getGeometry();
+        final var layer = element.layer();
+        final long id = element.id();
+        final var geometry = element.geometry();
         final var tags = VectorTileElementUtils.getFinalTags(element);
 
         final var geometryValidator = new IsValidOp(geometry);
@@ -140,7 +142,8 @@ public class VectorTileHelper<T extends VectorTileElement<?, ?>> {
                                         tiles.parallelStream()
                                                 .map(
                                                         tile -> {
-                                                            byte[] bytes = generateBinary(tile);
+                                                            ThrowingFunction<Tile<T>, byte[], Exception> generateFunction = this::generateBinary;
+                                                            byte[] bytes = generateFunction.uncheck().apply(tile);
 
                                                             // Log progress
                                                             int countValue =
@@ -299,7 +302,7 @@ public class VectorTileHelper<T extends VectorTileElement<?, ?>> {
             T element) {
         final List<Pair<Integer, Integer>> xyList = new ArrayList<>();
 
-        final var box = element.getBoundingBox();
+        final var box = element.boundingBox();
 
         final var x1 = MathUtils.clamp(getX.applyAsInt(box.getMinX()),0, tilesX - 1);
         final var x2 = MathUtils.clamp(getX.applyAsInt(box.getMaxX()),0, tilesX - 1);
@@ -334,13 +337,13 @@ public class VectorTileHelper<T extends VectorTileElement<?, ?>> {
         var visibleElements = new HashSet<Long>();
         for (var tile : tiles) {
             // only the most important elements are visible
-            ToDoubleFunction<VectorTileElement<?, ?>> getScore = VectorTileElement::getScore;
+            ToDoubleFunction<VectorTileElement<?, ?>> getScore = VectorTileElement::score;
             var visibleElementsForTile =
                     tile.elements().stream()
                             .sorted(Comparator.comparingDouble(getScore).reversed())
                             .filter(config::filter)
                             .limit(config.getMaxElementsPerTile(zoomLevel.level()))
-                            .map(VectorTileElement::getId)
+                            .map(VectorTileElement::id)
                             .collect(Collectors.toSet());
 
             visibleElements.addAll(visibleElementsForTile);
@@ -351,7 +354,7 @@ public class VectorTileHelper<T extends VectorTileElement<?, ?>> {
         for (var tile : tiles) {
             Collection<T> visibleElementsForTile =
                     tile.elements().stream()
-                            .filter(t -> visibleElements.contains(t.getId()))
+                            .filter(t -> visibleElements.contains(t.id()))
                             .toList();
 
             var limitedTile = new Tile<T>(tile.tileInfo(), tile.boundingBox());

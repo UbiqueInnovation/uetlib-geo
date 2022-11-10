@@ -25,8 +25,25 @@ import static java.lang.Math.toRadians;
 @Deprecated(since = "0.7.11", forRemoval = true)
 public abstract class TileElement implements VectorTileElement<Map<String, Object>, Object> {
 
-    private final GeometryFactory geometryFactory =
-            new GeometryFactory(new PrecisionModel(PrecisionModel.FIXED));
+    protected abstract long getId();
+
+    protected abstract String getLayer();
+
+    protected abstract double getScore();
+
+    protected abstract Object getMetadata();
+
+    protected abstract Map<String, Object> getAttributes();
+
+    public abstract List<LV95Coordinate> getCoordinates();
+
+    public abstract void setCoordinates(List<LV95Coordinate> coordinates);
+
+    public abstract List<List<LV95Coordinate>> getHoles();
+
+    public abstract void setHoles(List<List<LV95Coordinate>> holes);
+
+    private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FIXED), 2056);
 
     private TileElementType elementType = TileElementType.INFERRED;
 
@@ -61,16 +78,6 @@ public abstract class TileElement implements VectorTileElement<Map<String, Objec
         return zoomLevels == null || zoomLevels.contains(zoomLevel);
     }
 
-    protected abstract Map<String, Object> getAttributes();
-
-    public abstract List<LV95Coordinate> getCoordinates();
-
-    public abstract void setCoordinates(List<LV95Coordinate> coordinates);
-
-    public abstract List<List<LV95Coordinate>> getHoles();
-
-    public abstract void setHoles(List<List<LV95Coordinate>> holes);
-
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     // Common implementation
@@ -80,19 +87,39 @@ public abstract class TileElement implements VectorTileElement<Map<String, Objec
     }
 
     @Override
-    public Envelope getBoundingBox() {
+    public long id() {
+        return getId();
+    }
+
+    @Override
+    public String layer() {
+        return getLayer();
+    }
+
+    @Override
+    public double score() {
+        return getScore();
+    }
+
+    @Override
+    public Object metadata() {
+        return getMetadata();
+    }
+
+    @Override
+    public final Envelope boundingBox() {
         return BoundingBoxHelper.getEnvelope(BoundingBoxHelper.getBoundingBox(lv95toPoints(Point2d.class, getCoordinates())));
     }
 
     @Override
-    public Map<String, Object> getTags() {
+    public final Map<String, Object> tags() {
         return Optional.ofNullable(getGeometryWithAttributes())
                 .map(GeometryWithAttributes::attributes)
                 .orElse(null);
     }
 
     @Override
-    public Geometry getGeometry() {
+    public final Geometry geometry() {
         return Optional.ofNullable(getGeometryWithAttributes())
                 .map(GeometryWithAttributes::geometry)
                 .orElse(null);
@@ -105,7 +132,7 @@ public abstract class TileElement implements VectorTileElement<Map<String, Objec
             case POINT -> getPoint(getCoordinates().get(0));
             case LINE -> getLine();
             case POLYGON -> getPolygon();
-            default -> throw new RuntimeException("TileElementType " + type + " not implemented");
+            default -> throw new UnsupportedOperationException("TileElementType " + type + " not implemented");
         };
     }
 

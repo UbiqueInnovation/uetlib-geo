@@ -19,9 +19,9 @@ public class VectorTileElementUtils {
     public static <T, M> Map<String, Object> getFinalTags(VectorTileElement<T, M> element) {
 
         @SuppressWarnings("unchecked")
-        final var tags = new HashMap<String, Object>(objectMapper.convertValue(element.getTags(), Map.class));
+        final var tags = new HashMap<String, Object>(objectMapper.convertValue(element.tags(), Map.class));
 
-        final var metadata = element.getMetadata();
+        final var metadata = element.metadata();
         if (metadata != null) {
             try {
                 ObjectMapper objectMapper = new ObjectMapper();

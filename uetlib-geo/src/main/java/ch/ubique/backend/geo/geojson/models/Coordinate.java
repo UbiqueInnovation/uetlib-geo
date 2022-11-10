@@ -47,12 +47,6 @@ public class Coordinate extends ArrayList<Double> {
     }
 
     @JsonIgnore
-    public org.locationtech.jts.geom.Coordinate asJts() {
-        return new org.locationtech.jts.geom.Coordinate(get(0), get(1),
-                elevation().orElse(org.locationtech.jts.geom.Coordinate.NULL_ORDINATE));
-    }
-
-    @JsonIgnore
     public Optional<Double> elevation() {
         if (size() >= 3) {
             return Optional.of(get(2));
