@@ -5,6 +5,7 @@ import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Envelope;
+import org.opengis.referencing.FactoryException;
 
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -12,7 +13,7 @@ import java.util.stream.IntStream;
 class TileGeometryUtilsTest {
 
     @Test
-    void test() {
+    void test() throws FactoryException {
 
         final var east = 2600000;
         final var north = 1200000;
