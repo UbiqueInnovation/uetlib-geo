@@ -1,11 +1,12 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Objects;
 import org.locationtech.jts.geom.Point;
 
+import java.util.Objects;
+
+import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WGS84;
 import static java.lang.Math.*;
 
 /**
@@ -67,8 +68,13 @@ public class WGS84Coordinate implements Coordinate {
     }
 
     @Override
+    public org.locationtech.jts.geom.Coordinate toJts() {
+        return WGS84.toJts(this);
+    }
+
+    @Override
     public Point toJtsPoint() {
-        return JtsConverter.toJtsPoint(this);
+        return WGS84.toJtsPoint(this);
     }
 
     @Override
