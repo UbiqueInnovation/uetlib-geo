@@ -1,11 +1,12 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Objects;
 import org.locationtech.jts.geom.Point;
 
+import java.util.Objects;
+
+import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV03;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
@@ -65,8 +66,13 @@ public class LV03Coordinate implements Coordinate {
     }
 
     @Override
+    public org.locationtech.jts.geom.Coordinate toJts() {
+        return LV03.toJts(this);
+    }
+
+    @Override
     public Point toJtsPoint() {
-        return JtsConverter.toJtsPoint(this);
+        return LV03.toJtsPoint(this);
     }
 
     @Override

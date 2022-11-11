@@ -1,6 +1,5 @@
 package ch.ubique.backend.geo.graph.routing;
 
-import ch.ubique.backend.geo.coordinate.models.Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
@@ -10,11 +9,11 @@ import org.junit.jupiter.api.Test;
 
 class RoutingGraphUtilTest {
 
-    private record VertexProperties(Coordinate coordinate) implements CoordinateVertexProperties {}
+    private record VertexProperties(WGS84Coordinate coordinate) implements CoordinateVertexProperties<WGS84Coordinate> {}
 
     @Test
     void testSimple() {
-        final var testGraph = new Graph<CoordinateVertexProperties, ObjectUtils.Null>();
+        final var testGraph = new Graph<VertexProperties, ObjectUtils.Null>();
 
         testGraph.addVertex(0, new VertexProperties(new WGS84Coordinate(0, 0)));
         testGraph.addVertex(1, new VertexProperties(new WGS84Coordinate(0, 1)));
@@ -31,7 +30,7 @@ class RoutingGraphUtilTest {
 
     @Test
     void test() {
-        final var testGraph = new Graph<CoordinateVertexProperties, ObjectUtils.Null>();
+        final var testGraph = new Graph<VertexProperties, ObjectUtils.Null>();
 
         testGraph.addVertex(0, new VertexProperties(new WGS84Coordinate(0, 0)));
         testGraph.addVertex(1, new VertexProperties(new WGS84Coordinate(0, 1)));
@@ -56,7 +55,7 @@ class RoutingGraphUtilTest {
         routingGraphTests(testGraph);
     }
 
-    private static void routingGraphTests(Graph<CoordinateVertexProperties, ObjectUtils.Null> testGraph) {
+    private static void routingGraphTests(Graph<VertexProperties, ObjectUtils.Null> testGraph) {
         final var cycles = testGraph.findCycles().size();
         final var routingVerticesByDegree = testGraph.getVertices().stream().filter(v -> v.degree() == 1 || v.degree() > 2).count();
 

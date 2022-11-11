@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.tile.vector.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.geotools.referencing.operation.builder.MissingInfoException;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -9,11 +10,13 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public interface VectorTileElement<T, M> {
 
+    @JsonProperty
     long id();
 
     /**
      * The layer this feature is exported to on the vector tile.
      */
+    @JsonProperty
     String layer();
 
     /**
@@ -30,6 +33,7 @@ public interface VectorTileElement<T, M> {
      * Properties not needed during rendering can be returned by
      * getMetadata, as this makes parsing for the clients easier.
      */
+    @JsonProperty
     T tags();
 
     /**
@@ -37,6 +41,7 @@ public interface VectorTileElement<T, M> {
      * This may include all properties that are not needed during rendering.
      * For properties needed during rendering, please use getTags()
      */
+    @JsonProperty
     M metadata();
 
     /**

@@ -53,6 +53,13 @@ public final class Edge<V, E> {
         return u;
     }
 
+    public Vertex<V, E> getOther(final long firstVertexId) {
+        if (u.getId() == firstVertexId) {
+            return v;
+        }
+        return u;
+    }
+
     public boolean connects(long vertexId1, long vertexId2) {
         return (vertexId1 == u.getId() && vertexId2 == v.getId()) || (vertexId1 == v.getId() && vertexId2 == u.getId());
     }

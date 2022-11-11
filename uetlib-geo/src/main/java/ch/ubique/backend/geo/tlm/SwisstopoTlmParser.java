@@ -10,6 +10,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,28 +27,30 @@ public class SwisstopoTlmParser {
     private static final Logger logger = LoggerFactory.getLogger(SwisstopoTlmParser.class);
 
 
-
-    public static Collection<TlmPath> parseData(final InputStream inputStream) throws XMLStreamException {
-
+    public static Collection<TlmPath> parseData(final InputStream inputStream) throws IOException {
         final var paths = new LinkedList<TlmPath>();
-
         final var inputFactory = XMLInputFactory.newInstance();
-        final var reader = inputFactory.createXMLStreamReader(inputStream, "UTF-8");
 
-        logger.info("Parsing TLM");
-        while (reader.hasNext()) {
-            reader.next();
-            final var type = reader.getEventType();
-            if (type == XMLStreamConstants.START_ELEMENT) {
-                String elementName = reader.getLocalName();
-                if (elementName.equals(PATH_XML_TAG_NAME)) {
-                    final var path = parsePath(reader);
-                    paths.add(path);
+        try {
+            final var reader = inputFactory.createXMLStreamReader(inputStream, "UTF-8");
+
+            logger.info("Parsing TLM");
+            while (reader.hasNext()) {
+                reader.next();
+                final var type = reader.getEventType();
+                if (type == XMLStreamConstants.START_ELEMENT) {
+                    String elementName = reader.getLocalName();
+                    if (elementName.equals(PATH_XML_TAG_NAME)) {
+                        final var path = parsePath(reader);
+                        paths.add(path);
+                    }
                 }
             }
+            logger.info("Parsing TLM finished");
+            return paths;
+        } catch (XMLStreamException e) {
+            throw new IOException(e);
         }
-        logger.info("Parsing TLM finished");
-        return paths;
     }
 
     private static TlmPath parsePath(XMLStreamReader reader) throws XMLStreamException {

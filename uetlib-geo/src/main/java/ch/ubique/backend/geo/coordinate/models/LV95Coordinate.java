@@ -1,11 +1,12 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Objects;
 import org.locationtech.jts.geom.Point;
 
+import java.util.Objects;
+
+import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV95;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
@@ -65,8 +66,13 @@ public class LV95Coordinate implements Coordinate {
     }
 
     @Override
+    public org.locationtech.jts.geom.Coordinate toJts() {
+        return LV95.toJts(this);
+    }
+
+    @Override
     public Point toJtsPoint() {
-        return JtsConverter.toJtsPoint(this);
+        return LV95.toJtsPoint(this);
     }
 
     @Override
@@ -101,11 +107,9 @@ public class LV95Coordinate implements Coordinate {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LV95Coordinate that = o;
-
-        if (Math.abs(that.east - east) > 0.0) return false;
-        if (Math.abs(that.north - north) > 0.0) return false;
-        return Objects.equals(elevation, that.elevation);
+        if (Math.abs(o.east - east) > 0.0) return false;
+        if (Math.abs(o.north - north) > 0.0) return false;
+        return Objects.equals(elevation, o.elevation);
     }
 
     @Override

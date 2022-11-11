@@ -9,7 +9,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Logger;
@@ -23,52 +23,56 @@ public class KmlParser {
 
     private KmlParser() {}
 
-    public static KmlDocument parse(String path) throws XMLStreamException, FileNotFoundException {
+    public static KmlDocument parse(String path) throws  IOException {
         return parse(new FileInputStream(path));
     }
 
-    public static KmlDocument parse(InputStream inputStream) throws XMLStreamException {
+    public static KmlDocument parse(InputStream inputStream) throws IOException {
 
         List<Placemark> placemarks = new LinkedList<>();
         Map<String, Style> styles = new HashMap<>();
         Map<String, StyleMap> styleMaps = new HashMap<>();
 
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLStreamReader reader = inputFactory.createXMLStreamReader(inputStream, "UTF-8");
+        try {
+            XMLStreamReader reader = inputFactory.createXMLStreamReader(inputStream, "UTF-8");
 
-        logger.info("Parsing KML");
-        while (reader.hasNext()) {
-            reader.next();
-            int type = reader.getEventType();
-            if (type == XMLStreamConstants.START_ELEMENT) {
-                String elementName = reader.getLocalName();
-                switch (elementName) {
-                    case "Placemark" -> {
-                        Placemark placemark = parsePlacemark(reader);
-                        placemarks.add(placemark);
-                    }
-                    case "Style" -> {
-                        String styleId = reader.getAttributeValue(0);
-                        Style style = parseStyle(reader);
-                        styles.put(styleId, style);
-                    }
-                    case "StyleMap" -> {
-                        String id = reader.getAttributeValue(0);
-                        StyleMap styleMap = parseStyleMap(reader);
-                        styleMaps.put(id, styleMap);
-                    }
-                    default -> {
-                        /* NO-OP */
+            logger.info("Parsing KML");
+            while (reader.hasNext()) {
+                reader.next();
+                int type = reader.getEventType();
+                if (type == XMLStreamConstants.START_ELEMENT) {
+                    String elementName = reader.getLocalName();
+                    switch (elementName) {
+                        case "Placemark" -> {
+                            Placemark placemark = parsePlacemark(reader);
+                            placemarks.add(placemark);
+                        }
+                        case "Style" -> {
+                            String styleId = reader.getAttributeValue(0);
+                            Style style = parseStyle(reader);
+                            styles.put(styleId, style);
+                        }
+                        case "StyleMap" -> {
+                            String id = reader.getAttributeValue(0);
+                            StyleMap styleMap = parseStyleMap(reader);
+                            styleMaps.put(id, styleMap);
+                        }
+                        default -> {
+                            /* NO-OP */
+                        }
                     }
                 }
             }
-        }
 
-        logger.info("Parsing KML finished");
-        return new KmlDocument()
-                .setPlacemarks(placemarks)
-                .setStyleMaps(styleMaps)
-                .setStyles(styles);
+            logger.info("Parsing KML finished");
+            return new KmlDocument()
+                    .setPlacemarks(placemarks)
+                    .setStyleMaps(styleMaps)
+                    .setStyles(styles);
+        } catch (XMLStreamException e) {
+            throw new IOException(e);
+        }
     }
 
     private static Placemark parsePlacemark(XMLStreamReader reader) throws XMLStreamException {
