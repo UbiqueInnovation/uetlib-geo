@@ -5,10 +5,14 @@ import ch.ubique.backend.geo.geojson.models.Geometry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * @deprecated Please use {@link org.locationtech.jts.geom.LineString} instead. Will be removed with
+ *     0.8.0
+ */
+@Deprecated(since = "0.7.14", forRemoval = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LineString extends Geometry {
 

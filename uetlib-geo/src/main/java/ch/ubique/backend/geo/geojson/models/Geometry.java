@@ -1,13 +1,26 @@
 package ch.ubique.backend.geo.geojson.models;
 
-import ch.ubique.backend.geo.geojson.models.geometries.*;
-
-import com.fasterxml.jackson.annotation.*;
-
+import ch.ubique.backend.geo.geojson.models.geometries.GeometryCollection;
+import ch.ubique.backend.geo.geojson.models.geometries.LineString;
+import ch.ubique.backend.geo.geojson.models.geometries.MultiLineString;
+import ch.ubique.backend.geo.geojson.models.geometries.MultiPoint;
+import ch.ubique.backend.geo.geojson.models.geometries.MultiPolygon;
+import ch.ubique.backend.geo.geojson.models.geometries.Point;
+import ch.ubique.backend.geo.geojson.models.geometries.Polygon;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @deprecated Please use {@link org.locationtech.jts.geom.Geometry} instead. Will be removed with
+ *     0.8.0
+ */
+@Deprecated(since = "0.7.14", forRemoval = true)
 @JsonTypeInfo(property = "type", use = JsonTypeInfo.Id.NAME)
 @JsonSubTypes({
     @JsonSubTypes.Type(GeometryCollection.class),
