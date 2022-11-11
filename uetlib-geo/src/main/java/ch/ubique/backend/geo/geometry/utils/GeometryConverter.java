@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.geometry.utils;
 
 import static ch.ubique.backend.geo.geometry.utils.GeometryHelper.getCrs;
+import static ch.ubique.backend.geo.geometry.utils.GeometryHelper.getSimpleGeometriesIterator;
 
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import org.geotools.geometry.jts.JTS;
@@ -17,8 +18,12 @@ public class GeometryConverter {
                     CRS.decode("EPSG:" + SwissConstants.LV95_SRID);
             final Geometry lv95geom =
                     JTS.transform(geometry, CRS.findMathTransform(getCrs(geometry), lv95Crs));
+
             // JTS.transform doesnt update srid
             lv95geom.setSRID(SwissConstants.LV95_SRID);
+            getSimpleGeometriesIterator(lv95geom)
+                    .forEachRemaining(g -> g.setSRID(SwissConstants.LV95_SRID));
+
             return lv95geom;
         } catch (FactoryException | TransformException e) {
             // rethrow as runtime exception. no way for caller to handle this

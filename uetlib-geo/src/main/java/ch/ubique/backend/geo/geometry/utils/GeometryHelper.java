@@ -7,6 +7,7 @@ import ch.ubique.backend.geo.geometry.models.Point;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.geometry.models.Polygon2d;
 import ch.ubique.backend.geo.geometry.models.Vector;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -189,5 +190,17 @@ public class GeometryHelper {
             return CRS.decode("EPSG:4326", true);
         }
         return CRS.decode("EPSG:" + srid);
+    }
+
+    public static List<Geometry> getSimpleGeometries(Geometry geometry) {
+        final List<Geometry> simpleGeometries = new ArrayList<>();
+        for (int n = 0; n < geometry.getNumGeometries(); n++) {
+            simpleGeometries.add(geometry.getGeometryN(n));
+        }
+        return simpleGeometries;
+    }
+
+    public static Iterator<Geometry> getSimpleGeometriesIterator(Geometry geometry) {
+        return getSimpleGeometries(geometry).iterator();
     }
 }
