@@ -7,12 +7,16 @@ import ch.ubique.backend.geo.geometry.models.Point;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.geometry.models.Polygon2d;
 import ch.ubique.backend.geo.geometry.models.Vector;
-
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.operation.builder.MissingInfoException;
+import org.locationtech.jts.geom.Geometry;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public class GeometryHelper {
 
@@ -171,5 +175,19 @@ public class GeometryHelper {
 
     public static <P extends Point<P>> double angle(P start, P middle, P end) {
         return new Vector<>(start, middle).angle(new Vector<>(middle, end));
+    }
+
+    public static CoordinateReferenceSystem getCrs(Geometry geometry) throws FactoryException {
+        final var srid = geometry.getSRID();
+        if (srid == 0) {
+            throw new MissingInfoException(
+                    "The Spatial Reference ID (SRID) is not set for the given geometry.");
+        }
+        if (srid == 4326) {
+            // the default for EPSG:4326 is latitude first. our JtsConverter as well as PostGIS
+            // works with longitude first, so this will be our default
+            return CRS.decode("EPSG:4326", true);
+        }
+        return CRS.decode("EPSG:" + srid);
     }
 }
