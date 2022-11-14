@@ -4,17 +4,18 @@ import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
-
 import java.util.List;
 
 public class SwissConstants {
+
+    public static final int LV95_SRID = 2056;
 
     private SwissConstants() {
     }
 
     public static TileLevelsDefinition swissTileDefinition() {
         final var origin = new LV95Coordinate(2420000, 1350000);
-        return new TileLevelsDefinition(origin, YAxisDirection.DOWN, swisstopoZoomLevels());
+        return new TileLevelsDefinition(origin, YAxisDirection.DOWN, swisstopoZoomLevels(), LV95_SRID);
     }
 
     public static List<ZoomLevel> swisstopoZoomLevels() {

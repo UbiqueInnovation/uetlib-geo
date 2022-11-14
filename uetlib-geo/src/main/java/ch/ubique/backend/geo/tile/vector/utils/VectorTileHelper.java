@@ -1,5 +1,9 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import ch.ubique.backend.core.utils.MathUtils;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
@@ -12,17 +16,12 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import com.pivovarit.function.ThrowingConsumer;
 import com.pivovarit.function.ThrowingFunction;
-import no.ecc.vectortile.VectorTileEncoder;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.operation.valid.IsValidOp;
-import org.opengis.referencing.FactoryException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -30,10 +29,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
-
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import no.ecc.vectortile.VectorTileEncoder;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.operation.valid.IsValidOp;
+import org.opengis.geometry.MismatchedReferenceSystemException;
+import org.opengis.referencing.FactoryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VectorTileHelper<T extends VectorTileElement> {
 
@@ -51,7 +55,8 @@ public class VectorTileHelper<T extends VectorTileElement> {
     }
 
     private byte[] generateBinary(Tile<T> tile) throws FactoryException {
-        final var encoder = new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
+        final var encoder =
+                new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
 
         for (final var element : tile.elements()) {
             addFeature(encoder, tile, element);
@@ -59,7 +64,9 @@ public class VectorTileHelper<T extends VectorTileElement> {
         return encoder.encode();
     }
 
-    private void addFeature(final VectorTileEncoder encoder, final Tile<T> tile, final VectorTileElement element) throws FactoryException {
+    private void addFeature(
+            final VectorTileEncoder encoder, final Tile<T> tile, final VectorTileElement element)
+            throws FactoryException {
         if (!element.showElement(tile.tileInfo().zoomLevel().level())) {
             return;
         }
@@ -71,11 +78,16 @@ public class VectorTileHelper<T extends VectorTileElement> {
 
         final var geometryValidator = new IsValidOp(geometry);
         if (!geometryValidator.isValid()) {
-            logger.warn("Element geometry for {} not valid: {}", tags, geometryValidator.getValidationError());
+            logger.warn(
+                    "Element geometry for {} not valid: {}",
+                    tags,
+                    geometryValidator.getValidationError());
             return;
         }
 
-        final var tileGeometryMaybe = TileGeometryUtils.getTileGeometry(geometry, boundingBox, config.getExtent(), config.getYAxisDirection());
+        final var tileGeometryMaybe =
+                TileGeometryUtils.getTileGeometry(
+                        geometry, boundingBox, config.getExtent(), config.getYAxisDirection());
         if (tileGeometryMaybe.isEmpty()) {
             logger.warn("Could not get tile geometry for {}", tags);
             return;
@@ -84,17 +96,20 @@ public class VectorTileHelper<T extends VectorTileElement> {
         final var tileGeometry = tileGeometryMaybe.get();
         final var tileGeometryValidator = new IsValidOp(tileGeometry);
         if (!tileGeometry.isValid()) {
-            logger.warn("Tile geometry for {} not valid: {}", tags, tileGeometryValidator.getValidationError());
+            logger.warn(
+                    "Tile geometry for {} not valid: {}",
+                    tags,
+                    tileGeometryValidator.getValidationError());
             return;
         }
 
-        final var outputGeometry = config.simplify() ?
-                SimplifyGeometryUtils.simplify(tileGeometry, config.simplifyTolerance()) :
-                tileGeometry;
+        final var outputGeometry =
+                config.simplify()
+                        ? SimplifyGeometryUtils.simplify(tileGeometry, config.simplifyTolerance())
+                        : tileGeometry;
 
         encoder.addFeature(layer, tags, outputGeometry, id);
     }
-
 
     public void generateTiles(
             ThrowingConsumer<BinaryTile, IOException> tileConsumer, int numThreads)
@@ -142,8 +157,16 @@ public class VectorTileHelper<T extends VectorTileElement> {
                                         tiles.parallelStream()
                                                 .map(
                                                         tile -> {
-                                                            ThrowingFunction<Tile<T>, byte[], Exception> generateFunction = this::generateBinary;
-                                                            byte[] bytes = generateFunction.uncheck().apply(tile);
+                                                            ThrowingFunction<
+                                                                            Tile<T>,
+                                                                            byte[],
+                                                                            Exception>
+                                                                    generateFunction =
+                                                                            this::generateBinary;
+                                                            byte[] bytes =
+                                                                    generateFunction
+                                                                            .uncheck()
+                                                                            .apply(tile);
 
                                                             // Log progress
                                                             int countValue =
@@ -169,8 +192,7 @@ public class VectorTileHelper<T extends VectorTileElement> {
 
                                                             var binaryTile =
                                                                     new BinaryTile(
-                                                                            tile.tileInfo(),
-                                                                            bytes);
+                                                                            tile.tileInfo(), bytes);
                                                             if (tileConsumer != null) {
                                                                 tileConsumer
                                                                         .uncheck()
@@ -228,8 +250,7 @@ public class VectorTileHelper<T extends VectorTileElement> {
                             avgElementsWithLimit, maxElementsWithLimit));
         }
 
-        int maxElements =
-                tiles.stream().mapToInt(tile -> tile.elements().size()).max().orElse(-1);
+        int maxElements = tiles.stream().mapToInt(tile -> tile.elements().size()).max().orElse(-1);
         double avgElements =
                 tiles.stream().mapToInt(tile -> tile.elements().size()).average().orElse(-1);
         stats.append(
@@ -256,7 +277,8 @@ public class VectorTileHelper<T extends VectorTileElement> {
                 Point2d min = origin.plus(tileWidth * x, -tileWidth * (y + 1));
                 Point2d max = min.plus(tileWidth, tileWidth);
                 TileInfo tileInfo = new TileInfo(x, y, zoomLevel);
-                final var boundingBox = new Envelope(min.getX(), max.getX(), min.getY(), max.getY());
+                final var boundingBox =
+                        new Envelope(min.getX(), max.getX(), min.getY(), max.getY());
                 tiles.add(new Tile<>(tileInfo, boundingBox));
             }
         }
@@ -270,6 +292,13 @@ public class VectorTileHelper<T extends VectorTileElement> {
         // Add elements to tiles that lie within bounding box of element and are visible at the
         // current zoom level
         for (T element : elements) {
+            if (element.geometry().getSRID() != gridInfo.srid()) {
+                throw new MismatchedReferenceSystemException(
+                        String.format(
+                                "The elements (%s) srid (%d) does not match the grids srid (%d)",
+                                element, element.geometry().getSRID(), gridInfo.srid()));
+            }
+
             if (element.showElement(zoomLevel.level())) {
                 getXYsElementIsIn(tilesX, tilesY, getX, getY, element)
                         .forEach(
@@ -304,10 +333,10 @@ public class VectorTileHelper<T extends VectorTileElement> {
 
         final var box = element.boundingBox();
 
-        final var x1 = MathUtils.clamp(getX.applyAsInt(box.getMinX()),0, tilesX - 1);
-        final var x2 = MathUtils.clamp(getX.applyAsInt(box.getMaxX()),0, tilesX - 1);
-        final var y1 = MathUtils.clamp(getY.applyAsInt(box.getMinY()),0, tilesY - 1);
-        final var y2 = MathUtils.clamp(getY.applyAsInt(box.getMaxY()),0, tilesY - 1);
+        final var x1 = MathUtils.clamp(getX.applyAsInt(box.getMinX()), 0, tilesX - 1);
+        final var x2 = MathUtils.clamp(getX.applyAsInt(box.getMaxX()), 0, tilesX - 1);
+        final var y1 = MathUtils.clamp(getY.applyAsInt(box.getMinY()), 0, tilesY - 1);
+        final var y2 = MathUtils.clamp(getY.applyAsInt(box.getMaxY()), 0, tilesY - 1);
 
         final var minX = Math.min(x1, x2);
         final var maxX = Math.max(x1, x2);
@@ -353,9 +382,7 @@ public class VectorTileHelper<T extends VectorTileElement> {
         final var limitedTiles = new ArrayList<Tile<T>>(tiles.size());
         for (var tile : tiles) {
             Collection<T> visibleElementsForTile =
-                    tile.elements().stream()
-                            .filter(t -> visibleElements.contains(t.id()))
-                            .toList();
+                    tile.elements().stream().filter(t -> visibleElements.contains(t.id())).toList();
 
             var limitedTile = new Tile<T>(tile.tileInfo(), tile.boundingBox());
             limitedTile.elements().addAll(visibleElementsForTile);

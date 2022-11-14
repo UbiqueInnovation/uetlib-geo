@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
+import static ch.ubique.backend.geo.geometry.utils.GeometryHelper.getCrs;
+
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
@@ -40,14 +42,6 @@ public class TileGeometryUtils {
             logger.warn("Could not transform geometry for tile", e);
             return Optional.empty();
         }
-    }
-
-    private static CoordinateReferenceSystem getCrs(Geometry geometry) throws FactoryException {
-        final var srid = geometry.getSRID();
-        if (srid == 0) {
-            throw new MissingInfoException("The Spatial Reference ID (SRID) is not set for the given geometry.");
-        }
-        return CRS.decode("EPSG:" + srid);
     }
 
     public static MathTransform tileTransform(final Envelope tileEnvelope, final int extend, YAxisDirection yAxisDirection, CoordinateReferenceSystem crs) throws TransformException {
