@@ -23,7 +23,7 @@ import static java.lang.Math.toRadians;
  * {@link VectorTileElement} interface directly.
  */
 @Deprecated(since = "0.7.11", forRemoval = true)
-public abstract class TileElement implements VectorTileElement<Map<String, Object>, Object> {
+public abstract class TileElement implements VectorTileElementWithTagsAndMetadata<Map<String, Object>, Object> {
 
     protected abstract long getId();
 
@@ -82,6 +82,7 @@ public abstract class TileElement implements VectorTileElement<Map<String, Objec
 
     // Common implementation
 
+    @Override
     public boolean showElement(int zoomLevel) {
         return isVisibleAtZoomLevel(zoomLevel);
     }

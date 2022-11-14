@@ -35,7 +35,7 @@ import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-public class VectorTileHelper<T extends VectorTileElement<?, ?>> {
+public class VectorTileHelper<T extends VectorTileElement> {
 
     private static final Logger logger = LoggerFactory.getLogger(VectorTileHelper.class);
 
@@ -59,7 +59,7 @@ public class VectorTileHelper<T extends VectorTileElement<?, ?>> {
         return encoder.encode();
     }
 
-    private void addFeature(final VectorTileEncoder encoder, final Tile<T> tile, final VectorTileElement<?, ?> element) throws FactoryException {
+    private void addFeature(final VectorTileEncoder encoder, final Tile<T> tile, final VectorTileElement element) throws FactoryException {
         if (!element.showElement(tile.tileInfo().zoomLevel().level())) {
             return;
         }
@@ -337,11 +337,11 @@ public class VectorTileHelper<T extends VectorTileElement<?, ?>> {
         var visibleElements = new HashSet<Long>();
         for (var tile : tiles) {
             // only the most important elements are visible
-            ToDoubleFunction<VectorTileElement<?, ?>> getScore = VectorTileElement::score;
+            ToDoubleFunction<VectorTileElement> getScore = VectorTileElement::score;
             var visibleElementsForTile =
                     tile.elements().stream()
-                            .sorted(Comparator.comparingDouble(getScore).reversed())
                             .filter(config::filter)
+                            .sorted(Comparator.comparingDouble(getScore).reversed())
                             .limit(config.getMaxElementsPerTile(zoomLevel.level()))
                             .map(VectorTileElement::id)
                             .collect(Collectors.toSet());

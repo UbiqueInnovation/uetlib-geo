@@ -5,7 +5,6 @@ import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
 import ch.ubique.backend.geo.graph.routing.RoutingLinkEdgeProperties;
-import org.apache.commons.lang3.ObjectUtils;
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.Collection;
@@ -43,11 +42,6 @@ public class CompleteGraphVertex<C extends Coordinate, P> implements GraphVertex
     @Override
     public String layer() {
         return "routing";
-    }
-
-    @Override
-    public ObjectUtils.Null tags() {
-        return null;
     }
 
     @Override

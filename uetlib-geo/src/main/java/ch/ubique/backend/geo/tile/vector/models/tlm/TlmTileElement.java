@@ -1,8 +1,7 @@
 package ch.ubique.backend.geo.tile.vector.models.tlm;
 
-import ch.ubique.backend.geo.tile.vector.models.VectorTileElementUnweightedAlwaysVisible;
+import ch.ubique.backend.geo.tile.vector.models.VectorTileElementWithTags;
 import ch.ubique.backend.geo.tlm.models.TlmPath;
-import org.apache.commons.lang3.ObjectUtils;
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.Objects;
@@ -14,7 +13,7 @@ public record TlmTileElement(
         long id,
         Geometry geometry,
         TlmInfo tags
-) implements VectorTileElementUnweightedAlwaysVisible<TlmInfo, ObjectUtils.Null> {
+) implements VectorTileElementWithTags<TlmInfo> {
 
     @Override
     public String layer() {
@@ -22,11 +21,6 @@ public record TlmTileElement(
                 .ofNullable(tags.trailType()).map(Objects::toString)
                 .orElse(tags.type().toString())
                 .toLowerCase();
-    }
-
-    @Override
-    public ObjectUtils.Null metadata() {
-        return null;
     }
 
     private static long lastId = 0;

@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class VectorTileConfig<T extends VectorTileElement<?, ?>> {
+public class VectorTileConfig<T extends VectorTileElement> {
 
     private String key;
 

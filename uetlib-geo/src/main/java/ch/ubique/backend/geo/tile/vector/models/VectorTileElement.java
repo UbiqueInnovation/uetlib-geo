@@ -8,7 +8,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 
-public interface VectorTileElement<T, M> {
+public interface VectorTileElement {
 
     @JsonProperty
     long id();
@@ -25,30 +25,17 @@ public interface VectorTileElement<T, M> {
      * vector tile when maxElementsPerTile is set by the given {@link VectorTileConfig}.
      */
     @JsonIgnore
-    double score();
-
-    /**
-     * This map will be available in the vector tile as tags.
-     * The tags may include all properties needed during rendering.
-     * Properties not needed during rendering can be returned by
-     * getMetadata, as this makes parsing for the clients easier.
-     */
-    @JsonProperty
-    T tags();
-
-    /**
-     * The metadata will be encoded as json string in the vector tile.
-     * This may include all properties that are not needed during rendering.
-     * For properties needed during rendering, please use getTags()
-     */
-    @JsonProperty
-    M metadata();
+    default double score() {
+        return 0;
+    }
 
     /**
      * Defines if this VectorTileElement is shown at the specified zoom level
      */
     @JsonIgnore
-    boolean showElement(int zoomLevel);
+    default boolean showElement(int zoomLevel) {
+        return true;
+    }
 
     /**
      * The actual geometry.
