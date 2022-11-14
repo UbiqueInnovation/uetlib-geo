@@ -1,6 +1,8 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
+import ch.ubique.backend.geo.tile.vector.models.VectorTileElementWithMetadata;
+import ch.ubique.backend.geo.tile.vector.models.VectorTileElementWithTags;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -11,22 +13,24 @@ import java.util.Map;
 
 public class VectorTileElementUtils {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper(); // TODO pass as parameter
     private static final Logger logger = LoggerFactory.getLogger(VectorTileElementUtils.class);
 
-    private VectorTileElementUtils() {}
+    private VectorTileElementUtils() {
+    }
 
-    public static <T, M> Map<String, Object> getFinalTags(VectorTileElement<T, M> element) {
+    public static Map<String, Object> getFinalTags(VectorTileElement element) {
 
-        @SuppressWarnings("unchecked")
-        final var tags = new HashMap<String, Object>(objectMapper.convertValue(element.tags(), Map.class));
+        final var tags = new HashMap<String, Object>();
 
-        final var metadata = element.metadata();
-        if (metadata != null) {
+        if (element instanceof VectorTileElementWithTags<?> withTags && withTags.tags() != null) {
+            //noinspection unchecked
+            tags.putAll(objectMapper.convertValue(withTags.tags(), Map.class));
+        }
+
+        if (element instanceof VectorTileElementWithMetadata<?> withMetadata && withMetadata.metadata() != null) {
             try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                String metadataJson = objectMapper.writeValueAsString(metadata);
-                tags.put("metadata", metadataJson);
+                tags.put("metadata", objectMapper.writeValueAsString(withMetadata.metadata()));
             } catch (JsonProcessingException e) {
                 logger.error("Could not serialize metadata to JSON");
             }
