@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.kml.parser;
 
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.kml.models.*;
 
 import javax.xml.stream.XMLInputFactory;
@@ -14,8 +15,6 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import static ch.ubique.backend.geo.coordinate.util.CoordinateConverter.toLV95;
 
 public class KmlParser {
 
@@ -274,6 +273,6 @@ public class KmlParser {
             wgs84Coordinate.setElevation(elevation);
         }
 
-        return toLV95(wgs84Coordinate);
+        return JtsConverter.LV95.transform(wgs84Coordinate);
     }
 }

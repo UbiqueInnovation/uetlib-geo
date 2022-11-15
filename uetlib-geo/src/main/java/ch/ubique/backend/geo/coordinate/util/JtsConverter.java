@@ -10,6 +10,7 @@ import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.*;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import javax.validation.constraints.NotNull;
@@ -60,6 +61,10 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
             c -> new Coordinate(c.getEast(), c.getNorth()),
             c -> new LV03Coordinate(c.x, c.y)
     );
+
+    public int srid() {
+        return srid;
+    }
 
     @NotNull
     public GeometryFactory geometryFactory() {
@@ -124,7 +129,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     }
 
     /**
-     * Transforms the given geometry into the current reference system.
+     * Transforms the given geometry into the current spatial reference system.
      */
     public Geometry transform(final Geometry geometry) {
         if (geometry.getSRID() == srid) {
@@ -133,17 +138,42 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
 
         try {
             final var transformedGeometry =
-                    JTS.transform(geometry, CRS.findMathTransform(getCrs(geometry), crs));
+                    JTS.transform(geometry, findMathTransform(geometry.getSRID()));
 
             // JTS.transform doesnt update srid
             transformedGeometry.setSRID(srid);
             getSimpleGeometriesIterator(transformedGeometry).forEachRemaining(g -> g.setSRID(srid));
 
             return transformedGeometry;
-        } catch (FactoryException | TransformException e) {
-            // rethrow as runtime exception. no way for caller to handle this
-            throw new WrappedException(e);
+        } catch (TransformException e) {
+            throw new WrappedException(e); // rethrow as runtime exception. no way for caller to handle this
+
         }
     }
 
+    /**
+     * Transforms the given coordinate into the current spatial reference system.
+     */
+    public Coordinate transform(Coordinate coordinate, int sourceSRID) {
+        if (sourceSRID == srid) {
+            return coordinate; // No transform need, already in correct spatial reference system
+        }
+        try {
+            return JTS.transform(coordinate, null, findMathTransform(sourceSRID));
+        } catch (TransformException e) {
+            throw new WrappedException(e); // rethrow as runtime exception. no way for caller to handle this
+        }
+    }
+
+    public C transform(ch.ubique.backend.geo.coordinate.models.Coordinate coordinate) {
+        return toBackendLib(transform(coordinate.toJts(), coordinate.srid()));
+    }
+
+    public MathTransform findMathTransform(int sourceSRID) {
+        try {
+            return CRS.findMathTransform(getCrs(sourceSRID), crs);
+        } catch (FactoryException e) {
+            throw new WrappedException(e); // rethrow as runtime exception. no way for caller to handle this
+        }
+    }
 }

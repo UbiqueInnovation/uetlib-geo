@@ -66,6 +66,11 @@ public class LV03Coordinate implements Coordinate {
     }
 
     @Override
+    public int srid() {
+        return LV03.srid();
+    }
+
+    @Override
     public org.locationtech.jts.geom.Coordinate toJts() {
         return LV03.toJts(this);
     }

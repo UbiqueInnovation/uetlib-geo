@@ -36,6 +36,11 @@ public class WebMercatorCoordinate implements Coordinate {
     }
 
     @Override
+    public int srid() {
+        return WEB_MERCATOR.srid();
+    }
+
+    @Override
     public org.locationtech.jts.geom.Coordinate toJts() {
         return WEB_MERCATOR.toJts(this);
     }

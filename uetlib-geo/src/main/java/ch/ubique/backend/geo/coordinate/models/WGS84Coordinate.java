@@ -68,6 +68,11 @@ public class WGS84Coordinate implements Coordinate {
     }
 
     @Override
+    public int srid() {
+        return WGS84.srid();
+    }
+
+    @Override
     public org.locationtech.jts.geom.Coordinate toJts() {
         return WGS84.toJts(this);
     }
