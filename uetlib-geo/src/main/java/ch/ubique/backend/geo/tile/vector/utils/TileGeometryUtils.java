@@ -1,11 +1,7 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
-import static ch.ubique.backend.geo.geometry.utils.GeometryHelper.getCrs;
-
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.CRS;
-import org.geotools.referencing.operation.builder.MissingInfoException;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.renderer.lite.RendererUtilities;
 import org.locationtech.jts.geom.Coordinate;
@@ -21,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.Optional;
+
+import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 
 public class TileGeometryUtils {
 
