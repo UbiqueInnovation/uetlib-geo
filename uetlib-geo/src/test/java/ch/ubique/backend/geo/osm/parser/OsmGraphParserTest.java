@@ -1,6 +1,9 @@
 package ch.ubique.backend.geo.osm.parser;
 
-import ch.ubique.backend.geo.graph.routing.RoutingGraphUtil;
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import ch.ubique.backend.geo.graph.models.Edge;
+import ch.ubique.backend.geo.graph.models.Vertex;
+import ch.ubique.backend.geo.graph.routing.utils.RoutingGraphUtil;
 import ch.ubique.backend.geo.osm.parser.graph.OsmGraphParser;
 import ch.ubique.backend.geo.osm.parser.graph.OsmGraphParserConfig;
 import org.junit.jupiter.api.Assertions;
@@ -23,25 +26,16 @@ class OsmGraphParserTest {
                         .build();
 
         try (final var inputStream = new URL("https://download.geofabrik.de/europe/liechtenstein-latest.osm.pbf").openStream()){
-            final var graph = OsmGraphParser.parse(inputStream, config);
+            final var graph = OsmGraphParser.parse(inputStream, config).map(
+                    v -> new Vertex<>(v.getId(), v.getProperties().coordinate().toJts()),
+                    Edge::getProperties);
+
             Assertions.assertTrue(graph.getVertices().size() > 0);
             Assertions.assertTrue(graph.getEdges().size() > 0);
 
-            final var routingGraphs = RoutingGraphUtil.createRoutingGraph(graph);
-            Assertions.assertTrue(routingGraphs.routingGraph().getVertices().size() > 0);
-            Assertions.assertTrue(routingGraphs.routingGraph().getEdges().size() > 0);
-
-
-
-            final var allVerticesHaveNonNegativeId =
-                    routingGraphs.completeGraph().getVertices().stream().allMatch(v -> v.getId() >= 0);
-            Assertions.assertTrue(allVerticesHaveNonNegativeId);
-
-            final var edgesWithoutRoutingId =
-                    routingGraphs.completeGraph().getEdges().stream()
-                            .filter(e -> e.getProperties().getRoutingEdgeId() == null)
-                            .count();
-            Assertions.assertEquals(0, edgesWithoutRoutingId, "Expected all edges to have a routing id.");
+            final var routingGraph = RoutingGraphUtil.createRoutingGraph(graph, JtsConverter.WGS84.crs());
+            Assertions.assertTrue(routingGraph.getVertices().size() > 0);
+            Assertions.assertTrue(routingGraph.getEdges().size() > 0);
         }
 
     }

@@ -1,8 +1,6 @@
 package ch.ubique.backend.geo.tlm.models;
 
-import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
-
-import java.util.List;
+import org.locationtech.jts.geom.LineString;
 
 public class TlmPath {
 
@@ -18,7 +16,7 @@ public class TlmPath {
 
     private Verkehrsbedeutung verkehrsbedeutung;
 
-    private List<LV95Coordinate> polyline;
+    private LineString line;
 
 
     public WegType getType() {
@@ -73,18 +71,18 @@ public class TlmPath {
         return wanderwegType != null;
     }
 
-    public void setPolyline(List<LV95Coordinate> polyline) {
-        this.polyline = polyline;
+    public void setLine(LineString line) {
+        this.line = line;
     }
 
 
-    public List<LV95Coordinate> getPolyline() {
-        return polyline;
+    public LineString getLine() {
+        return line;
     }
 
     @Override
     public String toString() {
-        return type + ", " + polyline;
+        return type + ", " + line;
     }
 
     @Override

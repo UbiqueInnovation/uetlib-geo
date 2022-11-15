@@ -1,11 +1,14 @@
 package ch.ubique.backend.geo.graph.routing;
 
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
+import ch.ubique.backend.geo.graph.routing.utils.RoutingGraphUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
 
 class RoutingGraphUtilTest {
 
@@ -13,12 +16,12 @@ class RoutingGraphUtilTest {
 
     @Test
     void testSimple() {
-        final var testGraph = new Graph<VertexProperties, ObjectUtils.Null>();
+        final var testGraph = new Graph<Coordinate, ObjectUtils.Null>();
 
-        testGraph.addVertex(0, new VertexProperties(new WGS84Coordinate(0, 0)));
-        testGraph.addVertex(1, new VertexProperties(new WGS84Coordinate(0, 1)));
-        testGraph.addVertex(2, new VertexProperties(new WGS84Coordinate(1, 0)));
-        testGraph.addVertex(3, new VertexProperties(new WGS84Coordinate(1, 1)));
+        testGraph.addVertex(0, new WGS84Coordinate(0, 0).toJts());
+        testGraph.addVertex(1, new WGS84Coordinate(0, 1).toJts());
+        testGraph.addVertex(2, new WGS84Coordinate(1, 0).toJts());
+        testGraph.addVertex(3, new WGS84Coordinate(1, 1).toJts());
 
         testGraph.getOrAddEdge(0, 1);
         testGraph.getOrAddEdge(1, 2);
@@ -30,16 +33,16 @@ class RoutingGraphUtilTest {
 
     @Test
     void test() {
-        final var testGraph = new Graph<VertexProperties, ObjectUtils.Null>();
+        final var testGraph = new Graph<Coordinate, ObjectUtils.Null>();
 
-        testGraph.addVertex(0, new VertexProperties(new WGS84Coordinate(0, 0)));
-        testGraph.addVertex(1, new VertexProperties(new WGS84Coordinate(0, 1)));
-        testGraph.addVertex(2, new VertexProperties(new WGS84Coordinate(1, 0)));
-        testGraph.addVertex(3, new VertexProperties(new WGS84Coordinate(1, 1)));
-        testGraph.addVertex(4, new VertexProperties(new WGS84Coordinate(2, 0)));
-        testGraph.addVertex(5, new VertexProperties(new WGS84Coordinate(3, 3)));
-        testGraph.addVertex(6, new VertexProperties(new WGS84Coordinate(4, 9)));
-        testGraph.addVertex(7, new VertexProperties(new WGS84Coordinate(5, 11)));
+        testGraph.addVertex(0, new WGS84Coordinate(0, 0).toJts());
+        testGraph.addVertex(1, new WGS84Coordinate(0, 1).toJts());
+        testGraph.addVertex(2, new WGS84Coordinate(1, 0).toJts());
+        testGraph.addVertex(3, new WGS84Coordinate(1, 1).toJts());
+        testGraph.addVertex(4, new WGS84Coordinate(2, 0).toJts());
+        testGraph.addVertex(5, new WGS84Coordinate(3, 3).toJts());
+        testGraph.addVertex(6, new WGS84Coordinate(4, 9).toJts());
+        testGraph.addVertex(7, new WGS84Coordinate(5, 11).toJts());
 
         testGraph.getOrAddEdge(0, 1);
         testGraph.getOrAddEdge(1, 2);
@@ -55,22 +58,13 @@ class RoutingGraphUtilTest {
         routingGraphTests(testGraph);
     }
 
-    private static void routingGraphTests(Graph<VertexProperties, ObjectUtils.Null> testGraph) {
+    private static void routingGraphTests(Graph<Coordinate, ObjectUtils.Null> testGraph) {
         final var cycles = testGraph.findCycles().size();
         final var routingVerticesByDegree = testGraph.getVertices().stream().filter(v -> v.degree() == 1 || v.degree() > 2).count();
 
-        final var routingGraphs = RoutingGraphUtil.createRoutingGraph(testGraph);
-        Assertions.assertEquals(testGraph.getVertices().size(), routingGraphs.completeGraph().getVertices().size());
-        Assertions.assertEquals(testGraph.getEdges().size(), routingGraphs.completeGraph().getEdges().size());
+        final var routingGraph = RoutingGraphUtil.createRoutingGraph(testGraph, JtsConverter.WGS84.crs());
 
-
-        Assertions.assertEquals(cycles + routingVerticesByDegree, routingGraphs.routingGraph().getVertices().size());
-        Assertions.assertTrue(cycles <= routingGraphs.routingGraph().getEdges().size());
-
-        final var edgesWithoutRoutingId =
-                routingGraphs.completeGraph().getEdges().stream()
-                        .filter(e -> e.getProperties().getRoutingEdgeId() == null)
-                        .count();
-        Assertions.assertEquals(0, edgesWithoutRoutingId, "Expected all edges to have a routing id.");
+        Assertions.assertEquals(cycles + routingVerticesByDegree, routingGraph.getVertices().size());
+        Assertions.assertTrue(cycles <= routingGraph.getEdges().size());
     }
 }

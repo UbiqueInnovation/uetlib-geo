@@ -1,25 +1,26 @@
 package ch.ubique.backend.geo.tile.vector.models.graph;
 
-import ch.ubique.backend.geo.coordinate.models.Coordinate;
+import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
-import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphEdgeProperties;
-import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 
 import java.util.Collection;
 
 @SuppressWarnings("ClassCanBeRecord") // We want to allow inheritance
-public class RoutingGraphVertex<C extends Coordinate, P> implements GraphVertex<C, P> {
+public class RoutingGraphVertex<P> implements GraphVertex<P> {
 
     private final long id;
-    private final C coordinate;
+    private final Point point;
 
     private final Collection<RoutingGraphNeighbor<P>> metadata;
 
-    public RoutingGraphVertex(long id, C coordinate, Collection<RoutingGraphNeighbor<P>> metadata) {
+    public RoutingGraphVertex(long id, Point point, Collection<RoutingGraphNeighbor<P>> metadata) {
         this.id = id;
-        this.coordinate = coordinate;
+        this.point = point;
         this.metadata = metadata;
     }
 
@@ -29,8 +30,8 @@ public class RoutingGraphVertex<C extends Coordinate, P> implements GraphVertex<
     }
 
     @Override
-    public C coordinate() {
-        return coordinate;
+    public Point point() {
+        return point;
     }
 
     @Override
@@ -45,23 +46,22 @@ public class RoutingGraphVertex<C extends Coordinate, P> implements GraphVertex<
 
     @Override
     public Geometry geometry() {
-        return coordinate.toJtsPoint();
+        return point;
     }
 
-    public static <U extends Coordinate, S extends CoordinateVertexProperties<U>, T> GraphVertex<U, T> from(final Vertex<S, RoutingGraphEdgeProperties<S, T>> vertex) {
+    public static <T> GraphVertex<T> from(final Vertex<Coordinate, RoutingGraphEdgeProperties<T>> vertex, final GeometryFactory geometryFactory) {
         return new RoutingGraphVertex<>(
                 vertex.getId(),
-                vertex.getProperties().coordinate(),
+                geometryFactory.createPoint(vertex.getProperties()),
                 vertex.getEdges().stream().map(e -> RoutingGraphNeighbor.fromEdge(vertex.getId(), e)).toList()
         );
     }
 
-    public static <U extends Coordinate, S extends CoordinateVertexProperties<U>, T> Collection<GraphVertex<U, T>> from(final RoutingGraphs<S, T> routingGraphs) {
-        return routingGraphs
-                .routingGraph()
+    public static <T> Collection<GraphVertex<T>> from(final Graph<Coordinate, RoutingGraphEdgeProperties<T>> routingGraph, final GeometryFactory geometryFactory) {
+        return routingGraph
                 .getVertices()
                 .stream()
-                .map(RoutingGraphVertex::from)
+                .map(v -> from(v, geometryFactory))
                 .toList();
     }
 }

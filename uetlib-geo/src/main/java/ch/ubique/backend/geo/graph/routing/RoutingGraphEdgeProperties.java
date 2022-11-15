@@ -1,13 +1,13 @@
 package ch.ubique.backend.geo.graph.routing;
 
 import ch.ubique.backend.geo.graph.models.Vertex;
-import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.locationtech.jts.geom.Coordinate;
 
-public record RoutingGraphEdgeProperties<V extends CoordinateVertexProperties, E>(
+public record RoutingGraphEdgeProperties<E>(
         double distance,
-        Vertex<V, RoutingLinkEdgeProperties<E>> direction,
+        Vertex<Coordinate, E> direction,
         E originalProperties) {
 
     @Override
