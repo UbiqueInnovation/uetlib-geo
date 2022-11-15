@@ -5,6 +5,11 @@ import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
 
+/**
+ * @deprecated Please use {@linkplain JtsConverter#transform) instead
+ * Example: LV95Coordinate lv95Coordinate = JtsConverter.LV95.transform(wgs84Coordinate)
+ */
+@Deprecated(since = "0.7.18", forRemoval = true)
 public class CoordinateConverter {
 
     private CoordinateConverter() {}
