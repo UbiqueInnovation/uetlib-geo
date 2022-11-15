@@ -7,8 +7,6 @@ import org.locationtech.jts.geom.Geometry;
 import java.util.Objects;
 import java.util.Optional;
 
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV95;
-
 public record TlmTileElement(
         long id,
         Geometry geometry,
@@ -31,7 +29,7 @@ public record TlmTileElement(
 
     public static TlmTileElement fromTlmPath(final TlmPath tlmPath) {
         return new TlmTileElement(
-                LV95.toJtsLineString(tlmPath.getPolyline()),
+                tlmPath.getLine(),
                 new TlmInfo(tlmPath));
     }
 }

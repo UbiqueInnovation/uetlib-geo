@@ -1,10 +1,9 @@
 package ch.ubique.backend.geo.tile.vector.models.graph;
 
-import ch.ubique.backend.geo.coordinate.models.Coordinate;
 import ch.ubique.backend.geo.graph.models.Edge;
-import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphEdgeProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.locationtech.jts.geom.Coordinate;
 
 @SuppressWarnings("ClassCanBeRecord") // We want to allow inheritance
 public class RoutingGraphNeighbor<P> implements GraphNeighbor<P> {
@@ -28,8 +27,8 @@ public class RoutingGraphNeighbor<P> implements GraphNeighbor<P> {
         this.edgeProperties = edgeProperties;
     }
 
-    public static <U extends Coordinate, S extends CoordinateVertexProperties<U>, T> RoutingGraphNeighbor<T> fromEdge(
-            long fromVertexId, Edge<S, RoutingGraphEdgeProperties<S, T>> edge) {
+    public static <T> RoutingGraphNeighbor<T> fromEdge(
+            long fromVertexId, Edge<Coordinate, RoutingGraphEdgeProperties<T>> edge) {
 
         final var properties = edge.getProperties();
 

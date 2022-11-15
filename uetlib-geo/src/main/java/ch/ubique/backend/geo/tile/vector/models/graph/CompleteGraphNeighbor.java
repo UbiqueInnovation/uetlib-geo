@@ -1,10 +1,8 @@
 package ch.ubique.backend.geo.tile.vector.models.graph;
 
-import ch.ubique.backend.geo.coordinate.models.Coordinate;
 import ch.ubique.backend.geo.graph.models.Edge;
-import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
-import ch.ubique.backend.geo.graph.routing.RoutingLinkEdgeProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.locationtech.jts.geom.Coordinate;
 
 @SuppressWarnings("ClassCanBeRecord") // We want to allow inheritance
 public class CompleteGraphNeighbor<P> implements GraphNeighbor<P> {
@@ -13,14 +11,10 @@ public class CompleteGraphNeighbor<P> implements GraphNeighbor<P> {
     private final long neighborId;
 
     @JsonProperty
-    private final long routingEdgeId;
-
-    @JsonProperty
     private final P edgeProperties;
 
-    public CompleteGraphNeighbor(long neighborId, long routingEdgeId, P edgeProperties) {
+    public CompleteGraphNeighbor(long neighborId, P edgeProperties) {
         this.neighborId = neighborId;
-        this.routingEdgeId = routingEdgeId;
         this.edgeProperties = edgeProperties;
     }
 
@@ -28,23 +22,12 @@ public class CompleteGraphNeighbor<P> implements GraphNeighbor<P> {
         return neighborId;
     }
 
-    public long routingEdgeId() {
-        return routingEdgeId;
-    }
-
     public P edgeProperties() {
         return edgeProperties;
     }
 
-    public static <U extends Coordinate, S extends CoordinateVertexProperties<U>, T> CompleteGraphNeighbor<T> fromEdge(
-            long fromVertexId,
-            Edge<S, RoutingLinkEdgeProperties<T>> edge) {
-        final var properties = edge.getProperties();
+    public static <T> CompleteGraphNeighbor<T> fromEdge(long fromVertexId, Edge<Coordinate, T> edge) {
 
-        return new CompleteGraphNeighbor<>(
-                edge.getOther(fromVertexId).getId(),
-                properties.getRoutingEdgeId(),
-                properties.getOriginalProperties()
-        );
+        return new CompleteGraphNeighbor<>(edge.getOther(fromVertexId).getId(), edge.getProperties());
     }
 }

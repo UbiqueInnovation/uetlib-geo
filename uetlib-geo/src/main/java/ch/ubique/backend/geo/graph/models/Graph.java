@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.graph.models;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * @param <V> type of the vertex properties
@@ -62,6 +63,9 @@ public class Graph<V, E> {
         return getOrAddEdge(getOrAddVertex(u), getOrAddVertex(v), properties);
     }
 
+    public Edge<V, E> getOrAddEdge(Edge<V, E>  edge) {
+        return getOrAddEdge(edge.getU(), edge.getV(), edge.getProperties());
+    }
 
     public Edge<V, E> getOrAddEdge(Vertex<V, E>  u, Vertex<V, E>  v, E properties) {
         final var existingEdge = getEdge(u, v);
@@ -138,5 +142,12 @@ public class Graph<V, E> {
             }
         }
         return cycles;
+    }
+
+    public <S, T> Graph<S, T> map(Function<Vertex<V, E>, Vertex<S, T>> vertexMapper, Function<Edge<V, E>, T> edgeMapper) {
+        final var mappedGraph = new Graph<S, T>();
+        getVertices().forEach(vertex -> mappedGraph.addVertex(vertexMapper.apply(vertex)));
+        getEdges().forEach(edge -> mappedGraph.getOrAddEdge(edge.getU().getId(), edge.getV().getId(), edgeMapper.apply(edge)));
+        return mappedGraph;
     }
 }

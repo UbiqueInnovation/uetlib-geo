@@ -1,26 +1,26 @@
 package ch.ubique.backend.geo.tile.vector.models.graph;
 
-import ch.ubique.backend.geo.coordinate.models.Coordinate;
+import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
-import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
-import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
-import ch.ubique.backend.geo.graph.routing.RoutingLinkEdgeProperties;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 
 import java.util.Collection;
 
 @SuppressWarnings("ClassCanBeRecord") // We want to allow inheritance
-public class CompleteGraphVertex<C extends Coordinate, P> implements GraphVertex<C, P> {
+public class CompleteGraphVertex<P> implements GraphVertex<P> {
 
     private final long id;
 
-    private final  C coordinate;
+    private final Point point;
 
     private final Collection<CompleteGraphNeighbor<P>> metadata;
 
-    public CompleteGraphVertex(long id, C coordinate, Collection<CompleteGraphNeighbor<P>> metadata) {
+    public CompleteGraphVertex(long id, Point point, Collection<CompleteGraphNeighbor<P>> metadata) {
         this.id = id;
-        this.coordinate = coordinate;
+        this.point = point;
         this.metadata = metadata;
     }
 
@@ -30,8 +30,8 @@ public class CompleteGraphVertex<C extends Coordinate, P> implements GraphVertex
     }
 
     @Override
-    public C coordinate() {
-        return coordinate;
+    public Point point() {
+        return point;
     }
 
     @Override
@@ -46,23 +46,22 @@ public class CompleteGraphVertex<C extends Coordinate, P> implements GraphVertex
 
     @Override
     public Geometry geometry() {
-        return coordinate.toJtsPoint();
+        return point;
     }
 
-    public static <U extends Coordinate, S extends CoordinateVertexProperties<U>, T> GraphVertex<U, T> from(final Vertex<S, RoutingLinkEdgeProperties<T>> vertex) {
+    public static <T> GraphVertex<T> from(final Vertex<Coordinate, T> vertex, final GeometryFactory geometryFactory) {
         return new CompleteGraphVertex<>(
                 vertex.getId(),
-                vertex.getProperties().coordinate(),
+                geometryFactory.createPoint(vertex.getProperties()),
                 vertex.getEdges().stream().map(e -> CompleteGraphNeighbor.fromEdge(vertex.getId(), e)).toList()
         );
     }
 
-    public static <U extends Coordinate, S extends CoordinateVertexProperties<U>, T> Collection<GraphVertex<U, T>> from(final RoutingGraphs<S, T> routingGraphs) {
-        return routingGraphs
-                .completeGraph()
+    public static <T> Collection<GraphVertex<T>> from(final Graph<Coordinate, T> routingGraph, final GeometryFactory geometryFactory) {
+        return routingGraph
                 .getVertices()
                 .stream()
-                .map(CompleteGraphVertex::from)
+                .map(v -> from(v, geometryFactory))
                 .toList();
     }
 }

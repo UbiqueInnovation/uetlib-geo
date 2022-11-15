@@ -1,11 +1,12 @@
 package ch.ubique.backend.geo.tile.vector.models.graph;
 
-import ch.ubique.backend.geo.coordinate.models.Coordinate;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElementWithMetadata;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.locationtech.jts.geom.Point;
 
 import java.util.Collection;
 
-public interface GraphVertex<C extends Coordinate, P> extends VectorTileElementWithMetadata<Collection<? extends GraphNeighbor<P>>> {
-    long id();
-    C coordinate();
+public interface GraphVertex<P> extends VectorTileElementWithMetadata<Collection<? extends GraphNeighbor<P>>> {
+    @JsonIgnore
+    Point point();
 }

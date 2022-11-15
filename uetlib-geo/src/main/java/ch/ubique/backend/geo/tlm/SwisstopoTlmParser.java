@@ -1,8 +1,10 @@
 package ch.ubique.backend.geo.tlm;
 
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.tlm.models.*;
 import org.apache.commons.lang3.StringUtils;
+import org.locationtech.jts.geom.LineString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +64,7 @@ public class SwisstopoTlmParser {
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
                 if (elementName.equals("POLYLINE")) {
-                    path.setPolyline(parsePolyline(reader));
+                    path.setLine(parsePolyline(reader));
                 }
                 readPathAttributes(reader, path);
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
@@ -117,7 +119,7 @@ public class SwisstopoTlmParser {
         }
     }
 
-    private static List<LV95Coordinate> parsePolyline(XMLStreamReader reader) throws XMLStreamException {
+    private static LineString parsePolyline(XMLStreamReader reader) throws XMLStreamException {
         List<LV95Coordinate> polyline = new ArrayList<>();
         while (reader.hasNext()) {
             reader.next();
@@ -133,11 +135,11 @@ public class SwisstopoTlmParser {
             if (type == XMLStreamConstants.END_ELEMENT) {
                 String elementName = reader.getLocalName();
                 if (elementName.equals("POLYLINE")) {
-                    return polyline;
+                    return JtsConverter.LV95.toJtsLineString(polyline);
                 }
             }
         }
-        return polyline;
+        return JtsConverter.LV95.toJtsLineString(polyline);
     }
 
     private static LV95Coordinate parseCoordinate(XMLStreamReader reader) throws XMLStreamException {
