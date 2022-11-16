@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.locationtech.jts.geom.Point;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV95;
 import static java.lang.Math.pow;
@@ -56,8 +57,8 @@ public class LV95Coordinate implements Coordinate {
         return this;
     }
 
-    public Double getElevation() {
-        return elevation;
+    public Optional<Double> getElevation() {
+        return Optional.ofNullable(elevation);
     }
 
     public LV95Coordinate setElevation(Double elevation) {
@@ -105,7 +106,7 @@ public class LV95Coordinate implements Coordinate {
 
     @Override
     public String toString() {
-        return "LV95(east=" + east + ", north=" + north + ')';
+        return String.format("LV95(east=%,.2f, north=%,.2f, elevation=%,.1f)", east, north, elevation);
     }
 
     public boolean equalsExact(LV95Coordinate o) {

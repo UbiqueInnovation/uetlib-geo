@@ -16,11 +16,14 @@ public class CompleteGraphVertex<P> implements GraphVertex<P> {
 
     private final Point point;
 
+    private final GraphVertexTags tags;
+
     private final Collection<CompleteGraphNeighbor<P>> metadata;
 
-    public CompleteGraphVertex(long id, Point point, Collection<CompleteGraphNeighbor<P>> metadata) {
+    public CompleteGraphVertex(long id, Point point, GraphVertexTags tags, Collection<CompleteGraphNeighbor<P>> metadata) {
         this.id = id;
         this.point = point;
+        this.tags = tags;
         this.metadata = metadata;
     }
 
@@ -32,6 +35,11 @@ public class CompleteGraphVertex<P> implements GraphVertex<P> {
     @Override
     public Point point() {
         return point;
+    }
+
+    @Override
+    public GraphVertexTags tags() {
+        return tags;
     }
 
     @Override
@@ -53,6 +61,7 @@ public class CompleteGraphVertex<P> implements GraphVertex<P> {
         return new CompleteGraphVertex<>(
                 vertex.getId(),
                 geometryFactory.createPoint(vertex.getProperties()),
+                new GraphVertexTags(vertex.getProperties().getZ()),
                 vertex.getEdges().stream().map(e -> CompleteGraphNeighbor.fromEdge(vertex.getId(), e)).toList()
         );
     }

@@ -6,7 +6,7 @@ import ch.ubique.backend.core.service.DataAndInput;
 import ch.ubique.backend.core.service.InputCollectionLoaderService;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
-import ch.ubique.backend.geo.tile.vector.utils.VectorTileHelper;
+import ch.ubique.backend.geo.tile.vector.utils.VectorTileGenerator;
 import ch.ubique.backend.job.BaseInputJob;
 import ch.ubique.backend.job.data.service.InputJobDataService;
 import ch.ubique.backend.job.model.Job;
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
 
 public abstract class BaseVectorTileImporter<S, T extends VectorTileElement> extends BaseInputJob {
 
@@ -32,7 +33,7 @@ public abstract class BaseVectorTileImporter<S, T extends VectorTileElement> ext
 
     protected abstract InputCollectionLoaderService<S> getService();
 
-    protected abstract Collection<VectorTileOutput<T>> getOutputs(Collection<S> elements);
+    protected abstract Stream<VectorTileOutput<T>> getOutputs(Collection<S> elements);
 
     protected boolean isInputFileUploadEnabled() {
         return true;
@@ -52,9 +53,18 @@ public abstract class BaseVectorTileImporter<S, T extends VectorTileElement> ext
 
     @Override
     protected final JobRunState processInputs() {
+        logger.info("Getting outputs.");
         final var outputs = getOutputs(data.data());
-        for (final var output : outputs) {
+        final var iterator = outputs.iterator();
 
+        logger.info("Processing each output.");
+        while (iterator.hasNext()) {
+
+            // Get output
+            final var output = iterator.next();
+            logger.info("Got output {}.", output);
+
+            // Validate output
             if (output.isEmpty()) {
                 if (allowEmpty()) {
                     logger.info("No elements found. Continuing to generate empty vector tiles.");
@@ -64,11 +74,10 @@ public abstract class BaseVectorTileImporter<S, T extends VectorTileElement> ext
                 }
             }
 
-            logger.info("Generating and uploading tiles");
-            var vectorTileHelper = new VectorTileHelper<>(output.elements(), output.config());
-
+            // Generate vector tiles
             try {
-                vectorTileHelper.generateTiles(output.tileConsumer(), 32);
+                logger.info("Generating and uploading tiles");
+                VectorTileGenerator.generateForSwitzerlandLv95(output);
             } catch (ExecutionException e) {
                 logger.error("Generating vector tiles failed", e);
                 return JobRunState.ERROR;

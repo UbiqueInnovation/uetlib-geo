@@ -19,15 +19,16 @@ public class CoordinateConverter {
     public static LV95Coordinate toLV95(LV03Coordinate lv03) {
         double east = lv03.getEast() + 2e6;
         double north = lv03.getNorth() + 1e6;
-        return new LV95Coordinate(east, north, lv03.getElevation());
+        return new LV95Coordinate(east, north, lv03.getElevation().orElse(null));
     }
 
     public static LV95Coordinate toLV95(WGS84Coordinate wgs84) {
         double north = wgsToChX(wgs84.getLatitude(), wgs84.getLongitude()) + 1e6;
         double east = wgsToChY(wgs84.getLatitude(), wgs84.getLongitude()) + 2e6;
         Double elevation = null;
-        if (wgs84.getElevation() != null) {
-            elevation = wgsToChH(wgs84.getLatitude(), wgs84.getLongitude(), wgs84.getElevation());
+        final var wgs84Elevation = wgs84.getElevation();
+        if (wgs84Elevation.isPresent()) {
+            elevation = wgsToChH(wgs84.getLatitude(), wgs84.getLongitude(), wgs84Elevation.get());
         }
         return new LV95Coordinate(east, north, elevation);
     }
@@ -41,7 +42,7 @@ public class CoordinateConverter {
     public static LV03Coordinate toLV03(LV95Coordinate lv95) {
         double east = lv95.getEast() - 2e6;
         double north = lv95.getNorth() - 1e6;
-        return new LV03Coordinate(east, north, lv95.getElevation());
+        return new LV03Coordinate(east, north, lv95.getElevation().orElse(null));
     }
 
     public static LV03Coordinate toLV03(WGS84Coordinate wgs84) {
@@ -57,12 +58,13 @@ public class CoordinateConverter {
     public static WGS84Coordinate toWGS84(LV95Coordinate lv95) {
         double east = lv95.getEast() - 2e6;
         double north = lv95.getNorth() - 1e6;
-        Double elevation = lv95.getElevation();
+        final var lv95Elevation = lv95.getElevation();
 
         double latitude = chToWGSlat(east, north);
         double longitude = chToWGSlng(east, north);
-        if (elevation != null) {
-            elevation = chToWGSheight(east, north, elevation);
+        Double elevation  = null;
+        if (lv95Elevation.isPresent()) {
+            elevation = chToWGSheight(east, north, lv95Elevation.get());
         }
         return new WGS84Coordinate(latitude, longitude, elevation);
     }

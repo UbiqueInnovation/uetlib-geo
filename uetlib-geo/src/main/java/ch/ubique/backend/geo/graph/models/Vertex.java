@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @param <V> type of the vertex properties
@@ -50,7 +51,11 @@ public final class Vertex<V, E> {
     }
 
     public List<Vertex<V, E>> getNeighbors() {
-        return edges.stream().map(e -> this.equals(e.getU()) ? e.getV() : e.getU()).toList();
+        return getNeighborsStream().toList();
+    }
+
+    public Stream<Vertex<V, E>> getNeighborsStream() {
+        return edges.stream().map(e -> this.id == e.getU().id ? e.getV() : e.getU());
     }
 
     public void setProperties(V properties) {

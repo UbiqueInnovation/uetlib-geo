@@ -6,7 +6,6 @@ import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Envelope;
-import org.opengis.referencing.FactoryException;
 
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -14,7 +13,7 @@ import java.util.stream.IntStream;
 class TileGeometryUtilsTest {
 
     @Test
-    void test() throws FactoryException {
+    void test() {
 
         final var east = 2600000;
         final var north = 1200000;
@@ -25,7 +24,10 @@ class TileGeometryUtilsTest {
         final var random = new Random();
 
         for (var i : IntStream.range(0, 1000).toArray()) {
-            final var testCoordinate = new LV95Coordinate(east + random.nextInt(-tileSize, 2 * tileSize), north + random.nextInt(-tileSize, 2 * tileSize));
+            final var testCoordinate = new LV95Coordinate(
+                    east + random.nextInt(-tileSize, 2 * tileSize),
+                    north + random.nextInt(-tileSize, 2 * tileSize),
+                    random.nextDouble(0, 4000));
 
             for (final var direction : YAxisDirection.values()) {
                 @SuppressWarnings("deprecation") // This unit tests compares the behaviour of the existing code to the new code
@@ -33,6 +35,7 @@ class TileGeometryUtilsTest {
                 final var actual = TileGeometryUtils.getTileGeometry(JtsConverter.LV95.toJtsPoint(testCoordinate), tileEnvelope, extend, direction);
                 Assertions.assertTrue(actual.isPresent());
                 Assertions.assertEquals(expected, actual.get().getCoordinate());
+                Assertions.assertEquals(testCoordinate.getElevation().orElse(null), actual.get().getCoordinate().getZ());
             }
         }
     }

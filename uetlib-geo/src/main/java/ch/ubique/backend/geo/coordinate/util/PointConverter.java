@@ -18,9 +18,10 @@ public class PointConverter {
     }
 
     public static <P extends Point<P>> P toPoint(Class<P> cls, LV95Coordinate coordinate) {
-        if (coordinate.getElevation() != null) {
+        final var elevation = coordinate.getElevation();
+        if (elevation.isPresent()) {
             return Point.newInstance(
-                    cls, coordinate.getEast(), coordinate.getNorth(), coordinate.getElevation());
+                    cls, coordinate.getEast(), coordinate.getNorth(), elevation.get());
         }
         return Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth());
     }
@@ -42,9 +43,10 @@ public class PointConverter {
     }
 
     public static <P extends Point<P>> P toPoint(Class<P> cls, LV03Coordinate coordinate) {
-        if (coordinate.getElevation() != null) {
+        final var elevation = coordinate.getElevation();
+        if (elevation.isPresent()) {
             return Point.newInstance(
-                    cls, coordinate.getEast(), coordinate.getNorth(), coordinate.getElevation());
+                    cls, coordinate.getEast(), coordinate.getNorth(), elevation.get());
         }
         return Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth());
     }
@@ -66,12 +68,13 @@ public class PointConverter {
     }
 
     public static <P extends Point<P>> P toPoint(Class<P> cls, WGS84Coordinate coordinate) {
-        if (coordinate.getElevation() != null) {
+        final var elevation = coordinate.getElevation();
+        if (elevation.isPresent()) {
             return Point.newInstance(
                     cls,
                     coordinate.getLatitude(),
                     coordinate.getLongitude(),
-                    coordinate.getElevation());
+                    elevation.get());
         }
         return Point.newInstance(cls, coordinate.getLatitude(), coordinate.getLongitude());
     }

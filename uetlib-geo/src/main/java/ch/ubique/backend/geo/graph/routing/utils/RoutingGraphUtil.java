@@ -1,14 +1,13 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
+import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculator;
+import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculatorFactory;
 import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphEdgeProperties;
-import org.eclipse.emf.common.util.WrappedException;
-import org.geotools.geometry.jts.JTS;
 import org.locationtech.jts.geom.Coordinate;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.TransformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,7 @@ public class RoutingGraphUtil<E> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final CoordinateReferenceSystem crs;
+    private final DistanceCalculator distanceCalculator;
 
     public static <T> Graph<Coordinate, RoutingGraphEdgeProperties<T>> createRoutingGraph(
             final Graph<Coordinate, T> graph, final CoordinateReferenceSystem crs) {
@@ -32,7 +31,7 @@ public class RoutingGraphUtil<E> {
     private final Set<Vertex<Coordinate, E>> additionalRoutingVertices;
 
     private RoutingGraphUtil(final Graph<Coordinate, E> inputGraph, final CoordinateReferenceSystem crs) {
-        this.crs = crs;
+        this.distanceCalculator = DistanceCalculatorFactory.create(crs);
         this.inputGraph = inputGraph;
         routingGraph = new Graph<>();
         additionalRoutingVertices = new HashSet<>();
@@ -136,10 +135,6 @@ public class RoutingGraphUtil<E> {
     }
 
     private double getDistance(Vertex<Coordinate, E> from, Vertex<Coordinate, E> to) {
-        try {
-            return JTS.orthodromicDistance(from.getProperties(), to.getProperties(), crs);
-        } catch (TransformException e) {
-            throw new WrappedException("Could not compute distance.", e);
-        }
+        return distanceCalculator.getDistance(from.getProperties(), to.getProperties());
     }
 }
