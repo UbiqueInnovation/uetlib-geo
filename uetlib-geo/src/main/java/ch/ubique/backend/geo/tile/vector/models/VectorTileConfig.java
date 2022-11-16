@@ -1,18 +1,16 @@
 package ch.ubique.backend.geo.tile.vector.models;
 
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
-import com.pivovarit.function.ThrowingConsumer;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 public class VectorTileConfig<T extends VectorTileElement> {
 
     private String key;
-
-    private ThrowingConsumer<BinaryTile, IOException> onTileGenerated;
-    private int maxElementsPerTile;
+    private int maxElementsPerTile = -1;
     private double simplifyTolerance;
     private int clipBuffer = 0;
     private int extent = 4096;
@@ -27,10 +25,6 @@ public class VectorTileConfig<T extends VectorTileElement> {
     private List<Integer> zoomLevels;
     private VectorTileFilter<T> filter;
 
-    public VectorTileConfig() {
-        this.maxElementsPerTile = -1;
-    }
-
     public VectorTileConfig<T> setMaxElementsPerTile(int maxElementsPerTile) {
         this.maxElementsPerTile = maxElementsPerTile;
         return this;
@@ -38,7 +32,7 @@ public class VectorTileConfig<T extends VectorTileElement> {
 
     /**
      * Returns the maximum allowed elements per tile. This depends on the zoomlevel, meaning that on
-     * the maximum level we never limit the allowed number of elements so we never miss any
+     * the maximum level we never limit the allowed number of elements, so we never miss any
      * elements.
      */
     public int getMaxElementsPerTile(int zoomLevel) {
@@ -94,16 +88,6 @@ public class VectorTileConfig<T extends VectorTileElement> {
         return this;
     }
 
-    public ThrowingConsumer<BinaryTile, IOException> getOnTileGenerated() {
-        return onTileGenerated;
-    }
-
-    public VectorTileConfig<T> setOnTileGenerated(
-            ThrowingConsumer<BinaryTile, IOException> onTileGenerated) {
-        this.onTileGenerated = onTileGenerated;
-        return this;
-    }
-
     public String getKey() {
         return key;
     }
@@ -143,5 +127,19 @@ public class VectorTileConfig<T extends VectorTileElement> {
 
     public double simplifyTolerance() {
         return simplifyTolerance;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("key", key)
+                .append("maxElementsPerTile", maxElementsPerTile)
+                .append("simplifyTolerance", simplifyTolerance)
+                .append("clipBuffer", clipBuffer)
+                .append("extent", extent)
+                .append("yAxisDirection", yAxisDirection)
+                .append("zoomLevels", zoomLevels)
+                .append("filter", filter)
+                .toString();
     }
 }

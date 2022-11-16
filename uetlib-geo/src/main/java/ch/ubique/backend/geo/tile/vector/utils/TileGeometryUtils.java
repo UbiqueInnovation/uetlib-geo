@@ -3,11 +3,11 @@ package ch.ubique.backend.geo.tile.vector.utils;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.geotools.referencing.operation.transform.PassThroughTransform;
 import org.geotools.renderer.lite.RendererUtilities;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
@@ -30,11 +30,12 @@ public class TileGeometryUtils {
             final Geometry geometry,
             final Envelope tileEnvelope,
             final int extend,
-            final YAxisDirection yAxisDirection) throws FactoryException {
+            final YAxisDirection yAxisDirection) {
 
         try {
             final var crs = getCrs(geometry);
-            final var transformed = JTS.transform(geometry, tileTransform(tileEnvelope, extend, yAxisDirection, crs));
+            final var withHeight = !Double.isNaN(geometry.getCoordinate().getZ());
+            final var transformed = JTS.transform(geometry, tileTransform(tileEnvelope, extend, yAxisDirection, crs, withHeight));
             return Optional.of(transformed);
         } catch (TransformException e) {
             logger.warn("Could not transform geometry for tile", e);
@@ -42,7 +43,7 @@ public class TileGeometryUtils {
         }
     }
 
-    public static MathTransform tileTransform(final Envelope tileEnvelope, final int extend, YAxisDirection yAxisDirection, CoordinateReferenceSystem crs) throws TransformException {
+    public static MathTransform tileTransform(final Envelope tileEnvelope, final int extend, YAxisDirection yAxisDirection, CoordinateReferenceSystem crs, boolean withHeight) throws TransformException {
         final var tileArea = new Rectangle(extend, extend);
         final var affineTransform = new AffineTransform();
 
@@ -52,7 +53,16 @@ public class TileGeometryUtils {
         }
 
         affineTransform.concatenate(RendererUtilities.worldToScreenTransform(tileEnvelope, tileArea, crs));
-        return new AffineTransform2D(affineTransform);
+
+        final var transform2d = new AffineTransform2D(affineTransform);
+
+        if (withHeight) {
+            // The pass through transform ensures, that the height is passed through to the tile.
+            // Otherwise, the height would just be dropped, i.e. 3D coordinates would be converted to 2D coordinates
+            return PassThroughTransform.create(0, transform2d, 1);
+        }
+
+        return transform2d;
     }
 
 

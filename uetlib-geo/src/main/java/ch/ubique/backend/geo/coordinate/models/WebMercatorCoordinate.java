@@ -6,6 +6,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.locationtech.jts.geom.Point;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WEB_MERCATOR;
 
@@ -78,8 +79,8 @@ public class WebMercatorCoordinate implements Coordinate {
         return this;
     }
 
-    public Double getElevation() {
-        return elevation;
+    public Optional<Double> getElevation() {
+        return Optional.ofNullable(elevation);
     }
 
     public WebMercatorCoordinate setElevation(final Double elevation) {
@@ -89,7 +90,7 @@ public class WebMercatorCoordinate implements Coordinate {
 
     @Override
     public String toString() {
-        return "WebMercator(x=" + x + ", y=" + y + ')';
+        return String.format("WebMercator(x=%,.2f, y=%,.2f, elevation=%,.1f)", x, y, elevation);
     }
 
     @Override

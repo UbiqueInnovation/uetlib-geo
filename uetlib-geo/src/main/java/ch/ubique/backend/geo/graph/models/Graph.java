@@ -133,7 +133,7 @@ public class Graph<V, E> {
                 potentialCycle.add(current);
 
                 final var prev = previous;
-                final var next = current.getNeighbors().stream().filter(v -> !v.equals(prev)).findAny();
+                final var next = current.getNeighborsStream().filter(v -> !v.equals(prev)).findAny();
 
                 assert next.isPresent();
 

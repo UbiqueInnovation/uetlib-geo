@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.locationtech.jts.geom.Point;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WGS84;
 import static java.lang.Math.*;
@@ -58,8 +59,8 @@ public class WGS84Coordinate implements Coordinate {
         return this;
     }
 
-    public Double getElevation() {
-        return elevation;
+    public Optional<Double> getElevation() {
+        return Optional.ofNullable(elevation);
     }
 
     public WGS84Coordinate setElevation(Double elevation) {
@@ -109,7 +110,7 @@ public class WGS84Coordinate implements Coordinate {
 
     @Override
     public String toString() {
-        return "WGS84(lat=" + latitude + ", lon=" + longitude + ')';
+        return String.format("WGS84(lat=%,.2f, lon=%,.2f, elevation=%,.1f)", latitude, longitude, elevation);
     }
 
     @Override

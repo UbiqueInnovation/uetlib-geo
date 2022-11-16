@@ -204,12 +204,14 @@ public abstract class TileElement implements VectorTileElementWithTagsAndMetadat
     }
 
     private boolean is3d() {
-        return getCoordinates().stream().allMatch(c -> c.getElevation() != null);
+        return getCoordinates().stream()
+                .map(LV95Coordinate::getElevation)
+                .allMatch(Optional::isPresent);
     }
 
     private GeometryWithAttributes getPoint(LV95Coordinate position) {
         Coordinate coordinate = getCoordinate(toPoint(Point2d.class, position));
-        return getPoint(coordinate, position.getElevation());
+        return getPoint(coordinate, position.getElevation().orElse(null));
     }
 
     private GeometryWithAttributes getPoint(Coordinate coordinate, Double elevation) {
@@ -226,7 +228,7 @@ public abstract class TileElement implements VectorTileElementWithTagsAndMetadat
         Coordinate[] coordinates =
                 toTileCoordinateArray(points);
         if (coordinates.length == 1) {
-            return getPoint(coordinates[0], getCoordinates().get(0).getElevation());
+            return getPoint(coordinates[0], getCoordinates().get(0).getElevation().orElse(null));
         }
         Geometry geometry = geometryFactory.createLineString(coordinates);
         Map<String, Object> attributes = getAttributes();
@@ -289,10 +291,10 @@ public abstract class TileElement implements VectorTileElementWithTagsAndMetadat
         List<Double> slopes = calculateSlopes(points);
         Double maxSlope = null;
         for (int i = 0; i < points.size(); ++i) {
-            Double elevation = points.get(i).getElevation();
+            final var elevation = points.get(i).getElevation();
             Double slope = slopes.get(i);
-            if (elevation != null) {
-                attributes.put("elevation_" + i, elevation);
+            if (elevation.isPresent()) {
+                attributes.put("elevation_" + i, elevation.get());
             }
             if (slope != null) {
                 attributes.put("slope_" + i, slope);
@@ -323,11 +325,13 @@ public abstract class TileElement implements VectorTileElementWithTagsAndMetadat
         return slopes;
     }
 
-    private Double calculateSlope(LV95Coordinate a, LV95Coordinate b) {
-        if (a.getElevation() == null || b.getElevation() == 0) {
+    private Double calculateSlope(LV95Coordinate c1, LV95Coordinate c2) {
+        final var e1 = c1.getElevation();
+        final var e2 = c2.getElevation();
+        if (e1.isEmpty() || e2.isEmpty()) {
             return null;
         }
-        return abs(a.getElevation() - b.getElevation()) / a.distanceTo(b);
+        return abs(e1.get() - e2.get()) / c1.distanceTo(c2);
     }
 
 

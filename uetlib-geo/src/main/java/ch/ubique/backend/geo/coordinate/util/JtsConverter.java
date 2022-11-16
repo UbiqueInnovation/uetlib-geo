@@ -7,6 +7,7 @@ import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.geotools.referencing.operation.transform.PassThroughTransform;
 import org.locationtech.jts.geom.*;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -21,6 +22,7 @@ import java.util.function.Function;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getSimpleGeometriesIterator;
+import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
 public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coordinate> {
 
@@ -35,31 +37,27 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
         this.toJtsMapper = toJtsMapper;
         this.fromJtsMapper = fromJtsMapper;
         this.geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
-        try {
-            this.crs = getCrs(srid);
-        } catch (FactoryException e) {
-            throw new WrappedException(e); // rethrow as runtime exception. no way for caller to handle this
-        }
+        this.crs = getCrs(srid);
     }
     
     public static final JtsConverter<WGS84Coordinate> WGS84 = new JtsConverter<>(4326,
-            c -> new Coordinate(c.getLongitude(), c.getLatitude()),
-            c -> new WGS84Coordinate(c.y, c.x)
+            c -> new Coordinate(c.getLongitude(), c.getLatitude(), c.getElevation().orElse(NULL_ORDINATE)),
+            c -> new WGS84Coordinate(c.y, c.x, nullIfNaN(c.getZ()))
     );
 
     public static final JtsConverter<WebMercatorCoordinate> WEB_MERCATOR = new JtsConverter<>(3857,
-            c -> new Coordinate(c.getX(), c.getY()),
-            c -> new WebMercatorCoordinate(c.x, c.y)
+            c -> new Coordinate(c.getX(), c.getY(), c.getElevation().orElse(NULL_ORDINATE)),
+            c -> new WebMercatorCoordinate(c.x, c.y, nullIfNaN(c.getZ()))
     );
 
     public static final JtsConverter<LV95Coordinate> LV95 = new JtsConverter<>(2056,
-            c -> new Coordinate(c.getEast(), c.getNorth()),
-            c -> new LV95Coordinate(c.x, c.y)
+            c -> new Coordinate(c.getEast(), c.getNorth(), c.getElevation().orElse(NULL_ORDINATE)),
+            c -> new LV95Coordinate(c.x, c.y, nullIfNaN(c.getZ()))
     );
 
     public static final JtsConverter<LV03Coordinate> LV03 = new JtsConverter<>(21781,
-            c -> new Coordinate(c.getEast(), c.getNorth()),
-            c -> new LV03Coordinate(c.x, c.y)
+            c -> new Coordinate(c.getEast(), c.getNorth(), c.getElevation().orElse(NULL_ORDINATE)),
+            c -> new LV03Coordinate(c.x, c.y, nullIfNaN(c.getZ()))
     );
 
     public int srid() {
@@ -171,9 +169,24 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
 
     public MathTransform findMathTransform(int sourceSRID) {
         try {
-            return CRS.findMathTransform(getCrs(sourceSRID), crs);
+            final var baseTransform = CRS.findMathTransform(getCrs(sourceSRID), crs);
+
+            if (baseTransform.getTargetDimensions() <= 2) {
+                // This ensures, that the height of the coordinate is passed through
+                // if the base transform only transforms the first two coordinates
+                return PassThroughTransform.create(0, baseTransform, 1);
+            }
+
+            return baseTransform;
         } catch (FactoryException e) {
             throw new WrappedException(e); // rethrow as runtime exception. no way for caller to handle this
         }
+    }
+
+    private static Double nullIfNaN(Double value){
+        if (value != null && value.isNaN()) {
+            return null;
+        }
+        return value;
     }
 }

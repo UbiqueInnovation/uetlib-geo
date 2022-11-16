@@ -16,11 +16,14 @@ public class RoutingGraphVertex<P> implements GraphVertex<P> {
     private final long id;
     private final Point point;
 
+    private final GraphVertexTags tags;
+
     private final Collection<RoutingGraphNeighbor<P>> metadata;
 
-    public RoutingGraphVertex(long id, Point point, Collection<RoutingGraphNeighbor<P>> metadata) {
+    public RoutingGraphVertex(long id, Point point, GraphVertexTags tags, Collection<RoutingGraphNeighbor<P>> metadata) {
         this.id = id;
         this.point = point;
+        this.tags = tags;
         this.metadata = metadata;
     }
 
@@ -32,6 +35,11 @@ public class RoutingGraphVertex<P> implements GraphVertex<P> {
     @Override
     public Point point() {
         return point;
+    }
+
+    @Override
+    public GraphVertexTags tags() {
+        return tags;
     }
 
     @Override
@@ -53,6 +61,7 @@ public class RoutingGraphVertex<P> implements GraphVertex<P> {
         return new RoutingGraphVertex<>(
                 vertex.getId(),
                 geometryFactory.createPoint(vertex.getProperties()),
+                new GraphVertexTags(vertex.getProperties().getZ()),
                 vertex.getEdges().stream().map(e -> RoutingGraphNeighbor.fromEdge(vertex.getId(), e)).toList()
         );
     }
@@ -64,4 +73,5 @@ public class RoutingGraphVertex<P> implements GraphVertex<P> {
                 .map(v -> from(v, geometryFactory))
                 .toList();
     }
+
 }

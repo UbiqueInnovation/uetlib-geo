@@ -112,7 +112,7 @@ public class KmlParser {
                                         new LV95Coordinate(
                                                 first.getEast(),
                                                 first.getNorth(),
-                                                first.getElevation()));
+                                                first.getElevation().orElse(null)));
                             }
                         }
                         placemark.addCoordinates(coordinates);
