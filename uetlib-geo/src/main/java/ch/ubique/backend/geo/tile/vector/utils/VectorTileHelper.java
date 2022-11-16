@@ -5,6 +5,8 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import ch.ubique.backend.core.utils.MathUtils;
+import ch.ubique.backend.geo.coordinate.util.JtsUtil;
+import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
@@ -33,7 +35,7 @@ import no.ecc.vectortile.VectorTileEncoder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.operation.valid.IsValidOp;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.geometry.MismatchedReferenceSystemException;
 import org.opengis.referencing.FactoryException;
 import org.slf4j.Logger;
@@ -73,15 +75,13 @@ public class VectorTileHelper<T extends VectorTileElement> {
         final var boundingBox = tile.boundingBox();
         final var layer = element.layer();
         final long id = element.id();
-        final var geometry = element.geometry();
         final var tags = VectorTileElementUtils.getFinalTags(element);
 
-        final var geometryValidator = new IsValidOp(geometry);
-        if (!geometryValidator.isValid()) {
-            logger.warn(
-                    "Element geometry for {} not valid: {}",
-                    tags,
-                    geometryValidator.getValidationError());
+        final Geometry geometry;
+        try {
+            geometry = JtsUtil.tryToGetValidGeometry(element.geometry());
+        } catch (UnfixableGeometryException e) {
+            logger.warn("Element geometry for {} not valid and could not be fixed", tags, e);
             return;
         }
 
@@ -93,13 +93,11 @@ public class VectorTileHelper<T extends VectorTileElement> {
             return;
         }
 
-        final var tileGeometry = tileGeometryMaybe.get();
-        final var tileGeometryValidator = new IsValidOp(tileGeometry);
-        if (!tileGeometry.isValid()) {
-            logger.warn(
-                    "Tile geometry for {} not valid: {}",
-                    tags,
-                    tileGeometryValidator.getValidationError());
+        final Geometry tileGeometry;
+        try {
+            tileGeometry = JtsUtil.tryToGetValidGeometry(tileGeometryMaybe.get());
+        } catch (UnfixableGeometryException e) {
+            logger.warn("Tile geometry for {} not valid and could not be fixed", tags, e);
             return;
         }
 
