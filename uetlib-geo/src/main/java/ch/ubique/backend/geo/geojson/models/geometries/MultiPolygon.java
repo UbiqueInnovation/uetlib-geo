@@ -4,13 +4,14 @@ import ch.ubique.backend.geo.geojson.models.Coordinate;
 import ch.ubique.backend.geo.geojson.models.Geometry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * @deprecated Please use {@link org.locationtech.jts.geom.MultiPolygon} instead. Will be removed
- *     with 0.8.0
+ *     with 0.9.0
  */
 @Deprecated(since = "0.7.14", forRemoval = true)
 public class MultiPolygon extends Geometry {
