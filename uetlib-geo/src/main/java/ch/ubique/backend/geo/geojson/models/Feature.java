@@ -3,12 +3,13 @@ package ch.ubique.backend.geo.geojson.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * @deprecated This implementation does not use JTS geometries. Please use {@link
- *     ch.ubique.backend.geo.geojson.models.jts.Feature} instead. Will be removed with 0.8.0
+ *     ch.ubique.backend.geo.geojson.models.jts.Feature} instead. Will be removed with 0.9.0
  */
 @Deprecated(since = "0.7.14", forRemoval = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
