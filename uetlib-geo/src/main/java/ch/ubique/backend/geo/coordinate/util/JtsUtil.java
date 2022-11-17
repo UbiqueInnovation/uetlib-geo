@@ -70,7 +70,7 @@ public class JtsUtil {
     }
 
     public static List<Geometry> getSimpleGeometries(Geometry geometry) {
-        if (geometry.getNumGeometries() == 1) {
+        if (!(geometry instanceof GeometryCollection)) {
             // Not a collection -> already simple -> return geometry itself
             return List.of(geometry);
         }
