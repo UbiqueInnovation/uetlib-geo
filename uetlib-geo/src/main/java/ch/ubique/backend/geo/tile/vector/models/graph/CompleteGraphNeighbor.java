@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.tile.vector.models.graph;
 
 import ch.ubique.backend.geo.graph.models.Edge;
+import ch.ubique.backend.geo.graph.routing.utils.RoutingIdUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.locationtech.jts.geom.Coordinate;
 
@@ -11,10 +12,14 @@ public class CompleteGraphNeighbor<P> implements GraphNeighbor<P> {
     private final long neighborId;
 
     @JsonProperty
+    private final String neighborRoutingId;
+
+    @JsonProperty
     private final P edgeProperties;
 
-    public CompleteGraphNeighbor(long neighborId, P edgeProperties) {
+    public CompleteGraphNeighbor(long neighborId, String neighborRoutingId, P edgeProperties) {
         this.neighborId = neighborId;
+        this.neighborRoutingId = neighborRoutingId;
         this.edgeProperties = edgeProperties;
     }
 
@@ -22,12 +27,18 @@ public class CompleteGraphNeighbor<P> implements GraphNeighbor<P> {
         return neighborId;
     }
 
+    @Override
+    public String neighborRoutingId() {
+        return neighborRoutingId;
+    }
+
     public P edgeProperties() {
         return edgeProperties;
     }
 
     public static <T> CompleteGraphNeighbor<T> fromEdge(long fromVertexId, Edge<Coordinate, T> edge) {
-
-        return new CompleteGraphNeighbor<>(edge.getOther(fromVertexId).getId(), edge.getProperties());
+        final var neighborVertex = edge.getOther(fromVertexId);
+        final var neighborRoutingId = RoutingIdUtil.getRoutingIdentifier(neighborVertex.getProperties());
+        return new CompleteGraphNeighbor<>(neighborVertex.getId(), neighborRoutingId, edge.getProperties());
     }
 }

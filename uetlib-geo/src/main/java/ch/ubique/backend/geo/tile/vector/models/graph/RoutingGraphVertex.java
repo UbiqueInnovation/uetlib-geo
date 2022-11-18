@@ -61,7 +61,7 @@ public class RoutingGraphVertex<P> implements GraphVertex<P> {
         return new RoutingGraphVertex<>(
                 vertex.getId(),
                 geometryFactory.createPoint(vertex.getProperties()),
-                new GraphVertexTags(vertex.getProperties().getZ()),
+                new GraphVertexTags(vertex.getProperties()),
                 vertex.getEdges().stream().map(e -> RoutingGraphNeighbor.fromEdge(vertex.getId(), e)).toList()
         );
     }
