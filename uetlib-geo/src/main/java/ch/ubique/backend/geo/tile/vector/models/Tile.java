@@ -6,10 +6,10 @@ import org.locationtech.jts.geom.Envelope;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public record Tile<T>(
+public record Tile(
         TileInfo tileInfo,
         Envelope boundingBox,
-        Collection<T> elements
+        Collection<VectorTileElement> elements
 ) {
 
     public Tile(TileInfo tileInfo, Envelope boundingBox) {
@@ -20,7 +20,7 @@ public record Tile<T>(
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final var tile = (Tile<?>) o;
+        final var tile = (Tile) o;
         return boundingBox.equals(tile.boundingBox);
     }
 

@@ -5,7 +5,6 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.referencing.operation.transform.PassThroughTransform;
 import org.geotools.renderer.lite.RendererUtilities;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -64,37 +63,4 @@ public class TileGeometryUtils {
 
         return transform2d;
     }
-
-
-    /**
-     * @deprecated please use tileTransform instead
-     */
-    @Deprecated(since = "0.7.11")
-    public static Coordinate getCoordinateOnTile(
-            final Coordinate originalCoordinate,
-            final Envelope tileEnvelope,
-            final int extend,
-            final YAxisDirection yAxisDirection) {
-
-        double x =
-                Math.round(
-                        (originalCoordinate.getX() - tileEnvelope.getMinX())
-                                / tileEnvelope.getWidth()
-                                * extend);
-
-        /*
-         * currently y is only correct when using LV95 or LV03 coordinates, which increase in UPward
-         * direction
-         */
-        double y =
-                Math.round(
-                        (originalCoordinate.getY() - tileEnvelope.getMinY())
-                                / tileEnvelope.getHeight()
-                                * extend);
-        if (YAxisDirection.DOWN.equals(yAxisDirection)) {
-            y = extend - y;
-        }
-        return new Coordinate(x, y);
-    }
-
 }
