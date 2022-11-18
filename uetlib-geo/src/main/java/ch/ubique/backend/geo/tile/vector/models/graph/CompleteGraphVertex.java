@@ -61,7 +61,7 @@ public class CompleteGraphVertex<P> implements GraphVertex<P> {
         return new CompleteGraphVertex<>(
                 vertex.getId(),
                 geometryFactory.createPoint(vertex.getProperties()),
-                new GraphVertexTags(vertex.getProperties().getZ()),
+                new GraphVertexTags(vertex.getProperties()),
                 vertex.getEdges().stream().map(e -> CompleteGraphNeighbor.fromEdge(vertex.getId(), e)).toList()
         );
     }

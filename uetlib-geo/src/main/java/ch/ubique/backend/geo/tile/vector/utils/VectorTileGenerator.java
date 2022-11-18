@@ -247,7 +247,7 @@ public class VectorTileGenerator<T extends VectorTileElement> {
             ToDoubleFunction<VectorTileElement> getScore = VectorTileElement::score;
             var visibleElementsForTile =
                     tile.elements().stream()
-                            .filter(output.config()::filter)
+                            .filter(e -> e.showElement(zoomLevel.level()))
                             .sorted(Comparator.comparingDouble(getScore).reversed())
                             .limit(output.config().getMaxElementsPerTile(zoomLevel.level()))
                             .map(VectorTileElement::id)

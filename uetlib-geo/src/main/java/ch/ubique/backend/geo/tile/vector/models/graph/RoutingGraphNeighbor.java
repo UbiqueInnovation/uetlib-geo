@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.tile.vector.models.graph;
 
 import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphEdgeProperties;
+import ch.ubique.backend.geo.graph.routing.utils.RoutingIdUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.locationtech.jts.geom.Coordinate;
 
@@ -12,6 +13,9 @@ public class RoutingGraphNeighbor<P> implements GraphNeighbor<P> {
     private final long neighborId;
 
     @JsonProperty
+    private final String neighborRoutingId;
+
+    @JsonProperty
     private final long direction;
 
     @JsonProperty
@@ -20,8 +24,9 @@ public class RoutingGraphNeighbor<P> implements GraphNeighbor<P> {
     @JsonProperty
     private final P edgeProperties;
 
-    public RoutingGraphNeighbor(long neighborId, long direction, double distance, P edgeProperties) {
+    public RoutingGraphNeighbor(long neighborId, String neighborRoutingId, long direction, double distance, P edgeProperties) {
         this.neighborId = neighborId;
+        this.neighborRoutingId = neighborRoutingId;
         this.direction = direction;
         this.distance = distance;
         this.edgeProperties = edgeProperties;
@@ -31,9 +36,12 @@ public class RoutingGraphNeighbor<P> implements GraphNeighbor<P> {
             long fromVertexId, Edge<Coordinate, RoutingGraphEdgeProperties<T>> edge) {
 
         final var properties = edge.getProperties();
+        final var neighborVertex = edge.getOther(fromVertexId);
+        final var neighborRoutingId = RoutingIdUtil.getRoutingIdentifier(neighborVertex.getProperties());
 
         return new RoutingGraphNeighbor<>(
-                edge.getOther(fromVertexId).getId(),
+                neighborVertex.getId(),
+                neighborRoutingId,
                 properties.direction().getId(),
                 properties.distance(),
                 properties.originalProperties()
@@ -43,6 +51,11 @@ public class RoutingGraphNeighbor<P> implements GraphNeighbor<P> {
     @Override
     public long neighborId() {
         return neighborId;
+    }
+
+    @Override
+    public String neighborRoutingId() {
+        return neighborRoutingId;
     }
 
     public long direction() {

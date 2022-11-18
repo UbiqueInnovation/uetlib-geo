@@ -7,6 +7,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.util.Arrays;
 import java.util.List;
 
+
+// TODO: remove generics for version 0.9.0, not needed anymore after removing the filter
 public class VectorTileConfig<T extends VectorTileElement> {
 
     private String key;
@@ -23,6 +25,10 @@ public class VectorTileConfig<T extends VectorTileElement> {
     private YAxisDirection yAxisDirection = YAxisDirection.UP;
 
     private List<Integer> zoomLevels;
+
+    /**
+     * Will be removed with version 0.9.0, see {@link VectorTileFilter}.
+     */
     private VectorTileFilter<T> filter;
 
     public VectorTileConfig<T> setMaxElementsPerTile(int maxElementsPerTile) {
@@ -83,6 +89,9 @@ public class VectorTileConfig<T extends VectorTileElement> {
         return setZoomLevels(Arrays.asList(zoomLevels));
     }
 
+    /**
+     * Will be removed with version 0.9.0, see {@link VectorTileFilter}.
+     */
     public VectorTileConfig<T> setFilter(VectorTileFilter<T> filter) {
         this.filter = filter;
         return this;
@@ -106,6 +115,10 @@ public class VectorTileConfig<T extends VectorTileElement> {
         return this;
     }
 
+    /**
+     * Will be removed with version 0.9.0, see {@link VectorTileFilter}.
+     */
+    @Deprecated(since = "0.8.0", forRemoval = true)
     public boolean filter(T t) {
         if (filter != null) {
             return filter.accept(t);
