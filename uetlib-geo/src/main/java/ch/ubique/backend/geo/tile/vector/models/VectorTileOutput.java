@@ -7,9 +7,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.io.IOException;
 import java.util.Collection;
 
-public record VectorTileOutput<T extends VectorTileElement>(
-        VectorTileConfig<T> config,
-        Collection<T> elements,
+public record VectorTileOutput(
+        VectorTileConfig config,
+        Collection<VectorTileElement> elements,
         ThrowingConsumer<BinaryTile, IOException> tileConsumer
 ) {
     public boolean isEmpty() {

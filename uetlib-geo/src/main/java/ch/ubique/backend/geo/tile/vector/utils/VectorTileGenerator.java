@@ -28,23 +28,23 @@ import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-public class VectorTileGenerator<T extends VectorTileElement> {
+public class VectorTileGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(VectorTileGenerator.class);
 
     private final TileLevelsDefinition tileLevelsDefinition;
 
-    private final VectorTileOutput<T> output;
+    private final VectorTileOutput output;
 
     private final ForkJoinPool forkJoinPool;
 
-    public static <S extends VectorTileElement> void generateForSwitzerlandLv95(VectorTileOutput<S> output) throws ExecutionException, InterruptedException {
-        final var generator = new VectorTileGenerator<>(SwissConstants.swissTileDefinition(), output, 4);
+    public static void generateForSwitzerlandLv95(VectorTileOutput output) throws ExecutionException, InterruptedException {
+        final var generator = new VectorTileGenerator(SwissConstants.swissTileDefinition(), output, 4);
         generator.generateTiles();
         generator.forkJoinPool.shutdown();
     }
 
-    private VectorTileGenerator(TileLevelsDefinition tileLevelsDefinition, VectorTileOutput<T> output, int numThreads) {
+    private VectorTileGenerator(TileLevelsDefinition tileLevelsDefinition, VectorTileOutput output, int numThreads) {
         this.tileLevelsDefinition = tileLevelsDefinition;
         this.output = output;
         this.forkJoinPool = new ForkJoinPool(numThreads);
@@ -72,13 +72,13 @@ public class VectorTileGenerator<T extends VectorTileElement> {
         printStats(tiles, tileSizes, level);
     }
 
-    private int generateTile(Tile<T> tile) {
+    private int generateTile(Tile tile) {
         var binaryTile = VectorTileEncoderUtil.encode(tile, output.config());
         output.tileConsumer().uncheck().accept(binaryTile);
         return binaryTile.bytes().length;
     }
 
-    private void logProgress(Collection<Tile<T>> tiles, AtomicInteger count, int onePercent, long startTime) {
+    private void logProgress(Collection<Tile> tiles, AtomicInteger count, int onePercent, long startTime) {
         int countValue = count.incrementAndGet();
         if (countValue % onePercent == 0) {
             int percent = 100 * countValue / tiles.size();
@@ -88,7 +88,7 @@ public class VectorTileGenerator<T extends VectorTileElement> {
         }
     }
 
-    private void printStats(Collection<Tile<T>> tiles, List<Integer> tileSizes, int level) {
+    private void printStats(Collection<Tile> tiles, List<Integer> tileSizes, int level) {
 
         StringBuilder stats = new StringBuilder();
         stats.append('\n');
@@ -139,7 +139,7 @@ public class VectorTileGenerator<T extends VectorTileElement> {
         logger.info("Statistic for level {}: {}", level, stats);
     }
 
-    private Collection<Tile<T>> getTiles(int level) {
+    private Collection<Tile> getTiles(int level) {
         final var zoomLevel = tileLevelsDefinition.getZoomLevel(level);
         final var tilesX = zoomLevel.tilesX();
         final var tilesY = zoomLevel.tilesY();
@@ -148,7 +148,7 @@ public class VectorTileGenerator<T extends VectorTileElement> {
 
         logger.info("Generate tiles for zoom level {}", level);
 
-        List<Tile<T>> tiles = new ArrayList<>(tilesX * tilesY);
+        List<Tile> tiles = new ArrayList<>(tilesX * tilesY);
 
         for (int x = 0; x < tilesX; ++x) {
             for (int y = 0; y < tilesY; ++y) {
@@ -157,7 +157,7 @@ public class VectorTileGenerator<T extends VectorTileElement> {
                 TileInfo tileInfo = new TileInfo(x, y, zoomLevel);
                 final var boundingBox =
                         new Envelope(min.getX(), max.getX(), min.getY(), max.getY());
-                tiles.add(new Tile<>(tileInfo, boundingBox));
+                tiles.add(new Tile(tileInfo, boundingBox));
             }
         }
 
@@ -169,7 +169,7 @@ public class VectorTileGenerator<T extends VectorTileElement> {
 
         // Add elements to tiles that lie within bounding box of element and are visible at the
         // current zoom level
-        for (T element : output.elements()) {
+        for (final var element : output.elements()) {
             if (element.geometry().getSRID() != tileLevelsDefinition.srid()) {
                 throw new MismatchedReferenceSystemException(
                         String.format(
@@ -190,7 +190,7 @@ public class VectorTileGenerator<T extends VectorTileElement> {
         return limitElementsPerTile(tiles, zoomLevel);
     }
 
-    public List<Pair<Integer, Integer>> getXYsElementIsIn(T element, int z) {
+    public List<Pair<Integer, Integer>> getXYsElementIsIn(VectorTileElement element, int z) {
         final ZoomLevel zoomLevel = tileLevelsDefinition.getZoomLevel(z);
         final double tileWidth = zoomLevel.tileWidth();
         final Point2d origin = toPoint(Point2d.class, tileLevelsDefinition.origin());
@@ -206,7 +206,7 @@ public class VectorTileGenerator<T extends VectorTileElement> {
             int tilesY,
             ToIntFunction<Double> getX,
             ToIntFunction<Double> getY,
-            T element) {
+            VectorTileElement element) {
         final List<Pair<Integer, Integer>> xyList = new ArrayList<>();
 
         final var box = element.boundingBox();
@@ -230,8 +230,8 @@ public class VectorTileGenerator<T extends VectorTileElement> {
         return xyList;
     }
 
-    private Collection<Tile<T>> limitElementsPerTile(
-            Collection<Tile<T>> tiles, ZoomLevel zoomLevel) {
+    private Collection<Tile> limitElementsPerTile(
+            Collection<Tile> tiles, ZoomLevel zoomLevel) {
 
         if (!output.config().limitElementsPerTile(zoomLevel.level())) {
             return tiles;
@@ -257,12 +257,12 @@ public class VectorTileGenerator<T extends VectorTileElement> {
         }
 
         // Generate tiles that contain only visible elements
-        final var limitedTiles = new ArrayList<Tile<T>>(tiles.size());
+        final var limitedTiles = new ArrayList<Tile>(tiles.size());
         for (var tile : tiles) {
-            Collection<T> visibleElementsForTile =
+            final var visibleElementsForTile =
                     tile.elements().stream().filter(t -> visibleElements.contains(t.id())).toList();
 
-            var limitedTile = new Tile<T>(tile.tileInfo(), tile.boundingBox());
+            var limitedTile = new Tile(tile.tileInfo(), tile.boundingBox());
             limitedTile.elements().addAll(visibleElementsForTile);
             limitedTiles.add(limitedTile);
         }

@@ -4,7 +4,6 @@ package ch.ubique.backend.geojob;
 import ch.ubique.backend.core.file.ByteFile;
 import ch.ubique.backend.core.service.DataAndInput;
 import ch.ubique.backend.core.service.InputCollectionLoaderService;
-import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileGenerator;
 import ch.ubique.backend.job.BaseInputJob;
@@ -22,18 +21,18 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-public abstract class BaseVectorTileImporter<S, T extends VectorTileElement> extends BaseInputJob {
+public abstract class BaseVectorTileImporter<T> extends BaseInputJob {
 
 
-    private DataAndInput<Collection<S>> data;
+    private DataAndInput<Collection<T>> data;
 
     protected BaseVectorTileImporter(InputJobDataService jobDataService) {
         super(jobDataService);
     }
 
-    protected abstract InputCollectionLoaderService<S> getService();
+    protected abstract InputCollectionLoaderService<T> getService();
 
-    protected abstract Stream<VectorTileOutput<T>> getOutputs(Collection<S> elements);
+    protected abstract Stream<VectorTileOutput> getOutputs(Collection<T> elements);
 
     protected boolean isInputFileUploadEnabled() {
         return true;

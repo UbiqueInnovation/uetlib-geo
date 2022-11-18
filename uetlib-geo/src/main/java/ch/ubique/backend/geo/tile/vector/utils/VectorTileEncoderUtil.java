@@ -11,21 +11,21 @@ import org.locationtech.jts.geom.Geometry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class VectorTileEncoderUtil<T extends VectorTileElement> {
+public final class VectorTileEncoderUtil {
 
-    private final Tile<T> tile;
-    private final VectorTileConfig<T> config;
+    private final Tile tile;
+    private final VectorTileConfig config;
     private final VectorTileEncoder encoder;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public static <S extends VectorTileElement> BinaryTile encode(Tile<S> tile, VectorTileConfig<S> config) {
-        final var encoderUtil = new VectorTileEncoderUtil<>(tile, config);
+    public static BinaryTile encode(Tile tile, VectorTileConfig config) {
+        final var encoderUtil = new VectorTileEncoderUtil(tile, config);
         final var bytes = encoderUtil.encode();
         return new BinaryTile(tile.tileInfo(), bytes);
     }
 
-    private VectorTileEncoderUtil(Tile<T> tile, VectorTileConfig<T> config) {
+    private VectorTileEncoderUtil(Tile tile, VectorTileConfig config) {
         this.tile = tile;
         this.config = config;
         this.encoder = new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
@@ -39,7 +39,7 @@ public final class VectorTileEncoderUtil<T extends VectorTileElement> {
         return encoder.encode();
     }
 
-    private void encodeElement(T element) {
+    private void encodeElement(VectorTileElement element) {
 
         if (!element.showElement(tile.tileInfo().level())) {
             return;

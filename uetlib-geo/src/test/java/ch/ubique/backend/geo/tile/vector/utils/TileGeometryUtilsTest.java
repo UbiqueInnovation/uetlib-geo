@@ -30,11 +30,8 @@ class TileGeometryUtilsTest {
                     random.nextDouble(0, 4000));
 
             for (final var direction : YAxisDirection.values()) {
-                @SuppressWarnings("deprecation") // This unit tests compares the behaviour of the existing code to the new code
-                final var expected = TileGeometryUtils.getCoordinateOnTile(testCoordinate.toJts(), tileEnvelope, extend, direction);
                 final var actual = TileGeometryUtils.getTileGeometry(JtsConverter.LV95.toJtsPoint(testCoordinate), tileEnvelope, extend, direction);
                 Assertions.assertTrue(actual.isPresent());
-                Assertions.assertEquals(expected, actual.get().getCoordinate());
                 Assertions.assertEquals(testCoordinate.getElevation().orElse(null), actual.get().getCoordinate().getZ());
             }
         }

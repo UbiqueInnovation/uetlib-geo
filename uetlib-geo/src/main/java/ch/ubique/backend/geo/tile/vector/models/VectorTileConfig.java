@@ -8,8 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-// TODO: remove generics for version 0.9.0, not needed anymore after removing the filter
-public class VectorTileConfig<T extends VectorTileElement> {
+public class VectorTileConfig {
 
     private String key;
     private int maxElementsPerTile = -1;
@@ -26,12 +25,7 @@ public class VectorTileConfig<T extends VectorTileElement> {
 
     private List<Integer> zoomLevels;
 
-    /**
-     * Will be removed with version 0.9.0, see {@link VectorTileFilter}.
-     */
-    private VectorTileFilter<T> filter;
-
-    public VectorTileConfig<T> setMaxElementsPerTile(int maxElementsPerTile) {
+    public VectorTileConfig setMaxElementsPerTile(int maxElementsPerTile) {
         this.maxElementsPerTile = maxElementsPerTile;
         return this;
     }
@@ -62,7 +56,7 @@ public class VectorTileConfig<T extends VectorTileElement> {
         return clipBuffer;
     }
 
-    public VectorTileConfig<T> setClipBuffer(int clipBuffer) {
+    public VectorTileConfig setClipBuffer(int clipBuffer) {
         this.clipBuffer = clipBuffer;
         return this;
     }
@@ -71,7 +65,7 @@ public class VectorTileConfig<T extends VectorTileElement> {
         return extent;
     }
 
-    public VectorTileConfig<T> setExtent(int extent) {
+    public VectorTileConfig setExtent(int extent) {
         this.extent = extent;
         return this;
     }
@@ -80,28 +74,20 @@ public class VectorTileConfig<T extends VectorTileElement> {
         return zoomLevels;
     }
 
-    public VectorTileConfig<T> setZoomLevels(List<Integer> zoomLevels) {
+    public VectorTileConfig setZoomLevels(List<Integer> zoomLevels) {
         this.zoomLevels = zoomLevels;
         return this;
     }
 
-    public VectorTileConfig<T> setZoomLevels(Integer... zoomLevels) {
+    public VectorTileConfig setZoomLevels(Integer... zoomLevels) {
         return setZoomLevels(Arrays.asList(zoomLevels));
-    }
-
-    /**
-     * Will be removed with version 0.9.0, see {@link VectorTileFilter}.
-     */
-    public VectorTileConfig<T> setFilter(VectorTileFilter<T> filter) {
-        this.filter = filter;
-        return this;
     }
 
     public String getKey() {
         return key;
     }
 
-    public VectorTileConfig<T> setKey(String key) {
+    public VectorTileConfig setKey(String key) {
         this.key = key;
         return this;
     }
@@ -110,21 +96,9 @@ public class VectorTileConfig<T extends VectorTileElement> {
         return yAxisDirection;
     }
 
-    public VectorTileConfig<T> setYAxisDirection(YAxisDirection yAxisDirection) {
+    public VectorTileConfig setYAxisDirection(YAxisDirection yAxisDirection) {
         this.yAxisDirection = yAxisDirection;
         return this;
-    }
-
-    /**
-     * Will be removed with version 0.9.0, see {@link VectorTileFilter}.
-     */
-    @Deprecated(since = "0.8.0", forRemoval = true)
-    public boolean filter(T t) {
-        if (filter != null) {
-            return filter.accept(t);
-        } else {
-            return true;
-        }
     }
 
     /**
@@ -132,7 +106,7 @@ public class VectorTileConfig<T extends VectorTileElement> {
      * (in output coordinates on of the vector tile, the output coordinates are between 0 and extent).
      * The tolerance value must be non-negative. A tolerance value of zero is effectively a no-op.
      */
-    public VectorTileConfig<T> setSimplifyTolerance(double simplifyTolerance) {
+    public VectorTileConfig setSimplifyTolerance(double simplifyTolerance) {
         this.simplifyTolerance = simplifyTolerance;
         return this;
     }
@@ -152,7 +126,6 @@ public class VectorTileConfig<T extends VectorTileElement> {
                 .append("extent", extent)
                 .append("yAxisDirection", yAxisDirection)
                 .append("zoomLevels", zoomLevels)
-                .append("filter", filter)
                 .toString();
     }
 }
