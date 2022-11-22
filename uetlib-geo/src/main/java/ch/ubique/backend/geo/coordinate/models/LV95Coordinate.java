@@ -1,7 +1,9 @@
 package ch.ubique.backend.geo.coordinate.models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.locationtech.jts.geom.Point;
 
 import java.util.Objects;
@@ -17,12 +19,16 @@ public class LV95Coordinate implements Coordinate {
     // For equality testing
     private static final double EPSILON = 0.1; // = 10 cm
 
-    /** x */
+    @Schema(description = "specifies the north–south position", example = "2 600 000")
+    @JsonProperty
     private double east;
 
-    /** y */
+    @Schema(description = "specifies the east–west position", example = "1 200 000")
+    @JsonProperty
     private double north;
 
+    @Schema(description = "meters above sea level", nullable = true)
+    @JsonProperty
     private Double elevation;
 
     public LV95Coordinate(double east, double north) {
@@ -57,6 +63,7 @@ public class LV95Coordinate implements Coordinate {
         return this;
     }
 
+    @JsonIgnore
     public Optional<Double> getElevation() {
         return Optional.ofNullable(elevation);
     }
