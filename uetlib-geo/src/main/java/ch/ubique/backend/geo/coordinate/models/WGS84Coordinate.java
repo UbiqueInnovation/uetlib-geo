@@ -1,7 +1,9 @@
 package ch.ubique.backend.geo.coordinate.models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.locationtech.jts.geom.Point;
 
 import java.util.Objects;
@@ -19,12 +21,16 @@ public class WGS84Coordinate implements Coordinate {
     // For equality testing
     private static final double EPSILON = 0.001;
 
-    /** y */
+    @Schema(minimum = "-90", maximum = "90", example = "47.265", description = "specifies the north–south position")
+    @JsonProperty
     private double latitude;
 
-    /** x */
+    @Schema(minimum = "-180", maximum = "180", example = "11.392", description = "specifies the east–west position")
+    @JsonProperty
     private double longitude;
 
+    @Schema(minimum = "-413", maximum = "8849", example = "574", description = "meters above sea level", nullable = true)
+    @JsonProperty
     private Double elevation;
 
     public WGS84Coordinate(double latitude, double longitude) {
@@ -59,6 +65,7 @@ public class WGS84Coordinate implements Coordinate {
         return this;
     }
 
+    @JsonIgnore
     public Optional<Double> getElevation() {
         return Optional.ofNullable(elevation);
     }

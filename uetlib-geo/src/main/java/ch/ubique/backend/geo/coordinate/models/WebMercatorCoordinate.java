@@ -1,7 +1,9 @@
 package ch.ubique.backend.geo.coordinate.models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.NotImplementedException;
 import org.locationtech.jts.geom.Point;
 
@@ -16,10 +18,16 @@ public class WebMercatorCoordinate implements Coordinate {
     // For equality testing
     private static final double EPSILON = 0.1;
 
+    @Schema(description = "specifies the north–south position")
+    @JsonProperty
     private double x;
 
+    @Schema(description = "specifies the east–west position")
+    @JsonProperty
     private double y;
 
+    @Schema(description = "meters above sea level", nullable = true)
+    @JsonProperty
     private Double elevation;
 
     @JsonCreator
@@ -79,6 +87,7 @@ public class WebMercatorCoordinate implements Coordinate {
         return this;
     }
 
+    @JsonIgnore
     public Optional<Double> getElevation() {
         return Optional.ofNullable(elevation);
     }
