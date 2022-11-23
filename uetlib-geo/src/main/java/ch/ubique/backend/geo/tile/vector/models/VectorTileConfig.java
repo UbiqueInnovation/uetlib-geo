@@ -13,7 +13,7 @@ public class VectorTileConfig {
     private String key;
     private int maxElementsPerTile = -1;
     private double simplifyTolerance;
-    private int clipBuffer = 8;
+    private int clipBuffer = 0;
     private int extent = 4096;
 
     /**
