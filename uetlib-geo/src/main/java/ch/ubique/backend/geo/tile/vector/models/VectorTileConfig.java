@@ -4,26 +4,42 @@ import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 public class VectorTileConfig {
 
-    private String key;
     private int maxElementsPerTile = -1;
-    private double simplifyTolerance;
+    private double simplifyTolerance = 0;
     private int clipBuffer = 0;
     private int extent = 4096;
+    private final YAxisDirection yAxisDirection;
+
+    private Set<Integer> zoomLevels;
+
+    private VectorTileConfig(YAxisDirection yAxisDirection) {
+        this.yAxisDirection = yAxisDirection;
+    }
 
     /**
-     * technically DOWN is the correct default, as this corresponds with the vector tile specs.
-     * however, the first implementation used UP as default, so we are now stuck with the incorrect
-     * default
+     * This sets {@linkplain VectorTileConfig#yAxisDirection} to {@link YAxisDirection#UP}, which is the
+     * correct direction, according to the vector tile standard.
+     * <p>
+     * Always use this method, for new layers, and when you do not need backwards compatibility.
      */
-    private YAxisDirection yAxisDirection = YAxisDirection.UP;
+    public static VectorTileConfig correct() {
+        return new VectorTileConfig(YAxisDirection.DOWN);
+    }
 
-    private List<Integer> zoomLevels;
+    /**
+     * This sets {@linkplain VectorTileConfig#yAxisDirection} to {@link YAxisDirection#DOWN}, which is the
+     * wrong direction, but has been used for multiple layers already.
+     * <p>
+     * Use this method only if you need backwards compatibility.
+     */
+    public static VectorTileConfig wrongDirection() {
+        return new VectorTileConfig(YAxisDirection.UP);
+    }
 
     public VectorTileConfig setMaxElementsPerTile(int maxElementsPerTile) {
         this.maxElementsPerTile = maxElementsPerTile;
@@ -70,12 +86,12 @@ public class VectorTileConfig {
         return this;
     }
 
-    public List<Integer> getZoomLevels() {
+    public Set<Integer> getZoomLevels() {
         return zoomLevels;
     }
 
-    public VectorTileConfig setZoomLevels(List<Integer> zoomLevels) {
-        this.zoomLevels = zoomLevels;
+    public VectorTileConfig setZoomLevels(Collection<Integer> zoomLevels) {
+        this.zoomLevels = new HashSet<>(zoomLevels);
         return this;
     }
 
@@ -83,22 +99,8 @@ public class VectorTileConfig {
         return setZoomLevels(Arrays.asList(zoomLevels));
     }
 
-    public String getKey() {
-        return key;
-    }
-
-    public VectorTileConfig setKey(String key) {
-        this.key = key;
-        return this;
-    }
-
     public YAxisDirection getYAxisDirection() {
         return yAxisDirection;
-    }
-
-    public VectorTileConfig setYAxisDirection(YAxisDirection yAxisDirection) {
-        this.yAxisDirection = yAxisDirection;
-        return this;
     }
 
     /**
@@ -119,7 +121,6 @@ public class VectorTileConfig {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("key", key)
                 .append("maxElementsPerTile", maxElementsPerTile)
                 .append("simplifyTolerance", simplifyTolerance)
                 .append("clipBuffer", clipBuffer)
