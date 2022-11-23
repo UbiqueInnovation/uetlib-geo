@@ -19,12 +19,13 @@ public class Graph<V, E> {
         lastEdgeId = 0;
     }
 
-    public void addVertex(Vertex<V, E>  vertex) {
+    public Vertex<V, E> addVertex(Vertex<V, E>  vertex) {
         vertices.put(vertex.getId(), vertex);
+        return vertex;
     }
 
-    public void addVertex(long vertexId, V properties) {
-        addVertex(new Vertex<>(vertexId, properties));
+    public Vertex<V, E> addVertex(long vertexId, V properties) {
+        return addVertex(new Vertex<>(vertexId, properties));
     }
 
     public Vertex<V, E> getOrAddVertex(long vertexId) {
