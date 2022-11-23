@@ -1,10 +1,9 @@
-package ch.ubique.backend.geo.graph.routing;
+package ch.ubique.backend.geo.graph.routing.utils;
 
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
-import ch.ubique.backend.geo.graph.routing.utils.RoutingGraphUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

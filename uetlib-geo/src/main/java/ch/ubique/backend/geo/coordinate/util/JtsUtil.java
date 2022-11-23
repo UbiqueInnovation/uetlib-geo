@@ -40,7 +40,7 @@ public class JtsUtil {
                 .createMultiPolygon(polygons.toArray(Polygon[]::new));
     }
 
-    private static GeometryFactory factoryFromGeometryCollection(
+    public static GeometryFactory factoryFromGeometryCollection(
             Collection<? extends Geometry> geometries) {
         final var geometryMaybe = geometries.stream().findAny();
         return geometryMaybe.map(Geometry::getFactory).orElse(new GeometryFactory());

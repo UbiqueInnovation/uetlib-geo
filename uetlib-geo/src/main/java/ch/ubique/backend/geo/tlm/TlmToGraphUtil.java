@@ -25,6 +25,6 @@ public class TlmToGraphUtil {
                 .map(path -> new LineWithInfo<>(path.getLine(), new TlmInfo(path)))
                 .toList();
 
-        return LinesToRoutingGraphUtil.buildGraph(relevantPaths);
+        return LinesToRoutingGraphUtil.buildGraphWithInfo(relevantPaths);
     }
 }
