@@ -22,10 +22,10 @@ class RoutingGraphUtilTest {
         testGraph.addVertex(2, new WGS84Coordinate(1, 0).toJts());
         testGraph.addVertex(3, new WGS84Coordinate(1, 1).toJts());
 
-        testGraph.getOrAddEdge(0, 1);
-        testGraph.getOrAddEdge(1, 2);
-        testGraph.getOrAddEdge(2, 3);
-        testGraph.getOrAddEdge(3, 0);
+        testGraph.getOrAddUndirectedEdge(0, 1);
+        testGraph.getOrAddUndirectedEdge(1, 2);
+        testGraph.getOrAddUndirectedEdge(2, 3);
+        testGraph.getOrAddUndirectedEdge(3, 0);
 
         routingGraphTests(testGraph);
     }
@@ -43,16 +43,16 @@ class RoutingGraphUtilTest {
         testGraph.addVertex(6, new WGS84Coordinate(4, 9).toJts());
         testGraph.addVertex(7, new WGS84Coordinate(5, 11).toJts());
 
-        testGraph.getOrAddEdge(0, 1);
-        testGraph.getOrAddEdge(1, 2);
-        testGraph.getOrAddEdge(2, 3);
-        testGraph.getOrAddEdge(3, 0);
-        testGraph.getOrAddEdge(0, 2);
-        testGraph.getOrAddEdge(0, 5);
-        testGraph.getOrAddEdge(5, 4);
-        testGraph.getOrAddEdge(5, 5);
-        testGraph.getOrAddEdge(5, 6);
-        testGraph.getOrAddEdge(5, 7);
+        testGraph.getOrAddUndirectedEdge(0, 1);
+        testGraph.getOrAddUndirectedEdge(1, 2);
+        testGraph.getOrAddUndirectedEdge(2, 3);
+        testGraph.getOrAddUndirectedEdge(3, 0);
+        testGraph.getOrAddUndirectedEdge(0, 2);
+        testGraph.getOrAddUndirectedEdge(0, 5);
+        testGraph.getOrAddUndirectedEdge(5, 4);
+        testGraph.getOrAddUndirectedEdge(5, 5);
+        testGraph.getOrAddUndirectedEdge(5, 6);
+        testGraph.getOrAddUndirectedEdge(5, 7);
 
         routingGraphTests(testGraph);
     }
@@ -64,6 +64,6 @@ class RoutingGraphUtilTest {
         final var routingGraph = RoutingGraphUtil.createRoutingGraph(testGraph, JtsConverter.WGS84.crs());
 
         Assertions.assertEquals(cycles + routingVerticesByDegree, routingGraph.getVertices().size());
-        Assertions.assertTrue(cycles <= routingGraph.getEdges().size());
+        Assertions.assertTrue(2 * cycles <= routingGraph.getDirectedEdges().size());
     }
 }

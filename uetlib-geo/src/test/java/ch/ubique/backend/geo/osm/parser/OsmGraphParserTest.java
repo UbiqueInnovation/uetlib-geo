@@ -31,11 +31,11 @@ class OsmGraphParserTest {
                     Edge::getProperties);
 
             Assertions.assertTrue(graph.getVertices().size() > 0);
-            Assertions.assertTrue(graph.getEdges().size() > 0);
+            Assertions.assertTrue(graph.getDirectedEdges().size() > 0);
 
             final var routingGraph = RoutingGraphUtil.createRoutingGraph(graph, JtsConverter.WGS84.crs());
             Assertions.assertTrue(routingGraph.getVertices().size() > 0);
-            Assertions.assertTrue(routingGraph.getEdges().size() > 0);
+            Assertions.assertTrue(routingGraph.getDirectedEdges().size() > 0);
         }
 
     }
