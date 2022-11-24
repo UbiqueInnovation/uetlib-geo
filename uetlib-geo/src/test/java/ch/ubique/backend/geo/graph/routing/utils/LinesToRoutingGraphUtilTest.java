@@ -54,12 +54,15 @@ class LinesToRoutingGraphUtilTest {
 
         final var graphs = LinesToRoutingGraphUtil.buildGraphWithInfo(lines);
         final var completeGraph = graphs.completeGraph();
-
+        final var routingGraph = graphs.routingGraph();
 
         Assertions.assertNotNull(completeGraph);
         Assertions.assertEquals(2, completeGraph.getVertices().size());
         Assertions.assertEquals(2, completeGraph.getDirectedEdges().size());
         Assertions.assertTrue(completeGraph.getDirectedEdges().stream().allMatch(e -> testInfo.equals(e.getProperties())));
+
+        Assertions.assertTrue(completeGraph.getVertices().stream().allMatch(v -> Double.isNaN(v.getProperties().getZ())));
+        Assertions.assertTrue(routingGraph.getVertices().stream().allMatch(v -> Double.isNaN(v.getProperties().getZ())));
     }
 
     @Test
@@ -69,10 +72,10 @@ class LinesToRoutingGraphUtilTest {
         final var testInfo = "Hello there";
 
         final var lines = Stream.of(
-                        "LINESTRING (0 0, 0 10)",
-                        "LINESTRING (0 10, 0 20)",
-                        "LINESTRING (0 20, 0 30)",
-                        "LINESTRING (0 30, 0 40)"
+                        "LINESTRING (0 0 0, 0 10 10)",
+                        "LINESTRING (0 10 10, 0 19.1 20)",
+                        "LINESTRING (0 20 20, 0 29.5 30)",
+                        "LINESTRING (0 30 30, 0 40 40)"
                 )
                 .map(ThrowingFunction.unchecked(wktReader::read))
                 .map(LineString.class::cast)
@@ -92,5 +95,8 @@ class LinesToRoutingGraphUtilTest {
         Assertions.assertEquals(2, routingGraph.getVertices().size());
         Assertions.assertEquals(2, routingGraph.getDirectedEdges().size()); // Two edges -> one directed edge for each direction
         Assertions.assertTrue(routingGraph.getDirectedEdges().stream().allMatch(e -> testInfo.equals(e.getProperties().originalProperties())));
+
+        Assertions.assertTrue(completeGraph.getVertices().stream().noneMatch(v -> Double.isNaN(v.getProperties().getZ())));
+        Assertions.assertTrue(routingGraph.getVertices().stream().noneMatch(v -> Double.isNaN(v.getProperties().getZ())));
     }
 }
