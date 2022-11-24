@@ -64,6 +64,6 @@ class RoutingGraphUtilTest {
         final var routingGraph = RoutingGraphUtil.createRoutingGraph(testGraph, JtsConverter.WGS84.crs());
 
         Assertions.assertEquals(cycles + routingVerticesByDegree, routingGraph.getVertices().size());
-        Assertions.assertTrue(2 * cycles <= routingGraph.getDirectedEdges().size());
+        Assertions.assertTrue(routingVerticesByDegree <= routingGraph.getDirectedEdges().size());
     }
 }

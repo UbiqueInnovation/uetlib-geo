@@ -117,7 +117,7 @@ public class RoutingGraphUtil<E> {
             double distance, E originalProperties) {
 
         // Try to get existing routing edge
-        final var existingRoutingEdgeMaybe = routingGraph.getVertex(vertexId).getEdgeTo(routingNeighborId);
+        final var existingRoutingEdgeMaybe = routingGraph.getEdge(vertexId, routingNeighborId);
 
         if (existingRoutingEdgeMaybe.isPresent()) {
             final var existingRoutingEdge = existingRoutingEdgeMaybe.get();
@@ -131,7 +131,9 @@ public class RoutingGraphUtil<E> {
 
         // Insert new routing edge
         final var routingProperties = new RoutingGraphEdgeProperties<>(distance, direction, originalProperties);
-        routingGraph.getOrAddDirectedEdge(vertexId, routingNeighborId, routingProperties);
+        if (vertexId != routingNeighborId) {
+            routingGraph.getOrAddDirectedEdge(vertexId, routingNeighborId, routingProperties);
+        }
     }
 
     private double getDistance(Vertex<Coordinate, E> from, Vertex<Coordinate, E> to) {
