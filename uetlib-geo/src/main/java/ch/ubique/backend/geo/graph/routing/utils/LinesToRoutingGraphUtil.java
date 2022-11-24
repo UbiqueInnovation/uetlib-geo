@@ -140,8 +140,8 @@ public class LinesToRoutingGraphUtil {
 
             final var distance = line.getLength();
 
-            routingGraph.getOrAddVertex(first.getId());
-            routingGraph.getOrAddVertex(last.getId());
+            routingGraph.getOrAddVertex(first.getId(), first.getProperties());
+            routingGraph.getOrAddVertex(last.getId(), last.getProperties());
 
             routingGraph.getOrAddDirectedEdge(first.getId(), last.getId(), new RoutingGraphEdgeProperties<>(distance, second, firstEdge.get().getProperties()));
             routingGraph.getOrAddDirectedEdge(last.getId(), first.getId(), new RoutingGraphEdgeProperties<>(distance, secondLast, lastEdge.get().getProperties()));
