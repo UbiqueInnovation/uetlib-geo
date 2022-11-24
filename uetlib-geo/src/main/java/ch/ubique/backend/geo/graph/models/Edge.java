@@ -24,13 +24,8 @@ public final class Edge<V, E> {
 
     public Edge(long id, @NotNull Vertex<V, E> u, @NotNull Vertex<V, E> v, E properties) {
         this.id = id;
-        if (u.getId() < v.getId()) {
-            this.u = u;
-            this.v = v;
-        } else {
-            this.u = v;
-            this.v = u;
-        }
+        this.u = u;
+        this.v = v;
         this.properties = properties;
     }
 

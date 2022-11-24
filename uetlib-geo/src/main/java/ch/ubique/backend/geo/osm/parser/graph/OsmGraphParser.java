@@ -99,7 +99,7 @@ public class OsmGraphParser {
             if (existingEdge.isPresent()) {
                 existingEdge.get().getProperties().tags().putAll(tags); // Merge tags
             } else {
-                graph.getOrAddEdge(u, v, properties);
+                graph.getOrAddUndirectedEdge(u, v, properties);
             }
         }
         logWayProgress();

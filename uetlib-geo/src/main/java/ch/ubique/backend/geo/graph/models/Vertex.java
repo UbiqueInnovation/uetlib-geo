@@ -40,7 +40,8 @@ public final class Vertex<V, E> {
 
     /**
      * Returns an unmodifiable instance, to prevent getEdges().add() calls.
-     * To add edges, {@linkplain Graph#getOrAddEdge} should be used.
+     * To add edges, {@linkplain Graph#getOrAddUndirectedEdge} respectively
+     * {@linkplain Graph#getOrAddDirectedEdge} should be used.
      */
     public Set<Edge<V, E>> getEdges() {
         return edges.stream().collect(Collectors.toUnmodifiableSet());

@@ -26,12 +26,13 @@ class LinesToRoutingGraphUtilTest {
                 .map(line -> new LineWithInfo<>(line, testInfo))
                 .toList();
 
-        final var graph = LinesToRoutingGraphUtil.buildGraphWithInfo(lines);
+        final var graphs = LinesToRoutingGraphUtil.buildGraphWithInfo(lines);
+        final var completeGraph = graphs.completeGraph();
 
-        Assertions.assertNotNull(graph);
-        Assertions.assertEquals(4, graph.getVertices().size());
-        Assertions.assertEquals(3, graph.getEdges().size());
-        Assertions.assertTrue(graph.getEdges().stream().allMatch(e -> testInfo.equals(e.getProperties())));
+        Assertions.assertNotNull(completeGraph);
+        Assertions.assertEquals(4, completeGraph.getVertices().size());
+        Assertions.assertEquals(2 * 3, completeGraph.getDirectedEdges().size());
+        Assertions.assertTrue(completeGraph.getDirectedEdges().stream().allMatch(e -> testInfo.equals(e.getProperties())));
     }
 
     @Test
@@ -51,11 +52,45 @@ class LinesToRoutingGraphUtilTest {
                 .map(line -> new LineWithInfo<>(line, testInfo))
                 .toList();
 
-        final var graph = LinesToRoutingGraphUtil.buildGraphWithInfo(lines);
+        final var graphs = LinesToRoutingGraphUtil.buildGraphWithInfo(lines);
+        final var completeGraph = graphs.completeGraph();
 
-        Assertions.assertNotNull(graph);
-        Assertions.assertEquals(2, graph.getVertices().size());
-        Assertions.assertEquals(1, graph.getEdges().size());
-        Assertions.assertTrue(graph.getEdges().stream().allMatch(e -> testInfo.equals(e.getProperties())));
+
+        Assertions.assertNotNull(completeGraph);
+        Assertions.assertEquals(2, completeGraph.getVertices().size());
+        Assertions.assertEquals(2, completeGraph.getDirectedEdges().size());
+        Assertions.assertTrue(completeGraph.getDirectedEdges().stream().allMatch(e -> testInfo.equals(e.getProperties())));
+    }
+
+    @Test
+    void testLineMerging() {
+
+        final var wktReader = new WKTReader();
+        final var testInfo = "Hello there";
+
+        final var lines = Stream.of(
+                        "LINESTRING (0 0, 0 10)",
+                        "LINESTRING (0 10, 0 20)",
+                        "LINESTRING (0 20, 0 30)",
+                        "LINESTRING (0 30, 0 40)"
+                )
+                .map(ThrowingFunction.unchecked(wktReader::read))
+                .map(LineString.class::cast)
+                .map(line -> new LineWithInfo<>(line, testInfo))
+                .toList();
+
+        final var graphs = LinesToRoutingGraphUtil.buildGraphWithInfo(lines);
+        final var completeGraph = graphs.completeGraph();
+        final var routingGraph = graphs.routingGraph();
+
+        Assertions.assertNotNull(completeGraph);
+        Assertions.assertEquals(5, completeGraph.getVertices().size());
+        Assertions.assertEquals(2 * 4, completeGraph.getDirectedEdges().size());
+        Assertions.assertTrue(completeGraph.getDirectedEdges().stream().allMatch(e -> testInfo.equals(e.getProperties())));
+
+        Assertions.assertNotNull(routingGraph);
+        Assertions.assertEquals(2, routingGraph.getVertices().size());
+        Assertions.assertEquals(2, routingGraph.getDirectedEdges().size()); // Two edges -> one directed edge for each direction
+        Assertions.assertTrue(routingGraph.getDirectedEdges().stream().allMatch(e -> testInfo.equals(e.getProperties().originalProperties())));
     }
 }

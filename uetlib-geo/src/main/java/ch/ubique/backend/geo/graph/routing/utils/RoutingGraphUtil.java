@@ -131,7 +131,7 @@ public class RoutingGraphUtil<E> {
 
         // Insert new routing edge
         final var routingProperties = new RoutingGraphEdgeProperties<>(distance, direction, originalProperties);
-        routingGraph.getOrAddEdge(vertexId, routingNeighborId, routingProperties);
+        routingGraph.getOrAddDirectedEdge(vertexId, routingNeighborId, routingProperties);
     }
 
     private double getDistance(Vertex<Coordinate, E> from, Vertex<Coordinate, E> to) {
