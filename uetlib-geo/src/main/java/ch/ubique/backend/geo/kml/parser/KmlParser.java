@@ -3,18 +3,26 @@ package ch.ubique.backend.geo.kml.parser;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
-import ch.ubique.backend.geo.kml.models.*;
-
+import ch.ubique.backend.geo.kml.models.Icon;
+import ch.ubique.backend.geo.kml.models.ItemStyle;
+import ch.ubique.backend.geo.kml.models.KmlDocument;
+import ch.ubique.backend.geo.kml.models.Placemark;
+import ch.ubique.backend.geo.kml.models.Style;
+import ch.ubique.backend.geo.kml.models.StyleMap;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class KmlParser {
 
@@ -22,7 +30,7 @@ public class KmlParser {
 
     private KmlParser() {}
 
-    public static KmlDocument parse(String path) throws  IOException {
+    public static KmlDocument parse(String path) throws IOException {
         return parse(new FileInputStream(path));
     }
 
@@ -112,7 +120,7 @@ public class KmlParser {
                                         new LV95Coordinate(
                                                 first.getEast(),
                                                 first.getNorth(),
-                                                first.getElevation().orElse(null)));
+                                                first.getOptionalElevation().orElse(null)));
                             }
                         }
                         placemark.addCoordinates(coordinates);

@@ -61,34 +61,41 @@ class JtsConverterTest {
 
     @Test
     void toWgs84() {
-        final var wgs84Coordinate = JtsConverter.WGS84.toBackendLib(JtsConverter.WGS84.toJts(new WGS84Coordinate(2.8, 4.2)));
+        final var wgs84Coordinate =
+                JtsConverter.WGS84.toBackendLib(
+                        JtsConverter.WGS84.toJts(new WGS84Coordinate(2.8, 4.2)));
         Assertions.assertEquals(2.8, wgs84Coordinate.getLatitude());
         Assertions.assertEquals(4.2, wgs84Coordinate.getLongitude());
-        Assertions.assertTrue(wgs84Coordinate.getElevation().isEmpty());
+        Assertions.assertTrue(wgs84Coordinate.getOptionalElevation().isEmpty());
     }
 
     @Test
     void toWebMercator() {
         final var webMercator =
-                JtsConverter.WEB_MERCATOR.toBackendLib(JtsConverter.WEB_MERCATOR.toJts(new WebMercatorCoordinate(2.8, 4.2, 17.2)));
+                JtsConverter.WEB_MERCATOR.toBackendLib(
+                        JtsConverter.WEB_MERCATOR.toJts(new WebMercatorCoordinate(2.8, 4.2, 17.2)));
         Assertions.assertEquals(2.8, webMercator.getX());
         Assertions.assertEquals(4.2, webMercator.getY());
-        Assertions.assertTrue(webMercator.getElevation().isPresent());
+        Assertions.assertTrue(webMercator.getOptionalElevation().isPresent());
     }
 
     @Test
     void toLv03() {
-        final var lv03Coordinate = JtsConverter.LV03.toBackendLib(JtsConverter.LV03.toJts(new LV03Coordinate(2.8, 4.2)));
+        final var lv03Coordinate =
+                JtsConverter.LV03.toBackendLib(
+                        JtsConverter.LV03.toJts(new LV03Coordinate(2.8, 4.2)));
         Assertions.assertEquals(2.8, lv03Coordinate.getEast());
         Assertions.assertEquals(4.2, lv03Coordinate.getNorth());
-        Assertions.assertTrue(lv03Coordinate.getElevation().isEmpty());
+        Assertions.assertTrue(lv03Coordinate.getOptionalElevation().isEmpty());
     }
 
     @Test
     void toLv95() {
-        final var lv95Coordinate = JtsConverter.LV95.toBackendLib(JtsConverter.LV95.toJts(new LV95Coordinate(2.8, 4.2)));
+        final var lv95Coordinate =
+                JtsConverter.LV95.toBackendLib(
+                        JtsConverter.LV95.toJts(new LV95Coordinate(2.8, 4.2)));
         Assertions.assertEquals(2.8, lv95Coordinate.getEast());
         Assertions.assertEquals(4.2, lv95Coordinate.getNorth());
-        Assertions.assertTrue(lv95Coordinate.getElevation().isEmpty());
+        Assertions.assertTrue(lv95Coordinate.getOptionalElevation().isEmpty());
     }
 }

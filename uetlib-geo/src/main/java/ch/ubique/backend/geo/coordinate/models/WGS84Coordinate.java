@@ -1,16 +1,20 @@
 package ch.ubique.backend.geo.coordinate.models;
 
+import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WGS84;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.toRadians;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.locationtech.jts.geom.Point;
-
 import java.util.Objects;
 import java.util.Optional;
-
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WGS84;
-import static java.lang.Math.*;
+import javax.annotation.Nullable;
+import org.locationtech.jts.geom.Point;
 
 /**
  * World Geodetic System 1984 (also known as WGS84, WGS 1984, EPSG:4326) Most common coordinate
@@ -21,15 +25,28 @@ public class WGS84Coordinate implements Coordinate {
     // For equality testing
     private static final double EPSILON = 0.001;
 
-    @Schema(minimum = "-90", maximum = "90", example = "47.265", description = "specifies the north–south position")
+    @Schema(
+            minimum = "-90",
+            maximum = "90",
+            example = "47.265",
+            description = "specifies the north–south position")
     @JsonProperty
     private double latitude;
 
-    @Schema(minimum = "-180", maximum = "180", example = "11.392", description = "specifies the east–west position")
+    @Schema(
+            minimum = "-180",
+            maximum = "180",
+            example = "11.392",
+            description = "specifies the east–west position")
     @JsonProperty
     private double longitude;
 
-    @Schema(minimum = "-413", maximum = "8849", example = "574", description = "meters above sea level", nullable = true)
+    @Schema(
+            minimum = "-413",
+            maximum = "8849",
+            example = "574",
+            description = "meters above sea level",
+            nullable = true)
     @JsonProperty
     private Double elevation;
 
@@ -65,14 +82,19 @@ public class WGS84Coordinate implements Coordinate {
         return this;
     }
 
-    @JsonIgnore
-    public Optional<Double> getElevation() {
-        return Optional.ofNullable(elevation);
+    @Nullable
+    public Double getElevation() {
+        return elevation;
     }
 
     public WGS84Coordinate setElevation(Double elevation) {
         this.elevation = elevation;
         return this;
+    }
+
+    @JsonIgnore
+    public Optional<Double> getOptionalElevation() {
+        return Optional.ofNullable(elevation);
     }
 
     @Override
@@ -104,20 +126,22 @@ public class WGS84Coordinate implements Coordinate {
             var a =
                     sin(dLat / 2) * sin(dLat / 2)
                             + cos(toRadians(latitude))
-                            * cos(toRadians(otherWgs84.latitude))
-                            * sin(dLon / 2)
-                            * sin(dLon / 2);
+                                    * cos(toRadians(otherWgs84.latitude))
+                                    * sin(dLon / 2)
+                                    * sin(dLon / 2);
             var c = 2 * atan2(Math.sqrt(a), sqrt(1 - a));
             var d = r * c; // Distance in [km]
             return d * 1000; // Distance in [m]
         }
 
-        throw new IllegalArgumentException("Calculating the distance between different coordinate systems is not possible.");
+        throw new IllegalArgumentException(
+                "Calculating the distance between different coordinate systems is not possible.");
     }
 
     @Override
     public String toString() {
-        return String.format("WGS84(lat=%,.2f, lon=%,.2f, elevation=%,.1f)", latitude, longitude, elevation);
+        return String.format(
+                "WGS84(lat=%,.2f, lon=%,.2f, elevation=%,.1f)", latitude, longitude, elevation);
     }
 
     @Override

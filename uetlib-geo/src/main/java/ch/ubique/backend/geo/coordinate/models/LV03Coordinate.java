@@ -1,16 +1,17 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
-import org.locationtech.jts.geom.Point;
-
-import java.util.Objects;
-import java.util.Optional;
-
 import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV03;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Objects;
+import java.util.Optional;
+import javax.annotation.Nullable;
+import org.locationtech.jts.geom.Point;
 
 /** Swiss coordinates (1903) https://epsg.io/21781 Imprecise, use LV95 instead if possible */
 public class LV03Coordinate implements Coordinate {
@@ -62,13 +63,19 @@ public class LV03Coordinate implements Coordinate {
         return this;
     }
 
-    public Optional<Double> getElevation() {
-        return Optional.ofNullable(elevation);
+    @Nullable
+    public Double getElevation() {
+        return elevation;
     }
 
     public LV03Coordinate setElevation(Double elevation) {
         this.elevation = elevation;
         return this;
+    }
+
+    @JsonIgnore
+    public Optional<Double> getOptionalElevation() {
+        return Optional.ofNullable(elevation);
     }
 
     @Override
@@ -97,7 +104,8 @@ public class LV03Coordinate implements Coordinate {
                             + pow(north - otherLv03.north, 2)
                             + pow(elevation - otherLv03.elevation, 2));
         }
-        throw new IllegalArgumentException("Calculating the distance between different coordinate systems is not possible.");
+        throw new IllegalArgumentException(
+                "Calculating the distance between different coordinate systems is not possible.");
     }
 
     @Override
@@ -105,12 +113,14 @@ public class LV03Coordinate implements Coordinate {
         if (other instanceof LV03Coordinate otherLv03) {
             return sqrt(pow(east - otherLv03.east, 2) + pow(north - otherLv03.north, 2));
         }
-        throw new IllegalArgumentException("Calculating the flat distance between different coordinate systems is not possible.");
+        throw new IllegalArgumentException(
+                "Calculating the flat distance between different coordinate systems is not possible.");
     }
 
     @Override
     public String toString() {
-        return String.format("LV03(east=%,.2f, north=%,.2f, elevation=%,.1f)", east, north, elevation);
+        return String.format(
+                "LV03(east=%,.2f, north=%,.2f, elevation=%,.1f)", east, north, elevation);
     }
 
     @Override
