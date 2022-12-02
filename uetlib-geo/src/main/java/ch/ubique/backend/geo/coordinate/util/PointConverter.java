@@ -4,7 +4,6 @@ import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.geometry.models.Point;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,12 +17,17 @@ public class PointConverter {
     }
 
     public static <P extends Point<P>> P toPoint(Class<P> cls, LV95Coordinate coordinate) {
-        final var elevation = coordinate.getElevation();
-        if (elevation.isPresent()) {
-            return Point.newInstance(
-                    cls, coordinate.getEast(), coordinate.getNorth(), elevation.get());
-        }
-        return Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth());
+        return coordinate
+                .getOptionalElevation()
+                .map(
+                        elevation ->
+                                Point.newInstance(
+                                        cls,
+                                        coordinate.getEast(),
+                                        coordinate.getNorth(),
+                                        elevation))
+                .orElseGet(
+                        () -> Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth()));
     }
 
     public static <P extends Point<P>> List<LV95Coordinate> toLv95Coordinate(List<P> points) {
@@ -43,12 +47,17 @@ public class PointConverter {
     }
 
     public static <P extends Point<P>> P toPoint(Class<P> cls, LV03Coordinate coordinate) {
-        final var elevation = coordinate.getElevation();
-        if (elevation.isPresent()) {
-            return Point.newInstance(
-                    cls, coordinate.getEast(), coordinate.getNorth(), elevation.get());
-        }
-        return Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth());
+        return coordinate
+                .getOptionalElevation()
+                .map(
+                        elevation ->
+                                Point.newInstance(
+                                        cls,
+                                        coordinate.getEast(),
+                                        coordinate.getNorth(),
+                                        elevation))
+                .orElseGet(
+                        () -> Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth()));
     }
 
     public static <P extends Point<P>> List<LV03Coordinate> toLv03Coordinate(List<P> points) {
@@ -68,15 +77,19 @@ public class PointConverter {
     }
 
     public static <P extends Point<P>> P toPoint(Class<P> cls, WGS84Coordinate coordinate) {
-        final var elevation = coordinate.getElevation();
-        if (elevation.isPresent()) {
-            return Point.newInstance(
-                    cls,
-                    coordinate.getLatitude(),
-                    coordinate.getLongitude(),
-                    elevation.get());
-        }
-        return Point.newInstance(cls, coordinate.getLatitude(), coordinate.getLongitude());
+        return coordinate
+                .getOptionalElevation()
+                .map(
+                        elevation ->
+                                Point.newInstance(
+                                        cls,
+                                        coordinate.getLatitude(),
+                                        coordinate.getLongitude(),
+                                        elevation))
+                .orElseGet(
+                        () ->
+                                Point.newInstance(
+                                        cls, coordinate.getLatitude(), coordinate.getLongitude()));
     }
 
     public static <P extends Point<P>> List<WGS84Coordinate> toWgs84Coordinate(List<P> points) {

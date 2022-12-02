@@ -1,16 +1,16 @@
 package ch.ubique.backend.geo.coordinate.models;
 
+import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WEB_MERCATOR;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.apache.commons.lang3.NotImplementedException;
-import org.locationtech.jts.geom.Point;
-
 import java.util.Objects;
 import java.util.Optional;
-
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WEB_MERCATOR;
+import javax.annotation.Nullable;
+import org.apache.commons.lang3.NotImplementedException;
+import org.locationtech.jts.geom.Point;
 
 /** https://epsg.io/3857 Pseudo-Mercator, Web Mercator */
 public class WebMercatorCoordinate implements Coordinate {
@@ -87,14 +87,19 @@ public class WebMercatorCoordinate implements Coordinate {
         return this;
     }
 
-    @JsonIgnore
-    public Optional<Double> getElevation() {
-        return Optional.ofNullable(elevation);
+    @Nullable
+    public Double getElevation() {
+        return elevation;
     }
 
     public WebMercatorCoordinate setElevation(final Double elevation) {
         this.elevation = elevation;
         return this;
+    }
+
+    @JsonIgnore
+    public Optional<Double> getOptionalElevation() {
+        return Optional.ofNullable(elevation);
     }
 
     @Override
