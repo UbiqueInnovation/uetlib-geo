@@ -1,5 +1,9 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
+import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import ch.ubique.backend.core.utils.MathUtils;
 import ch.ubique.backend.geo.geometry.models.Point2d;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
@@ -9,24 +13,23 @@ import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
 import ch.ubique.backend.geo.tile.vector.models.Tile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.locationtech.jts.geom.Envelope;
-import org.opengis.geometry.MismatchedReferenceSystemException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
-
-import static ch.ubique.backend.geo.coordinate.util.PointConverter.toPoint;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.locationtech.jts.geom.Envelope;
+import org.opengis.geometry.MismatchedReferenceSystemException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VectorTileGenerator {
 
@@ -39,7 +42,8 @@ public class VectorTileGenerator {
     private final ForkJoinPool forkJoinPool;
 
     public static void generateForSwitzerlandLv95(VectorTileOutput output) throws ExecutionException, InterruptedException {
-        final var generator = new VectorTileGenerator(SwissConstants.swissTileDefinition(), output, 4);
+        final var generator =
+                new VectorTileGenerator(SwissConstants.swissTileDefinition(), output, 64);
         generator.generateTiles();
         generator.forkJoinPool.shutdown();
     }
