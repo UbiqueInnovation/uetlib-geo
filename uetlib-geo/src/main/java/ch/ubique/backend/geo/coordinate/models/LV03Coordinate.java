@@ -8,12 +8,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import org.locationtech.jts.geom.Point;
 
-/** Swiss coordinates (1903) https://epsg.io/21781 Imprecise, use LV95 instead if possible */
+/**
+ * Swiss coordinates (1903) <a href="https://epsg.io/21781">https://epsg.io/21781</a> Imprecise, use
+ * LV95 instead if possible
+ */
 public class LV03Coordinate implements Coordinate {
 
     // For equality testing
@@ -31,15 +34,15 @@ public class LV03Coordinate implements Coordinate {
     @JsonProperty
     private Double elevation;
 
-    public LV03Coordinate(double east, double north) {
+    public LV03Coordinate(final double east, final double north) {
         this(east, north, null);
     }
 
     @JsonCreator
     public LV03Coordinate(
-            @JsonProperty("east") double east,
-            @JsonProperty("north") double north,
-            @JsonProperty("elevation") Double elevation) {
+            @JsonProperty("east") final double east,
+            @JsonProperty("north") final double north,
+            @JsonProperty("elevation") final Double elevation) {
         this.east = east;
         this.north = north;
         this.elevation = elevation;
@@ -49,7 +52,7 @@ public class LV03Coordinate implements Coordinate {
         return east;
     }
 
-    public LV03Coordinate setEast(double east) {
+    public LV03Coordinate setEast(final double east) {
         this.east = east;
         return this;
     }
@@ -58,7 +61,7 @@ public class LV03Coordinate implements Coordinate {
         return north;
     }
 
-    public LV03Coordinate setNorth(double north) {
+    public LV03Coordinate setNorth(final double north) {
         this.north = north;
         return this;
     }
@@ -68,7 +71,7 @@ public class LV03Coordinate implements Coordinate {
         return elevation;
     }
 
-    public LV03Coordinate setElevation(Double elevation) {
+    public LV03Coordinate setElevation(final Double elevation) {
         this.elevation = elevation;
         return this;
     }
@@ -94,7 +97,7 @@ public class LV03Coordinate implements Coordinate {
     }
 
     @Override
-    public double distanceTo(Coordinate other) {
+    public double distanceTo(final Coordinate other) {
         if (other instanceof LV03Coordinate otherLv03) {
             if (elevation == null || otherLv03.elevation == null) {
                 return flatDistanceTo(otherLv03);
@@ -109,7 +112,7 @@ public class LV03Coordinate implements Coordinate {
     }
 
     @Override
-    public double flatDistanceTo(Coordinate other) {
+    public double flatDistanceTo(final Coordinate other) {
         if (other instanceof LV03Coordinate otherLv03) {
             return sqrt(pow(east - otherLv03.east, 2) + pow(north - otherLv03.north, 2));
         }
@@ -124,11 +127,11 @@ public class LV03Coordinate implements Coordinate {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LV03Coordinate that = (LV03Coordinate) o;
+        final LV03Coordinate that = (LV03Coordinate) o;
 
         if (Math.abs(that.east - east) > EPSILON) return false;
         if (Math.abs(that.north - north) > EPSILON) return false;

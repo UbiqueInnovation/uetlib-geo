@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import org.apache.commons.lang3.NotImplementedException;
 import org.locationtech.jts.geom.Point;
 
-/** https://epsg.io/3857 Pseudo-Mercator, Web Mercator */
+/** <a href="https://epsg.io/3857">https://epsg.io/3857</a> Pseudo-Mercator, Web Mercator */
 public class WebMercatorCoordinate implements Coordinate {
 
     // For equality testing
@@ -32,15 +32,15 @@ public class WebMercatorCoordinate implements Coordinate {
 
     @JsonCreator
     public WebMercatorCoordinate(
-            @JsonProperty("x") double x,
-            @JsonProperty("y") double y,
-            @JsonProperty("elevation") Double elevation) {
+            @JsonProperty("x") final double x,
+            @JsonProperty("y") final double y,
+            @JsonProperty("elevation") final Double elevation) {
         this.x = x;
         this.y = y;
         this.elevation = elevation;
     }
 
-    public WebMercatorCoordinate(double x, double y) {
+    public WebMercatorCoordinate(final double x, final double y) {
         this(x, y, null);
     }
 
@@ -60,12 +60,12 @@ public class WebMercatorCoordinate implements Coordinate {
     }
 
     @Override
-    public double distanceTo(Coordinate other) {
+    public double distanceTo(final Coordinate other) {
         throw new NotImplementedException("distanceTo not implemented");
     }
 
     @Override
-    public double flatDistanceTo(Coordinate other) {
+    public double flatDistanceTo(final Coordinate other) {
         throw new NotImplementedException("flatDistanceTo not implemented");
     }
 
@@ -73,7 +73,7 @@ public class WebMercatorCoordinate implements Coordinate {
         return x;
     }
 
-    public WebMercatorCoordinate setX(double x) {
+    public WebMercatorCoordinate setX(final double x) {
         this.x = x;
         return this;
     }
@@ -82,7 +82,7 @@ public class WebMercatorCoordinate implements Coordinate {
         return y;
     }
 
-    public WebMercatorCoordinate setY(double y) {
+    public WebMercatorCoordinate setY(final double y) {
         this.y = y;
         return this;
     }
@@ -108,7 +108,7 @@ public class WebMercatorCoordinate implements Coordinate {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

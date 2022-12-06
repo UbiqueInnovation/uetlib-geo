@@ -30,39 +30,39 @@ public class KmlParser {
 
     private KmlParser() {}
 
-    public static KmlDocument parse(String path) throws IOException {
+    public static KmlDocument parse(final String path) throws IOException {
         return parse(new FileInputStream(path));
     }
 
-    public static KmlDocument parse(InputStream inputStream) throws IOException {
+    public static KmlDocument parse(final InputStream inputStream) throws IOException {
 
-        List<Placemark> placemarks = new LinkedList<>();
-        Map<String, Style> styles = new HashMap<>();
-        Map<String, StyleMap> styleMaps = new HashMap<>();
+        final List<Placemark> placemarks = new LinkedList<>();
+        final Map<String, Style> styles = new HashMap<>();
+        final Map<String, StyleMap> styleMaps = new HashMap<>();
 
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+        final var inputFactory = XMLInputFactory.newInstance();
         try {
-            XMLStreamReader reader = inputFactory.createXMLStreamReader(inputStream, "UTF-8");
+            final var reader = inputFactory.createXMLStreamReader(inputStream, "UTF-8");
 
             logger.info("Parsing KML");
             while (reader.hasNext()) {
                 reader.next();
-                int type = reader.getEventType();
+                final var type = reader.getEventType();
                 if (type == XMLStreamConstants.START_ELEMENT) {
-                    String elementName = reader.getLocalName();
+                    final var elementName = reader.getLocalName();
                     switch (elementName) {
                         case "Placemark" -> {
-                            Placemark placemark = parsePlacemark(reader);
+                            final var placemark = parsePlacemark(reader);
                             placemarks.add(placemark);
                         }
                         case "Style" -> {
-                            String styleId = reader.getAttributeValue(0);
-                            Style style = parseStyle(reader);
+                            final var styleId = reader.getAttributeValue(0);
+                            final var style = parseStyle(reader);
                             styles.put(styleId, style);
                         }
                         case "StyleMap" -> {
-                            String id = reader.getAttributeValue(0);
-                            StyleMap styleMap = parseStyleMap(reader);
+                            final var id = reader.getAttributeValue(0);
+                            final var styleMap = parseStyleMap(reader);
                             styleMaps.put(id, styleMap);
                         }
                         default -> {
@@ -77,18 +77,18 @@ public class KmlParser {
                     .setPlacemarks(placemarks)
                     .setStyleMaps(styleMaps)
                     .setStyles(styles);
-        } catch (XMLStreamException e) {
+        } catch (final XMLStreamException e) {
             throw new IOException(e);
         }
     }
 
-    private static Placemark parsePlacemark(XMLStreamReader reader) throws XMLStreamException {
-        Placemark placemark = new Placemark();
-        boolean isPolygon = false;
+    private static Placemark parsePlacemark(final XMLStreamReader reader) throws XMLStreamException {
+        final var placemark = new Placemark();
+        var isPolygon = false;
         while (reader.hasNext()) {
             reader.next();
-            int eventType = reader.getEventType();
-            String elementName;
+            final var eventType = reader.getEventType();
+            final String elementName;
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
                 switch (elementName) {
@@ -102,8 +102,8 @@ public class KmlParser {
                     case "styleUrl" -> placemark.setStyleId(
                             reader.getElementText().replace("#", ""));
                     case "coordinates" -> {
-                        String coordinateList = reader.getElementText();
-                        List<LV95Coordinate> coordinates =
+                        final var coordinateList = reader.getElementText();
+                        final var coordinates =
                                 Arrays.stream(coordinateList.split("\\s"))
                                         .map(String::trim)
                                         .filter(v -> !v.isEmpty())
@@ -112,8 +112,8 @@ public class KmlParser {
                         if (isPolygon && !coordinates.isEmpty()) {
                             // make sure first and last coordinate are the same. If not, replace
                             // last with first.
-                            LV95Coordinate first = coordinates.get(0);
-                            LV95Coordinate last = coordinates.get(coordinates.size() - 1);
+                            final var first = coordinates.get(0);
+                            final var last = coordinates.get(coordinates.size() - 1);
                             if (!first.equalsExact(last)) {
                                 coordinates.set(
                                         coordinates.size() - 1,
@@ -126,8 +126,8 @@ public class KmlParser {
                         placemark.addCoordinates(coordinates);
                     }
                     case "SimpleData" -> {
-                        String key = reader.getAttributeValue(0);
-                        String value = reader.getElementText();
+                        final var key = reader.getAttributeValue(0);
+                        final var value = reader.getElementText();
                         placemark.getExtendedData().put(key, value);
                     }
                     case "Polygon" -> isPolygon = true;
@@ -147,12 +147,12 @@ public class KmlParser {
         return null;
     }
 
-    private static Style parseStyle(XMLStreamReader reader) throws XMLStreamException {
-        Style style = new Style();
+    private static Style parseStyle(final XMLStreamReader reader) throws XMLStreamException {
+        final var style = new Style();
         while (reader.hasNext()) {
             reader.next();
-            int eventType = reader.getEventType();
-            String elementName;
+            final var eventType = reader.getEventType();
+            final String elementName;
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
                 switch (elementName) {
@@ -173,13 +173,13 @@ public class KmlParser {
         return null;
     }
 
-    private static ItemStyle parseItemStyle(XMLStreamReader reader, String endTag)
+    private static ItemStyle parseItemStyle(final XMLStreamReader reader, final String endTag)
             throws XMLStreamException {
-        ItemStyle style = new ItemStyle();
+        final var style = new ItemStyle();
         while (reader.hasNext()) {
             reader.next();
-            int eventType = reader.getEventType();
-            String elementName;
+            final var eventType = reader.getEventType();
+            final String elementName;
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
                 switch (elementName) {
@@ -201,12 +201,12 @@ public class KmlParser {
         return null;
     }
 
-    private static StyleMap parseStyleMap(XMLStreamReader reader) throws XMLStreamException {
-        StyleMap styleMap = new StyleMap();
+    private static StyleMap parseStyleMap(final XMLStreamReader reader) throws XMLStreamException {
+        final var styleMap = new StyleMap();
         while (reader.hasNext()) {
             reader.next();
-            int eventType = reader.getEventType();
-            String elementName;
+            final var eventType = reader.getEventType();
+            final String elementName;
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
                 if (elementName.equals("Pair")) {
@@ -222,14 +222,14 @@ public class KmlParser {
         return null;
     }
 
-    private static void addPairToStyleMap(XMLStreamReader reader, StyleMap styleMap)
+    private static void addPairToStyleMap(final XMLStreamReader reader, final StyleMap styleMap)
             throws XMLStreamException {
         String key = null;
         String value = null;
         while (reader.hasNext()) {
             reader.next();
-            int eventType = reader.getEventType();
-            String elementName;
+            final var eventType = reader.getEventType();
+            final String elementName;
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
                 if ("key".equals(elementName)) {
@@ -249,12 +249,12 @@ public class KmlParser {
         }
     }
 
-    private static Icon parseIcon(XMLStreamReader reader) throws XMLStreamException {
-        Icon icon = new Icon();
+    private static Icon parseIcon(final XMLStreamReader reader) throws XMLStreamException {
+        final var icon = new Icon();
         while (reader.hasNext()) {
             reader.next();
-            int eventType = reader.getEventType();
-            String elementName;
+            final var eventType = reader.getEventType();
+            final String elementName;
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
                 if ("href".equals(elementName)) {
@@ -270,14 +270,14 @@ public class KmlParser {
         return null;
     }
 
-    private static LV95Coordinate toSwissCoordinate(String value) {
+    private static LV95Coordinate toSwissCoordinate(final String value) {
         final var split = value.split(",");
-        double lon = Double.parseDouble(split[0]);
-        double lat = Double.parseDouble(split[1]);
+        final var lon = Double.parseDouble(split[0]);
+        final var lat = Double.parseDouble(split[1]);
         final var wgs84Coordinate = new WGS84Coordinate(lat, lon);
 
         if (split.length > 2) {
-            double elevation = Double.parseDouble(split[2]);
+            final var elevation = Double.parseDouble(split[2]);
             wgs84Coordinate.setElevation(elevation);
         }
 
