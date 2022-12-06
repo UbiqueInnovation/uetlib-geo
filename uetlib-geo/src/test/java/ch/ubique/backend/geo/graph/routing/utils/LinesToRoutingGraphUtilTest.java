@@ -24,7 +24,7 @@ class LinesToRoutingGraphUtilTest {
                         .map(line -> new LineWithInfo<>(line, testInfo))
                         .toList();
 
-        final var graphs = LinesToRoutingGraphUtil.buildGraphWithInfo(lines);
+        final var graphs = LinesToRoutingGraphUtil.withInfo(lines).buildGraph();
         final var completeGraph = graphs.completeGraph();
 
         Assertions.assertNotNull(completeGraph);
@@ -52,7 +52,7 @@ class LinesToRoutingGraphUtilTest {
                         .map(line -> new LineWithInfo<>(line, testInfo))
                         .toList();
 
-        final var graphs = LinesToRoutingGraphUtil.buildGraphWithInfo(lines);
+        final var graphs = LinesToRoutingGraphUtil.withInfo(lines).buildGraph();
         final var completeGraph = graphs.completeGraph();
         final var routingGraph = graphs.routingGraph();
 
@@ -88,7 +88,7 @@ class LinesToRoutingGraphUtilTest {
                         .map(line -> new LineWithInfo<>(line, testInfo))
                         .toList();
 
-        final var graphs = LinesToRoutingGraphUtil.buildGraphWithInfo(lines);
+        final var graphs = LinesToRoutingGraphUtil.withInfo(lines).buildGraph();
         final var completeGraph = graphs.completeGraph();
         final var routingGraph = graphs.routingGraph();
 
@@ -132,7 +132,7 @@ class LinesToRoutingGraphUtilTest {
                                 "LINESTRING (0 0 100, 10 0.8 100, 20 .2 100, 30 0.8 100, 40 0.5 100, 50 0.8 100)");
         line2.setUserData("TLM");
 
-        final var graphs = LinesToRoutingGraphUtil.buildGraph(List.of(line1, line2));
+        final var graphs = new LinesToRoutingGraphUtil<String>(List.of(line1, line2)).buildGraph();
         final var completeGraph = graphs.completeGraph();
 
         Assertions.assertNotNull(completeGraph);
@@ -168,7 +168,7 @@ class LinesToRoutingGraphUtilTest {
         final var line2 = (LineString) wktReader.read("LINESTRING (0 0, 50 0)");
         line2.setUserData("SAC");
 
-        final var graphs = LinesToRoutingGraphUtil.buildGraph(List.of(line1, line2));
+        final var graphs = new LinesToRoutingGraphUtil<String>(List.of(line1, line2)).buildGraph();
         final var completeGraph = graphs.completeGraph();
 
         Assertions.assertNotNull(completeGraph);
@@ -195,5 +195,52 @@ class LinesToRoutingGraphUtilTest {
         //                graphs.routingGraph().getDirectedEdges().stream()
         //                        .allMatch(e ->
         // "SAC".equals(e.getProperties().originalProperties())));
+    }
+
+    @Test
+    void testSacExample() throws ParseException {
+
+        final var wktReader = new WKTReader();
+
+        final var lineSac =
+                (LineString)
+                        wktReader.read(
+                                "LINESTRING( 898.0 2973.0 , 894.0 2942.0 , 939.0 2836.0 , 915.0 2780.0 , 860.0 2749.0 , 781.0 2735.0 )");
+        lineSac.setUserData("SAC");
+        final var lineTlm =
+                (LineString)
+                        wktReader.read(
+                                "LINESTRING(896.0 2941.0 , 902.0 2926.0 , 916.0 2901.0 , 932.0 2869.0 , 942.0 2835.0 , 941.0 2815.0 , 933.0 2797.0 , 918.0 2779.0 , 891.0 2760.0 , 862.0 2748.0 , 826.0 2740.0 , 802.0 2740.0 , 784.0 2734.0)");
+        lineTlm.setUserData("TLM");
+
+        final var graphs =
+                new LinesToRoutingGraphUtil<String>(List.of(lineTlm, lineSac))
+                        .snapTolerance(6.4)
+                        .hasSnappingPriority("TLM"::equals)
+                        .hasEdgePriority("SAC"::equals)
+                        .buildGraph();
+        final var completeGraph = graphs.completeGraph();
+
+        Assertions.assertNotNull(completeGraph);
+
+        System.out.println(graphs.completeGraph());
+        graphs.completeGraph().getVertices().stream()
+                .map(v -> v.getId() + ": " + v.getProperties())
+                .forEach(System.out::println);
+        graphs.completeGraph().getDirectedEdges().stream()
+                .map(e -> e.toString() + ": " + e.getProperties())
+                .forEach(System.out::println);
+
+        System.out.println(graphs.routingGraph());
+        graphs.routingGraph().getVertices().stream()
+                .map(v -> v.getId() + ": " + v.getProperties())
+                .forEach(System.out::println);
+        graphs.routingGraph().getDirectedEdges().stream()
+                .map(e -> e.toString() + ": " + e.getProperties().originalProperties())
+                .forEach(System.out::println);
+
+        Assertions.assertTrue(
+                graphs.routingGraph().getDirectedEdges().stream()
+                        .allMatch(e -> e.getProperties().originalProperties().equals("SAC")));
     }
 }
