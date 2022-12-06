@@ -43,7 +43,7 @@ public class VectorTileGenerator {
 
     public static void generateForSwitzerlandLv95(VectorTileOutput output) throws ExecutionException, InterruptedException {
         final var generator =
-                new VectorTileGenerator(SwissConstants.swissTileDefinition(), output, 64);
+            new VectorTileGenerator(SwissConstants.swissTileDefinition(), output, 256);
         generator.generateTiles();
         generator.forkJoinPool.shutdown();
     }
