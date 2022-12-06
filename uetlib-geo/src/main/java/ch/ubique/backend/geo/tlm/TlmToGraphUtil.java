@@ -6,7 +6,6 @@ import ch.ubique.backend.geo.graph.routing.utils.LinesToRoutingGraphUtil;
 import ch.ubique.backend.geo.tile.vector.models.tlm.TlmInfo;
 import ch.ubique.backend.geo.tlm.models.TlmPath;
 import ch.ubique.backend.geo.tlm.models.WegType;
-
 import java.util.Collection;
 import java.util.Set;
 
@@ -24,6 +23,6 @@ public class TlmToGraphUtil {
                 .map(path -> new LineWithInfo<>(path.getLine(), new TlmInfo(path)))
                 .toList();
 
-        return LinesToRoutingGraphUtil.buildGraphWithInfo(relevantPaths);
+        return LinesToRoutingGraphUtil.withInfo(relevantPaths).buildGraph();
     }
 }

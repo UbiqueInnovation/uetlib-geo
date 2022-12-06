@@ -1,6 +1,13 @@
 package ch.ubique.backend.geo.graph.models;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -44,8 +51,8 @@ public class Graph<V, E> {
         return vertices.get(vertex.getId());
     }
 
-    public Vertex<V, E>  getVertex(long vertexId) {
-        return vertices.get(vertexId);
+    public Optional<Edge<V, E>> getEdge(long u, long v) {
+        return getVertex(u).flatMap(vertex -> vertex.getEdgeTo(v));
     }
 
     public Edge<V, E>  getEdge(long edgeId) {
@@ -125,8 +132,8 @@ public class Graph<V, E> {
         return getEdge(u.getId(), v.getId());
     }
 
-    public Optional<Edge<V, E>> getEdge(long u, long v) {
-        return getVertex(u).getEdgeTo(v);
+    public Optional<Vertex<V, E>> getVertex(long vertexId) {
+        return Optional.ofNullable(vertices.get(vertexId));
     }
 
     public Collection<Vertex<V, E>> getVertices() {
