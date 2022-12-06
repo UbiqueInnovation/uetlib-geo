@@ -15,7 +15,7 @@ import java.util.function.Function;
  * @param <E> type of the edge properties
  */
 public class Graph<V, E> {
-    private final Map<Long, Vertex<V, E> > vertices;
+    private final Map<Long, Vertex<V, E>> vertices;
     private final Map<Long, Edge<V, E>> directedEdges;
 
     private long lastEdgeId;
@@ -26,9 +26,11 @@ public class Graph<V, E> {
         lastEdgeId = 0;
     }
 
-    public Vertex<V, E> addVertex(Vertex<V, E>  vertex) {
-        vertices.put(vertex.getId(), vertex);
-        return vertex;
+    public Vertex<V, E> getOrAddVertex(Vertex<V, E> vertex) {
+        if (!vertices.containsKey(vertex.getId())) {
+            addVertex(vertex);
+        }
+        return vertices.get(vertex.getId());
     }
 
     public Vertex<V, E> addVertex(long vertexId, V properties) {
@@ -43,19 +45,16 @@ public class Graph<V, E> {
         return getOrAddVertex(new Vertex<>(vertexId, properties));
     }
 
-
-    public Vertex<V, E> getOrAddVertex(Vertex<V, E>  vertex) {
-        if (!vertices.containsKey(vertex.getId())) {
-            addVertex(vertex);
-        }
-        return vertices.get(vertex.getId());
+    public Vertex<V, E> addVertex(Vertex<V, E> vertex) {
+        vertices.put(vertex.getId(), vertex);
+        return vertex;
     }
 
     public Optional<Edge<V, E>> getEdge(long u, long v) {
         return getVertex(u).flatMap(vertex -> vertex.getEdgeTo(v));
     }
 
-    public Edge<V, E>  getEdge(long edgeId) {
+    public Edge<V, E> getEdge(long edgeId) {
         return directedEdges.get(edgeId);
     }
 
@@ -63,7 +62,7 @@ public class Graph<V, E> {
         return getOrAddUndirectedEdge(u, v, null);
     }
 
-    public Edge<V, E> getOrAddUndirectedEdge(Vertex<V, E>  u, Vertex<V, E>  v) {
+    public Edge<V, E> getOrAddUndirectedEdge(Vertex<V, E> u, Vertex<V, E> v) {
         return getOrAddUndirectedEdge(u, v, null);
     }
 
@@ -71,47 +70,13 @@ public class Graph<V, E> {
         return getOrAddUndirectedEdge(getOrAddVertex(u), getOrAddVertex(v), properties);
     }
 
-    public Edge<V, E> getOrAddUndirectedEdge(Edge<V, E>  edge) {
-        return getOrAddUndirectedEdge(edge.getU(), edge.getV(), edge.getProperties());
-    }
-
-    public Edge<V, E> getOrAddUndirectedEdge(Vertex<V, E>  a, Vertex<V, E>  b, E properties) {
+    public Edge<V, E> getOrAddUndirectedEdge(Vertex<V, E> a, Vertex<V, E> b, E properties) {
         getOrAddDirectedEdge(b, a, properties);
         return getOrAddDirectedEdge(a, b, properties);
     }
 
-    /**
-     * Gets or adds a <strong>directed</strong> edge
-     */
-    public Edge<V, E> getOrAddDirectedEdge(long u, long v) {
-        return getOrAddDirectedEdge(u, v, null);
-    }
-
-    /**
-     * Gets or adds a <strong>directed</strong> edge
-     */
-    public Edge<V, E> getOrAddDirectedEdge(Vertex<V, E>  u, Vertex<V, E>  v) {
-        return getOrAddDirectedEdge(u, v, null);
-    }
-
-    /**
-     * Gets or adds a <strong>directed</strong> edge
-     */
-    public Edge<V, E> getOrAddDirectedEdge(long u, long v, E properties) {
-        return getOrAddDirectedEdge(getOrAddVertex(u), getOrAddVertex(v), properties);
-    }
-
-    /**
-     * Gets or adds a <strong>directed</strong> edge
-     */
-    public Edge<V, E> getOrAddDirectedEdge(Edge<V, E>  edge) {
-        return getOrAddDirectedEdge(edge.getU(), edge.getV(), edge.getProperties());
-    }
-
-    /**
-     * Gets or adds a <strong>directed</strong> edge
-     */
-    public Edge<V, E> getOrAddDirectedEdge(Vertex<V, E>  u, Vertex<V, E>  v, E properties) {
+    /** Gets or adds a <strong>directed</strong> edge */
+    public Edge<V, E> getOrAddDirectedEdge(Vertex<V, E> u, Vertex<V, E> v, E properties) {
         final var existingEdge = getEdge(u, v);
         if (existingEdge.isPresent()) {
             return existingEdge.get();
@@ -122,6 +87,30 @@ public class Graph<V, E> {
         u.getModifiableEdges().add(edge);
 
         return edge;
+    }
+
+    public Edge<V, E> getOrAddUndirectedEdge(Edge<V, E> edge) {
+        return getOrAddUndirectedEdge(edge.getU(), edge.getV(), edge.getProperties());
+    }
+
+    /** Gets or adds a <strong>directed</strong> edge */
+    public Edge<V, E> getOrAddDirectedEdge(long u, long v) {
+        return getOrAddDirectedEdge(u, v, null);
+    }
+
+    /** Gets or adds a <strong>directed</strong> edge */
+    public Edge<V, E> getOrAddDirectedEdge(long u, long v, E properties) {
+        return getOrAddDirectedEdge(getOrAddVertex(u), getOrAddVertex(v), properties);
+    }
+
+    /** Gets or adds a <strong>directed</strong> edge */
+    public Edge<V, E> getOrAddDirectedEdge(Vertex<V, E> u, Vertex<V, E> v) {
+        return getOrAddDirectedEdge(u, v, null);
+    }
+
+    /** Gets or adds a <strong>directed</strong> edge */
+    public Edge<V, E> getOrAddDirectedEdge(Edge<V, E> edge) {
+        return getOrAddDirectedEdge(edge.getU(), edge.getV(), edge.getProperties());
     }
 
     public Optional<Edge<V, E>> getEdge(Edge<V, E> edge) {
@@ -142,6 +131,15 @@ public class Graph<V, E> {
 
     public Collection<Edge<V, E>> getDirectedEdges() {
         return directedEdges.values();
+    }
+
+    public void removeEdge(final Edge<V, E> edge) {
+        edge.getFrom().getModifiableEdges().remove(edge);
+        directedEdges.remove(edge.getId());
+    }
+
+    public void removeVertex(final Vertex<V, E> vertex) {
+        vertices.remove(vertex.getId());
     }
 
     @Override
@@ -174,7 +172,8 @@ public class Graph<V, E> {
                 potentialCycle.add(current);
 
                 final var prev = previous;
-                final var next = current.getNeighborsStream().filter(v -> !v.equals(prev)).findAny();
+                final var next =
+                        current.getNeighborsStream().filter(v -> !v.equals(prev)).findAny();
 
                 assert next.isPresent();
 
@@ -185,10 +184,17 @@ public class Graph<V, E> {
         return cycles;
     }
 
-    public <S, T> Graph<S, T> map(Function<Vertex<V, E>, Vertex<S, T>> vertexMapper, Function<Edge<V, E>, T> edgeMapper) {
+    public <S, T> Graph<S, T> map(
+            Function<Vertex<V, E>, Vertex<S, T>> vertexMapper, Function<Edge<V, E>, T> edgeMapper) {
         final var mappedGraph = new Graph<S, T>();
         getVertices().forEach(vertex -> mappedGraph.addVertex(vertexMapper.apply(vertex)));
-        getDirectedEdges().forEach(edge -> mappedGraph.getOrAddUndirectedEdge(edge.getU().getId(), edge.getV().getId(), edgeMapper.apply(edge)));
+        getDirectedEdges()
+                .forEach(
+                        edge ->
+                                mappedGraph.getOrAddUndirectedEdge(
+                                        edge.getU().getId(),
+                                        edge.getV().getId(),
+                                        edgeMapper.apply(edge)));
         return mappedGraph;
     }
 }
