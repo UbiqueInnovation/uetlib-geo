@@ -5,6 +5,12 @@ import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphEdgeProperties;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -15,13 +21,6 @@ import org.locationtech.jts.noding.snap.SnappingNoder;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 
 public class LinesToRoutingGraphUtil {
@@ -42,7 +41,7 @@ public class LinesToRoutingGraphUtil {
         logger.info("Creating complete graph.");
         final var nodedSegmentStrings = computeNodedSegmentStrings(lines, snapTolerance);
         final var completeGraph = new Graph<Coordinate, T>();
-        final var coordinateToVertex= createVertices(completeGraph, nodedSegmentStrings);
+        final var coordinateToVertex = createVertices(completeGraph, nodedSegmentStrings);
         createEdges(completeGraph, nodedSegmentStrings, coordinateToVertex);
         logger.info("Created complete graph {}.", completeGraph);
 
@@ -71,8 +70,8 @@ public class LinesToRoutingGraphUtil {
         return buildGraphWithInfo(linesWithInfo, DEFAULT_SNAP_TOLERANCE);
     }
 
-    @NotNull
-    private static List<NodedSegmentString> computeNodedSegmentStrings(final Collection<LineString> lines, final double snapTolerance) {
+    private static List<LineString> computeNodedSegmentStrings(
+            final Collection<LineString> lines, final double snapTolerance) {
         logger.info("Creating segment strings for {} lines.", lines.size());
         final var segmentStrings = lines.stream()
                 .map(SegmentStringUtil::extractSegmentStrings)
@@ -84,15 +83,30 @@ public class LinesToRoutingGraphUtil {
         logger.info("Noding segments using {} with snapTolerance {}", noder.getClass(), snapTolerance);
         noder.computeNodes(segmentStrings);
         //noinspection unchecked
-        return (List<NodedSegmentString>) noder.getNodedSubstrings();
-    }
+        final var nodedSegmentStrings = (List<NodedSegmentString>) noder.getNodedSubstrings();
 
-    private static <T> Map<Coordinate, Vertex<Coordinate, T>> createVertices(final Graph<Coordinate, T> graph, final List<NodedSegmentString> nodedSegmentStrings) {
-        logger.info("Getting distinct coordinates from {} noded segment strings", nodedSegmentStrings.size());
-        final var coordinates = nodedSegmentStrings.stream()
-                .map(NodedSegmentString::getCoordinates).flatMap(Arrays::stream)
+        final var factory = JtsUtil.factoryFromGeometryCollection(lines);
+        return nodedSegmentStrings.stream()
+                .map(
+                        segmentString -> {
+                            final var line =
+                                    factory.createLineString(segmentString.getCoordinates());
+                            line.setUserData(((Geometry) segmentString.getData()).getUserData());
+                            return line;
+                        })
                 .distinct()
                 .toList();
+    }
+
+    private static <T> Map<Coordinate, Vertex<Coordinate, T>> createVertices(
+            final Graph<Coordinate, T> graph, final List<LineString> nodedSegmentStrings) {
+        logger.info("Getting distinct coordinates from {} noded segment strings", nodedSegmentStrings.size());
+        final var coordinates =
+                nodedSegmentStrings.stream()
+                        .map(Geometry::getCoordinates)
+                        .flatMap(Arrays::stream)
+                        .distinct()
+                        .toList();
 
         logger.info("Creating vertices for {} coordinates", coordinates.size());
         final var lastId = new AtomicInteger();
@@ -101,12 +115,15 @@ public class LinesToRoutingGraphUtil {
                 coordinate -> graph.addVertex(lastId.incrementAndGet(), coordinate)));
     }
 
-    private static <T> void createEdges(final Graph<Coordinate, T> graph, final List<NodedSegmentString> nodedSegmentStrings, final Map<Coordinate, Vertex<Coordinate, T>> coordinateToVertex) {
+    private static <T> void createEdges(
+            final Graph<Coordinate, T> graph,
+            final List<LineString> nodedSegmentStrings,
+            final Map<Coordinate, Vertex<Coordinate, T>> coordinateToVertex) {
         logger.info("Creating edges by linking neighbors of each path");
         for (final var segmentString : nodedSegmentStrings) {
             final var segmentCoordinates = segmentString.getCoordinates();
             //noinspection unchecked
-            final var info = (T) ((Geometry)segmentString.getData()).getUserData();
+            final var info = (T) segmentString.getUserData();
             for (int i = 0; i < segmentCoordinates.length - 1; i++) {
                 final var from = coordinateToVertex.get(segmentCoordinates[i]);
                 final var to = coordinateToVertex.get(segmentCoordinates[i + 1]);
@@ -117,7 +134,11 @@ public class LinesToRoutingGraphUtil {
     }
 
     @NotNull
-    private static <T> Graph<Coordinate, RoutingGraphEdgeProperties<T>> createRoutingGraph(final Collection<LineString> lines, final List<NodedSegmentString> nodedSegmentStrings, final Graph<Coordinate, T> completeGraph, final Map<Coordinate, Vertex<Coordinate, T>> coordinateToVertex) {
+    private static <T> Graph<Coordinate, RoutingGraphEdgeProperties<T>> createRoutingGraph(
+            final Collection<LineString> lines,
+            final List<LineString> nodedSegmentStrings,
+            final Graph<Coordinate, T> completeGraph,
+            final Map<Coordinate, Vertex<Coordinate, T>> coordinateToVertex) {
         logger.info("Merging segment strings.");
         final var mergedLines = mergeSegmentStrings(lines, nodedSegmentStrings);
 
@@ -151,14 +172,10 @@ public class LinesToRoutingGraphUtil {
     }
 
     @NotNull
-    private static List<LineString> mergeSegmentStrings(final Collection<LineString> lines, final List<NodedSegmentString> nodedSegmentStrings) {
+    private static List<LineString> mergeSegmentStrings(
+            final Collection<LineString> lines, final List<LineString> nodedSegmentStrings) {
         final var lineMerger = new LineMerger();
-        final var factory = JtsUtil.factoryFromGeometryCollection(lines);
-        lineMerger.add(nodedSegmentStrings.stream().map(segmentString -> {
-            final var line = factory.createLineString(segmentString.getCoordinates());
-            line.setUserData(((Geometry) segmentString.getData()).getUserData());
-            return line;
-        }).toList());
+        lineMerger.add(nodedSegmentStrings);
         //noinspection unchecked
         return (List<LineString>) lineMerger.getMergedLineStrings();
     }

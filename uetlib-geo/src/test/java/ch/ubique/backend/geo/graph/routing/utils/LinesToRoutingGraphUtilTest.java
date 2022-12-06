@@ -1,12 +1,13 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
 import com.pivovarit.function.ThrowingFunction;
+import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
-
-import java.util.stream.Stream;
 
 
 class LinesToRoutingGraphUtilTest {
@@ -98,5 +99,41 @@ class LinesToRoutingGraphUtilTest {
 
         Assertions.assertTrue(completeGraph.getVertices().stream().noneMatch(v -> Double.isNaN(v.getProperties().getZ())));
         Assertions.assertTrue(routingGraph.getVertices().stream().noneMatch(v -> Double.isNaN(v.getProperties().getZ())));
+    }
+
+    @Test
+    void testTooManyRoutingVertices() throws ParseException {
+
+        final var wktReader = new WKTReader();
+
+        final var line1 =
+                (LineString) wktReader.read("LINESTRING (0 0, 10 0, 20 0, 30 0, 40 0, 50 0)");
+        line1.setUserData("SAC");
+        final var line2 =
+                (LineString)
+                        wktReader.read("LINESTRING (0 0, 10 0.8, 20 .2, 30 0.8, 40 0.5, 50 0.8)");
+        line2.setUserData("TLM");
+
+        final var graphs = LinesToRoutingGraphUtil.buildGraph(List.of(line1, line2));
+        final var completeGraph = graphs.completeGraph();
+
+        Assertions.assertNotNull(completeGraph);
+
+        System.out.println(graphs.completeGraph());
+        graphs.completeGraph().getVertices().stream()
+                .map(v -> v.getId() + ": " + v.getProperties())
+                .forEach(System.out::println);
+        graphs.completeGraph().getDirectedEdges().forEach(System.out::println);
+
+        System.out.println(graphs.routingGraph());
+        graphs.routingGraph().getVertices().stream()
+                .map(v -> v.getId() + ": " + v.getProperties())
+                .forEach(System.out::println);
+        graphs.routingGraph().getDirectedEdges().stream()
+                .map(e -> e.toString() + ": " + e.getProperties().originalProperties())
+                .forEach(System.out::println);
+
+        Assertions.assertEquals(2, graphs.routingGraph().getVertices().size());
+        Assertions.assertEquals(2, graphs.routingGraph().getDirectedEdges().size());
     }
 }
