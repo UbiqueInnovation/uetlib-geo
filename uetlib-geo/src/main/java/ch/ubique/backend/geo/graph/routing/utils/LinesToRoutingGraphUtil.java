@@ -112,8 +112,8 @@ public class LinesToRoutingGraphUtil<T> {
 
         logger.info("Creating routing graph.");
         final var routingGraph =
-                mergedLinesToRoutingGraph(
-                        lines, nodedSegmentStrings, completeGraph, coordinateToVertex);
+                buildRoutingGraph(
+                    lines, nodedSegmentStrings, completeGraph, coordinateToVertex);
         logger.info("Created routing graph {}.", routingGraph);
 
         return new RoutingGraphs<>(completeGraph, routingGraph);
@@ -193,15 +193,15 @@ public class LinesToRoutingGraphUtil<T> {
     }
 
     @NotNull
-    private Graph<Coordinate, RoutingGraphEdgeProperties<T>> mergedLinesToRoutingGraph(
-            final Collection<LineString> lines,
-            final List<LineString> nodedSegmentStrings,
-            final Graph<Coordinate, T> completeGraph,
-            final Map<Coordinate, Vertex<Coordinate, T>> coordinateToVertex) {
+    private Graph<Coordinate, RoutingGraphEdgeProperties<T>> buildRoutingGraph(
+        final Collection<LineString> lines,
+        final List<LineString> nodedSegmentStrings,
+        final Graph<Coordinate, T> completeGraph,
+        final Map<Coordinate, Vertex<Coordinate, T>> coordinateToVertex) {
 
         final var mergedLines = mergeSegmentStrings(lines, nodedSegmentStrings);
-        final var routingGraph =
-                mergedLinesToRoutingGraph(completeGraph, coordinateToVertex, mergedLines);
+        final var routingGraph = mergedLinesToRoutingGraph(completeGraph, coordinateToVertex,
+            mergedLines);
         removeDegreeTwoVertices(routingGraph);
         return routingGraph;
     }
@@ -284,31 +284,27 @@ public class LinesToRoutingGraphUtil<T> {
             final Graph<Coordinate, RoutingGraphEdgeProperties<T>> routingGraph) {
 
         final var edges =
-                vertex.getEdges().stream().map(Edge::getTwin).map(Optional::orElseThrow).toList();
+            vertex.getEdges().stream().map(Edge::getTwin).map(Optional::orElseThrow).toList();
 
         final var edgeA = edges.get(0);
         final var edgeB = edges.get(1);
 
         // Add direct edges
-        routingGraph.getOrAddUndirectedEdge(
-                edgeA.getU(),
-                edgeB.getU(),
-                new RoutingGraphEdgeProperties<>(
-                        edgeA.getProperties().distance() + edgeB.getProperties().distance(),
-                        edgeA.getProperties().direction(),
-                        edgeA.getProperties().originalProperties()));
+        final var forwards = routingGraph.getOrAddUndirectedEdge(edgeA.getFrom(), edgeB.getFrom());
+        forwards.setProperties(new RoutingGraphEdgeProperties<>(
+            edgeA.getProperties().distance() + edgeB.getProperties().distance(),
+            edgeA.getProperties().direction(),
+            edgeA.getProperties().originalProperties()));
 
-        routingGraph.getOrAddUndirectedEdge(
-                edgeB.getU(),
-                edgeA.getU(),
-                new RoutingGraphEdgeProperties<>(
-                        edgeA.getProperties().distance() + edgeB.getProperties().distance(),
-                        edgeB.getProperties().direction(),
-                        edgeB.getProperties().originalProperties()));
+        final var backwards = routingGraph.getOrAddUndirectedEdge(edgeB.getFrom(), edgeA.getFrom());
+        backwards.setProperties(new RoutingGraphEdgeProperties<>(
+            edgeA.getProperties().distance() + edgeB.getProperties().distance(),
+            edgeB.getProperties().direction(),
+            edgeB.getProperties().originalProperties()));
 
         // Remove old edges
         Stream.concat(vertex.getEdges().stream(), Stream.of(edgeA, edgeB))
-                .forEach(routingGraph::removeEdge);
+            .forEach(routingGraph::removeEdge);
 
         // Remove vertex
         routingGraph.removeVertex(vertex);
