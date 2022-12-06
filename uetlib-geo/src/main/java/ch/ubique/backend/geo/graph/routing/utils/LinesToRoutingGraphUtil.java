@@ -164,9 +164,25 @@ public class LinesToRoutingGraphUtil {
             routingGraph.getOrAddVertex(first.getId(), first.getProperties());
             routingGraph.getOrAddVertex(last.getId(), last.getProperties());
 
-            routingGraph.getOrAddDirectedEdge(first.getId(), last.getId(), new RoutingGraphEdgeProperties<>(distance, second, firstEdge.get().getProperties()));
-            routingGraph.getOrAddDirectedEdge(last.getId(), first.getId(), new RoutingGraphEdgeProperties<>(distance, secondLast, lastEdge.get().getProperties()));
+            final var existingEdgeForward = routingGraph.getEdge(first.getId(), last.getId());
+            if (existingEdgeForward.isEmpty()
+                    || existingEdgeForward.get().getProperties().distance() > distance) {
+                routingGraph.getOrAddDirectedEdge(
+                        first.getId(),
+                        last.getId(),
+                        new RoutingGraphEdgeProperties<>(
+                                distance, second, firstEdge.get().getProperties()));
+            }
 
+            final var existingEdgeBackward = routingGraph.getEdge(last.getId(), first.getId());
+            if (existingEdgeBackward.isEmpty()
+                    || existingEdgeBackward.get().getProperties().distance() > distance) {
+                routingGraph.getOrAddDirectedEdge(
+                        last.getId(),
+                        first.getId(),
+                        new RoutingGraphEdgeProperties<>(
+                                distance, secondLast, lastEdge.get().getProperties()));
+            }
         }
         return routingGraph;
     }
