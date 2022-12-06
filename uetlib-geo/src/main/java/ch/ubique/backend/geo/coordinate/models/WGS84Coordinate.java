@@ -11,14 +11,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import org.locationtech.jts.geom.Point;
 
 /**
- * World Geodetic System 1984 (also known as WGS84, WGS 1984, EPSG:4326) Most common coordinate
- * System Also referred to as Lat/Lon-Coordinate
+ * World Geodetic System 1984 (also known as WGS84, WGS 1984, EPSG:4326). Most common coordinate
+ * System Also referred to as Lat/Lon-Coordinate. <a
+ * href="https://epsg.io/4326">https://epsg.io/4326</a>
  */
 public class WGS84Coordinate implements Coordinate {
 
@@ -50,15 +51,15 @@ public class WGS84Coordinate implements Coordinate {
     @JsonProperty
     private Double elevation;
 
-    public WGS84Coordinate(double latitude, double longitude) {
+    public WGS84Coordinate(final double latitude, final double longitude) {
         this(latitude, longitude, null);
     }
 
     @JsonCreator
     public WGS84Coordinate(
-            @JsonProperty("latitude") double latitude,
-            @JsonProperty("longitude") double longitude,
-            @JsonProperty("elevation") Double elevation) {
+            @JsonProperty("latitude") final double latitude,
+            @JsonProperty("longitude") final double longitude,
+            @JsonProperty("elevation") final Double elevation) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.elevation = elevation;
@@ -68,7 +69,7 @@ public class WGS84Coordinate implements Coordinate {
         return latitude;
     }
 
-    public WGS84Coordinate setLatitude(double latitude) {
+    public WGS84Coordinate setLatitude(final double latitude) {
         this.latitude = latitude;
         return this;
     }
@@ -77,7 +78,7 @@ public class WGS84Coordinate implements Coordinate {
         return longitude;
     }
 
-    public WGS84Coordinate setLongitude(double longitude) {
+    public WGS84Coordinate setLongitude(final double longitude) {
         this.longitude = longitude;
         return this;
     }
@@ -87,7 +88,7 @@ public class WGS84Coordinate implements Coordinate {
         return elevation;
     }
 
-    public WGS84Coordinate setElevation(Double elevation) {
+    public WGS84Coordinate setElevation(final Double elevation) {
         this.elevation = elevation;
         return this;
     }
@@ -113,24 +114,24 @@ public class WGS84Coordinate implements Coordinate {
     }
 
     @Override
-    public double distanceTo(Coordinate other) {
+    public double distanceTo(final Coordinate other) {
         return flatDistanceTo(other);
     }
 
     @Override
-    public double flatDistanceTo(Coordinate other) {
+    public double flatDistanceTo(final Coordinate other) {
         if (other instanceof WGS84Coordinate otherWgs84) {
-            var r = 6371; // Radius of the earth in km
-            var dLat = toRadians(otherWgs84.latitude - latitude);
-            var dLon = toRadians(otherWgs84.longitude - longitude);
-            var a =
+            final var r = 6371; // Radius of the earth in km
+            final var dLat = toRadians(otherWgs84.latitude - latitude);
+            final var dLon = toRadians(otherWgs84.longitude - longitude);
+            final var a =
                     sin(dLat / 2) * sin(dLat / 2)
                             + cos(toRadians(latitude))
                                     * cos(toRadians(otherWgs84.latitude))
                                     * sin(dLon / 2)
                                     * sin(dLon / 2);
-            var c = 2 * atan2(Math.sqrt(a), sqrt(1 - a));
-            var d = r * c; // Distance in [km]
+            final var c = 2 * atan2(Math.sqrt(a), sqrt(1 - a));
+            final var d = r * c; // Distance in [km]
             return d * 1000; // Distance in [m]
         }
 
@@ -145,11 +146,11 @@ public class WGS84Coordinate implements Coordinate {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        WGS84Coordinate that = (WGS84Coordinate) o;
+        final WGS84Coordinate that = (WGS84Coordinate) o;
 
         if (Math.abs(that.latitude - latitude) > EPSILON) return false;
         if (Math.abs(that.longitude - longitude) > EPSILON) return false;

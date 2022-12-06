@@ -2,32 +2,32 @@ package ch.ubique.backend.geo.tlm;
 
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
-import ch.ubique.backend.geo.tlm.models.*;
-import org.apache.commons.lang3.StringUtils;
-import org.locationtech.jts.geom.LineString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import ch.ubique.backend.geo.tlm.models.BelagType;
+import ch.ubique.backend.geo.tlm.models.TlmPath;
+import ch.ubique.backend.geo.tlm.models.Verkehrsbedeutung;
+import ch.ubique.backend.geo.tlm.models.WanderwegType;
+import ch.ubique.backend.geo.tlm.models.WegType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import org.apache.commons.lang3.StringUtils;
+import org.locationtech.jts.geom.LineString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SwisstopoTlmParser {
 
-    private SwisstopoTlmParser() {}
-
     private static final String PATH_XML_TAG_NAME = "swissTLM3D_ili2_V2_0.TLM_STRASSEN.TLM_STRASSE";
-
     private static final Logger logger = LoggerFactory.getLogger(SwisstopoTlmParser.class);
 
+    private SwisstopoTlmParser() {}
 
     public static Collection<TlmPath> parseData(final InputStream inputStream) throws IOException {
         final var paths = new LinkedList<TlmPath>();
@@ -41,7 +41,7 @@ public class SwisstopoTlmParser {
                 reader.next();
                 final var type = reader.getEventType();
                 if (type == XMLStreamConstants.START_ELEMENT) {
-                    String elementName = reader.getLocalName();
+                    final var elementName = reader.getLocalName();
                     if (elementName.equals(PATH_XML_TAG_NAME)) {
                         final var path = parsePath(reader);
                         paths.add(path);
@@ -50,17 +50,17 @@ public class SwisstopoTlmParser {
             }
             logger.info("Parsing TLM finished");
             return paths;
-        } catch (XMLStreamException e) {
+        } catch (final XMLStreamException e) {
             throw new IOException(e);
         }
     }
 
-    private static TlmPath parsePath(XMLStreamReader reader) throws XMLStreamException {
-        var path = new TlmPath();
+    private static TlmPath parsePath(final XMLStreamReader reader) throws XMLStreamException {
+        final var path = new TlmPath();
         while (reader.hasNext()) {
             reader.next();
-            int eventType = reader.getEventType();
-            String elementName;
+            final var eventType = reader.getEventType();
+            final String elementName;
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
                 if (elementName.equals("POLYLINE")) {
@@ -77,8 +77,9 @@ public class SwisstopoTlmParser {
         return null;
     }
 
-    private static void readPathAttributes(XMLStreamReader reader, TlmPath path) throws XMLStreamException {
-        String value;
+    private static void readPathAttributes(final XMLStreamReader reader, final TlmPath path)
+            throws XMLStreamException {
+        final String value;
         switch (reader.getLocalName()) {
             case "Objektart" -> {
                 value = reader.getElementText();
@@ -119,13 +120,14 @@ public class SwisstopoTlmParser {
         }
     }
 
-    private static LineString parsePolyline(XMLStreamReader reader) throws XMLStreamException {
-        List<LV95Coordinate> polyline = new ArrayList<>();
+    private static LineString parsePolyline(final XMLStreamReader reader)
+            throws XMLStreamException {
+        final List<LV95Coordinate> polyline = new ArrayList<>();
         while (reader.hasNext()) {
             reader.next();
-            int type = reader.getEventType();
+            final var type = reader.getEventType();
             if (type == XMLStreamConstants.START_ELEMENT) {
-                String elementName = reader.getLocalName();
+                final var elementName = reader.getLocalName();
                 if (elementName.equals("COORD")) {
                     polyline.add(parseCoordinate(reader));
                 } else {
@@ -133,7 +135,7 @@ public class SwisstopoTlmParser {
                 }
             }
             if (type == XMLStreamConstants.END_ELEMENT) {
-                String elementName = reader.getLocalName();
+                final var elementName = reader.getLocalName();
                 if (elementName.equals("POLYLINE")) {
                     return JtsConverter.LV95.toJtsLineString(polyline);
                 }
@@ -142,15 +144,16 @@ public class SwisstopoTlmParser {
         return JtsConverter.LV95.toJtsLineString(polyline);
     }
 
-    private static LV95Coordinate parseCoordinate(XMLStreamReader reader) throws XMLStreamException {
+    private static LV95Coordinate parseCoordinate(final XMLStreamReader reader)
+            throws XMLStreamException {
         double east = -1;
         double north = -1;
         Double elevation = null;
         while (reader.hasNext()) {
             reader.next();
-            int type = reader.getEventType();
+            final var type = reader.getEventType();
             if (type == XMLStreamConstants.START_ELEMENT) {
-                String elementName = reader.getLocalName();
+                final var elementName = reader.getLocalName();
                 switch (elementName) {
                     case "C1" -> east = Double.parseDouble(reader.getElementText());
                     case "C2" -> north = Double.parseDouble(reader.getElementText());
@@ -159,7 +162,7 @@ public class SwisstopoTlmParser {
                 }
             }
             if (type == XMLStreamConstants.END_ELEMENT) {
-                String elementName = reader.getLocalName();
+                final var elementName = reader.getLocalName();
                 if (elementName.equals("COORD")) {
                     return new LV95Coordinate(east, north, elevation);
                 }
@@ -168,8 +171,8 @@ public class SwisstopoTlmParser {
         return null;
     }
 
-    private static Integer parseStufe(String stufeString) {
-        String[] split = stufeString.split("_");
+    private static Integer parseStufe(final String stufeString) {
+        final var split = stufeString.split("_");
         var value = Integer.parseInt(split[split.length - 1]);
         if (stufeString.contains("minus")) {
             value = -value;
@@ -177,12 +180,12 @@ public class SwisstopoTlmParser {
         return value;
     }
 
-    private static boolean isPresent(String value) {
+    private static boolean isPresent(final String value) {
         return !isNull(value);
     }
 
-    private static boolean isNull(String value) {
-        var nullValues = List.of("k_W", "ub");
+    private static boolean isNull(final String value) {
+        final var nullValues = List.of("k_W", "ub");
         return StringUtils.isBlank(value) || nullValues.contains(value);
     }
 }
