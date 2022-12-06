@@ -1,19 +1,23 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
 import ch.ubique.backend.geo.coordinate.util.JtsUtil;
+import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphEdgeProperties;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.locationtech.jts.geom.Coordinate;
@@ -108,10 +112,29 @@ public class LinesToRoutingGraphUtil<T> {
 
         logger.info("Creating routing graph.");
         final var routingGraph =
-                createRoutingGraph(lines, nodedSegmentStrings, completeGraph, coordinateToVertex);
+                mergedLinesToRoutingGraph(
+                        lines, nodedSegmentStrings, completeGraph, coordinateToVertex);
         logger.info("Created routing graph {}.", routingGraph);
 
         return new RoutingGraphs<>(completeGraph, routingGraph);
+    }
+
+    private void createEdges(
+            final Graph<Coordinate, T> graph,
+            final List<LineString> lineStrings,
+            final Map<Coordinate, Vertex<Coordinate, T>> coordinateToVertex) {
+        logger.info("Creating edges by linking neighbors of each path");
+        for (final var lineString : lineStrings) {
+            final var info = userData(lineString);
+            JtsUtil.segments(lineString)
+                    .forEach(
+                            segment -> {
+                                final var from = coordinateToVertex.get(segment.getCoordinate(0));
+                                final var to = coordinateToVertex.get(segment.getCoordinate(1));
+                                assert (!from.equals(to));
+                                graph.getOrAddUndirectedEdge(from, to, info);
+                            });
+        }
     }
 
     private List<LineString> computeNodedSegmentStrings(
@@ -169,70 +192,126 @@ public class LinesToRoutingGraphUtil<T> {
                                         graph.addVertex(lastId.incrementAndGet(), coordinate)));
     }
 
-    private void createEdges(
-            final Graph<Coordinate, T> graph,
-            final List<LineString> nodedSegmentStrings,
-            final Map<Coordinate, Vertex<Coordinate, T>> coordinateToVertex) {
-        logger.info("Creating edges by linking neighbors of each path");
-        for (final var segmentString : nodedSegmentStrings) {
-            final var segmentCoordinates = segmentString.getCoordinates();
-            final var info = userData(segmentString);
-            for (int i = 0; i < segmentCoordinates.length - 1; i++) {
-                final var from = coordinateToVertex.get(segmentCoordinates[i]);
-                final var to = coordinateToVertex.get(segmentCoordinates[i + 1]);
-                assert (!from.equals(to));
-                graph.getOrAddUndirectedEdge(from, to, info);
-            }
-        }
-    }
-
     @NotNull
-    private Graph<Coordinate, RoutingGraphEdgeProperties<T>> createRoutingGraph(
+    private Graph<Coordinate, RoutingGraphEdgeProperties<T>> mergedLinesToRoutingGraph(
             final Collection<LineString> lines,
             final List<LineString> nodedSegmentStrings,
             final Graph<Coordinate, T> completeGraph,
             final Map<Coordinate, Vertex<Coordinate, T>> coordinateToVertex) {
-        logger.info("Merging segment strings.");
-        final var mergedLines = mergeSegmentStrings(lines, nodedSegmentStrings);
 
+        final var mergedLines = mergeSegmentStrings(lines, nodedSegmentStrings);
+        final var routingGraph =
+                mergedLinesToRoutingGraph(completeGraph, coordinateToVertex, mergedLines);
+        removeDegreeTwoVertices(routingGraph);
+        return routingGraph;
+    }
+
+    @NotNull
+    private List<LineString> mergeSegmentStrings(
+            final Collection<LineString> lines, final List<LineString> nodedSegmentStrings) {
+        logger.info("Merging segment strings.");
+        final var lineMerger = new LineMerger();
+        lineMerger.add(nodedSegmentStrings);
+        //noinspection unchecked
+        return (List<LineString>) lineMerger.getMergedLineStrings();
+    }
+
+    @NotNull
+    private Graph<Coordinate, RoutingGraphEdgeProperties<T>> mergedLinesToRoutingGraph(
+            final Graph<Coordinate, T> completeGraph,
+            final Map<Coordinate, Vertex<Coordinate, T>> coordinateToVertex,
+            final List<LineString> mergedLines) {
         logger.info("Creating routing graph from {} merged lines.", mergedLines.size());
+
         final var routingGraph = new Graph<Coordinate, RoutingGraphEdgeProperties<T>>();
         for (final var line : mergedLines) {
             final var coordinates = line.getCoordinates();
-
-            assert (coordinates.length >= 2);
-
-            final var first = coordinateToVertex.get(coordinates[0]);
-            final var second = coordinateToVertex.get(coordinates[1]);
-            final var firstEdge = completeGraph.getEdge(first, second).orElseThrow();
-
-            final var last = coordinateToVertex.get(coordinates[coordinates.length - 1]);
-            final var secondLast = coordinateToVertex.get(coordinates[coordinates.length - 2]);
-            final var lastEdge = completeGraph.getEdge(last, secondLast).orElseThrow();
-
-            final var distance = line.getLength();
-
-            routingGraph.getOrAddVertex(first.getId(), first.getProperties());
-            routingGraph.getOrAddVertex(last.getId(), last.getProperties());
-
-            final var forwardsEdge = routingGraph.getOrAddDirectedEdge(first.getId(), last.getId());
-            if (forwardsEdge.getProperties() == null
-                    || forwardsEdge.getProperties().distance() > distance) {
-                forwardsEdge.setProperties(
-                        new RoutingGraphEdgeProperties<>(
-                                distance, second, firstEdge.getProperties()));
-            }
-
-            final var backwardsEdge =
-                    routingGraph.getOrAddDirectedEdge(last.getId(), first.getId());
-            if (backwardsEdge.getProperties() == null
-                    || backwardsEdge.getProperties().distance() > distance) {
-                backwardsEdge.setProperties(
-                        new RoutingGraphEdgeProperties<>(
-                                distance, secondLast, lastEdge.getProperties()));
-            }
+            insertRoutingEdges(completeGraph, coordinateToVertex, routingGraph, line, coordinates);
         }
         return routingGraph;
+    }
+
+    private void removeDegreeTwoVertices(
+            final Graph<Coordinate, RoutingGraphEdgeProperties<T>> routingGraph) {
+        new ArrayList<>(routingGraph.getVertices())
+                .stream()
+                        .filter(vertex -> vertex.degree() == 2)
+                        .forEach(vertex -> mergeEdgesAndRemoveVertex(vertex, routingGraph));
+    }
+
+    private void insertRoutingEdges(
+            final Graph<Coordinate, T> completeGraph,
+            final Map<Coordinate, Vertex<Coordinate, T>> coordinateToVertex,
+            final Graph<Coordinate, RoutingGraphEdgeProperties<T>> routingGraph,
+            final LineString line,
+            final Coordinate[] coordinates) {
+        final var first = coordinateToVertex.get(coordinates[0]);
+        final var second = coordinateToVertex.get(coordinates[1]);
+        final var firstEdge = completeGraph.getEdge(first, second).orElseThrow();
+
+        final var last = coordinateToVertex.get(coordinates[coordinates.length - 1]);
+        final var secondLast = coordinateToVertex.get(coordinates[coordinates.length - 2]);
+        final var lastEdge = completeGraph.getEdge(last, secondLast).orElseThrow();
+
+        // Special case: loop - skip for now
+        if (first.equals(last)) {
+            return;
+        }
+
+        final var distance = line.getLength();
+
+        routingGraph.getOrAddVertex(first.getId(), first.getProperties());
+        routingGraph.getOrAddVertex(last.getId(), last.getProperties());
+
+        final var forwardsEdge = routingGraph.getOrAddDirectedEdge(first.getId(), last.getId());
+        if (forwardsEdge.getProperties() == null
+                || forwardsEdge.getProperties().distance() > distance) {
+            forwardsEdge.setProperties(
+                    new RoutingGraphEdgeProperties<>(distance, second, firstEdge.getProperties()));
+        }
+
+        final var backwardsEdge = routingGraph.getOrAddDirectedEdge(last.getId(), first.getId());
+        if (backwardsEdge.getProperties() == null
+                || backwardsEdge.getProperties().distance() > distance) {
+            backwardsEdge.setProperties(
+                    new RoutingGraphEdgeProperties<>(
+                            distance, secondLast, lastEdge.getProperties()));
+        }
+    }
+
+    private void mergeEdgesAndRemoveVertex(
+            Vertex<Coordinate, RoutingGraphEdgeProperties<T>> vertex,
+            final Graph<Coordinate, RoutingGraphEdgeProperties<T>> routingGraph) {
+
+        final var edges =
+                vertex.getEdges().stream().map(Edge::getTwin).map(Optional::orElseThrow).toList();
+
+        final var edgeA = edges.get(0);
+        final var edgeB = edges.get(1);
+
+        // Add direct edges
+        routingGraph.getOrAddUndirectedEdge(
+                edgeA.getU(),
+                edgeB.getU(),
+                new RoutingGraphEdgeProperties<>(
+                        edgeA.getProperties().distance() + edgeB.getProperties().distance(),
+                        edgeA.getProperties().direction(),
+                        edgeA.getProperties().originalProperties()));
+
+        routingGraph.getOrAddUndirectedEdge(
+                edgeB.getU(),
+                edgeA.getU(),
+                new RoutingGraphEdgeProperties<>(
+                        edgeA.getProperties().distance() + edgeB.getProperties().distance(),
+                        edgeB.getProperties().direction(),
+                        edgeB.getProperties().originalProperties()));
+
+        // Remove old edges
+        Stream.concat(vertex.getEdges().stream(), Stream.of(edgeA, edgeB))
+                .forEach(routingGraph::removeEdge);
+
+        // Remove vertex
+        routingGraph.removeVertex(vertex);
     }
 
     private T userData(final Geometry geometry) {
@@ -246,14 +325,5 @@ public class LinesToRoutingGraphUtil<T> {
             return Comparator.comparingInt(x -> 0);
         }
         return Comparator.comparingDouble(priorityExtractor).reversed();
-    }
-
-    @NotNull
-    private static List<LineString> mergeSegmentStrings(
-            final Collection<LineString> lines, final List<LineString> nodedSegmentStrings) {
-        final var lineMerger = new LineMerger();
-        lineMerger.add(nodedSegmentStrings);
-        //noinspection unchecked
-        return (List<LineString>) lineMerger.getMergedLineStrings();
     }
 }

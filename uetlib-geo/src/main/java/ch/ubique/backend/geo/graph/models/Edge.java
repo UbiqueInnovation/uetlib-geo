@@ -1,9 +1,9 @@
 package ch.ubique.backend.geo.graph.models;
 
+import java.util.Optional;
+import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * @param <V> type of the vertex properties
@@ -33,8 +33,19 @@ public final class Edge<V, E> {
         return u;
     }
 
+    public Vertex<V, E> getFrom() {
+        return u;
+    }
+
     public Vertex<V, E> getV() {
         return v;
+    }
+
+    public Vertex<V, E> getOther(final long firstVertexId) {
+        if (u.getId() == firstVertexId) {
+            return v;
+        }
+        return u;
     }
 
     public long getId() {
@@ -48,11 +59,12 @@ public final class Edge<V, E> {
         return u;
     }
 
-    public Vertex<V, E> getOther(final long firstVertexId) {
-        if (u.getId() == firstVertexId) {
-            return v;
-        }
-        return u;
+    public Optional<Edge<V, E>> getTwin() {
+        return getTo().getEdges().stream().filter(e -> u.equals(e.v) && v.equals(e.u)).findFirst();
+    }
+
+    public Vertex<V, E> getTo() {
+        return v;
     }
 
     public boolean connects(long vertexId1, long vertexId2) {

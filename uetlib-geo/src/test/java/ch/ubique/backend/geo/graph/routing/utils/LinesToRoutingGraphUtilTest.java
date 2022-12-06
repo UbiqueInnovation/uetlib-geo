@@ -33,6 +33,9 @@ class LinesToRoutingGraphUtilTest {
         Assertions.assertTrue(
                 completeGraph.getDirectedEdges().stream()
                         .allMatch(e -> testInfo.equals(e.getProperties())));
+
+        Assertions.assertTrue(
+                graphs.routingGraph().getVertices().stream().allMatch(v -> v.degree() != 2));
     }
 
     @Test
@@ -69,6 +72,9 @@ class LinesToRoutingGraphUtilTest {
         Assertions.assertTrue(
                 routingGraph.getVertices().stream()
                         .allMatch(v -> Double.isNaN(v.getProperties().getZ())));
+
+        Assertions.assertTrue(
+                graphs.routingGraph().getVertices().stream().allMatch(v -> v.degree() != 2));
     }
 
     @Test
@@ -116,6 +122,8 @@ class LinesToRoutingGraphUtilTest {
         Assertions.assertTrue(
                 routingGraph.getVertices().stream()
                         .noneMatch(v -> Double.isNaN(v.getProperties().getZ())));
+        Assertions.assertTrue(
+                graphs.routingGraph().getVertices().stream().allMatch(v -> v.degree() != 2));
     }
 
     @Test
@@ -153,6 +161,8 @@ class LinesToRoutingGraphUtilTest {
 
         Assertions.assertEquals(2, graphs.routingGraph().getVertices().size());
         Assertions.assertEquals(2, graphs.routingGraph().getDirectedEdges().size());
+        Assertions.assertTrue(
+                graphs.routingGraph().getVertices().stream().allMatch(v -> v.degree() != 2));
     }
 
     @Test
@@ -190,11 +200,10 @@ class LinesToRoutingGraphUtilTest {
                 .forEach(System.out::println);
 
         Assertions.assertEquals(2, graphs.routingGraph().getVertices().size());
-        //        Assertions.assertEquals(2, graphs.routingGraph().getDirectedEdges().size());
-        //        Assertions.assertTrue(
-        //                graphs.routingGraph().getDirectedEdges().stream()
-        //                        .allMatch(e ->
-        // "SAC".equals(e.getProperties().originalProperties())));
+        Assertions.assertEquals(2, graphs.routingGraph().getDirectedEdges().size());
+
+        Assertions.assertTrue(
+                graphs.routingGraph().getVertices().stream().allMatch(v -> v.degree() != 2));
     }
 
     @Test
@@ -242,5 +251,8 @@ class LinesToRoutingGraphUtilTest {
         Assertions.assertTrue(
                 graphs.routingGraph().getDirectedEdges().stream()
                         .allMatch(e -> e.getProperties().originalProperties().equals("SAC")));
+
+        Assertions.assertTrue(
+                graphs.routingGraph().getVertices().stream().allMatch(v -> v.degree() != 2));
     }
 }

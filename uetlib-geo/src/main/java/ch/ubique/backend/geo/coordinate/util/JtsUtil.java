@@ -1,22 +1,30 @@
 package ch.ubique.backend.geo.coordinate.util;
 
 import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.IntStream;
+import javax.validation.constraints.NotNull;
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.builder.MissingInfoException;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineSegment;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.IntStream;
 
 public class JtsUtil {
     private static final Logger logger = LoggerFactory.getLogger(JtsUtil.class);
@@ -52,8 +60,9 @@ public class JtsUtil {
 
     public static CoordinateReferenceSystem getCrs(int srid) {
         if (srid == 0) {
-            throw new WrappedException(new MissingInfoException(
-                    "The Spatial Reference ID (SRID) is not set for the given geometry."));
+            throw new WrappedException(
+                    new MissingInfoException(
+                            "The Spatial Reference ID (SRID) is not set for the given geometry."));
         }
         try {
             if (srid == 4326) {
@@ -63,10 +72,16 @@ public class JtsUtil {
             }
             return CRS.decode("EPSG:" + srid);
         } catch (FactoryException e) {
-            throw new WrappedException(e); // rethrow as runtime exception. no way for caller to handle this
+            throw new WrappedException(
+                    e); // rethrow as runtime exception. no way for caller to handle this
         }
+    }
 
-
+    public static List<LineSegment> segments(final LineString lineString) {
+        final var coordinates = lineString.getCoordinates();
+        return IntStream.range(0, coordinates.length - 1)
+                .mapToObj(i -> new LineSegment(coordinates[i], coordinates[i + 1]))
+                .toList();
     }
 
     public static List<Geometry> getSimpleGeometries(Geometry geometry) {
