@@ -75,7 +75,7 @@ public abstract class BaseVectorTileImporter<T> extends BaseInputJob {
             // Generate vector tiles
             try {
                 logger.info("Generating and uploading tiles");
-                VectorTileGenerator.generateForSwitzerlandLv95(output);
+                VectorTileGenerator.generateTiles(output);
             } catch (ExecutionException e) {
                 logger.error("Generating vector tiles failed", e);
                 return JobRunState.ERROR;

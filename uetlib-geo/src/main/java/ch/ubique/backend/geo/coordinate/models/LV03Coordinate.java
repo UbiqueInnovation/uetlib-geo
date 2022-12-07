@@ -12,6 +12,7 @@ import jakarta.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import org.locationtech.jts.geom.Point;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Swiss coordinates (1903) <a href="https://epsg.io/21781">https://epsg.io/21781</a> Imprecise, use
@@ -84,6 +85,11 @@ public class LV03Coordinate implements Coordinate {
     @Override
     public int srid() {
         return LV03.srid();
+    }
+
+    @Override
+    public CoordinateReferenceSystem crs() {
+        return LV03.crs();
     }
 
     @Override

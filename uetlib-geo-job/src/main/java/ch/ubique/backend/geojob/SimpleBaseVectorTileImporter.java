@@ -7,7 +7,7 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import ch.ubique.backend.job.data.service.InputJobDataService;
-
+import java.io.IOException;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -23,7 +23,7 @@ public abstract class SimpleBaseVectorTileImporter extends BaseVectorTileImporte
 
     protected abstract VectorTileConfig config();
 
-    protected abstract void consumeTile(BinaryTile tile);
+    protected abstract void consumeTile(BinaryTile tile) throws IOException;
 
     @Override
     protected final Stream<VectorTileOutput> getOutputs(Collection<VectorTileElement> elements) {

@@ -23,6 +23,8 @@ import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.cs.AxisDirection;
+import org.opengis.referencing.cs.CoordinateSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,5 +121,19 @@ public class JtsUtil {
         }
 
         throw new UnfixableGeometryException(fixedValidator.getValidationError());
+    }
+
+    public static void throwIfCoordinateSystemNotEastNorth(final CoordinateReferenceSystem crs) {
+        final CoordinateSystem coordinateSystem = crs.getCoordinateSystem();
+
+        if (!coordinateSystem.getAxis(0).getDirection().equals(AxisDirection.EAST)) {
+            throw new UnsupportedOperationException(
+                    "Only coordinate systems with x-axis direction east are supported.");
+        }
+
+        if (!coordinateSystem.getAxis(1).getDirection().equals(AxisDirection.NORTH)) {
+            throw new UnsupportedOperationException(
+                    "Only coordinate systems with y-axis direction north are supported.");
+        }
     }
 }

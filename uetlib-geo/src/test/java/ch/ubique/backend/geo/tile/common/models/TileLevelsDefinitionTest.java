@@ -1,11 +1,10 @@
 package ch.ubique.backend.geo.tile.common.models;
 
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 class TileLevelsDefinitionTest {
 
@@ -72,9 +71,16 @@ class TileLevelsDefinitionTest {
 
     @Test
     void testCustomZoomLevel() {
-        final var gridInfo = SwissConstants.swissTileDefinition()
-                .onlyWithLevels(List.of(8, 9, 10, 11, 12))
-                .addLevel(new ZoomLevel(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 1000));
+        final var gridInfo =
+                SwissConstants.swissTileDefinition()
+                        .onlyWithLevels(List.of(8, 9, 10, 11, 12))
+                        .addLevel(
+                                new ZoomLevel(
+                                        Integer.MAX_VALUE,
+                                        Integer.MAX_VALUE,
+                                        Integer.MAX_VALUE,
+                                        1000,
+                                        1000));
 
         final var testTileInfo = new TileInfo(1, 1, gridInfo.getZoomLevel(12));
 

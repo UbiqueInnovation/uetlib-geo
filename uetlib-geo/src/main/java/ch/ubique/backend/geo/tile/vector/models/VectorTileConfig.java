@@ -1,11 +1,16 @@
 package ch.ubique.backend.geo.tile.vector.models;
 
+import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
+import ch.ubique.backend.geo.tile.common.constants.WorldConstants;
+import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-
-import java.util.*;
-
 
 public class VectorTileConfig {
 
@@ -17,28 +22,33 @@ public class VectorTileConfig {
 
     private Set<Integer> zoomLevels;
 
-    private VectorTileConfig(YAxisDirection yAxisDirection) {
+    private final TileLevelsDefinition tileLevelsDefinition;
+
+    private VectorTileConfig(
+            YAxisDirection yAxisDirection, final TileLevelsDefinition tileLevelsDefinition) {
         this.yAxisDirection = yAxisDirection;
+        this.tileLevelsDefinition = tileLevelsDefinition;
+    }
+
+    public static VectorTileConfig lv95() {
+        return new VectorTileConfig(YAxisDirection.DOWN, SwissConstants.swissTileDefinition());
+    }
+
+    public static VectorTileConfig wgs84() {
+        return new VectorTileConfig(YAxisDirection.DOWN, WorldConstants.tileDefinitions());
     }
 
     /**
-     * This sets {@linkplain VectorTileConfig#yAxisDirection} to {@link YAxisDirection#UP}, which is the
-     * correct direction, according to the vector tile standard.
-     * <p>
-     * Always use this method, for new layers, and when you do not need backwards compatibility.
+     * This sets {@linkplain VectorTileConfig#yAxisDirection} to {@link YAxisDirection#DOWN}, which
+     * is the wrong direction, but has been used for multiple layers already.
+     *
+     * <p>Use this method only if you need backwards compatibility.
+     *
+     * @deprecated Will be removed with 2.0.0
      */
-    public static VectorTileConfig correct() {
-        return new VectorTileConfig(YAxisDirection.DOWN);
-    }
-
-    /**
-     * This sets {@linkplain VectorTileConfig#yAxisDirection} to {@link YAxisDirection#DOWN}, which is the
-     * wrong direction, but has been used for multiple layers already.
-     * <p>
-     * Use this method only if you need backwards compatibility.
-     */
-    public static VectorTileConfig wrongDirection() {
-        return new VectorTileConfig(YAxisDirection.UP);
+    @Deprecated(forRemoval = true, since = "1.2.0")
+    public static VectorTileConfig lv95WrongDirection() {
+        return new VectorTileConfig(YAxisDirection.UP, SwissConstants.swissTileDefinition());
     }
 
     public VectorTileConfig setMaxElementsPerTile(int maxElementsPerTile) {
@@ -51,17 +61,13 @@ public class VectorTileConfig {
      * the maximum level we never limit the allowed number of elements, so we never miss any
      * elements.
      */
-    public int getMaxElementsPerTile(int zoomLevel) {
+    public Optional<Integer> getLimit(int zoomLevel) {
         final var isMaxZoomLevel = zoomLevels.stream().allMatch(level -> zoomLevel >= level);
-        if (isMaxZoomLevel) {
-            return -1;
+        if (isMaxZoomLevel || maxElementsPerTile < 0) {
+            return Optional.empty();
         } else {
-            return this.maxElementsPerTile;
+            return Optional.of(this.maxElementsPerTile);
         }
-    }
-
-    public boolean limitElementsPerTile(int zoomLevel) {
-        return this.getMaxElementsPerTile(zoomLevel) >= 0;
     }
 
     public boolean simplify() {
@@ -105,17 +111,21 @@ public class VectorTileConfig {
 
     /**
      * All vertices in the simplified geometry will be within this distance of the original geometry
-     * (in output coordinates on of the vector tile, the output coordinates are between 0 and extent).
-     * The tolerance value must be non-negative. A tolerance value of zero is effectively a no-op.
+     * (in output coordinates on of the vector tile, the output coordinates are between 0 and
+     * extent). The tolerance value must be non-negative. A tolerance value of zero is effectively a
+     * no-op.
      */
     public VectorTileConfig setSimplifyTolerance(double simplifyTolerance) {
         this.simplifyTolerance = simplifyTolerance;
         return this;
     }
 
-
     public double simplifyTolerance() {
         return simplifyTolerance;
+    }
+
+    public TileLevelsDefinition getTileLevelsDefinition() {
+        return tileLevelsDefinition;
     }
 
     @Override

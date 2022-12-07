@@ -12,6 +12,7 @@ import jakarta.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import org.locationtech.jts.geom.Point;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Swiss coordinates (1995) <a href="https://epsg.io/2056">https://epsg.io/2056</a> Most recent
@@ -84,6 +85,11 @@ public class LV95Coordinate implements Coordinate {
     @Override
     public int srid() {
         return LV95.srid();
+    }
+
+    @Override
+    public CoordinateReferenceSystem crs() {
+        return LV95.crs();
     }
 
     @Override
