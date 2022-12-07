@@ -8,12 +8,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import org.locationtech.jts.geom.Point;
 
-/** Swiss coordinates (1995) https://epsg.io/2056 Most recent coordinate system for Switzerland */
+/**
+ * Swiss coordinates (1995) <a href="https://epsg.io/2056">https://epsg.io/2056</a> Most recent
+ * coordinate system for Switzerland
+ */
 public class LV95Coordinate implements Coordinate {
 
     // For equality testing
@@ -31,15 +34,15 @@ public class LV95Coordinate implements Coordinate {
     @JsonProperty
     private Double elevation;
 
-    public LV95Coordinate(double east, double north) {
+    public LV95Coordinate(final double east, final double north) {
         this(east, north, null);
     }
 
     @JsonCreator
     public LV95Coordinate(
-            @JsonProperty("east") double east,
-            @JsonProperty("north") double north,
-            @JsonProperty("elevation") Double elevation) {
+            @JsonProperty("east") final double east,
+            @JsonProperty("north") final double north,
+            @JsonProperty("elevation") final Double elevation) {
         this.east = east;
         this.north = north;
         this.elevation = elevation;
@@ -49,7 +52,7 @@ public class LV95Coordinate implements Coordinate {
         return east;
     }
 
-    public LV95Coordinate setEast(double east) {
+    public LV95Coordinate setEast(final double east) {
         this.east = east;
         return this;
     }
@@ -58,7 +61,7 @@ public class LV95Coordinate implements Coordinate {
         return north;
     }
 
-    public LV95Coordinate setNorth(double north) {
+    public LV95Coordinate setNorth(final double north) {
         this.north = north;
         return this;
     }
@@ -68,7 +71,7 @@ public class LV95Coordinate implements Coordinate {
         return elevation;
     }
 
-    public LV95Coordinate setElevation(Double elevation) {
+    public LV95Coordinate setElevation(final Double elevation) {
         this.elevation = elevation;
         return this;
     }
@@ -94,7 +97,7 @@ public class LV95Coordinate implements Coordinate {
     }
 
     @Override
-    public double distanceTo(Coordinate other) {
+    public double distanceTo(final Coordinate other) {
         if (other instanceof LV95Coordinate otherLv95) {
 
             if (elevation == null || otherLv95.elevation == null) {
@@ -110,7 +113,7 @@ public class LV95Coordinate implements Coordinate {
     }
 
     @Override
-    public double flatDistanceTo(Coordinate other) {
+    public double flatDistanceTo(final Coordinate other) {
         if (other instanceof LV95Coordinate otherLv95) {
             return sqrt(pow(east - otherLv95.east, 2) + pow(north - otherLv95.north, 2));
         }
@@ -124,7 +127,7 @@ public class LV95Coordinate implements Coordinate {
                 "LV95(east=%,.2f, north=%,.2f, elevation=%,.1f)", east, north, elevation);
     }
 
-    public boolean equalsExact(LV95Coordinate o) {
+    public boolean equalsExact(final LV95Coordinate o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -134,11 +137,11 @@ public class LV95Coordinate implements Coordinate {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LV95Coordinate that = (LV95Coordinate) o;
+        final LV95Coordinate that = (LV95Coordinate) o;
 
         if (Math.abs(that.east - east) > EPSILON) return false;
         if (Math.abs(that.north - north) > EPSILON) return false;
