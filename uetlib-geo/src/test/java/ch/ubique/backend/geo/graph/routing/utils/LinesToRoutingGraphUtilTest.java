@@ -253,6 +253,13 @@ class LinesToRoutingGraphUtilTest {
                         .allMatch(e -> e.getProperties().originalProperties().equals("SAC")));
 
         Assertions.assertTrue(
-                graphs.routingGraph().getVertices().stream().allMatch(v -> v.degree() != 2));
+                graphs.routingGraph().getVertices().stream()
+                        .allMatch(
+                                v ->
+                                        graphs.completeGraph()
+                                                        .getVertex(v.getId())
+                                                        .orElseThrow()
+                                                        .degree()
+                                                != 2));
     }
 }
