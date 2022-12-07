@@ -4,11 +4,16 @@ import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
 import ch.ubique.backend.geo.tile.raster.models.RasterTile;
-import org.jetbrains.annotations.NotNull;
-
+import jakarta.validation.constraints.NotNull;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 /**
