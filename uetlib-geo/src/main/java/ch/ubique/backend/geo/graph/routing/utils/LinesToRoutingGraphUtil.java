@@ -237,11 +237,12 @@ public class LinesToRoutingGraphUtil<T> {
                 .stream()
                         .filter(
                                 vertex ->
-                                        completeGraph
-                                                        .getVertex(vertex.getId())
-                                                        .orElseThrow()
-                                                        .degree()
-                                                == 2)
+                                        vertex.degree() > 1
+                                                && completeGraph
+                                                                .getVertex(vertex.getId())
+                                                                .orElseThrow()
+                                                                .degree()
+                                                        == 2)
                         .forEach(vertex -> mergeEdgesAndRemoveVertex(vertex, routingGraph));
     }
 
@@ -290,7 +291,10 @@ public class LinesToRoutingGraphUtil<T> {
             final Graph<Coordinate, RoutingGraphEdgeProperties<T>> routingGraph) {
 
         if (vertex.degree() != 2) {
-            throw new IllegalArgumentException("You need to pass a vertex of degree 2.");
+            logger.warn(
+                    "You need to pass a vertex of degree 2. Got vertex of degree {}",
+                    vertex.degree());
+            return;
         }
 
         final var edges =
