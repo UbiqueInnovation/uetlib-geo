@@ -3,16 +3,23 @@ package ch.ubique.backend.geo.tile.raster.utils;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.raster.models.RasterTile;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 
 @Disabled("For local testing only")
 class RasterTileGeneratorTest {
@@ -25,21 +32,22 @@ class RasterTileGeneratorTest {
         final var generatedTiles = new HashSet<TileInfo>();
         final var queriedSourceTiles = new HashSet<TileInfo>();
 
-        final var generator = new RasterTileGenerator(tileLevelsDefinition, sourceTileSize, 256) {
-            @Override
-            protected void onTileGenerated(RasterTile rasterTile) {
-                Assertions.assertFalse(generatedTiles.contains(rasterTile.tileInfo()));
-                generatedTiles.add(rasterTile.tileInfo());
-                writeToFile(rasterTile);
-            }
+        final var generator =
+                new RasterTileGenerator(tileLevelsDefinition, sourceTileSize, sourceTileSize, 256) {
+                    @Override
+                    protected RasterTile getSourceTile(TileInfo tileInfo) {
+                        Assertions.assertFalse(queriedSourceTiles.contains(tileInfo));
+                        queriedSourceTiles.add(tileInfo);
+                        return tileWithRandomColor(tileInfo);
+                    }
 
-            @Override
-            protected RasterTile getSourceTile(TileInfo tileInfo) {
-                Assertions.assertFalse(queriedSourceTiles.contains(tileInfo));
-                queriedSourceTiles.add(tileInfo);
-                return tileWithRandomColor(tileInfo);
-            }
-        };
+                    @Override
+                    protected void onTileGenerated(RasterTile rasterTile) {
+                        Assertions.assertFalse(generatedTiles.contains(rasterTile.tileInfo()));
+                        generatedTiles.add(rasterTile.tileInfo());
+                        writeToFile(rasterTile);
+                    }
+                };
 
         generator.generateTiles();
 
@@ -58,17 +66,19 @@ class RasterTileGeneratorTest {
 
         final var outputResolution = 512;
 
-        final var generator = new RasterTileGenerator(tileLevelsDefinition, sourceTileSize, outputResolution) {
-            @Override
-            protected void onTileGenerated(RasterTile rasterTile) {
-                generatedTiles.add(rasterTile);
-            }
+        final var generator =
+                new RasterTileGenerator(
+                        tileLevelsDefinition, sourceTileSize, sourceTileSize, outputResolution) {
+                    @Override
+                    protected RasterTile getSourceTile(TileInfo tileInfo) {
+                        return tileWithRandomColor(tileInfo);
+                    }
 
-            @Override
-            protected RasterTile getSourceTile(TileInfo tileInfo) {
-                return tileWithRandomColor(tileInfo);
-            }
-        };
+                    @Override
+                    protected void onTileGenerated(RasterTile rasterTile) {
+                        generatedTiles.add(rasterTile);
+                    }
+                };
 
         generator.generateTiles();
 

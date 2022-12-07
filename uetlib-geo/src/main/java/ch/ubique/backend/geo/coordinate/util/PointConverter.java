@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.coordinate.util;
 
+import ch.ubique.backend.geo.coordinate.models.Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
@@ -16,18 +17,16 @@ public class PointConverter {
         return coordinates.stream().map(c -> toPoint(cls, c)).collect(Collectors.toList());
     }
 
-    public static <P extends Point<P>> P toPoint(Class<P> cls, LV95Coordinate coordinate) {
-        return coordinate
-                .getOptionalElevation()
-                .map(
-                        elevation ->
-                                Point.newInstance(
-                                        cls,
-                                        coordinate.getEast(),
-                                        coordinate.getNorth(),
-                                        elevation))
-                .orElseGet(
-                        () -> Point.newInstance(cls, coordinate.getEast(), coordinate.getNorth()));
+    public static <P extends Point<P>> P toPoint(Class<P> cls, Coordinate coordinate) {
+        return toPoint(cls, coordinate.toJts());
+    }
+
+    public static <P extends Point<P>> P toPoint(
+            Class<P> cls, org.locationtech.jts.geom.Coordinate coordinate) {
+        if (Double.isNaN(coordinate.getZ())) {
+            return Point.newInstance(cls, coordinate.getX(), coordinate.getY());
+        }
+        return Point.newInstance(cls, coordinate.getX(), coordinate.getY(), coordinate.getZ());
     }
 
     public static <P extends Point<P>> List<LV95Coordinate> toLv95Coordinate(List<P> points) {

@@ -1,20 +1,11 @@
 package ch.ubique.backend.geo.tile.vector.models;
 
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
-import org.locationtech.jts.geom.Envelope;
-
-import java.util.ArrayList;
 import java.util.Collection;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 
 public record Tile(
-        TileInfo tileInfo,
-        Envelope boundingBox,
-        Collection<VectorTileElement> elements
-) {
-
-    public Tile(TileInfo tileInfo, Envelope boundingBox) {
-        this(tileInfo, boundingBox, new ArrayList<>());
-    }
+        TileInfo tileInfo, ReferencedEnvelope boundingBox, Collection<VectorTileElement> elements) {
 
     @Override
     public boolean equals(Object o) {

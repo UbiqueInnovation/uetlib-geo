@@ -1,6 +1,8 @@
 package ch.ubique.backend.geo.tile.common.models;
 
-import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
+import ch.ubique.backend.geo.coordinate.models.Coordinate;
+import ch.ubique.backend.geo.coordinate.util.JtsUtil;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -9,29 +11,21 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Envelope;
 
 /**
  * @param origin Origin for all zoom levels
- * @param yAxisDirection Y-Axis direction
  * @param zoomLevels Definition of all available zoom levels
  * @param srid Spatial reference identifier
  */
-public record TileLevelsDefinition(
-        LV95Coordinate origin,
-        YAxisDirection yAxisDirection,
-        List<ZoomLevel> zoomLevels,
-        int srid) {
+public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels, int srid) {
 
-    public TileLevelsDefinition(
-            LV95Coordinate origin,
-            YAxisDirection yAxisDirection,
-            List<ZoomLevel> zoomLevels,
-            int srid) {
+    public TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels, int srid) {
         if (zoomLevels == null || zoomLevels.isEmpty()) {
             throw new IllegalArgumentException("Zoom levels are not allowed to be null or empty");
         }
         this.origin = origin;
-        this.yAxisDirection = yAxisDirection;
         this.zoomLevels =
                 zoomLevels.stream()
                         .distinct()
@@ -74,12 +68,14 @@ public record TileLevelsDefinition(
         return Optional.of(zoomLevels.get(index));
     }
 
-    /** Return given zoom level object, returns Optional.empty() if level does not exist */
-    public ZoomLevel getZoomLevel(int level) {
-        return zoomLevels.stream()
-                .filter(zoomLevel -> zoomLevel.level() == level)
-                .findAny()
-                .orElse(null);
+    public TileLevelsDefinition withMaxLevel(int maxLevel) {
+        return new TileLevelsDefinition(
+                origin, zoomLevels.stream().filter(z -> z.level() <= maxLevel).toList(), srid);
+    }
+
+    public TileLevelsDefinition withMinLevel(int minLevel) {
+        return new TileLevelsDefinition(
+                origin, zoomLevels.stream().filter(z -> z.level() >= minLevel).toList(), srid);
     }
 
     public boolean isMin(ZoomLevel zoomLevel) {
@@ -94,48 +90,59 @@ public record TileLevelsDefinition(
         return onlyWithLevels(List.of(levels));
     }
 
-    public TileLevelsDefinition withMaxLevel(int maxLevel) {
+    public TileLevelsDefinition onlyWithLevels(Collection<Integer> levels) {
         return new TileLevelsDefinition(
-                origin,
-                yAxisDirection,
-                zoomLevels.stream().filter(z -> z.level() <= maxLevel).toList(),
-                srid);
+                origin, zoomLevels.stream().filter(z -> levels.contains(z.level())).toList(), srid);
     }
 
-    public TileLevelsDefinition withMinLevel(int minLevel) {
-        return new TileLevelsDefinition(
-                origin,
-                yAxisDirection,
-                zoomLevels.stream().filter(z -> z.level() >= minLevel).toList(),
-                srid);
+    public TileLevelsDefinition addLevel(ZoomLevel zoomLevel) {
+        final var combinedLevels = new ArrayList<>(zoomLevels);
+        combinedLevels.add(zoomLevel);
+        return new TileLevelsDefinition(origin, combinedLevels, srid);
     }
 
     public TileLevelsDefinition withMinMaxLevel(int minLevel, int maxLevel) {
         return new TileLevelsDefinition(
                 origin,
-                yAxisDirection,
                 zoomLevels.stream()
                         .filter(z -> z.level() >= minLevel && z.level() <= maxLevel)
                         .toList(),
                 srid);
     }
 
-    public TileLevelsDefinition onlyWithLevels(Collection<Integer> levels) {
-        return new TileLevelsDefinition(
-                origin,
-                yAxisDirection,
-                zoomLevels.stream().filter(z -> levels.contains(z.level())).toList(),
-                srid);
-    }
-
-    public TileLevelsDefinition addLevel(ZoomLevel zoomLevel) {
-        final var combinedLevels = new ArrayList<>(zoomLevels);
-        combinedLevels.add(zoomLevel);
-        return new TileLevelsDefinition(origin, yAxisDirection, combinedLevels, srid);
-    }
-
     public long numberOfTiles() {
         return zoomLevels.stream().mapToLong(ZoomLevel::numberOfTiles).sum();
+    }
+
+    public ReferencedEnvelope envelopeOf(final int level, final int x, final int y) {
+        final var crs = origin.crs();
+        final var originJts = origin.toJts();
+        final var zoomLevel = getZoomLevel(level);
+
+        // We expect the coordinate system to be oriented (east, north)
+        JtsUtil.throwIfCoordinateSystemNotEastNorth(crs);
+
+        final double tileWidth = zoomLevel.tileWidth();
+        final double tileHeight = zoomLevel.tileHeight();
+
+        final var xMin = originJts.x + x * tileWidth;
+        final var xMax = xMin + tileWidth;
+
+        // The tile origin is top left, the coordinate system increases in y from bottom to top
+        final var yMax = originJts.y - y * tileHeight;
+        final var yMin = yMax - tileHeight;
+
+        return new ReferencedEnvelope(new Envelope(xMin, xMax, yMin, yMax), crs);
+    }
+
+    /** Return given zoom level object */
+    @NotNull
+    public ZoomLevel getZoomLevel(int level) {
+        return getZoomLevelOptional(level).orElseThrow();
+    }
+
+    public Optional<ZoomLevel> getZoomLevelOptional(int level) {
+        return zoomLevels.stream().filter(zoomLevel -> zoomLevel.level() == level).findAny();
     }
 
     /**

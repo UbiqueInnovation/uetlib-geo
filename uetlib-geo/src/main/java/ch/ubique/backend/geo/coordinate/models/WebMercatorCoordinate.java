@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.lang3.NotImplementedException;
 import org.locationtech.jts.geom.Point;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /** <a href="https://epsg.io/3857">https://epsg.io/3857</a> Pseudo-Mercator, Web Mercator */
 public class WebMercatorCoordinate implements Coordinate {
@@ -47,6 +48,11 @@ public class WebMercatorCoordinate implements Coordinate {
     @Override
     public int srid() {
         return WEB_MERCATOR.srid();
+    }
+
+    @Override
+    public CoordinateReferenceSystem crs() {
+        return WEB_MERCATOR.crs();
     }
 
     @Override

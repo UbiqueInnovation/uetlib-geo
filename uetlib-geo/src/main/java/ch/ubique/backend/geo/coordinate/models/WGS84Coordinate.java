@@ -15,6 +15,7 @@ import jakarta.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import org.locationtech.jts.geom.Point;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * World Geodetic System 1984 (also known as WGS84, WGS 1984, EPSG:4326). Most common coordinate
@@ -101,6 +102,11 @@ public class WGS84Coordinate implements Coordinate {
     @Override
     public int srid() {
         return WGS84.srid();
+    }
+
+    @Override
+    public CoordinateReferenceSystem crs() {
+        return WGS84.crs();
     }
 
     @Override

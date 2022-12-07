@@ -30,18 +30,28 @@ public abstract class RasterTileGenerator {
 
     private final double[] customEmptyPixelValue;
 
-    protected RasterTileGenerator(final TileLevelsDefinition levelsDefinition, final double sourceTileWidth, int outputResolution) {
-        this(levelsDefinition, sourceTileWidth, outputResolution, null);
+    protected RasterTileGenerator(
+            final TileLevelsDefinition levelsDefinition,
+            final double sourceTileWidth,
+            final double sourceTileHeight,
+            int outputResolution) {
+        this(levelsDefinition, sourceTileWidth, sourceTileHeight, outputResolution, null);
     }
 
-    protected RasterTileGenerator(final TileLevelsDefinition levelsDefinition, final double sourceTileWidth, int outputResolution, double[] customEmptyPixelValue) {
+    protected RasterTileGenerator(
+            final TileLevelsDefinition levelsDefinition,
+            final double sourceTileWidth,
+            final double sourceTileHeight,
+            int outputResolution,
+            double[] customEmptyPixelValue) {
         this.outputResolution = outputResolution;
         this.sourceTileWidth = sourceTileWidth;
         this.customEmptyPixelValue = customEmptyPixelValue;
 
         // Add a "fake" zoom level for the input.
         // We set the level to Integer.MAX_VALUE, to ensure the level is treated as the base case.
-        final var sourceZoomLevel = ZoomLevel.unbounded(Integer.MAX_VALUE, sourceTileWidth);
+        final var sourceZoomLevel =
+                ZoomLevel.unbounded(Integer.MAX_VALUE, sourceTileWidth, sourceTileHeight);
         this.levelsDefinition = levelsDefinition.addLevel(sourceZoomLevel);
     }
 
@@ -197,16 +207,23 @@ public abstract class RasterTileGenerator {
             // Calculate scaling and where tile needs to go
             final var xOffset = (int) Math.round((childInfo.x() * childTileWidth - currentInfo.x() * currentTileWidth) / currentTileWidth * outputResolution);
             final var xNextOffset = (int) Math.round(((childInfo.x() + 1) * childTileWidth - currentInfo.x() * currentTileWidth) / currentTileWidth * outputResolution);
-            final var yOffsetDown = (int) Math.round((childInfo.y() * childTileWidth - currentInfo.y() * currentTileWidth) / currentTileWidth * outputResolution);
-            final var yNextOffsetDown = (int) Math.round(((childInfo.y() + 1) * childTileWidth - currentInfo.y() * currentTileWidth) / currentTileWidth * outputResolution);
+            final var yOffset =
+                    (int)
+                            Math.round(
+                                    (childInfo.y() * childTileWidth
+                                                    - currentInfo.y() * currentTileWidth)
+                                            / currentTileWidth
+                                            * outputResolution);
+            final var yNextOffset =
+                    (int)
+                            Math.round(
+                                    ((childInfo.y() + 1) * childTileWidth
+                                                    - currentInfo.y() * currentTileWidth)
+                                            / currentTileWidth
+                                            * outputResolution);
 
             final var scaledWidth = xNextOffset - xOffset;
-            final var scaledHeight = yNextOffsetDown - yOffsetDown;
-
-            final var yOffset = switch (levelsDefinition.yAxisDirection()) {
-                case DOWN -> yOffsetDown;
-                case UP -> outputResolution - scaledHeight - yOffsetDown;
-            };
+            final var scaledHeight = yNextOffset - yOffset;
 
             final var leftCrop = Math.max(0, -xOffset);
             final var topCrop = Math.max(0, -yOffset);

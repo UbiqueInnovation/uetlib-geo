@@ -1,8 +1,12 @@
 package ch.ubique.backend.geo.coordinate.models;
 
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
 public interface Coordinate {
 
     int srid();
+
+    CoordinateReferenceSystem crs();
 
     org.locationtech.jts.geom.Coordinate toJts();
 
@@ -11,6 +15,4 @@ public interface Coordinate {
     double distanceTo(Coordinate other);
 
     double flatDistanceTo(Coordinate other);
-
-
 }
