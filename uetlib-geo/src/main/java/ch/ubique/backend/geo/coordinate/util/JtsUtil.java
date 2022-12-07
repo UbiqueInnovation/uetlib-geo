@@ -1,11 +1,11 @@
 package ch.ubique.backend.geo.coordinate.util;
 
 import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
+import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
-import javax.validation.constraints.NotNull;
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.builder.MissingInfoException;

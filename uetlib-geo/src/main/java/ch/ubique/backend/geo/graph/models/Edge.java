@@ -1,7 +1,7 @@
 package ch.ubique.backend.geo.graph.models;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
-import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -68,7 +68,8 @@ public final class Edge<V, E> {
     }
 
     public boolean connects(long vertexId1, long vertexId2) {
-        return (vertexId1 == u.getId() && vertexId2 == v.getId()) || (vertexId1 == v.getId() && vertexId2 == u.getId());
+        return (vertexId1 == u.getId() && vertexId2 == v.getId())
+                || (vertexId1 == v.getId() && vertexId2 == u.getId());
     }
 
     public boolean connects(Vertex<V, E> a, Vertex<V, E> b) {
