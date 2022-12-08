@@ -104,7 +104,8 @@ public class JtsUtil {
         return getSimpleGeometries(geometry).iterator();
     }
 
-    public static Geometry tryToGetValidGeometry(final Geometry geometry)
+    @NotNull
+    public static Geometry tryToGetValidGeometry(@NotNull final Geometry geometry)
             throws UnfixableGeometryException {
         final var validator = new IsValidOp(geometry);
 

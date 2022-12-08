@@ -1,10 +1,11 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
+import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import java.util.Random;
 import java.util.stream.IntStream;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Envelope;
@@ -18,6 +19,7 @@ class TileGeometryUtilsTest {
         final var north = 1200000;
         final var extend = 1000;
         final var tileSize = 100;
+        final var config = VectorTileConfig.lv95().setExtent(extend);
         final var tileEnvelope = new Envelope(east, east + tileSize, north, north + tileSize);
 
         final var random = new Random();
@@ -32,10 +34,9 @@ class TileGeometryUtilsTest {
             for (final var direction : YAxisDirection.values()) {
                 final var actual =
                         TileGeometryUtils.getTileGeometry(
-                                JtsConverter.LV95.toJtsPoint(testCoordinate),
-                                tileEnvelope,
-                                extend,
-                                direction);
+                                testCoordinate.toJtsPoint(),
+                                new ReferencedEnvelope(tileEnvelope, testCoordinate.crs()),
+                                config);
                 Assertions.assertTrue(actual.isPresent());
                 Assertions.assertEquals(
                         testCoordinate.getOptionalElevation().orElse(null),

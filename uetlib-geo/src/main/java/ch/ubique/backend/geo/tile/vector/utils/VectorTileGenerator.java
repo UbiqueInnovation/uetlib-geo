@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.opengis.geometry.MismatchedReferenceSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,21 +41,8 @@ public class VectorTileGenerator {
     }
 
     public void generateTiles() throws ExecutionException, InterruptedException {
-        checkSRIDs();
         for (final var level : output.config().getZoomLevels()) {
             generateTilesForLevel(level);
-        }
-    }
-
-    private void checkSRIDs() {
-        final var expectedSrid = output.config().getTileLevelsDefinition().srid();
-        for (final var element : output.elements()) {
-            if (element.geometry().getSRID() != expectedSrid) {
-                throw new MismatchedReferenceSystemException(
-                        String.format(
-                                "The elements (%s) srid (%d) does not match the grids srid (%d)",
-                                element, element.geometry().getSRID(), expectedSrid));
-            }
         }
     }
 

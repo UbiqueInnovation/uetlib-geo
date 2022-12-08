@@ -12,22 +12,6 @@
     <artifactId>backend-jvm-lib-geo</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-        <org.geotools.version>27.2</org.geotools.version>
-    </properties>
-
-    <repositories>
-        <repository>
-            <id>ECC</id>
-            <url>https://maven.ecc.no/releases</url>
-        </repository>
-        <repository>
-            <id>osgeo</id>
-            <name>Open Source Geospatial Foundation Repository</name>
-            <url>https://repo.osgeo.org/repository/release/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>ch.ubique</groupId>
@@ -40,6 +24,11 @@
             <artifactId>backend-jvm-lib-storage</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <artifactId>jts-core</artifactId>
+            <groupId>org.locationtech.jts</groupId>
+            <version>1.19.0</version>
         </dependency>
 
         <dependency>
@@ -78,4 +67,20 @@
             <version>${org.geotools.version}</version>
         </dependency>
     </dependencies>
+
+    <properties>
+        <org.geotools.version>28-RC</org.geotools.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>ECC</id>
+            <url>https://maven.ecc.no/releases</url>
+        </repository>
+        <repository>
+            <id>osgeo</id>
+            <name>Open Source Geospatial Foundation Repository</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+        </repository>
+    </repositories>
 </project>

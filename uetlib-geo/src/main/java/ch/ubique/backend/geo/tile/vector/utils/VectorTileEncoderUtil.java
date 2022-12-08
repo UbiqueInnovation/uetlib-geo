@@ -6,6 +6,8 @@ import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.Tile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
+import jakarta.validation.constraints.NotNull;
+import java.util.Optional;
 import no.ecc.vectortile.VectorTileEncoder;
 import org.locationtech.jts.geom.Geometry;
 import org.slf4j.Logger;
@@ -28,67 +30,76 @@ public final class VectorTileEncoderUtil {
     private VectorTileEncoderUtil(Tile tile, VectorTileConfig config) {
         this.tile = tile;
         this.config = config;
-        this.encoder = new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
+        this.encoder =
+                new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
     }
 
-    public byte[] encode()  {
+    public byte[] encode() {
         for (final var element : tile.elements()) {
-            encodeElement(element);
+            final var geometry = getTileGeometry(element);
+            final var tags = VectorTileElementUtils.getFinalTags(element);
+            if (geometry.isEmpty()) {
+                logger.warn("Skipping {}, since no tile geometry could be created", element);
+            } else {
+                encoder.addFeature(element.layer(), tags, geometry.get(), element.id());
+            }
         }
 
         return encoder.encode();
     }
 
-    private void encodeElement(VectorTileElement element) {
+    private Optional<Geometry> getTileGeometry(VectorTileElement element) {
 
         if (!element.showElement(tile.tileInfo().level())) {
-            return;
+            return Optional.empty();
         }
 
-        final var boundingBox = tile.boundingBox();
-        final var layer = element.layer();
-        final long id = element.id();
-        final var tags = VectorTileElementUtils.getFinalTags(element);
+        return validateGeometry(element.geometry())
+                .flatMap(this::convertToTileCoordinates)
+                .flatMap(this::validateGeometry)
+                .map(this::simplifyIfNeeded)
+                .map(this::smoothingIfNeeded)
+                .flatMap(this::validateGeometry);
+    }
 
-        final Geometry geometry;
+    private Optional<Geometry> validateGeometry(@NotNull final Geometry geometry) {
+        if (geometry.isValid()) {
+            return Optional.of(geometry);
+        }
         try {
-            geometry = JtsUtil.tryToGetValidGeometry(element.geometry());
+            return emptyIfGeometryEmpty(JtsUtil.tryToGetValidGeometry(geometry));
         } catch (UnfixableGeometryException e) {
-            logger.warn("Element geometry for {} not valid and could not be fixed", tags, e);
-            return;
+            logger.warn("Geometry is not valid and could not be fixed", e);
+            return Optional.empty();
         }
+    }
 
-        if (geometry.isEmpty()) {
-            logger.warn("Geometry empty, going to skip it.");
-            return;
-        }
-
-        final var tileGeometryMaybe =
-                TileGeometryUtils.getTileGeometry(
-                        geometry, boundingBox, config.getExtent(), config.getYAxisDirection());
-        if (tileGeometryMaybe.isEmpty()) {
-            logger.warn("Could not get tile geometry for {}", tags);
-            return;
-        }
-
-        final Geometry tileGeometry;
-        try {
-            tileGeometry = JtsUtil.tryToGetValidGeometry(tileGeometryMaybe.get());
-        } catch (UnfixableGeometryException e) {
-            logger.warn("Tile geometry for {} not valid and could not be fixed", tags, e);
-            return;
-        }
-
+    private Optional<Geometry> convertToTileCoordinates(@NotNull final Geometry geometry) {
+        final var tileGeometry =
+                TileGeometryUtils.getTileGeometry(geometry, tile.boundingBox(), config);
         if (tileGeometry.isEmpty()) {
-            logger.warn("Tile geometry empty, going to skip it.");
-            return;
+            logger.warn("Could not convert geometry to tile coordinates");
         }
+        return tileGeometry;
+    }
 
-        final var outputGeometry =
-                config.simplify()
-                        ? SimplifyGeometryUtils.simplify(tileGeometry, config.simplifyTolerance())
-                        : tileGeometry;
+    private Geometry simplifyIfNeeded(@NotNull final Geometry geometry) {
+        return config.getSimplifyTolerance()
+                .map(tolerance -> SimplifyGeometryUtils.simplify(geometry, tolerance))
+                .orElse(geometry);
+    }
 
-        encoder.addFeature(layer, tags, outputGeometry, id);
+    private Geometry smoothingIfNeeded(@NotNull final Geometry geometry) {
+        return config.getSmoothing()
+                .map(alpha -> SimplifyGeometryUtils.smooth(geometry, alpha))
+                .orElse(geometry);
+    }
+
+    private Optional<Geometry> emptyIfGeometryEmpty(@NotNull final Geometry geometry) {
+        if (geometry.isEmpty()) {
+            logger.warn("The geometry is empty.");
+            return Optional.empty();
+        }
+        return Optional.of(geometry);
     }
 }
