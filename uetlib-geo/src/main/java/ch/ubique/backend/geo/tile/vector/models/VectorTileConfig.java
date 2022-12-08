@@ -14,8 +14,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class VectorTileConfig {
 
-    private int maxElementsPerTile = -1;
-    private double simplifyTolerance = 0;
+    private Integer maxElementsPerTile;
+    private Double simplifyTolerance;
+    private Double smoothing;
     private int clipBuffer = 0;
     private int extent = 4096;
     private final YAxisDirection yAxisDirection;
@@ -52,30 +53,11 @@ public class VectorTileConfig {
     }
 
     public VectorTileConfig setMaxElementsPerTile(int maxElementsPerTile) {
+        if (maxElementsPerTile <= 0) {
+            throw new IllegalArgumentException("The limit needs to be positive.");
+        }
         this.maxElementsPerTile = maxElementsPerTile;
         return this;
-    }
-
-    /**
-     * Returns the maximum allowed elements per tile. This depends on the zoomlevel, meaning that on
-     * the maximum level we never limit the allowed number of elements, so we never miss any
-     * elements.
-     */
-    public Optional<Integer> getLimit(int zoomLevel) {
-        final var isMaxZoomLevel = zoomLevels.stream().allMatch(level -> zoomLevel >= level);
-        if (isMaxZoomLevel || maxElementsPerTile < 0) {
-            return Optional.empty();
-        } else {
-            return Optional.of(this.maxElementsPerTile);
-        }
-    }
-
-    public boolean simplify() {
-        return simplifyTolerance > 0;
-    }
-
-    public int getClipBuffer() {
-        return clipBuffer;
     }
 
     public VectorTileConfig setClipBuffer(int clipBuffer) {
@@ -83,17 +65,9 @@ public class VectorTileConfig {
         return this;
     }
 
-    public int getExtent() {
-        return extent;
-    }
-
     public VectorTileConfig setExtent(int extent) {
         this.extent = extent;
         return this;
-    }
-
-    public Set<Integer> getZoomLevels() {
-        return zoomLevels;
     }
 
     public VectorTileConfig setZoomLevels(Collection<Integer> zoomLevels) {
@@ -105,27 +79,70 @@ public class VectorTileConfig {
         return setZoomLevels(Arrays.asList(zoomLevels));
     }
 
-    public YAxisDirection getYAxisDirection() {
-        return yAxisDirection;
+    public int getExtent() {
+        return extent;
+    }
+
+    public int getClipBuffer() {
+        return clipBuffer;
+    }
+
+    public Optional<Double> getSimplifyTolerance() {
+        return Optional.ofNullable(simplifyTolerance);
     }
 
     /**
      * All vertices in the simplified geometry will be within this distance of the original geometry
      * (in output coordinates on of the vector tile, the output coordinates are between 0 and
-     * extent). The tolerance value must be non-negative. A tolerance value of zero is effectively a
-     * no-op.
+     * extent). The tolerance value must be positive.
      */
     public VectorTileConfig setSimplifyTolerance(double simplifyTolerance) {
+        if (simplifyTolerance <= 0) {
+            throw new IllegalArgumentException("The simplify tolerance needs to be positive.");
+        }
         this.simplifyTolerance = simplifyTolerance;
         return this;
     }
 
-    public double simplifyTolerance() {
-        return simplifyTolerance;
+    public Optional<Double> getSmoothing() {
+        return Optional.ofNullable(smoothing);
+    }
+
+    /**
+     * @param alpha curved-ness parameter (0 is linear, 1 is round, >1 is increasingly curved)
+     */
+    public VectorTileConfig setSmoothing(final double alpha) {
+        if (alpha <= 0) {
+            throw new IllegalArgumentException("The smoothing value alpha needs to be positive.");
+        }
+        this.smoothing = alpha;
+        return this;
     }
 
     public TileLevelsDefinition getTileLevelsDefinition() {
         return tileLevelsDefinition;
+    }
+
+    public Set<Integer> getZoomLevels() {
+        return zoomLevels;
+    }
+
+    /**
+     * Returns the maximum allowed elements per tile. This depends on the zoomlevel, meaning that on
+     * the maximum level we never limit the allowed number of elements, so we never miss any
+     * elements.
+     */
+    public Optional<Integer> getLimit(int zoomLevel) {
+        final var isMaxZoomLevel = zoomLevels.stream().allMatch(level -> zoomLevel >= level);
+        if (isMaxZoomLevel) {
+            return Optional.empty();
+        } else {
+            return Optional.ofNullable(this.maxElementsPerTile);
+        }
+    }
+
+    public YAxisDirection getYAxisDirection() {
+        return yAxisDirection;
     }
 
     @Override

@@ -11,7 +11,7 @@ public class WorldConstants {
     private WorldConstants() {}
 
     public static TileLevelsDefinition tileDefinitions() {
-        final var origin = new WGS84Coordinate(-90, -180);
+        final var origin = new WGS84Coordinate(90, -180);
         final var maxLevel = 22;
         return new TileLevelsDefinition(
                 origin,
