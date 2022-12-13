@@ -12,7 +12,7 @@ public class SwissConstants {
 
     public static TileLevelsDefinition swissTileDefinition() {
         final var origin = new LV95Coordinate(2420000, 1350000);
-        return new TileLevelsDefinition(origin, swisstopoZoomLevels(), origin.srid());
+        return new TileLevelsDefinition(origin, swisstopoZoomLevels());
     }
 
     public static List<ZoomLevel> swisstopoZoomLevels() {

@@ -18,7 +18,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  * Swiss coordinates (1995) <a href="https://epsg.io/2056">https://epsg.io/2056</a> Most recent
  * coordinate system for Switzerland
  */
-public class LV95Coordinate implements Coordinate {
+public final class LV95Coordinate implements Coordinate {
 
     // For equality testing
     private static final double EPSILON = 0.1; // = 10 cm
@@ -135,7 +135,7 @@ public class LV95Coordinate implements Coordinate {
 
     public boolean equalsExact(final LV95Coordinate o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null) return false;
 
         if (Math.abs(o.east - east) > 0.0) return false;
         if (Math.abs(o.north - north) > 0.0) return false;

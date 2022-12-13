@@ -17,11 +17,10 @@ import org.locationtech.jts.geom.Envelope;
 /**
  * @param origin Origin for all zoom levels
  * @param zoomLevels Definition of all available zoom levels
- * @param srid Spatial reference identifier
  */
-public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels, int srid) {
+public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels) {
 
-    public TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels, int srid) {
+    public TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels) {
         if (zoomLevels == null || zoomLevels.isEmpty()) {
             throw new IllegalArgumentException("Zoom levels are not allowed to be null or empty");
         }
@@ -31,7 +30,6 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
                         .distinct()
                         .sorted(Comparator.comparingInt(ZoomLevel::level))
                         .toList();
-        this.srid = srid;
     }
 
     public ZoomLevel minZoomLevel() {
@@ -70,12 +68,12 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
 
     public TileLevelsDefinition withMaxLevel(int maxLevel) {
         return new TileLevelsDefinition(
-                origin, zoomLevels.stream().filter(z -> z.level() <= maxLevel).toList(), srid);
+                origin, zoomLevels.stream().filter(z -> z.level() <= maxLevel).toList());
     }
 
     public TileLevelsDefinition withMinLevel(int minLevel) {
         return new TileLevelsDefinition(
-                origin, zoomLevels.stream().filter(z -> z.level() >= minLevel).toList(), srid);
+                origin, zoomLevels.stream().filter(z -> z.level() >= minLevel).toList());
     }
 
     public boolean isMin(ZoomLevel zoomLevel) {
@@ -92,13 +90,13 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
 
     public TileLevelsDefinition onlyWithLevels(Collection<Integer> levels) {
         return new TileLevelsDefinition(
-                origin, zoomLevels.stream().filter(z -> levels.contains(z.level())).toList(), srid);
+                origin, zoomLevels.stream().filter(z -> levels.contains(z.level())).toList());
     }
 
     public TileLevelsDefinition addLevel(ZoomLevel zoomLevel) {
         final var combinedLevels = new ArrayList<>(zoomLevels);
         combinedLevels.add(zoomLevel);
-        return new TileLevelsDefinition(origin, combinedLevels, srid);
+        return new TileLevelsDefinition(origin, combinedLevels);
     }
 
     public TileLevelsDefinition withMinMaxLevel(int minLevel, int maxLevel) {
@@ -106,8 +104,7 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
                 origin,
                 zoomLevels.stream()
                         .filter(z -> z.level() >= minLevel && z.level() <= maxLevel)
-                        .toList(),
-                srid);
+                        .toList());
     }
 
     public long numberOfTiles() {
