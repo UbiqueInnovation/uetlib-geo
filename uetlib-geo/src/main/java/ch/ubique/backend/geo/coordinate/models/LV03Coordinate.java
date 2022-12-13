@@ -18,7 +18,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  * Swiss coordinates (1903) <a href="https://epsg.io/21781">https://epsg.io/21781</a> Imprecise, use
  * LV95 instead if possible
  */
-public class LV03Coordinate implements Coordinate {
+public final class LV03Coordinate implements Coordinate {
 
     // For equality testing
     private static final double EPSILON = 0.1; // = 10 cm

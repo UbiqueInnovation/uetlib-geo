@@ -2,7 +2,8 @@ package ch.ubique.backend.geo.coordinate.models;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-public interface Coordinate {
+public sealed interface Coordinate
+        permits LV03Coordinate, LV95Coordinate, WebMercatorCoordinate, WGS84Coordinate {
 
     int srid();
 

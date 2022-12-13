@@ -1,7 +1,7 @@
 package ch.ubique.backend.geo.tile.vector.models;
 
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
-import ch.ubique.backend.geo.tile.common.constants.WorldConstants;
+import ch.ubique.backend.geo.tile.common.constants.WebMercatorTileDefinitions;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import java.util.Arrays;
@@ -35,8 +35,9 @@ public class VectorTileConfig {
         return new VectorTileConfig(YAxisDirection.DOWN, SwissConstants.swissTileDefinition());
     }
 
-    public static VectorTileConfig wgs84() {
-        return new VectorTileConfig(YAxisDirection.DOWN, WorldConstants.tileDefinitions());
+    public static VectorTileConfig webMercator() {
+        return new VectorTileConfig(
+                YAxisDirection.DOWN, WebMercatorTileDefinitions.tileDefinitions());
     }
 
     /**

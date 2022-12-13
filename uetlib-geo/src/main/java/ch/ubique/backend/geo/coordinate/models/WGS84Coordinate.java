@@ -22,7 +22,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  * System Also referred to as Lat/Lon-Coordinate. <a
  * href="https://epsg.io/4326">https://epsg.io/4326</a>
  */
-public class WGS84Coordinate implements Coordinate {
+public final class WGS84Coordinate implements Coordinate {
 
     // For equality testing
     private static final double EPSILON = 0.001;
