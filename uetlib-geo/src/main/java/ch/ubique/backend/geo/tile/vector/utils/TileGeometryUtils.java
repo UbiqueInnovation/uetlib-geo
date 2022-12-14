@@ -6,7 +6,7 @@ import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.util.Optional;
+import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
@@ -16,16 +16,12 @@ import org.locationtech.jts.geom.Geometry;
 import org.opengis.geometry.MismatchedReferenceSystemException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TileGeometryUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(TileGeometryUtils.class);
-
     private TileGeometryUtils() {}
 
-    public static Optional<Geometry> getTileGeometry(
+    public static Geometry getTileGeometry(
             final Geometry geometry,
             final ReferencedEnvelope tileEnvelope,
             final VectorTileConfig config) {
@@ -34,12 +30,9 @@ public class TileGeometryUtils {
 
         try {
             final var withHeight = !Double.isNaN(geometry.getCoordinate().getZ());
-            final var transformed =
-                    JTS.transform(geometry, tileTransform(tileEnvelope, config, withHeight));
-            return Optional.of(transformed);
-        } catch (TransformException e) {
-            logger.warn("Could not transform geometry for tile", e);
-            return Optional.empty();
+            return JTS.transform(geometry, tileTransform(tileEnvelope, config, withHeight));
+        } catch (final TransformException e) {
+            throw new WrappedException("Could not transform geometry for tile", e);
         }
     }
 

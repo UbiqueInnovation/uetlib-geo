@@ -37,10 +37,10 @@ class TileGeometryUtilsTest {
                                 testCoordinate.toJtsPoint(),
                                 new ReferencedEnvelope(tileEnvelope, testCoordinate.crs()),
                                 config);
-                Assertions.assertTrue(actual.isPresent());
+                Assertions.assertFalse(actual.isEmpty());
                 Assertions.assertEquals(
                         testCoordinate.getOptionalElevation().orElse(null),
-                        actual.get().getCoordinate().getZ());
+                        actual.getCoordinate().getZ());
             }
         }
     }
