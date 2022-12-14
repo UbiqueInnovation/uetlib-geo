@@ -113,11 +113,14 @@ public class JtsUtil {
             return geometry;
         }
 
-        logger.info("Attempting to fix invalid geometry ({})", validator.getValidationError());
+        logger.info(
+                "Attempting to fix invalid geometry. Validation error = {}",
+                validator.getValidationError());
         final var fixedGeometry = GeometryFixer.fix(geometry);
 
         final var fixedValidator = new IsValidOp(fixedGeometry);
         if (fixedValidator.isValid()) {
+            logger.info("Successfully fixed geometry.");
             return fixedGeometry;
         }
 

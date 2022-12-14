@@ -1,8 +1,8 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
-import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import ch.ubique.backend.core.utils.ProgressLogger;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.vector.models.Tile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
@@ -11,9 +11,9 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -35,7 +35,12 @@ public class VectorTileGenerator {
 
     public static void generateTiles(final VectorTileOutput output)
             throws ExecutionException, InterruptedException {
-        final var generator = new VectorTileGenerator(output, 256);
+        generateTiles(output, 64);
+    }
+
+    public static void generateTiles(final VectorTileOutput output, int numThreads)
+            throws ExecutionException, InterruptedException {
+        final var generator = new VectorTileGenerator(output, numThreads);
         generator.generateTiles();
         generator.forkJoinPool.shutdown();
     }
@@ -49,27 +54,16 @@ public class VectorTileGenerator {
     private void generateTilesForLevel(final int level)
             throws ExecutionException, InterruptedException {
         final var tiles = getTiles(level);
-        final var count = new AtomicInteger();
-        final int onePercent = max(1, tiles.size() / 100);
-        final long startTime = System.currentTimeMillis();
 
-        final var tileSizes =
-                forkJoinPool
-                        .submit(
-                                () ->
-                                        tiles.parallelStream()
-                                                .map(this::generateTile)
-                                                .peek(
-                                                        i ->
-                                                                logProgress(
-                                                                        tiles,
-                                                                        count,
-                                                                        onePercent,
-                                                                        startTime))
-                                                .toList())
-                        .get();
+        final var tileSizes = forkJoinPool.submit(() -> generateTileCollection(tiles)).get();
 
         printStats(tiles, tileSizes, level);
+    }
+
+    @NotNull
+    private List<Integer> generateTileCollection(final Collection<Tile> tiles) {
+        final var progressLogger = new ProgressLogger(tiles.size());
+        return tiles.parallelStream().map(progressLogger.watch(this::generateTile)).toList();
     }
 
     @NotNull
@@ -86,23 +80,9 @@ public class VectorTileGenerator {
 
     private int generateTile(final Tile tile) {
         final var binaryTile = VectorTileEncoderUtil.encode(tile, output.config());
-        output.tileConsumer().uncheck().accept(binaryTile);
+        Optional.ofNullable(output.tileConsumer())
+                .ifPresent(consumer -> consumer.uncheck().accept(binaryTile));
         return binaryTile.bytes().length;
-    }
-
-    private void logProgress(
-            final Collection<Tile> tiles,
-            final AtomicInteger count,
-            final int onePercent,
-            final long startTime) {
-        final int countValue = count.incrementAndGet();
-        if (0 == countValue % onePercent) {
-            final int percent = 100 * countValue / tiles.size();
-            final long currentTime = System.currentTimeMillis();
-            final double tilesPerSecond =
-                    countValue / ((double) (currentTime - startTime)) * 1000.0;
-            logger.info("Processed {}% ({} tiles per second)", percent, tilesPerSecond);
-        }
     }
 
     private void printStats(

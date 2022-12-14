@@ -5,17 +5,24 @@ import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.Tile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
-import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
+import java.util.function.Function;
 import no.ecc.vectortile.VectorTileEncoder;
+import org.geotools.geometry.jts.JTS;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class VectorTileEncoderUtil {
 
     private final Tile tile;
+    private final Polygon tileBoundsPlusClipBuffer;
     private final VectorTileConfig config;
     private final VectorTileEncoder encoder;
 
@@ -32,15 +39,18 @@ public final class VectorTileEncoderUtil {
         this.config = config;
         this.encoder =
                 new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
+        final var envelope = new Envelope(0, config.getExtent(), 0, config.getExtent());
+        envelope.expandBy(config.getClipBuffer());
+        tileBoundsPlusClipBuffer = JTS.toGeometry(envelope);
     }
 
     public byte[] encode() {
         for (final var element : tile.elements()) {
-            final var geometry = getTileGeometry(element);
-            final var tags = VectorTileElementUtils.getFinalTags(element);
+            final var geometry = getTileGeometry(element.geometry());
             if (geometry.isEmpty()) {
                 logger.warn("Skipping {}, since no tile geometry could be created", element);
             } else {
+                final var tags = VectorTileElementUtils.getFinalTags(element);
                 encoder.addFeature(element.layer(), tags, geometry.get(), element.id());
             }
         }
@@ -48,39 +58,47 @@ public final class VectorTileEncoderUtil {
         return encoder.encode();
     }
 
-    private Optional<Geometry> getTileGeometry(VectorTileElement element) {
-
-        if (!element.showElement(tile.tileInfo().level())) {
-            return Optional.empty();
-        }
-
-        return validateGeometry(element.geometry())
-                .flatMap(this::convertToTileCoordinates)
-                .flatMap(this::validateGeometry)
+    private Optional<Geometry> getTileGeometry(@Nullable Geometry geometry) {
+        return Optional.ofNullable(geometry)
+                .flatMap(validateGeometry("Source"))
+                .map(this::convertToTileCoordinates)
+                .flatMap(validateGeometry("Tile"))
                 .map(this::simplifyIfNeeded)
+                .flatMap(validateGeometry("Simplified"))
                 .map(this::smoothingIfNeeded)
-                .flatMap(this::validateGeometry);
+                .flatMap(validateGeometry("Smoothed"))
+                .map(this::clip)
+                .flatMap(validateGeometry("Clipped"))
+                .map(this::toIntegerGrid)
+                .flatMap(validateGeometry("Integer"));
     }
 
-    private Optional<Geometry> validateGeometry(@NotNull final Geometry geometry) {
-        if (geometry.isValid()) {
-            return Optional.of(geometry);
-        }
-        try {
-            return emptyIfGeometryEmpty(JtsUtil.tryToGetValidGeometry(geometry));
-        } catch (UnfixableGeometryException e) {
-            logger.warn("Geometry is not valid and could not be fixed", e);
-            return Optional.empty();
-        }
+    private Function<Geometry, Optional<Geometry>> validateGeometry(@NotNull final String context) {
+        return geometry -> {
+            if (geometry.isValid()) {
+                return Optional.of(geometry);
+            }
+            try {
+                logger.info("{} geometry is not valid, trying to fix now", context);
+                final var validGeometry = JtsUtil.tryToGetValidGeometry(geometry);
+                if (validGeometry.isEmpty()) {
+                    logger.warn("{} geometry is empty.", context);
+                    return Optional.empty();
+                }
+                return Optional.of(geometry);
+            } catch (UnfixableGeometryException e) {
+                logger.warn("{} geometry is not valid and could not be fixed", context, e);
+                return Optional.empty();
+            }
+        };
     }
 
-    private Optional<Geometry> convertToTileCoordinates(@NotNull final Geometry geometry) {
-        final var tileGeometry =
-                TileGeometryUtils.getTileGeometry(geometry, tile.boundingBox(), config);
-        if (tileGeometry.isEmpty()) {
-            logger.warn("Could not convert geometry to tile coordinates");
-        }
-        return tileGeometry;
+    private Geometry convertToTileCoordinates(@NotNull final Geometry geometry) {
+        return TileGeometryUtils.getTileGeometry(geometry, tile.boundingBox(), config);
+    }
+
+    private Geometry clip(final Geometry geometry) {
+        return tileBoundsPlusClipBuffer.intersection(geometry);
     }
 
     private Geometry simplifyIfNeeded(@NotNull final Geometry geometry) {
@@ -95,11 +113,7 @@ public final class VectorTileEncoderUtil {
                 .orElse(geometry);
     }
 
-    private Optional<Geometry> emptyIfGeometryEmpty(@NotNull final Geometry geometry) {
-        if (geometry.isEmpty()) {
-            logger.warn("The geometry is empty.");
-            return Optional.empty();
-        }
-        return Optional.of(geometry);
+    private Geometry toIntegerGrid(@NotNull final Geometry geometry) {
+        return GeometryPrecisionReducer.reduce(geometry, new PrecisionModel(1));
     }
 }
