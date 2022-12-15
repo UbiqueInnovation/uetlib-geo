@@ -6,6 +6,7 @@ import ch.ubique.backend.core.utils.ProgressLogger;
 import ch.ubique.backend.geo.tile.common.encoder.TileEncoderFactory;
 import ch.ubique.backend.geo.tile.common.models.Tile;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
+import ch.ubique.backend.geo.tile.common.utils.TileGenerator;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
@@ -23,7 +24,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VectorTileGenerator {
+public class VectorTileGenerator implements TileGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(VectorTileGenerator.class);
 
@@ -31,7 +32,7 @@ public class VectorTileGenerator {
 
     private final ForkJoinPool forkJoinPool;
 
-    private VectorTileGenerator(final VectorTileOutput output, final int numThreads) {
+    public VectorTileGenerator(final VectorTileOutput output, final int numThreads) {
         this.output = output;
         this.forkJoinPool = new ForkJoinPool(numThreads);
     }
@@ -48,6 +49,7 @@ public class VectorTileGenerator {
         generator.forkJoinPool.shutdown();
     }
 
+    @Override
     public void generateTiles() throws ExecutionException, InterruptedException {
         for (final var level : output.config().getZoomLevels()) {
             generateTilesForLevel(level);
@@ -152,7 +154,7 @@ public class VectorTileGenerator {
         final var envelopeGeometry = JTS.toGeometry(tileEnvelope);
 
         final var elementsOnTile =
-                output.elements().stream()
+                output.elements(tileInfo).stream()
                         .filter(
                                 element ->
                                         element.showElement(tileInfo.level())

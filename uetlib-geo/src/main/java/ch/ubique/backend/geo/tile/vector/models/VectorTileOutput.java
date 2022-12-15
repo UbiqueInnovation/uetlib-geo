@@ -1,26 +1,35 @@
 package ch.ubique.backend.geo.tile.vector.models;
 
+import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import com.pivovarit.function.ThrowingConsumer;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.function.Function;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.io.IOException;
-import java.util.Collection;
-
 public record VectorTileOutput(
         VectorTileConfig config,
-        Collection<VectorTileElement> elements,
-        ThrowingConsumer<BinaryTile, IOException> tileConsumer
-) {
-    public boolean isEmpty() {
-        return elements == null || elements.isEmpty();
+        Function<TileInfo, Collection<VectorTileElement>> elementSupplier,
+        ThrowingConsumer<BinaryTile, IOException> tileConsumer) implements TileOutput {
+
+    public VectorTileOutput(
+            final VectorTileConfig config,
+            final Collection<VectorTileElement> elements,
+            final ThrowingConsumer<BinaryTile, IOException> tileConsumer) {
+        this(config, t -> elements, tileConsumer);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("config", config)
-                .append("elements.size", elements == null ? "null" : elements.size())
+                .append("elementSupplier", elementSupplier)
+                .append("tileConsumer", tileConsumer)
                 .toString();
+    }
+
+    public Collection<VectorTileElement> elements(final TileInfo tileInfo) {
+        return elementSupplier.apply(tileInfo);
     }
 }
