@@ -9,12 +9,12 @@ import org.slf4j.LoggerFactory;
 
 public final class TileGeneratorUtil {
 
-    private TileGeneratorUtil() {}
-
     private static final Logger logger = LoggerFactory.getLogger(TileGeneratorUtil.class);
 
+    private TileGeneratorUtil() {}
+
     public static void generateTiles(final Stream<? extends TileOutput> outputs)
-        throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException {
         final var iterator = outputs.iterator();
 
         if (!iterator.hasNext()) {
