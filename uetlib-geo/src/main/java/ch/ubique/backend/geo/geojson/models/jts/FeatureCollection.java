@@ -6,10 +6,16 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FeatureCollection {
 
+    private final String type = "FeatureCollection";
+
     private List<Feature> features;
 
     public List<Feature> getFeatures() {
         return features;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public FeatureCollection setFeatures(List<Feature> features) {

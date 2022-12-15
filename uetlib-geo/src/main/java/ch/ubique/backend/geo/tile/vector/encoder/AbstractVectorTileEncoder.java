@@ -1,16 +1,20 @@
-package ch.ubique.backend.geo.tile.vector.utils;
+package ch.ubique.backend.geo.tile.vector.encoder;
 
 import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
+import ch.ubique.backend.geo.tile.common.encoder.TileEncoder;
+import ch.ubique.backend.geo.tile.common.models.Tile;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
-import ch.ubique.backend.geo.tile.vector.models.Tile;
+import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
+import ch.ubique.backend.geo.tile.vector.utils.SimplifyGeometryUtils;
+import ch.ubique.backend.geo.tile.vector.utils.TileGeometryUtils;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
 import java.util.function.Function;
-import no.ecc.vectortile.VectorTileEncoder;
 import org.geotools.geometry.jts.JTS;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
@@ -19,49 +23,37 @@ import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class VectorTileEncoderUtil {
+abstract class AbstractVectorTileEncoder implements TileEncoder {
 
-    private final Tile tile;
     private final Polygon tileBoundsPlusClipBuffer;
     private final VectorTileConfig config;
-    private final VectorTileEncoder encoder;
-
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public static BinaryTile encode(Tile tile, VectorTileConfig config) {
-        final var encoderUtil = new VectorTileEncoderUtil(tile, config);
-        final var bytes = encoderUtil.encode();
-        return new BinaryTile(tile.tileInfo(), bytes);
-    }
-
-    private VectorTileEncoderUtil(Tile tile, VectorTileConfig config) {
-        this.tile = tile;
+    protected AbstractVectorTileEncoder(final VectorTileConfig config) {
         this.config = config;
-        this.encoder =
-                new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
         final var envelope = new Envelope(0, config.getExtent(), 0, config.getExtent());
         envelope.expandBy(config.getClipBuffer());
         tileBoundsPlusClipBuffer = JTS.toGeometry(envelope);
     }
 
-    public byte[] encode() {
-        for (final var element : tile.elements()) {
-            final var geometry = getTileGeometry(element.geometry());
-            if (geometry.isEmpty()) {
-                logger.warn("Skipping {}, since no tile geometry could be created", element);
-            } else {
-                final var tags = VectorTileElementUtils.getFinalTags(element);
-                encoder.addFeature(element.layer(), tags, geometry.get(), element.id());
-            }
+    @Override
+    public final BinaryTile encode(final Tile tile) {
+        if (!(tile instanceof VectorTile vectorTile)) {
+            throw new UnsupportedOperationException(
+                    "This encoder can only encode tiles of type " + VectorTile.class);
         }
 
-        return encoder.encode();
+        return new BinaryTile(
+                tile.tileInfo(), config.getOutputFormat(), encodeVectorTile(vectorTile));
     }
 
-    private Optional<Geometry> getTileGeometry(@Nullable Geometry geometry) {
+    protected abstract byte[] encodeVectorTile(final VectorTile vectorTile);
+
+    protected Optional<Geometry> getTileGeometry(
+            @Nullable final Geometry geometry, @NotNull final ReferencedEnvelope bounds) {
         return Optional.ofNullable(geometry)
                 .flatMap(validateGeometry("Source"))
-                .map(this::convertToTileCoordinates)
+                .map(convertToTileCoordinates(bounds))
                 .flatMap(validateGeometry("Tile"))
                 .map(this::simplifyIfNeeded)
                 .flatMap(validateGeometry("Simplified"))
@@ -93,12 +85,9 @@ public final class VectorTileEncoderUtil {
         };
     }
 
-    private Geometry convertToTileCoordinates(@NotNull final Geometry geometry) {
-        return TileGeometryUtils.getTileGeometry(geometry, tile.boundingBox(), config);
-    }
-
-    private Geometry clip(final Geometry geometry) {
-        return tileBoundsPlusClipBuffer.intersection(geometry);
+    private Function<Geometry, Geometry> convertToTileCoordinates(
+            @NotNull final ReferencedEnvelope bounds) {
+        return geometry -> TileGeometryUtils.getTileGeometry(geometry, bounds, config);
     }
 
     private Geometry simplifyIfNeeded(@NotNull final Geometry geometry) {
@@ -111,6 +100,10 @@ public final class VectorTileEncoderUtil {
         return config.getSmoothing()
                 .map(alpha -> SimplifyGeometryUtils.smooth(geometry, alpha))
                 .orElse(geometry);
+    }
+
+    private Geometry clip(final Geometry geometry) {
+        return tileBoundsPlusClipBuffer.intersection(geometry);
     }
 
     private Geometry toIntegerGrid(@NotNull final Geometry geometry) {
