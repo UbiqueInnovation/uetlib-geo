@@ -14,11 +14,11 @@ public abstract class BaseTileJob extends BaseJob {
         super(jobDataService);
     }
 
-    protected abstract Stream<TileOutput> outputs();
-
     @Override
     protected final JobRunState internalRun() throws InterruptedException, ExecutionException {
         TileGeneratorUtil.generateTiles(outputs());
         return JobRunState.DONE;
     }
+
+    protected abstract Stream<TileOutput> outputs();
 }

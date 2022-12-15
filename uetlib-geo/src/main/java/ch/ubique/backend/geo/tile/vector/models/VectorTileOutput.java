@@ -11,7 +11,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public record VectorTileOutput(
         VectorTileConfig config,
         Function<TileInfo, Collection<VectorTileElement>> elementSupplier,
-        ThrowingConsumer<BinaryTile, IOException> tileConsumer) implements TileOutput {
+        ThrowingConsumer<BinaryTile, IOException> tileConsumer)
+        implements TileOutput {
 
     public VectorTileOutput(
             final VectorTileConfig config,
