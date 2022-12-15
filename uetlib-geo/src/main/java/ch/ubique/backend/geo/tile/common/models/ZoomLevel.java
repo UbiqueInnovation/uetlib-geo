@@ -1,8 +1,5 @@
 package ch.ubique.backend.geo.tile.common.models;
 
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
 /**
  * @param level Level identifier
  * @param tilesY Number of tiles in Y direction
@@ -13,18 +10,13 @@ import java.util.stream.Stream;
  *     LV03/LV95 this would be meters [m], for WGS 84, this would be degrees)
  */
 public record ZoomLevel(int level, int tilesX, int tilesY, double tileWidth, double tileHeight) {
+
     public static ZoomLevel unbounded(int level, double tileWidth, double tileHeight) {
         return new ZoomLevel(level, Integer.MAX_VALUE, Integer.MAX_VALUE, tileWidth, tileHeight);
     }
 
     public long numberOfTiles() {
         return (long) tilesX * tilesY;
-    }
-
-    public Stream<TileInfo> tileInfos() {
-        return IntStream.range(0, tilesX)
-                .boxed()
-                .flatMap(x -> IntStream.range(0, tilesY).mapToObj(y -> new TileInfo(x, y, this)));
     }
 
     @Override

@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Stream;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,17 +88,15 @@ public class VectorTileGenerator implements TileGenerator {
 
         return output.config()
                 .getTileLevelsDefinition()
-                .getZoomLevel(level)
-                .tileInfos()
+                .tileInfos(level)
                 .map(this::createTile)
                 .toList();
     }
 
     @NotNull
     private VectorTile createTile(final TileInfo tileInfo) {
-        final var tileEnvelope = tileInfo.envelope(output.config().getTileLevelsDefinition());
-        final var elementsOnTile = elementsOnTile(tileInfo, tileEnvelope).toList();
-        return new VectorTile(tileInfo, tileEnvelope, elementsOnTile);
+        final var elementsOnTile = elementsOnTile(tileInfo).toList();
+        return new VectorTile(tileInfo, elementsOnTile);
     }
 
     private void printStats(
@@ -149,9 +146,8 @@ public class VectorTileGenerator implements TileGenerator {
     }
 
     @NotNull
-    private Stream<VectorTileElement> elementsOnTile(
-            final TileInfo tileInfo, final ReferencedEnvelope tileEnvelope) {
-        final var envelopeGeometry = JTS.toGeometry(tileEnvelope);
+    private Stream<VectorTileElement> elementsOnTile(final TileInfo tileInfo) {
+        final var envelopeGeometry = JTS.toGeometry(tileInfo.envelope());
 
         final var elementsOnTile =
                 output.elements(tileInfo).stream()

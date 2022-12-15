@@ -42,7 +42,7 @@ public final class GeoJsonVectorTileEncoder extends AbstractVectorTileEncoder {
     public byte[] encodeVectorTile(final VectorTile tile) {
         final var features =
                 tile.elements().stream()
-                        .map(toFeature(tile.boundingBox()))
+                        .map(toFeature(tile.tileInfo().envelope()))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .toList();

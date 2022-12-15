@@ -2,14 +2,18 @@ package ch.ubique.backend.geo.tile.common.models;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
-public record TileInfo(int x, int y, ZoomLevel zoomLevel) {
+public record TileInfo(int x, int y, ZoomLevel zoomLevel, ReferencedEnvelope envelope) {
+
+    public TileInfo(
+            final int x,
+            final int y,
+            final ZoomLevel level,
+            final TileLevelsDefinition tileLevelsDefinition) {
+        this(x, y, level, tileLevelsDefinition.envelopeOf(level, x, y));
+    }
 
     public String path() {
         return level() + "/" + x + "/" + y + ".pbf";
-    }
-
-    public ReferencedEnvelope envelope(final TileLevelsDefinition tileLevelsDefinition) {
-        return tileLevelsDefinition.envelopeOf(level(), x, y);
     }
 
     public int level() {
