@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.tile.vector.models;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.constants.WebMercatorTileDefinitions;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
+import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,11 +15,13 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class VectorTileConfig {
 
+
     private Integer maxElementsPerTile;
     private Double simplifyTolerance;
     private Double smoothing;
     private int clipBuffer = 0;
     private int extent = 4096;
+    private TileOutputFormat outputFormat = TileOutputFormat.PBF;
     private final YAxisDirection yAxisDirection;
 
     private Set<Integer> zoomLevels;
@@ -120,6 +123,10 @@ public class VectorTileConfig {
         return this;
     }
 
+    public YAxisDirection getYAxisDirection() {
+        return yAxisDirection;
+    }
+
     public TileLevelsDefinition getTileLevelsDefinition() {
         return tileLevelsDefinition;
     }
@@ -142,8 +149,13 @@ public class VectorTileConfig {
         }
     }
 
-    public YAxisDirection getYAxisDirection() {
-        return yAxisDirection;
+    public TileOutputFormat getOutputFormat() {
+        return outputFormat;
+    }
+
+    public VectorTileConfig setOutputFormat(final TileOutputFormat outputFormat) {
+        this.outputFormat = outputFormat;
+        return this;
     }
 
     @Override

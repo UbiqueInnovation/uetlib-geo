@@ -3,8 +3,11 @@ package ch.ubique.backend.geo.tile.vector.utils;
 import static java.lang.Math.min;
 
 import ch.ubique.backend.core.utils.ProgressLogger;
+import ch.ubique.backend.geo.tile.common.encoder.TileEncoderFactory;
+import ch.ubique.backend.geo.tile.common.models.Tile;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
-import ch.ubique.backend.geo.tile.vector.models.Tile;
+import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
+import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import jakarta.validation.constraints.NotNull;
@@ -61,13 +64,25 @@ public class VectorTileGenerator {
     }
 
     @NotNull
-    private List<Integer> generateTileCollection(final Collection<Tile> tiles) {
+    private List<Integer> generateTileCollection(final Collection<VectorTile> tiles) {
         final var progressLogger = new ProgressLogger(tiles.size());
         return tiles.parallelStream().map(progressLogger.watch(this::generateTile)).toList();
     }
 
+    private int generateTile(final Tile tile) {
+        final var encoder = TileEncoderFactory.getEncoder(output.config());
+        final var binaryTile = encoder.encode(tile);
+        consumeTile(binaryTile);
+        return binaryTile.bytes().length;
+    }
+
+    private void consumeTile(final BinaryTile binaryTile) {
+        Optional.ofNullable(output.tileConsumer())
+                .ifPresent(consumer -> consumer.uncheck().accept(binaryTile));
+    }
+
     @NotNull
-    private Collection<Tile> getTiles(final int level) {
+    private Collection<VectorTile> getTiles(final int level) {
         logger.info("Getting tiles for zoom level {}", level);
 
         return output.config()
@@ -78,15 +93,15 @@ public class VectorTileGenerator {
                 .toList();
     }
 
-    private int generateTile(final Tile tile) {
-        final var binaryTile = VectorTileEncoderUtil.encode(tile, output.config());
-        Optional.ofNullable(output.tileConsumer())
-                .ifPresent(consumer -> consumer.uncheck().accept(binaryTile));
-        return binaryTile.bytes().length;
+    @NotNull
+    private VectorTile createTile(final TileInfo tileInfo) {
+        final var tileEnvelope = tileInfo.envelope(output.config().getTileLevelsDefinition());
+        final var elementsOnTile = elementsOnTile(tileInfo, tileEnvelope).toList();
+        return new VectorTile(tileInfo, tileEnvelope, elementsOnTile);
     }
 
     private void printStats(
-            final Collection<Tile> tiles, final List<Integer> tileSizes, final int level) {
+            final Collection<VectorTile> tiles, final List<Integer> tileSizes, final int level) {
 
         final StringBuilder stats = new StringBuilder();
         stats.append('\n');
@@ -129,13 +144,6 @@ public class VectorTileGenerator {
                         avgElements, maxElements));
 
         logger.info("Statistic for level {}: {}", level, stats);
-    }
-
-    @NotNull
-    private Tile createTile(final TileInfo tileInfo) {
-        final var tileEnvelope = tileInfo.envelope(output.config().getTileLevelsDefinition());
-        final var elementsOnTile = elementsOnTile(tileInfo, tileEnvelope).toList();
-        return new Tile(tileInfo, tileEnvelope, elementsOnTile);
     }
 
     @NotNull
