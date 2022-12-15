@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
 
@@ -111,16 +112,15 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
         return zoomLevels.stream().mapToLong(ZoomLevel::numberOfTiles).sum();
     }
 
-    public ReferencedEnvelope envelopeOf(final int level, final int x, final int y) {
+    public ReferencedEnvelope envelopeOf(final ZoomLevel level, final int x, final int y) {
         final var crs = origin.crs();
         final var originJts = origin.toJts();
-        final var zoomLevel = getZoomLevel(level);
 
         // We expect the coordinate system to be oriented (east, north)
         JtsUtil.throwIfCoordinateSystemNotEastNorth(crs);
 
-        final double tileWidth = zoomLevel.tileWidth();
-        final double tileHeight = zoomLevel.tileHeight();
+        final double tileWidth = level.tileWidth();
+        final double tileHeight = level.tileHeight();
 
         final var xMin = originJts.x + x * tileWidth;
         final var xMax = xMin + tileWidth;
@@ -195,7 +195,21 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
                 .flatMap(
                         x ->
                                 IntStream.range(minY, maxY)
-                                        .mapToObj(y -> new TileInfo(x, y, otherLevel)))
+                                        .mapToObj(y -> new TileInfo(x, y, otherLevel, this)))
                 .collect(Collectors.toUnmodifiableSet());
+    }
+
+    public Stream<TileInfo> tileInfos(final int level) {
+        final var zoomLevel = getZoomLevel(level);
+        return IntStream.range(0, zoomLevel.tilesX())
+                .boxed()
+                .flatMap(
+                        x ->
+                                IntStream.range(0, zoomLevel.tilesY())
+                                        .mapToObj(y -> tileInfo(x, y, level)));
+    }
+
+    public TileInfo tileInfo(final int x, final int y, final int level) {
+        return new TileInfo(x, y, getZoomLevel(level), this);
     }
 }

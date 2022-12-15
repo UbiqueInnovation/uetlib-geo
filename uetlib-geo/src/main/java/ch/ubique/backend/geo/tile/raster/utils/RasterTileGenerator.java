@@ -17,9 +17,9 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 /**
- * Generates raster tiles for all zoom levels specified in the {@link TileLevelsDefinition}.
- * For this, the highest zoom level is computed based on the source tiles.
- * All other zoom levels are generated based on the next higher zoom level.
+ * Generates raster tiles for all zoom levels specified in the {@link TileLevelsDefinition}. For
+ * this, the highest zoom level is computed based on the source tiles. All other zoom levels are
+ * generated based on the next higher zoom level.
  */
 public abstract class RasterTileGenerator {
 
@@ -56,39 +56,23 @@ public abstract class RasterTileGenerator {
     }
 
     /**
-     * This method provides the generator with the actual data.
-     * It must return a {@link RasterTile} {@code rasterTile}
-     * such that {@code  rasterTile.tileInfo().equals(tileInfo) && rasterTile.size().tileWidth == sourceTileWidth}
-     *
-     * @param tileInfo  the requested tile
-     * @return          a raster tile for the given {@link TileInfo}
-     */
-    protected abstract RasterTile getSourceTile(TileInfo tileInfo);
-
-    /**
-     * This method is called once a raster tile has been generated.
-     * You can use it to consume generated tiles, e.g. for saving the tiles to some storage.
-     *
-     * @param rasterTile the generated raster tile
-     */
-    protected abstract void onTileGenerated(RasterTile rasterTile);
-
-    /**
-     * This method generates {@link RasterTile}s for all specified zoom levels.
-     * The highest zoom level is computed based on the source tiles,
-     * all other zoom levels are generated based on the next higher zoom level.
+     * This method generates {@link RasterTile}s for all specified zoom levels. The highest zoom
+     * level is computed based on the source tiles, all other zoom levels are generated based on the
+     * next higher zoom level.
      */
     public void generateTiles() {
         // Problem:
         // Since tiles of a given level are usually not aligned with the next higher level,
-        // we potentially need each tile of the next higher level for multiple tiles at the given level.
+        // we potentially need each tile of the next higher level for multiple tiles at the given
+        // level.
         // In essence, we have an implicit dependency graph. In this context, a tile corresponds to
         // a vertex in the dependency graph. If, tile A needs a tile B of the next higher level,
         // there is an edge in the dependency graph from A to B.
 
         // Solution:
         // We will explore the dependency graph using a DFS (depth first search).
-        // This way, we always know the dependencies and only keep the tiles active that are absolutely necessary.
+        // This way, we always know the dependencies and only keep the tiles active that are
+        // absolutely necessary.
 
         // Stack and visited needed for DFS
         // Initially we start with all top-level tile-infos in the stack.
@@ -122,7 +106,8 @@ public abstract class RasterTileGenerator {
                     validateSourceTile(current, rasterTile);
                 } else {
                     // Generate a raster tile based on all children of the current element
-                    rasterTile = createFromChildren(current, children.stream().map(ready::get).toList());
+                    rasterTile =
+                            createFromChildren(current, children.stream().map(ready::get).toList());
                     onTileGenerated(rasterTile);
 
                     // Clean up ready elements that are no longer needed
@@ -137,47 +122,59 @@ public abstract class RasterTileGenerator {
                 if (!visited.contains(child)) {
                     stack.add(child);
                     visited.add(child);
-                    pendingParents.put(child, new HashSet<>(levelsDefinition.parentTileInfos(child)));
+                    pendingParents.put(
+                            child, new HashSet<>(levelsDefinition.parentTileInfos(child)));
                 }
             }
-
         }
     }
 
     @NotNull
     private List<TileInfo> getTileTopLevelTileInfos() {
         final var maxLevel = levelsDefinition.minZoomLevel();
-        return IntStream
-                .range(0, maxLevel.tilesX())
+        return IntStream.range(0, maxLevel.tilesX())
                 .boxed()
-                .flatMap(x -> IntStream
-                        .range(0, maxLevel.tilesY())
-                        .mapToObj(y -> new TileInfo(x, y, maxLevel)))
+                .flatMap(
+                        x ->
+                                IntStream.range(0, maxLevel.tilesY())
+                                        .mapToObj(
+                                                y ->
+                                                        levelsDefinition.tileInfo(
+                                                                x, y, maxLevel.level())))
                 .toList();
     }
 
-    private static void cleanFinishedTiles(final Map<TileInfo, RasterTile> ready, final Map<TileInfo, Set<TileInfo>> pendingParents, final TileInfo current, Set<TileInfo> children) {
-        for (final var child : children) {
-            pendingParents.get(child).remove(current);
-            if (pendingParents.get(child).isEmpty()) {
-                pendingParents.remove(child);
-                ready.remove(child);
-            }
-        }
-    }
+    /**
+     * This method provides the generator with the actual data. It must return a {@link RasterTile}
+     * {@code rasterTile} such that {@code rasterTile.tileInfo().equals(tileInfo) &&
+     * rasterTile.size().tileWidth == sourceTileWidth}
+     *
+     * @param tileInfo the requested tile
+     * @return a raster tile for the given {@link TileInfo}
+     */
+    protected abstract RasterTile getSourceTile(TileInfo tileInfo);
 
     private void validateSourceTile(final TileInfo tileInfo, final RasterTile sourceTile) {
         if (!tileInfo.equals(sourceTile.tileInfo())) {
-            throw new AssertionError("Expected getSourceTile(tileInfo).tileInfo() == " + tileInfo + ". " +
-                    "But got " + sourceTile.tileInfo());
+            throw new AssertionError(
+                    "Expected getSourceTile(tileInfo).tileInfo() == "
+                            + tileInfo
+                            + ". "
+                            + "But got "
+                            + sourceTile.tileInfo());
         }
         if (sourceTile.size().tileWidth() != sourceTileWidth) {
-            throw new AssertionError("Expected getSourceTile(tileInfo).size().tileWidth() == " + sourceTileWidth + ". " +
-                    "But got " + sourceTile.size().tileWidth());
+            throw new AssertionError(
+                    "Expected getSourceTile(tileInfo).size().tileWidth() == "
+                            + sourceTileWidth
+                            + ". "
+                            + "But got "
+                            + sourceTile.size().tileWidth());
         }
     }
 
-    private RasterTile createFromChildren(final TileInfo currentInfo, final Collection<RasterTile> children) {
+    private RasterTile createFromChildren(
+            final TileInfo currentInfo, final Collection<RasterTile> children) {
 
         final var nonEmptyChildren = children.stream().filter(tile -> !tile.isEmpty()).toList();
         if (nonEmptyChildren.isEmpty()) {
@@ -187,8 +184,10 @@ public abstract class RasterTileGenerator {
 
         final var anyChild = nonEmptyChildren.get(0);
         final var colorModel = anyChild.data().getColorModel();
-        final var raster = colorModel.createCompatibleWritableRaster(outputResolution, outputResolution);
-        final var data = new BufferedImage(colorModel, raster, anyChild.data().isAlphaPremultiplied(), null);
+        final var raster =
+                colorModel.createCompatibleWritableRaster(outputResolution, outputResolution);
+        final var data =
+                new BufferedImage(colorModel, raster, anyChild.data().isAlphaPremultiplied(), null);
 
         if (customEmptyPixelValue != null) {
             for (var x = 0; x < data.getWidth(); ++x) {
@@ -205,8 +204,20 @@ public abstract class RasterTileGenerator {
             final var childTileWidth = childInfo.zoomLevel().tileWidth();
 
             // Calculate scaling and where tile needs to go
-            final var xOffset = (int) Math.round((childInfo.x() * childTileWidth - currentInfo.x() * currentTileWidth) / currentTileWidth * outputResolution);
-            final var xNextOffset = (int) Math.round(((childInfo.x() + 1) * childTileWidth - currentInfo.x() * currentTileWidth) / currentTileWidth * outputResolution);
+            final var xOffset =
+                    (int)
+                            Math.round(
+                                    (childInfo.x() * childTileWidth
+                                                    - currentInfo.x() * currentTileWidth)
+                                            / currentTileWidth
+                                            * outputResolution);
+            final var xNextOffset =
+                    (int)
+                            Math.round(
+                                    ((childInfo.x() + 1) * childTileWidth
+                                                    - currentInfo.x() * currentTileWidth)
+                                            / currentTileWidth
+                                            * outputResolution);
             final var yOffset =
                     (int)
                             Math.round(
@@ -238,13 +249,42 @@ public abstract class RasterTileGenerator {
             }
 
             // Actually scale the child data
-            final var target = data.getSubimage(Math.max(0, xOffset), Math.max(0, yOffset), croppedWidth, croppedHeight);
-            final var affineTransform =     new AffineTransform();
+            final var target =
+                    data.getSubimage(
+                            Math.max(0, xOffset),
+                            Math.max(0, yOffset),
+                            croppedWidth,
+                            croppedHeight);
+            final var affineTransform = new AffineTransform();
             affineTransform.translate(-leftCrop, -topCrop);
-            affineTransform.scale(1. * scaledWidth / child.data().getWidth(), 1. * scaledHeight /  child.data().getHeight());
+            affineTransform.scale(
+                    1. * scaledWidth / child.data().getWidth(),
+                    1. * scaledHeight / child.data().getHeight());
             RasterTransform.transform(child.data().getData(), target.getRaster(), affineTransform);
         }
 
         return new RasterTile(currentInfo, data);
+    }
+
+    /**
+     * This method is called once a raster tile has been generated. You can use it to consume
+     * generated tiles, e.g. for saving the tiles to some storage.
+     *
+     * @param rasterTile the generated raster tile
+     */
+    protected abstract void onTileGenerated(RasterTile rasterTile);
+
+    private static void cleanFinishedTiles(
+            final Map<TileInfo, RasterTile> ready,
+            final Map<TileInfo, Set<TileInfo>> pendingParents,
+            final TileInfo current,
+            Set<TileInfo> children) {
+        for (final var child : children) {
+            pendingParents.get(child).remove(current);
+            if (pendingParents.get(child).isEmpty()) {
+                pendingParents.remove(child);
+                ready.remove(child);
+            }
+        }
     }
 }

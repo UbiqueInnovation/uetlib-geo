@@ -10,63 +10,62 @@ class TileLevelsDefinitionTest {
 
     @Test
     void testChildren() {
-        final var gridInfo = SwissConstants.swissTileDefinition().onlyWithLevels(List.of(8, 9, 10, 12));
+        final var gridInfo =
+                SwissConstants.swissTileDefinition().onlyWithLevels(List.of(8, 9, 10, 12));
 
-        Assertions.assertEquals(Set.of(
-                new TileInfo(0, 0, gridInfo.getZoomLevel(9)),
-                new TileInfo(1, 0, gridInfo.getZoomLevel(9))
-        ), gridInfo.childrenTileInfos(new TileInfo(0, 0, gridInfo.getZoomLevel(8))));
+        Assertions.assertEquals(
+                Set.of(gridInfo.tileInfo(0, 0, 9), gridInfo.tileInfo(1, 0, 9)),
+                gridInfo.childrenTileInfos(gridInfo.tileInfo(0, 0, 8)));
 
-        Assertions.assertEquals(Set.of(
-                new TileInfo(0, 0, gridInfo.getZoomLevel(12)),
-                new TileInfo(0, 1, gridInfo.getZoomLevel(12)),
-                new TileInfo(1, 0, gridInfo.getZoomLevel(12)),
-                new TileInfo(1, 1, gridInfo.getZoomLevel(12))
-        ), gridInfo.childrenTileInfos(new TileInfo(0, 0, gridInfo.getZoomLevel(10))));
+        Assertions.assertEquals(
+                Set.of(
+                        gridInfo.tileInfo(0, 0, 12),
+                        gridInfo.tileInfo(0, 1, 12),
+                        gridInfo.tileInfo(1, 0, 12),
+                        gridInfo.tileInfo(1, 1, 12)),
+                gridInfo.childrenTileInfos(gridInfo.tileInfo(0, 0, 10)));
 
-        Assertions.assertEquals(Set.of(
-                new TileInfo(1, 0, gridInfo.getZoomLevel(12)),
-                new TileInfo(1, 1, gridInfo.getZoomLevel(12))
-        ), gridInfo.childrenTileInfos(new TileInfo(1, 0, gridInfo.getZoomLevel(10))));
+        Assertions.assertEquals(
+                Set.of(gridInfo.tileInfo(1, 0, 12), gridInfo.tileInfo(1, 1, 12)),
+                gridInfo.childrenTileInfos(gridInfo.tileInfo(1, 0, 10)));
     }
 
     @Test
     void testParent() {
-        final var gridInfo = SwissConstants.swissTileDefinition()
-                .onlyWithLevels(List.of(8, 9, 10, 12, 14, 15));
+        final var gridInfo =
+                SwissConstants.swissTileDefinition().onlyWithLevels(List.of(8, 9, 10, 12, 14, 15));
 
-        Assertions.assertEquals(Set.of(
-                new TileInfo(0, 0, gridInfo.getZoomLevel(10))
-        ), gridInfo.parentTileInfos(new TileInfo(0, 0, gridInfo.getZoomLevel(12))));
+        Assertions.assertEquals(
+                Set.of(gridInfo.tileInfo(0, 0, 10)),
+                gridInfo.parentTileInfos(gridInfo.tileInfo(0, 0, 12)));
 
-        Assertions.assertEquals(Set.of(
-                new TileInfo(0, 0, gridInfo.getZoomLevel(10))
-        ), gridInfo.parentTileInfos(new TileInfo(0, 1, gridInfo.getZoomLevel(12))));
+        Assertions.assertEquals(
+                Set.of(gridInfo.tileInfo(0, 0, 10)),
+                gridInfo.parentTileInfos(gridInfo.tileInfo(0, 1, 12)));
 
-        Assertions.assertEquals(Set.of(
-                new TileInfo(0, 0, gridInfo.getZoomLevel(10)),
-                new TileInfo(1, 0, gridInfo.getZoomLevel(10))
-        ), gridInfo.parentTileInfos(new TileInfo(1, 0, gridInfo.getZoomLevel(12))));
+        Assertions.assertEquals(
+                Set.of(gridInfo.tileInfo(0, 0, 10), gridInfo.tileInfo(1, 0, 10)),
+                gridInfo.parentTileInfos(gridInfo.tileInfo(1, 0, 12)));
 
-        Assertions.assertEquals(Set.of(
-                new TileInfo(0, 0, gridInfo.getZoomLevel(10)),
-                new TileInfo(1, 0, gridInfo.getZoomLevel(10))
-        ), gridInfo.parentTileInfos(new TileInfo(1, 1, gridInfo.getZoomLevel(12))));
+        Assertions.assertEquals(
+                Set.of(gridInfo.tileInfo(0, 0, 10), gridInfo.tileInfo(1, 0, 10)),
+                gridInfo.parentTileInfos(gridInfo.tileInfo(1, 1, 12)));
 
-        Assertions.assertEquals(Set.of(
-                new TileInfo(0, 0, gridInfo.getZoomLevel(14))
-        ), gridInfo.parentTileInfos(new TileInfo(0, 0, gridInfo.getZoomLevel(15))));
+        Assertions.assertEquals(
+                Set.of(gridInfo.tileInfo(0, 0, 14)),
+                gridInfo.parentTileInfos(gridInfo.tileInfo(0, 0, 15)));
 
-        Assertions.assertEquals(Set.of(
-                new TileInfo(1, 0, gridInfo.getZoomLevel(14)),
-                new TileInfo(1, 1, gridInfo.getZoomLevel(14)),
-                new TileInfo(2, 0, gridInfo.getZoomLevel(14)),
-                new TileInfo(2, 1, gridInfo.getZoomLevel(14))
-        ), gridInfo.parentTileInfos(new TileInfo(2, 1, gridInfo.getZoomLevel(15))));
+        Assertions.assertEquals(
+                Set.of(
+                        gridInfo.tileInfo(1, 0, 14),
+                        gridInfo.tileInfo(1, 1, 14),
+                        gridInfo.tileInfo(2, 0, 14),
+                        gridInfo.tileInfo(2, 1, 14)),
+                gridInfo.parentTileInfos(gridInfo.tileInfo(2, 1, 15)));
 
-        Assertions.assertEquals(Set.of(
-                new TileInfo(2, 1, gridInfo.getZoomLevel(14))
-        ), gridInfo.parentTileInfos(new TileInfo(3, 2, gridInfo.getZoomLevel(15))));
+        Assertions.assertEquals(
+                Set.of(gridInfo.tileInfo(2, 1, 14)),
+                gridInfo.parentTileInfos(gridInfo.tileInfo(3, 2, 15)));
     }
 
     @Test
@@ -82,7 +81,7 @@ class TileLevelsDefinitionTest {
                                         1000,
                                         1000));
 
-        final var testTileInfo = new TileInfo(1, 1, gridInfo.getZoomLevel(12));
+        final var testTileInfo = gridInfo.tileInfo(1, 1, 12);
 
         for (final var tileInfo : gridInfo.childrenTileInfos(testTileInfo)) {
             if (!gridInfo.parentTileInfos(tileInfo).contains(testTileInfo)) {
@@ -90,4 +89,5 @@ class TileLevelsDefinitionTest {
             }
         }
     }
+
 }
