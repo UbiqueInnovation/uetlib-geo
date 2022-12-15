@@ -15,7 +15,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class VectorTileConfig {
 
-
     private Integer maxElementsPerTile;
     private Double simplifyTolerance;
     private Double smoothing;
@@ -162,6 +161,7 @@ public class VectorTileConfig {
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("maxElementsPerTile", maxElementsPerTile)
+                .append("outputFormat", outputFormat)
                 .append("simplifyTolerance", simplifyTolerance)
                 .append("clipBuffer", clipBuffer)
                 .append("extent", extent)

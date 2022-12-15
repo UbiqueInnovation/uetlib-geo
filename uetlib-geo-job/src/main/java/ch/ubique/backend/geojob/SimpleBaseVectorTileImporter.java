@@ -3,6 +3,7 @@ package ch.ubique.backend.geojob;
 
 import ch.ubique.backend.core.service.InputCollectionLoaderService;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
+import ch.ubique.backend.geo.tile.vector.models.TileOutput;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;

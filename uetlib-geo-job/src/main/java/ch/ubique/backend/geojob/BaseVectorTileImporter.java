@@ -1,11 +1,10 @@
 package ch.ubique.backend.geojob;
 
-
 import ch.ubique.backend.core.file.ByteFile;
 import ch.ubique.backend.core.service.DataAndInput;
 import ch.ubique.backend.core.service.InputCollectionLoaderService;
+import ch.ubique.backend.geo.tile.common.utils.TileGeneratorUtil;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
-import ch.ubique.backend.geo.tile.vector.utils.VectorTileGenerator;
 import ch.ubique.backend.job.BaseInputJob;
 import ch.ubique.backend.job.data.service.InputJobDataService;
 import ch.ubique.backend.job.model.Job;
@@ -21,7 +20,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 public abstract class BaseVectorTileImporter<T> extends BaseInputJob {
-
 
     private DataAndInput<Collection<T>> data;
 
@@ -41,7 +39,6 @@ public abstract class BaseVectorTileImporter<T> extends BaseInputJob {
         return false;
     }
 
-
     @Override
     protected final Collection<JobRunInput> loadInputs() throws Exception {
         data = getService().loadData();
@@ -50,40 +47,20 @@ public abstract class BaseVectorTileImporter<T> extends BaseInputJob {
     }
 
     @Override
-    protected final JobRunState processInputs() {
-        logger.info("Getting outputs.");
-        final var outputs = getOutputs(data.data());
-        final var iterator = outputs.iterator();
-
-        logger.info("Processing each output.");
-        while (iterator.hasNext()) {
-
-            // Get output
-            final var output = iterator.next();
-            logger.info("Got output {}.", output);
-
-            // Validate output
-            if (output.isEmpty()) {
-                if (allowEmpty()) {
-                    logger.info("No elements found. Continuing to generate empty vector tiles.");
-                } else {
-                    logger.error("No elements found. Aborting.");
-                    return JobRunState.ERROR;
-                }
-            }
-
-            // Generate vector tiles
-            try {
-                logger.info("Generating and uploading tiles");
-                VectorTileGenerator.generateTiles(output);
-            } catch (ExecutionException e) {
-                logger.error("Generating vector tiles failed", e);
+    protected final JobRunState processInputs() throws ExecutionException, InterruptedException {
+        if (data.data().isEmpty()) {
+            if (allowEmpty()) {
+                logger.info("No elements found. Continuing to generate empty vector tiles.");
+            } else {
+                logger.error("No elements found. Aborting.");
                 return JobRunState.ERROR;
-            } catch (InterruptedException e) {
-                logger.warn("Thread interrupted", e);
-                Thread.currentThread().interrupt();
             }
         }
+
+        logger.info("Getting outputs.");
+        final var outputs = getOutputs(data.data());
+        TileGeneratorUtil.generateTiles(outputs);
+
         return JobRunState.DONE;
     }
 
@@ -113,5 +90,6 @@ public abstract class BaseVectorTileImporter<T> extends BaseInputJob {
         }
     }
 
-    protected abstract void saveJobRunInput(ByteFile file, Job job, JobRun jobRun) throws IOException;
+    protected abstract void saveJobRunInput(ByteFile file, Job job, JobRun jobRun)
+            throws IOException;
 }
