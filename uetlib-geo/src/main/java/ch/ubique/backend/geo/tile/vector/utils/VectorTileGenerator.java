@@ -31,9 +31,9 @@ public class VectorTileGenerator implements TileGenerator {
 
     private final ForkJoinPool forkJoinPool;
 
-    public VectorTileGenerator(final VectorTileOutput output, final int numThreads) {
+    public VectorTileGenerator(final VectorTileOutput output, final int parallelism) {
         this.output = output;
-        this.forkJoinPool = new ForkJoinPool(numThreads);
+        this.forkJoinPool = new ForkJoinPool(parallelism);
     }
 
     public static void generateTiles(final VectorTileOutput output)
@@ -41,9 +41,9 @@ public class VectorTileGenerator implements TileGenerator {
         generateTiles(output, 64);
     }
 
-    public static void generateTiles(final VectorTileOutput output, int numThreads)
+    public static void generateTiles(final VectorTileOutput output, int parallelism)
             throws ExecutionException, InterruptedException {
-        final var generator = new VectorTileGenerator(output, numThreads);
+        final var generator = new VectorTileGenerator(output, parallelism);
         generator.generateTiles();
         generator.forkJoinPool.shutdown();
     }
