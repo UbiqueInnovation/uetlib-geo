@@ -56,7 +56,7 @@ public final class GeoJsonVectorTileEncoder extends AbstractVectorTileEncoder {
 
     private Function<VectorTileElement, Optional<Feature>> toFeature(
             final ReferencedEnvelope bounds) {
-        return e -> getTileGeometry(e.geometry(), bounds).map(toFeature(e));
+        return e -> getTileGeometry(e, bounds).map(toFeature(e));
     }
 
     private static Function<Geometry, Feature> toFeature(final VectorTileElement element) {

@@ -29,7 +29,7 @@ public final class PngVectorTileEncoder extends AbstractVectorTileEncoder {
         graphics.setColor(new Color(155, 42, 211));
 
         tile.elements().stream()
-                .map(e -> getTileGeometry(e.geometry(), tile.tileInfo().envelope()))
+                .map(e -> getTileGeometry(e, tile.tileInfo().envelope()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(shapeWriter::toShape)

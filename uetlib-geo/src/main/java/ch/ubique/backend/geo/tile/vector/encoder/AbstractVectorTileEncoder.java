@@ -7,6 +7,7 @@ import ch.ubique.backend.geo.tile.common.models.Tile;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
+import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.utils.SimplifyGeometryUtils;
 import ch.ubique.backend.geo.tile.vector.utils.TileGeometryUtils;
 import jakarta.annotation.Nullable;
@@ -50,8 +51,8 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
     protected abstract byte[] encodeVectorTile(final VectorTile vectorTile);
 
     protected Optional<Geometry> getTileGeometry(
-            @Nullable final Geometry geometry, @NotNull final ReferencedEnvelope bounds) {
-        return Optional.ofNullable(geometry)
+            @Nullable final VectorTileElement element, @NotNull final ReferencedEnvelope bounds) {
+        return Optional.ofNullable(element.geometry())
                 .flatMap(validateGeometry("Source"))
                 .map(convertToTileCoordinates(bounds))
                 .flatMap(validateGeometry("Tile"))
@@ -62,7 +63,8 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
                 .map(this::clip)
                 .flatMap(validateGeometry("Clipped"))
                 .map(this::toIntegerGrid)
-                .flatMap(validateGeometry("Integer"));
+                .flatMap(validateGeometry("Integer"))
+                .flatMap(includeForOutput(element));
     }
 
     private Function<Geometry, Optional<Geometry>> validateGeometry(@NotNull final String context) {
@@ -108,5 +110,13 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
 
     private Geometry toIntegerGrid(@NotNull final Geometry geometry) {
         return GeometryPrecisionReducer.reduce(geometry, new PrecisionModel(1));
+    }
+
+    private static Function<Geometry, Optional<Geometry>> includeForOutput(
+            @NotNull final VectorTileElement element) {
+        return tileGeometry ->
+                element.includeForOutput(tileGeometry)
+                        ? Optional.of(tileGeometry)
+                        : Optional.empty();
     }
 }
