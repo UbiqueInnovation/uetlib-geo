@@ -1,7 +1,5 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
-import static java.lang.Math.min;
-
 import ch.ubique.backend.core.utils.ProgressLogger;
 import ch.ubique.backend.geo.tile.common.encoder.TileEncoderFactory;
 import ch.ubique.backend.geo.tile.common.models.Tile;
@@ -14,9 +12,7 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Stream;
 import org.geotools.geometry.jts.JTS;
@@ -36,45 +32,38 @@ public class VectorTileGenerator implements TileGenerator {
         this.forkJoinPool = new ForkJoinPool(parallelism);
     }
 
-    public static void generateTiles(final VectorTileOutput output)
-            throws ExecutionException, InterruptedException {
+    public static void generateTiles(final VectorTileOutput output) {
         generateTiles(output, 64);
     }
 
-    public static void generateTiles(final VectorTileOutput output, int parallelism)
-            throws ExecutionException, InterruptedException {
+    public static void generateTiles(final VectorTileOutput output, int parallelism) {
         final var generator = new VectorTileGenerator(output, parallelism);
         generator.generateTiles();
-        generator.forkJoinPool.shutdown();
     }
 
     @Override
-    public void generateTiles() throws ExecutionException, InterruptedException {
-        for (final var level : output.config().getZoomLevels()) {
-            generateTilesForLevel(level);
-        }
-    }
+    public void generateTiles() {
+        output.config().getZoomLevels().stream()
+                .map(this::getTileInfos)
+                .forEach(this::generateTilesForInfos);
 
-    private void generateTilesForLevel(final int level)
-            throws ExecutionException, InterruptedException {
-        final var tiles = getTiles(level);
-
-        final var tileSizes = forkJoinPool.submit(() -> generateTileCollection(tiles)).get();
-
-        printStats(tiles, tileSizes, level);
+        forkJoinPool.shutdown();
     }
 
     @NotNull
-    private List<Integer> generateTileCollection(final Collection<VectorTile> tiles) {
-        final var progressLogger = new ProgressLogger(tiles.size());
-        return tiles.parallelStream().map(progressLogger.watch(this::generateTile)).toList();
+    private Collection<TileInfo> getTileInfos(final int level) {
+        logger.info("Getting tile infos for zoom level {}", level);
+        return output.config().getTileLevelsDefinition().tileInfos(level).toList();
     }
 
-    private int generateTile(final Tile tile) {
-        final var encoder = TileEncoderFactory.getEncoder(output.config());
-        final var binaryTile = encoder.encode(tile);
-        consumeTile(binaryTile);
-        return binaryTile.bytes().length;
+    private void generateTilesForInfos(final Collection<TileInfo> tileInfos) {
+        final var progressLogger = new ProgressLogger(tileInfos.size());
+
+        forkJoinPool.submit(
+                () ->
+                        tileInfos.parallelStream()
+                                .map(this::createTile)
+                                .forEach(progressLogger.watch(this::generateTile)));
     }
 
     private void consumeTile(final BinaryTile binaryTile) {
@@ -82,67 +71,16 @@ public class VectorTileGenerator implements TileGenerator {
                 .ifPresent(consumer -> consumer.uncheck().accept(binaryTile));
     }
 
-    @NotNull
-    private Collection<VectorTile> getTiles(final int level) {
-        logger.info("Getting tiles for zoom level {}", level);
-
-        return output.config()
-                .getTileLevelsDefinition()
-                .tileInfos(level)
-                .map(this::createTile)
-                .toList();
+    private void generateTile(final Tile tile) {
+        final var encoder = TileEncoderFactory.getEncoder(output.config());
+        final var binaryTile = encoder.encode(tile);
+        consumeTile(binaryTile);
     }
 
     @NotNull
     private VectorTile createTile(final TileInfo tileInfo) {
         final var elementsOnTile = elementsOnTile(tileInfo).toList();
         return new VectorTile(tileInfo, elementsOnTile);
-    }
-
-    private void printStats(
-            final Collection<VectorTile> tiles, final List<Integer> tileSizes, final int level) {
-
-        final StringBuilder stats = new StringBuilder();
-        stats.append('\n');
-
-        final double nonEmptyPercent =
-                100.
-                        * tileSizes.stream().mapToInt(size -> 0 < size ? 1 : 0).sum()
-                        / tileSizes.size();
-        stats.append(String.format("  Non empty tiles: %.2f%%%n", nonEmptyPercent));
-
-        final int maxBytes = tileSizes.stream().mapToInt(size -> size).max().orElse(-1);
-        final double avgBytes = tileSizes.stream().mapToInt(size -> size).average().orElse(-1);
-        stats.append(String.format("  Tile size: avg = %,.1fB, max = %,dB%n", avgBytes, maxBytes));
-
-        final var limit = output.config().getLimit(level);
-        if (limit.isPresent()) {
-            final int maxElementsWithLimit =
-                    tiles.stream()
-                            .mapToInt(tile -> min(limit.get(), tile.elements().size()))
-                            .max()
-                            .orElse(-1);
-            final double avgElementsWithLimit =
-                    tiles.stream()
-                            .mapToInt(tile -> min(limit.get(), tile.elements().size()))
-                            .average()
-                            .orElse(-1);
-            stats.append(
-                    String.format(
-                            "  Elements per tile (with limit): avg = %.2f, max = %d%n",
-                            avgElementsWithLimit, maxElementsWithLimit));
-        }
-
-        final int maxElements =
-                tiles.stream().mapToInt(tile -> tile.elements().size()).max().orElse(-1);
-        final double avgElements =
-                tiles.stream().mapToInt(tile -> tile.elements().size()).average().orElse(-1);
-        stats.append(
-                String.format(
-                        "  Elements per tile (without limit): avg = %.2f, max = %d",
-                        avgElements, maxElements));
-
-        logger.info("Statistic for level {}: {}", level, stats);
     }
 
     @NotNull
