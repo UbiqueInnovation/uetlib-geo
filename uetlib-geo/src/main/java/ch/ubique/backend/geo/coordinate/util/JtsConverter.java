@@ -210,7 +210,9 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
 
             final var bounds =
                     JTS.toGeometry(coordinateSystemBounds.transform(getCrs(geometry), false));
-            final var geometryWithinBounds = geometry.intersection(bounds);
+
+            final var geometryWithinBounds =
+                    bounds.covers(geometry) ? geometry : geometry.intersection(bounds);
 
             final var transformedGeometry =
                     JTS.transform(
