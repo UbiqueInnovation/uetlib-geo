@@ -69,7 +69,7 @@
     </dependencies>
 
     <properties>
-        <org.geotools.version>28-RC</org.geotools.version>
+        <org.geotools.version>28.0</org.geotools.version>
     </properties>
 
     <repositories>
