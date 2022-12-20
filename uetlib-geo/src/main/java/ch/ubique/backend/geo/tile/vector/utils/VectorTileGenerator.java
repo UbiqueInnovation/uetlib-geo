@@ -57,30 +57,35 @@ public class VectorTileGenerator implements TileGenerator {
     }
 
     private void generateTilesForInfos(final Collection<TileInfo> tileInfos) {
-        final var progressLogger = new ProgressLogger(tileInfos.size());
+        final var currentLevel = tileInfos.stream().findFirst().orElseThrow().level();
+        final var prefix = String.format("Level %d: ", currentLevel);
+        final var progressLogger = new ProgressLogger(prefix, tileInfos.size());
 
-        forkJoinPool.submit(
-                () ->
-                        tileInfos.parallelStream()
-                                .map(this::createTile)
-                                .forEach(progressLogger.watch(this::generateTile)));
-    }
-
-    private void consumeTile(final BinaryTile binaryTile) {
-        Optional.ofNullable(output.tileConsumer())
-                .ifPresent(consumer -> consumer.uncheck().accept(binaryTile));
-    }
-
-    private void generateTile(final Tile tile) {
-        final var encoder = TileEncoderFactory.getEncoder(output.config());
-        final var binaryTile = encoder.encode(tile);
-        consumeTile(binaryTile);
+        forkJoinPool
+                .submit(
+                        () ->
+                                tileInfos.parallelStream()
+                                        .map(this::createTile)
+                                        .map(this::generateTile)
+                                        .forEach(progressLogger.watch(this::consumeTile)))
+                .join();
     }
 
     @NotNull
     private VectorTile createTile(final TileInfo tileInfo) {
         final var elementsOnTile = elementsOnTile(tileInfo).toList();
         return new VectorTile(tileInfo, elementsOnTile);
+    }
+
+    @NotNull
+    private BinaryTile generateTile(final Tile tile) {
+        final var encoder = TileEncoderFactory.getEncoder(output.config());
+        return encoder.encode(tile);
+    }
+
+    private void consumeTile(final BinaryTile binaryTile) {
+        Optional.ofNullable(output.tileConsumer())
+                .ifPresent(consumer -> consumer.uncheck().accept(binaryTile));
     }
 
     @NotNull
