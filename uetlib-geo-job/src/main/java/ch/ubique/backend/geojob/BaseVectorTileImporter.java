@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 
 public abstract class BaseVectorTileImporter<T> extends BaseInputJob {
 
-    private DataAndInput<Collection<T>> data;
+    protected DataAndInput<Collection<T>> data;
 
     protected BaseVectorTileImporter(InputJobDataService jobDataService) {
         super(jobDataService);
