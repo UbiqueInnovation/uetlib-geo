@@ -47,7 +47,7 @@ public abstract class BaseVectorTileImporter<T> extends BaseInputJob {
     }
 
     @Override
-    protected final JobRunState processInputs() throws ExecutionException, InterruptedException {
+    protected JobRunState processInputs() throws ExecutionException, InterruptedException {
         if (data.data().isEmpty()) {
             if (allowEmpty()) {
                 logger.info("No elements found. Continuing to generate empty vector tiles.");
