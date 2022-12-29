@@ -79,7 +79,7 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
                     logger.warn("{} geometry is empty.", context);
                     return Optional.empty();
                 }
-                return Optional.of(geometry);
+                return Optional.of(validGeometry);
             } catch (UnfixableGeometryException e) {
                 logger.warn("{} geometry is not valid and could not be fixed", context, e);
                 return Optional.empty();
