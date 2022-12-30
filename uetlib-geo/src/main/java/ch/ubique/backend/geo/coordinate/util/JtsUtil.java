@@ -86,10 +86,17 @@ public class JtsUtil {
                 .toList();
     }
 
+    /**
+     * simple geometries are not geometry collections and not multi-geometries
+     *
+     * @param geometry
+     * @return
+     */
     public static List<Geometry> getSimpleGeometries(Geometry geometry) {
         if (!(geometry instanceof GeometryCollection)) {
-            // Not a collection -> already simple -> return geometry itself
-            return List.of(geometry);
+            return IntStream.range(0, geometry.getNumGeometries())
+                    .mapToObj(geometry::getGeometryN)
+                    .toList();
         }
 
         // Get geometries of geometry collection and recursively
@@ -117,6 +124,8 @@ public class JtsUtil {
                 "Attempting to fix invalid geometry. Validation error = {}",
                 validator.getValidationError());
         final var fixedGeometry = GeometryFixer.fix(geometry);
+        // GeometryFixer.fix doesnt update srid
+        updateSrid(fixedGeometry, geometry.getSRID());
 
         final var fixedValidator = new IsValidOp(fixedGeometry);
         if (fixedValidator.isValid()) {
@@ -125,6 +134,11 @@ public class JtsUtil {
         }
 
         throw new UnfixableGeometryException(fixedValidator.getValidationError());
+    }
+
+    public static void updateSrid(Geometry geometry, int srid) {
+        geometry.setSRID(srid);
+        getSimpleGeometriesIterator(geometry).forEachRemaining(g -> g.setSRID(srid));
     }
 
     public static void throwIfCoordinateSystemNotEastNorth(final CoordinateReferenceSystem crs) {

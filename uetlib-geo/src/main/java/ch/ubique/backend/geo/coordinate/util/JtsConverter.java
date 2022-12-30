@@ -1,7 +1,6 @@
 package ch.ubique.backend.geo.coordinate.util;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
-import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getSimpleGeometriesIterator;
 import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
 import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
@@ -220,8 +219,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                             findMathTransform(geometry.getSRID(), withHeight));
 
             // JTS.transform doesnt update srid
-            transformedGeometry.setSRID(srid);
-            getSimpleGeometriesIterator(transformedGeometry).forEachRemaining(g -> g.setSRID(srid));
+            JtsUtil.updateSrid(transformedGeometry, srid);
 
             return transformedGeometry;
         } catch (final TransformException | FactoryException e) {
