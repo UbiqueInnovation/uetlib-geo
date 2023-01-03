@@ -1,13 +1,11 @@
 package ch.ubique.backend.geo.graph.models;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
  * @param <V> type of the vertex properties
@@ -16,7 +14,7 @@ import java.util.stream.Stream;
 public final class Vertex<V, E> {
     private final long id;
 
-    private final Set<Edge<V, E>> edges;
+    private Set<Edge<V, E>> edges;
 
     private V properties;
 
@@ -27,24 +25,24 @@ public final class Vertex<V, E> {
     public Vertex(long id, V properties) {
         this.id = id;
         this.properties = properties;
-        edges = new HashSet<>(2);
+        this.edges = Set.of();
     }
 
     public long getId() {
         return id;
     }
 
-    Set<Edge<V, E>> getModifiableEdges() {
-        return edges;
+    void setEdges(final Set<Edge<V, E>> edges) {
+        this.edges = Collections.unmodifiableSet(edges);
     }
 
     /**
-     * Returns an unmodifiable instance, to prevent getEdges().add() calls.
-     * To add edges, {@linkplain Graph#getOrAddUndirectedEdge} respectively
-     * {@linkplain Graph#getOrAddDirectedEdge} should be used.
+     * Returns an unmodifiable instance, to prevent getEdges().add() calls. To add edges,
+     * {@linkplain Graph#getOrAddUndirectedEdge} respectively {@linkplain
+     * Graph#getOrAddDirectedEdge} should be used.
      */
     public Set<Edge<V, E>> getEdges() {
-        return edges.stream().collect(Collectors.toUnmodifiableSet());
+        return edges;
     }
 
     public Optional<Edge<V, E>> getEdgeTo(long neighborId) {
@@ -95,6 +93,4 @@ public final class Vertex<V, E> {
     public int hashCode() {
         return Long.hashCode(id);
     }
-
-
 }

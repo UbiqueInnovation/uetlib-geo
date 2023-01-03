@@ -9,13 +9,20 @@ import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.geotools.geometry.jts.JTS;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +34,17 @@ public class VectorTileGenerator implements TileGenerator {
 
     private final ForkJoinPool forkJoinPool;
 
+    private final Cache<VectorTileElement, Envelope> envelopeCache;
+
     public VectorTileGenerator(final VectorTileOutput output, final int parallelism) {
         this.output = output;
         this.forkJoinPool = new ForkJoinPool(parallelism);
+        final var cacheBuilder = Caffeine.newBuilder();
+        if (output.usesElementSupplier()) {
+            // Do not cache when supplier is used
+            cacheBuilder.maximumSize(0);
+        }
+        this.envelopeCache = cacheBuilder.build();
     }
 
     public static void generateTiles(final VectorTileOutput output) {
@@ -47,6 +62,7 @@ public class VectorTileGenerator implements TileGenerator {
                 .map(this::getTileInfos)
                 .forEach(this::generateTilesForInfos);
 
+        envelopeCache.invalidateAll();
         forkJoinPool.shutdown();
     }
 
@@ -90,14 +106,13 @@ public class VectorTileGenerator implements TileGenerator {
 
     @NotNull
     private Stream<VectorTileElement> elementsOnTile(final TileInfo tileInfo) {
-        final var envelopeGeometry = JTS.toGeometry(tileInfo.envelope());
+        final var level = tileInfo.level();
+        final var tileEnvelope = tileInfo.envelope();
+        final var envelopeGeometry = JTS.toGeometry(tileEnvelope);
 
         final var elementsOnTile =
                 output.elements(tileInfo).stream()
-                        .filter(
-                                element ->
-                                        element.showElement(tileInfo.level())
-                                                && element.geometry().intersects(envelopeGeometry));
+                        .filter(isOnTile(level, tileEnvelope, envelopeGeometry));
 
         final var limit = output.config().getLimit(tileInfo.level());
         if (limit.isEmpty()) {
@@ -107,5 +122,25 @@ public class VectorTileGenerator implements TileGenerator {
         return elementsOnTile
                 .sorted(Comparator.comparingDouble(VectorTileElement::score).reversed())
                 .limit(limit.get());
+    }
+
+    private Predicate<VectorTileElement> isOnTile(
+            final int level,
+            final ReferencedEnvelope tileEnvelope,
+            final Polygon envelopeGeometry) {
+
+        return element -> {
+            if (!element.showElement(level)) {
+                return false;
+            }
+
+            if (element.geometry() instanceof Point point) {
+                return tileEnvelope.covers(point.getCoordinate());
+            }
+
+            final var elementEnvelope = envelopeCache.get(element, VectorTileElement::boundingBox);
+            return tileEnvelope.intersects(elementEnvelope)
+                    && envelopeGeometry.intersects(element.geometry());
+        };
     }
 }
