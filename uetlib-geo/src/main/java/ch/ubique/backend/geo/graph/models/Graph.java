@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.graph.models;
 
+import ch.ubique.backend.core.utils.SetUtils;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,7 +85,7 @@ public class Graph<V, E> {
 
         final var edge = new Edge<>(lastEdgeId++, u, v, properties);
         directedEdges.put(edge.getId(), edge);
-        u.getModifiableEdges().add(edge);
+        u.setEdges(SetUtils.union(u.getEdges(), Set.of(edge)));
 
         return edge;
     }
@@ -134,7 +135,8 @@ public class Graph<V, E> {
     }
 
     public void removeEdge(final Edge<V, E> edge) {
-        edge.getFrom().getModifiableEdges().remove(edge);
+        final var fromVertex = edge.getFrom();
+        fromVertex.setEdges(SetUtils.exclude(fromVertex.getEdges(), edge));
         directedEdges.remove(edge.getId());
     }
 
