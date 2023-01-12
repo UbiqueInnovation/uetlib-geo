@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -38,6 +39,8 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     private final GeometryFactory geometryFactory;
     private final Function<C, Coordinate> toJtsMapper;
     private final Function<Coordinate, C> fromJtsMapper;
+    private final ReferencedEnvelope coordinateSystemBounds;
+
     public static final JtsConverter<WGS84Coordinate> WGS84 =
             new JtsConverter<>(
                     4326,
@@ -82,7 +85,13 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                     c -> new LV03Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new LV03Coordinate(485071.58, 74261.72),
                     new LV03Coordinate(837119.8, 299941.79));
-    private final ReferencedEnvelope coordinateSystemBounds;
+
+    public static JtsConverter<?> forCrs(final CoordinateReferenceSystem crs) {
+        return Stream.of(LV95, LV03, WGS84, WEB_MERCATOR)
+                .filter(jtsConverter -> jtsConverter.crs.equals(crs))
+                .findFirst()
+                .orElseThrow();
+    }
 
     private JtsConverter(
             final int srid,

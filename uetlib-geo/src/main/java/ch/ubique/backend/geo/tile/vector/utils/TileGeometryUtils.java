@@ -2,10 +2,12 @@ package ch.ubique.backend.geo.tile.vector.utils;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.util.Arrays;
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -27,6 +29,7 @@ public class TileGeometryUtils {
             final VectorTileConfig config) {
 
         ensureCrsMatch(geometry, tileEnvelope);
+        ensureCoordinatesAreWellDefined(geometry);
 
         try {
             final var withHeight = !Double.isNaN(geometry.getCoordinate().getZ());
@@ -45,6 +48,21 @@ public class TileGeometryUtils {
                             "The elements (%s) crs (%s) does not match the tiles crs (%s)",
                             geometry, crs, tileEnvelope.getCoordinateReferenceSystem()));
         }
+    }
+
+    private static void ensureCoordinatesAreWellDefined(final Geometry geometry) {
+        final var crs = getCrs(geometry);
+        final var coordinateSystemBounds = JtsConverter.forCrs(crs).coordinateSystemBounds();
+        Arrays.stream(geometry.getCoordinates())
+                .forEach(
+                        coordinate -> {
+                            if (!coordinateSystemBounds.covers(coordinate)) {
+                                throw new IllegalArgumentException(
+                                        "The given geometry has a coordinate outside the defined bounds of the coordinate system. "
+                                                + "Violating coordinate: "
+                                                + coordinate);
+                            }
+                        });
     }
 
     public static MathTransform tileTransform(
