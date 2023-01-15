@@ -48,6 +48,11 @@
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
+            <artifactId>gt-geojson</artifactId>
+            <version>${org.geotools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
             <artifactId>gt-geotiff</artifactId>
             <version>${org.geotools.version}</version>
         </dependency>
@@ -64,6 +69,11 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
+            <version>${org.geotools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-opengis</artifactId>
             <version>${org.geotools.version}</version>
         </dependency>
     </dependencies>
