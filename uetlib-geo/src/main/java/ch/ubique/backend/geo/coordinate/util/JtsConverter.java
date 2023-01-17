@@ -34,13 +34,6 @@ import org.opengis.referencing.operation.TransformException;
 
 public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coordinate> {
 
-    private final int srid;
-    private final CoordinateReferenceSystem crs;
-    private final GeometryFactory geometryFactory;
-    private final Function<C, Coordinate> toJtsMapper;
-    private final Function<Coordinate, C> fromJtsMapper;
-    private final ReferencedEnvelope coordinateSystemBounds;
-
     public static final JtsConverter<WGS84Coordinate> WGS84 =
             new JtsConverter<>(
                     4326,
@@ -72,8 +65,8 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                                     c.getNorth(),
                                     c.getOptionalElevation().orElse(NULL_ORDINATE)),
                     c -> new LV95Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
-                    new LV95Coordinate(2485071.58, 1074261.72),
-                    new LV95Coordinate(2837119.8, 1299941.79));
+                    new LV95Coordinate(2449866.8, 1051693.7),
+                    new LV95Coordinate(2872324.6, 1322509.8));
     public static final JtsConverter<LV03Coordinate> LV03 =
             new JtsConverter<>(
                     21781,
@@ -83,15 +76,15 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                                     c.getNorth(),
                                     c.getOptionalElevation().orElse(NULL_ORDINATE)),
                     c -> new LV03Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
-                    new LV03Coordinate(485071.58, 74261.72),
-                    new LV03Coordinate(837119.8, 299941.79));
+                    new LV03Coordinate(449866.758, 51693.713),
+                    new LV03Coordinate(872324.622, 322509.797));
 
-    public static JtsConverter<?> forCrs(final CoordinateReferenceSystem crs) {
-        return Stream.of(LV95, LV03, WGS84, WEB_MERCATOR)
-                .filter(jtsConverter -> jtsConverter.crs.equals(crs))
-                .findFirst()
-                .orElseThrow();
-    }
+    private final int srid;
+    private final CoordinateReferenceSystem crs;
+    private final GeometryFactory geometryFactory;
+    private final Function<C, Coordinate> toJtsMapper;
+    private final Function<Coordinate, C> fromJtsMapper;
+    private final ReferencedEnvelope coordinateSystemBounds;
 
     private JtsConverter(
             final int srid,
@@ -109,6 +102,20 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                         new Envelope(toJts(minCoordinate), toJts(maxCoordinate)), crs);
     }
 
+    public static JtsConverter<?> forCrs(final CoordinateReferenceSystem crs) {
+        return Stream.of(LV95, LV03, WGS84, WEB_MERCATOR)
+                .filter(jtsConverter -> jtsConverter.crs.equals(crs))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private static Double nullIfNaN(final Double value) {
+        if (null != value && value.isNaN()) {
+            return null;
+        }
+        return value;
+    }
+
     public int srid() {
         return srid;
     }
@@ -121,13 +128,6 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     @NotNull
     public CoordinateReferenceSystem crs() {
         return crs;
-    }
-
-    private static Double nullIfNaN(final Double value) {
-        if (null != value && value.isNaN()) {
-            return null;
-        }
-        return value;
     }
 
     @NotNull
