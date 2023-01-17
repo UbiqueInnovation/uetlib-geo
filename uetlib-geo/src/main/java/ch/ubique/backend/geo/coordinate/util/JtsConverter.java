@@ -56,6 +56,10 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                     c -> new WebMercatorCoordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new WebMercatorCoordinate(-20037508.34, -20048966.1),
                     new WebMercatorCoordinate(20037508.34, 20048966.1));
+    /**
+     * bounds equal to the min/max available coordinates with tiles on <a
+     * href="https://map.geo.admin.ch/">map.geo.admin.ch</a>
+     */
     public static final JtsConverter<LV95Coordinate> LV95 =
             new JtsConverter<>(
                     2056,
@@ -65,8 +69,13 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                                     c.getNorth(),
                                     c.getOptionalElevation().orElse(NULL_ORDINATE)),
                     c -> new LV95Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
-                    new LV95Coordinate(2449866.8, 1051693.7),
-                    new LV95Coordinate(2872324.6, 1322509.8));
+                    new LV95Coordinate(2_420_000.0, 1_000_000.0),
+                    new LV95Coordinate(2_900_000.0, 1_350_000.0));
+
+    /**
+     * bounds equal to the min/max available coordinates with tiles on <a
+     * href="https://map.geo.admin.ch/">map.geo.admin.ch</a>
+     */
     public static final JtsConverter<LV03Coordinate> LV03 =
             new JtsConverter<>(
                     21781,
@@ -76,8 +85,8 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                                     c.getNorth(),
                                     c.getOptionalElevation().orElse(NULL_ORDINATE)),
                     c -> new LV03Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
-                    new LV03Coordinate(449866.758, 51693.713),
-                    new LV03Coordinate(872324.622, 322509.797));
+                    new LV03Coordinate(420_000.0, 0.0),
+                    new LV03Coordinate(900_000.0, 350_000.0));
 
     private final int srid;
     private final CoordinateReferenceSystem crs;
