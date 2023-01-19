@@ -12,18 +12,20 @@
     <artifactId>backend-jvm-lib-geo</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <org.geotools.version>28.0</org.geotools.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>backend-jvm-lib-core</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>backend-jvm-lib-storage</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <artifactId>jts-core</artifactId>
@@ -78,9 +80,17 @@
         </dependency>
     </dependencies>
 
-    <properties>
-        <org.geotools.version>28.0</org.geotools.version>
-    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <type>pom</type>
+                <version>${spring-boot-version}</version>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <repositories>
         <repository>
