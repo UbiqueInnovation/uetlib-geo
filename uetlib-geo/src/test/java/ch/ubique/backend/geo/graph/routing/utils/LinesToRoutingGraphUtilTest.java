@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
+import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
 import com.pivovarit.function.ThrowingFunction;
 import java.util.List;
 import java.util.stream.Stream;
@@ -10,6 +11,11 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
 class LinesToRoutingGraphUtilTest {
+    private final WeightingFunction<String> weightingFunction =
+            (from, to, info) -> {
+                Assertions.assertNotNull(info);
+                return (float) from.distance(to);
+            };
 
     @Test
     void test() {
@@ -24,7 +30,7 @@ class LinesToRoutingGraphUtilTest {
                         .map(line -> new LineWithInfo<>(line, testInfo))
                         .toList();
 
-        final var graphs = LinesToRoutingGraphUtil.withInfo(lines).buildGraph();
+        final var graphs = LinesToRoutingGraphUtil.withInfo(lines, weightingFunction).buildGraph();
         final var completeGraph = graphs.completeGraph();
 
         Assertions.assertNotNull(completeGraph);
@@ -32,7 +38,7 @@ class LinesToRoutingGraphUtilTest {
         Assertions.assertEquals(2 * 3, completeGraph.getDirectedEdges().size());
         Assertions.assertTrue(
                 completeGraph.getDirectedEdges().stream()
-                        .allMatch(e -> testInfo.equals(e.getProperties())));
+                        .allMatch(e -> e.getProperties().weight() > 0));
 
         Assertions.assertTrue(
                 graphs.routingGraph().getVertices().stream().allMatch(v -> v.degree() != 2));
@@ -55,7 +61,7 @@ class LinesToRoutingGraphUtilTest {
                         .map(line -> new LineWithInfo<>(line, testInfo))
                         .toList();
 
-        final var graphs = LinesToRoutingGraphUtil.withInfo(lines).buildGraph();
+        final var graphs = LinesToRoutingGraphUtil.withInfo(lines, weightingFunction).buildGraph();
         final var completeGraph = graphs.completeGraph();
         final var routingGraph = graphs.routingGraph();
 
@@ -64,7 +70,7 @@ class LinesToRoutingGraphUtilTest {
         Assertions.assertEquals(2, completeGraph.getDirectedEdges().size());
         Assertions.assertTrue(
                 completeGraph.getDirectedEdges().stream()
-                        .allMatch(e -> testInfo.equals(e.getProperties())));
+                        .allMatch(e -> e.getProperties().weight() > 0));
 
         Assertions.assertTrue(
                 completeGraph.getVertices().stream()
@@ -94,7 +100,7 @@ class LinesToRoutingGraphUtilTest {
                         .map(line -> new LineWithInfo<>(line, testInfo))
                         .toList();
 
-        final var graphs = LinesToRoutingGraphUtil.withInfo(lines).buildGraph();
+        final var graphs = LinesToRoutingGraphUtil.withInfo(lines, weightingFunction).buildGraph();
         final var completeGraph = graphs.completeGraph();
         final var routingGraph = graphs.routingGraph();
 
@@ -103,7 +109,7 @@ class LinesToRoutingGraphUtilTest {
         Assertions.assertEquals(2 * 4, completeGraph.getDirectedEdges().size());
         Assertions.assertTrue(
                 completeGraph.getDirectedEdges().stream()
-                        .allMatch(e -> testInfo.equals(e.getProperties())));
+                        .allMatch(e -> e.getProperties().weight() > 0));
 
         Assertions.assertNotNull(routingGraph);
         Assertions.assertEquals(2, routingGraph.getVertices().size());
@@ -114,7 +120,7 @@ class LinesToRoutingGraphUtilTest {
                         .size()); // Two edges -> one directed edge for each direction
         Assertions.assertTrue(
                 routingGraph.getDirectedEdges().stream()
-                        .allMatch(e -> testInfo.equals(e.getProperties().originalProperties())));
+                        .allMatch(e -> e.getProperties().weight() > 0));
 
         Assertions.assertTrue(
                 completeGraph.getVertices().stream()
@@ -140,7 +146,9 @@ class LinesToRoutingGraphUtilTest {
                                 "LINESTRING (0 0 100, 10 0.8 100, 20 .2 100, 30 0.8 100, 40 0.5 100, 50 0.8 100)");
         line2.setUserData("TLM");
 
-        final var graphs = new LinesToRoutingGraphUtil<String>(List.of(line1, line2)).buildGraph();
+        final var graphs =
+                new LinesToRoutingGraphUtil<>(List.of(line1, line2), weightingFunction)
+                        .buildGraph();
         final var completeGraph = graphs.completeGraph();
 
         Assertions.assertNotNull(completeGraph);
@@ -156,7 +164,7 @@ class LinesToRoutingGraphUtilTest {
                 .map(v -> v.getId() + ": " + v.getProperties())
                 .forEach(System.out::println);
         graphs.routingGraph().getDirectedEdges().stream()
-                .map(e -> e.toString() + ": " + e.getProperties().originalProperties())
+                .map(e -> e.toString() + ": " + e.getProperties())
                 .forEach(System.out::println);
 
         Assertions.assertEquals(2, graphs.routingGraph().getVertices().size());
@@ -178,7 +186,9 @@ class LinesToRoutingGraphUtilTest {
         final var line2 = (LineString) wktReader.read("LINESTRING (0 0, 50 0)");
         line2.setUserData("SAC");
 
-        final var graphs = new LinesToRoutingGraphUtil<String>(List.of(line1, line2)).buildGraph();
+        final var graphs =
+                new LinesToRoutingGraphUtil<>(List.of(line1, line2), weightingFunction)
+                        .buildGraph();
         final var completeGraph = graphs.completeGraph();
 
         Assertions.assertNotNull(completeGraph);
@@ -196,7 +206,7 @@ class LinesToRoutingGraphUtilTest {
                 .map(v -> v.getId() + ": " + v.getProperties())
                 .forEach(System.out::println);
         graphs.routingGraph().getDirectedEdges().stream()
-                .map(e -> e.toString() + ": " + e.getProperties().originalProperties())
+                .map(e -> e.toString() + ": " + e.getProperties())
                 .forEach(System.out::println);
 
         Assertions.assertEquals(2, graphs.routingGraph().getVertices().size());
@@ -223,7 +233,7 @@ class LinesToRoutingGraphUtilTest {
         lineTlm.setUserData("TLM");
 
         final var graphs =
-                new LinesToRoutingGraphUtil<String>(List.of(lineTlm, lineSac))
+                new LinesToRoutingGraphUtil<>(List.of(lineTlm, lineSac), weightingFunction)
                         .snapTolerance(6.4)
                         .hasSnappingPriority("TLM"::equals)
                         .hasEdgePriority("SAC"::equals)
@@ -245,12 +255,12 @@ class LinesToRoutingGraphUtilTest {
                 .map(v -> v.getId() + ": " + v.getProperties())
                 .forEach(System.out::println);
         graphs.routingGraph().getDirectedEdges().stream()
-                .map(e -> e.toString() + ": " + e.getProperties().originalProperties())
+                .map(e -> e.toString() + ": " + e.getProperties())
                 .forEach(System.out::println);
 
         Assertions.assertTrue(
                 graphs.routingGraph().getDirectedEdges().stream()
-                        .allMatch(e -> e.getProperties().originalProperties().equals("SAC")));
+                        .allMatch(e -> e.getProperties().weight() > 0));
 
         Assertions.assertTrue(
                 graphs.routingGraph().getVertices().stream()

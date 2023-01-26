@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.tile.common.encoder;
 
 import ch.ubique.backend.geo.tile.vector.encoder.GeoJsonVectorTileEncoder;
+import ch.ubique.backend.geo.tile.vector.encoder.JsonVectorTileEncoder;
 import ch.ubique.backend.geo.tile.vector.encoder.PbfVectorTileEncoder;
 import ch.ubique.backend.geo.tile.vector.encoder.PngVectorTileEncoder;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
@@ -13,6 +14,7 @@ public final class TileEncoderFactory {
         final var format = config.getOutputFormat();
         return switch (format) {
             case PBF -> new PbfVectorTileEncoder(config);
+            case JSON -> new JsonVectorTileEncoder(config);
             case GEO_JSON -> new GeoJsonVectorTileEncoder(config);
             case PNG -> new PngVectorTileEncoder(config);
         };

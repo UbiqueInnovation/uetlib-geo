@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.tile.common.models;
 
 public enum TileOutputFormat {
+    JSON,
     GEO_JSON,
     PBF,
     PNG;
@@ -9,7 +10,7 @@ public enum TileOutputFormat {
         return switch (this) {
             case PBF -> "pbf";
             case PNG -> "png";
-            case GEO_JSON -> "json";
+            case JSON, GEO_JSON -> "json";
         };
     }
 }
