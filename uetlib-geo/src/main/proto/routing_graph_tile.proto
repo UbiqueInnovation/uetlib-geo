@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package ch.ubique.geo;
+
+option optimize_for = SPEED;
+
+// Java specific options
+option java_multiple_files = true;
+option java_package = "ch.ubique.backend.geo.graph.routing";
+option java_outer_classname = "RoutingGraphTileProtos";
+
+
+message RoutingGraphTile {
+  repeated Vertex vertices = 1;
+
+  message Vertex {
+    int32 identifier = 1;
+    double x = 2;
+    double y = 3;
+    optional float elevation = 4;
+
+    message Neighbor {
+      int32 identifier = 1;
+      double x = 2;
+      double y = 3;
+      float weight = 4;
+    }
+
+    repeated Neighbor neighbors = 5;
+
+    message RoutingNeighbor {
+      int32 identifier = 1;
+      double x = 2;
+      double y = 3;
+      float weight = 4;
+      // the direction is the identifier of a neighbor in which we can reach this routing neighbor
+      int32 direction = 5;
+    }
+    repeated RoutingNeighbor routingNeighbors = 6;
+  }
+}
