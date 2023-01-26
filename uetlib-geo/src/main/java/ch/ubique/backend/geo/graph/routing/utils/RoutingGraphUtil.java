@@ -1,43 +1,38 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
-import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculator;
-import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculatorFactory;
 import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
-import ch.ubique.backend.geo.graph.routing.RoutingGraphEdgeProperties;
+import ch.ubique.backend.geo.graph.routing.models.Weight;
+import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import org.locationtech.jts.geom.Coordinate;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Set;
-
-public class RoutingGraphUtil<E> {
+public class RoutingGraphUtil {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final DistanceCalculator distanceCalculator;
-
-    public static <T> Graph<Coordinate, RoutingGraphEdgeProperties<T>> createRoutingGraph(
-            final Graph<Coordinate, T> graph, final CoordinateReferenceSystem crs) {
-        final var routingGraphUtil = new RoutingGraphUtil<>(graph, crs);
+    public static Graph<Coordinate, WeightAndDirection> createRoutingGraph(
+            final Graph<Coordinate, Weight> graph) {
+        final var routingGraphUtil = new RoutingGraphUtil(graph);
         return routingGraphUtil.createRoutingGraph();
     }
 
-    private final Graph<Coordinate, E> inputGraph;
-    private final Graph<Coordinate, RoutingGraphEdgeProperties<E>> routingGraph;
-    private final Set<Vertex<Coordinate, E>> additionalRoutingVertices;
+    private final Graph<Coordinate, Weight> inputGraph;
+    private final Graph<Coordinate, WeightAndDirection> routingGraph;
+    private final Set<Vertex<Coordinate, Weight>> additionalRoutingVertices;
 
-    private RoutingGraphUtil(final Graph<Coordinate, E> inputGraph, final CoordinateReferenceSystem crs) {
-        this.distanceCalculator = DistanceCalculatorFactory.create(crs);
+    private RoutingGraphUtil(final Graph<Coordinate, Weight> inputGraph) {
         this.inputGraph = inputGraph;
         routingGraph = new Graph<>();
         additionalRoutingVertices = new HashSet<>();
     }
 
-    private Graph<Coordinate, RoutingGraphEdgeProperties<E>> createRoutingGraph() {
+    private Graph<Coordinate, WeightAndDirection> createRoutingGraph() {
         logger.info("Creating routing graphs");
 
         logger.info("Finding cycles");
@@ -48,10 +43,8 @@ public class RoutingGraphUtil<E> {
             additionalRoutingVertices.add(vertexOnCycle);
         }
 
-        final var routingVertices = inputGraph.getVertices()
-                .stream()
-                .filter(this::isRoutingVertex)
-                .toList();
+        final var routingVertices =
+                inputGraph.getVertices().stream().filter(this::isRoutingVertex).toList();
 
         logger.info("Creating routing vertices");
         routingVertices.forEach(this::addToRoutingGraph);
@@ -63,38 +56,39 @@ public class RoutingGraphUtil<E> {
         return routingGraph;
     }
 
-    private boolean isRoutingVertex(Vertex<Coordinate, E> vertex) {
-        return vertex.degree() == 1 || vertex.degree() > 2 || additionalRoutingVertices.contains(vertex);
+    private boolean isRoutingVertex(Vertex<Coordinate, Weight> vertex) {
+        return vertex.degree() == 1
+                || vertex.degree() > 2
+                || additionalRoutingVertices.contains(vertex);
     }
 
-    private void addToRoutingGraph(Vertex<Coordinate, E> vertex) {
+    private void addToRoutingGraph(Vertex<Coordinate, Weight> vertex) {
         routingGraph.getOrAddVertex(new Vertex<>(vertex.getId(), vertex.getProperties()));
     }
 
-    private void linkRoutingNode(Vertex<Coordinate, E> vertex) {
+    private void linkRoutingNode(Vertex<Coordinate, Weight> vertex) {
         for (final var direction : vertex.getEdges()) {
             linkRoutingNodeForNeighbor(vertex, direction);
         }
     }
 
     private void linkRoutingNodeForNeighbor(
-            Vertex<Coordinate, E> start,
-            Edge<Coordinate, E>  direction) {
+            Vertex<Coordinate, Weight> start, Edge<Coordinate, Weight> direction) {
 
-        final var visitedEdges = new HashSet<Edge<Coordinate, E>>();
+        final var visitedEdges = new HashSet<Edge<Coordinate, Weight>>();
 
-        var distance = 0.0;
+        var weight = 0.0f;
 
         var from = start;
         var current = direction;
         while (true) {
             visitedEdges.add(current);
             final var to = current.getOther(from);
-            distance += getDistance(from, to);
+            weight += Optional.ofNullable(current.getProperties()).map(Weight::weight).orElse(0f);
 
             // Link routing vertex and return
             if (isRoutingVertex(to)) {
-                upsertRoutingEdge(start.getId(), to.getId(), direction.getOther(start), distance, direction.getProperties());
+                upsertRoutingEdge(start.getId(), to.getId(), direction.getOther(start), weight);
                 return;
             }
 
@@ -104,7 +98,6 @@ public class RoutingGraphUtil<E> {
 
             assert next.isPresent();
 
-
             from = to;
             current = next.get();
         }
@@ -113,30 +106,26 @@ public class RoutingGraphUtil<E> {
     private void upsertRoutingEdge(
             long vertexId,
             long routingNeighborId,
-            Vertex<Coordinate, E> direction,
-            double distance, E originalProperties) {
+            Vertex<Coordinate, Weight> direction,
+            float weight) {
 
         // Try to get existing routing edge
         final var existingRoutingEdgeMaybe = routingGraph.getEdge(vertexId, routingNeighborId);
 
         if (existingRoutingEdgeMaybe.isPresent()) {
             final var existingRoutingEdge = existingRoutingEdgeMaybe.get();
-            if (existingRoutingEdge.getProperties().distance() > distance) {
+            if (existingRoutingEdge.getProperties().weight() > weight) {
                 // Found a shorter way, update routing properties
-                final var routingProperties = new RoutingGraphEdgeProperties<>(distance, direction, existingRoutingEdge.getProperties().originalProperties());
+                final var routingProperties = new WeightAndDirection(weight, direction);
                 existingRoutingEdge.setProperties(routingProperties);
             }
             return;
         }
 
         // Insert new routing edge
-        final var routingProperties = new RoutingGraphEdgeProperties<>(distance, direction, originalProperties);
+        final var routingProperties = new WeightAndDirection(weight, direction);
         if (vertexId != routingNeighborId) {
             routingGraph.getOrAddDirectedEdge(vertexId, routingNeighborId, routingProperties);
         }
-    }
-
-    private double getDistance(Vertex<Coordinate, E> from, Vertex<Coordinate, E> to) {
-        return distanceCalculator.getDistance(from.getProperties(), to.getProperties());
     }
 }

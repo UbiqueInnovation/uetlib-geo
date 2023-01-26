@@ -44,6 +44,10 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
                     "This encoder can only encode tiles of type " + VectorTile.class);
         }
 
+        if (RoutingGraphVectorTileEncoder.isRoutingGraphTile(tile)) {
+            return new RoutingGraphVectorTileEncoder(config).encode(vectorTile);
+        }
+
         return new BinaryTile(
                 tile.tileInfo(), config.getOutputFormat(), encodeVectorTile(vectorTile));
     }
