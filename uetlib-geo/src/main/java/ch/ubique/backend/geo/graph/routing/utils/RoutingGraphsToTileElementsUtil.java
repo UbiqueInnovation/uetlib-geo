@@ -7,7 +7,6 @@ import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.Neighbor;
 import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.RoutingNeighbor;
 import ch.ubique.backend.geo.graph.routing.models.Weight;
 import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
-import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import org.locationtech.jts.geom.Coordinate;
@@ -17,12 +16,11 @@ public class RoutingGraphsToTileElementsUtil {
 
     private RoutingGraphsToTileElementsUtil() {}
 
-    public static Collection<VectorTileElement> mapToTileElements(
+    public static Collection<RoutingGraphTile.Vertex> mapToTileElements(
             final RoutingGraphs graphs, final GeometryFactory geometryFactory) {
 
         return graphs.completeGraph().getVertices().stream()
                 .map(vertex -> vertex(graphs, geometryFactory, vertex))
-                .map(VectorTileElement.class::cast)
                 .toList();
     }
 
