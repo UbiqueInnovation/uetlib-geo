@@ -25,6 +25,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public class VectorTileGenerator implements TileGenerator {
 
@@ -75,7 +76,8 @@ public class VectorTileGenerator implements TileGenerator {
     private void generateTilesForInfos(final Collection<TileInfo> tileInfos) {
         final var currentLevel = tileInfos.stream().findFirst().orElseThrow().level();
         final var prefix = String.format("Level %d: ", currentLevel);
-        final var progressLogger = new ProgressLogger(prefix, tileInfos.size());
+        final var mdcContextMap = MDC.getCopyOfContextMap();
+        final var progressLogger = new ProgressLogger(prefix, tileInfos.size(), mdcContextMap);
 
         forkJoinPool
                 .submit(
