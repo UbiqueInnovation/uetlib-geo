@@ -41,10 +41,6 @@ public class VectorTileGenerator implements TileGenerator {
         this.output = output;
         this.forkJoinPool = new ForkJoinPool(parallelism);
         final var cacheBuilder = Caffeine.newBuilder();
-        if (output.usesElementSupplier()) {
-            // Do not cache when supplier is used
-            cacheBuilder.maximumSize(0);
-        }
         this.envelopeCache = cacheBuilder.build();
     }
 
