@@ -78,6 +78,7 @@ public class RoutingGraphVectorTileEncoder implements TileEncoder {
                 .setX(coordinate.x)
                 .setY(coordinate.y)
                 .setWeight(routingNeighbor.weight())
+                .setDirection((int) routingNeighbor.direction())
                 .build();
     }
 }
