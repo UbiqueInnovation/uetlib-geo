@@ -4,6 +4,7 @@ import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
 import ch.ubique.backend.geo.tile.common.encoder.TileEncoder;
 import ch.ubique.backend.geo.tile.common.models.Tile;
+import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
@@ -44,7 +45,8 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
                     "This encoder can only encode tiles of type " + VectorTile.class);
         }
 
-        if (RoutingGraphVectorTileEncoder.isRoutingGraphTile(tile)) {
+        if (config.getOutputFormat() == TileOutputFormat.PBF
+                && RoutingGraphVectorTileEncoder.isRoutingGraphTile(tile)) {
             return new RoutingGraphVectorTileEncoder(config).encode(vectorTile);
         }
 
