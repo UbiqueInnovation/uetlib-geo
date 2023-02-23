@@ -1,14 +1,8 @@
 package ch.ubique.backend.geo.graph.models;
 
 import ch.ubique.backend.core.utils.SetUtils;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -198,5 +192,9 @@ public class Graph<V, E> {
                                         edge.getV().getId(),
                                         edgeMapper.apply(edge)));
         return mappedGraph;
+    }
+
+    public boolean isEmpty() {
+        return vertices.isEmpty() && directedEdges.isEmpty();
     }
 }

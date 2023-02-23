@@ -1,6 +1,5 @@
 package ch.ubique.backend.geo.osm.parser.graph;
 
-import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.osm.parser.osmosis.OsmParser;
 import ch.ubique.backend.geo.osm.parser.osmosis.OsmUtils;
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
@@ -15,7 +14,7 @@ import java.util.Map;
 
 public class OsmGraphParser {
 
-    public static Graph<OsmVertexProperties, OsmEdgeProperties> parse(InputStream inputStream, OsmGraphParserConfig config) {
+    public static OsmGraph parse(InputStream inputStream, OsmGraphParserConfig config) {
         var osmParser = new OsmGraphParser(inputStream, config);
         return osmParser.parse();
     }
@@ -23,7 +22,7 @@ public class OsmGraphParser {
     private final InputStream inputStream;
     private final OsmGraphParserConfig config;
 
-    private final Graph<OsmVertexProperties, OsmEdgeProperties> graph;
+    private final OsmGraph graph;
 
     private long nodeCount;
     private long nodeStartMillis;
@@ -45,15 +44,11 @@ public class OsmGraphParser {
         wayCount = 0;
         wayStartMillis = -1;
 
-        graph = new Graph<>();
+        graph = new OsmGraph();
     }
 
-    private Graph<OsmVertexProperties, OsmEdgeProperties> parse() {
-        OsmParser
-                .from(inputStream)
-                .onNode(this::processNodes)
-                .onWay(this::processWays)
-                .parse();
+    private OsmGraph parse() {
+        OsmParser.from(inputStream).onNode(this::processNodes).onWay(this::processWays).parse();
 
         return graph;
     }
@@ -62,7 +57,6 @@ public class OsmGraphParser {
         // Get or create vertex
         var id = config.useSourceIds() ? node.getId() : nodeCount;
         nodeIdToVertexId.put(node.getId(), id);
-
 
         // Get coordinate
         var coordinate = OsmUtils.getCoordinate(node);
@@ -111,7 +105,11 @@ public class OsmGraphParser {
         }
         nodeCount++;
         if (nodeCount % 1000000 == 0) {
-            logProgress(nodeCount, 1000000, nodeStartMillis, "Processed {} nodes at a current rate of {} [nodes/s]");
+            logProgress(
+                    nodeCount,
+                    1000000,
+                    nodeStartMillis,
+                    "Processed {} nodes at a current rate of {} [nodes/s]");
             nodeStartMillis = System.currentTimeMillis();
         }
     }
@@ -122,12 +120,17 @@ public class OsmGraphParser {
         }
         wayCount++;
         if (wayCount % 100000 == 0) {
-            logProgress(wayCount, 100000, wayStartMillis, "Processed {} ways at a current rate of {} [ways/s]");
+            logProgress(
+                    wayCount,
+                    100000,
+                    wayStartMillis,
+                    "Processed {} ways at a current rate of {} [ways/s]");
             wayStartMillis = System.currentTimeMillis();
         }
     }
 
-    private void logProgress(long elementCount, int logInterval, long startMillis, String logFormat) {
+    private void logProgress(
+            long elementCount, int logInterval, long startMillis, String logFormat) {
         double secondsPassed = (System.currentTimeMillis() - startMillis) / 1000.;
         var count = String.format("%,d", elementCount);
         var throughput = String.format("%,.0f", logInterval / secondsPassed);

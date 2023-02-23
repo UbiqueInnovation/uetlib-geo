@@ -1,32 +1,47 @@
 package ch.ubique.backend.geojob;
 
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV95;
-
+import ch.ubique.backend.core.service.DataAndInput;
+import ch.ubique.backend.core.service.InputDataLoaderService;
 import ch.ubique.backend.geo.graph.routing.GraphType;
-import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
+import ch.ubique.backend.geo.graph.routing.RoutingGraphsWithLayer;
 import ch.ubique.backend.geo.graph.routing.utils.RoutingGraphsToTileElementsUtil;
 import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
+import ch.ubique.backend.geo.tile.common.utils.TileGeneratorUtil;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileElementSupplier;
+import ch.ubique.backend.job.BaseInputJob;
 import ch.ubique.backend.job.model.JobPropertyKey;
+import ch.ubique.backend.job.model.JobRunState;
 import ch.ubique.backend.job.model.JobRunnerKey;
 import com.pivovarit.function.ThrowingConsumer;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.context.ApplicationContext;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.springframework.context.ApplicationContext;
 
-public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseVectorTileImporter<T> {
+import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV95;
 
-    protected BaseRoutingGraphGeneratorJob(final ApplicationContext context) {
+public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
+
+    private final InputDataLoaderService<T> service;
+
+    protected BaseRoutingGraphGeneratorJob(
+            final ApplicationContext context, final InputDataLoaderService<T> service) {
         super(context);
+        this.service = service;
     }
 
-    public record TileOutput(BinaryTile tile, GraphType graphType, TileOutputFormat format) {}
+    public record RoutingGraphOutput(
+            BinaryTile tile, String layer, GraphType graphType, TileOutputFormat format) {}
+
+    protected abstract Stream<RoutingGraphsWithLayer> getGraphs(T data);
+
+    protected abstract void saveGraph(final RoutingGraphOutput output) throws IOException;
 
     @Override
     protected boolean isInputFileUploadEnabled() {
@@ -42,15 +57,45 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseVectorTileImpo
                 Map.entry(JobPropertyKey.K8S_REQUESTS_MEMORY, "40Gi"));
     }
 
+    @Override
+    protected final DataAndInput<T> loadInputs() throws Exception {
+        return service.loadData();
+    }
+
+    @Override
+    protected final JobRunState processInputs(T data) throws Exception {
+        logger.info("Getting graphs.");
+        final var graphs = getGraphs(data);
+
+        logger.info("Mapping graphs to outputs");
+        final var outputs = graphs.flatMap(this::getVectorTileOutputs);
+
+        logger.info("Generating tiles");
+        TileGeneratorUtil.generateTiles(outputs);
+
+        return JobRunState.DONE;
+    }
+
     @NotNull
-    protected Stream<VectorTileOutput> getOutputsForGraphs(
-            final RoutingGraphs graphs,
-            final ThrowingConsumer<TileOutput, IOException> tileConsumer) {
+    private Stream<VectorTileOutput> getVectorTileOutputs(
+            final RoutingGraphsWithLayer graphsWithLayer) {
+
+        final var graphs = graphsWithLayer.graphs();
+
+        final var completeGraph = graphs.completeGraph();
+        final var routingGraph = graphs.routingGraph();
 
         logger.info(
                 "Creating outputs for complete graph {} and routing graph {}.",
-                graphs.completeGraph(),
-                graphs.routingGraph());
+                completeGraph,
+                routingGraph);
+
+        if (completeGraph.isEmpty()) {
+            throw new IllegalArgumentException("Complete graph must not be empty.");
+        }
+        if (routingGraph.isEmpty()) {
+            throw new IllegalArgumentException("Routing graph must not be empty.");
+        }
 
         logger.info("Creating vector tile elements for each vertex.");
         final var completeVertices =
@@ -73,15 +118,15 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseVectorTileImpo
                 .flatMap(
                         format ->
                                 vectorTileOutputs(
-                                        tileConsumer,
+                                        graphsWithLayer.layer(),
                                         routingGraphElementSupplier,
                                         completeGraphVertexSupplier,
                                         format));
     }
 
     @NotNull
-    private static Stream<VectorTileOutput> vectorTileOutputs(
-            final ThrowingConsumer<TileOutput, IOException> tileConsumer,
+    private Stream<VectorTileOutput> vectorTileOutputs(
+            final String layer,
             final VectorTileElementSupplier<VectorTileElement> routingGraphVertexSupplier,
             final VectorTileElementSupplier<VectorTileElement> completeGraphVertexSupplier,
             final TileOutputFormat format) {
@@ -90,14 +135,19 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseVectorTileImpo
                 new VectorTileOutput(
                         VectorTileConfig.lv95().setZoomLevels(20, 21).setOutputFormat(format),
                         routingGraphVertexSupplier,
-                        t -> tileConsumer.accept(new TileOutput(t, GraphType.ROUTING, format)));
+                        saveGraph(layer, GraphType.ROUTING, format));
 
         final VectorTileOutput completeGraphOutput =
                 new VectorTileOutput(
                         VectorTileConfig.lv95().setZoomLevels(21).setOutputFormat(format),
                         completeGraphVertexSupplier,
-                        t -> tileConsumer.accept(new TileOutput(t, GraphType.COMPLETE, format)));
+                        saveGraph(layer, GraphType.COMPLETE, format));
 
         return Stream.of(routingGraphOutput, completeGraphOutput);
+    }
+
+    private ThrowingConsumer<BinaryTile, IOException> saveGraph(
+            final String layer, final GraphType graphType, final TileOutputFormat format) {
+        return tile -> saveGraph(new RoutingGraphOutput(tile, layer, graphType, format));
     }
 }
