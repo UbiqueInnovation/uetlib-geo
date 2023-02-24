@@ -1,9 +1,12 @@
 package ch.ubique.backend.geo.graph.models;
 
 import ch.ubique.backend.core.utils.SetUtils;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @param <V> type of the vertex properties
@@ -180,18 +183,67 @@ public class Graph<V, E> {
         return cycles;
     }
 
+    /**
+     * @param vertexPropertyMapper specifies how vertex properties are transformed.
+     * @param edgePropertyMapper specifies how edge properties are transformed.
+     * @return the mapped graph
+     * @param <S> the vertex property type of the mapped graph
+     * @param <T> the edge property type of the mapped graph
+     */
     public <S, T> Graph<S, T> map(
-            Function<Vertex<V, E>, Vertex<S, T>> vertexMapper, Function<Edge<V, E>, T> edgeMapper) {
-        final var mappedGraph = new Graph<S, T>();
-        getVertices().forEach(vertex -> mappedGraph.addVertex(vertexMapper.apply(vertex)));
-        getDirectedEdges()
+            @NotNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
+            @NotNull final Function<Edge<V, E>, T> edgePropertyMapper) {
+        return filterAndMap(null, vertexPropertyMapper, null, edgePropertyMapper);
+    }
+
+    /**
+     * @param vertexFilter vertices where this predicate evaluates to true are kept. If null, no
+     *     filter is applied.
+     * @param edgeFilter edges where this predicate evaluates to true are kept. If null, no filter
+     *     is applied.
+     * @return the filtered graph
+     */
+    public Graph<V, E> filter(
+            @Nullable final Predicate<Vertex<V, E>> vertexFilter,
+            @Nullable final Predicate<Edge<V, E>> edgeFilter) {
+        return filterAndMap(vertexFilter, Vertex::getProperties, edgeFilter, Edge::getProperties);
+    }
+
+    /**
+     * @param vertexFilter vertices where this predicate evaluates to true are kept. If null, no
+     *     filter is applied.
+     * @param vertexPropertyMapper specifies how vertex properties are transformed.
+     * @param edgeFilter edges where this predicate evaluates to true are kept. If null, no filter
+     *     is applied.
+     * @param edgePropertyMapper specifies how edge properties are transformed.
+     * @return the filtered and mapped graph
+     * @param <S> the vertex property type of the mapped graph
+     * @param <T> the edge property type of the mapped graph
+     */
+    public <S, T> Graph<S, T> filterAndMap(
+            @Nullable final Predicate<Vertex<V, E>> vertexFilter,
+            @NotNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
+            @Nullable final Predicate<Edge<V, E>> edgeFilter,
+            @NotNull final Function<Edge<V, E>, T> edgePropertyMapper) {
+
+        final var graph = new Graph<S, T>();
+
+        getVertices().stream()
+                .filter(Objects.requireNonNullElse(vertexFilter, v -> true))
+                .forEach(
+                        vertex ->
+                                graph.addVertex(
+                                        vertex.getId(), vertexPropertyMapper.apply(vertex)));
+
+        getDirectedEdges().stream()
+                .filter(Objects.requireNonNullElse(edgeFilter, e -> true))
                 .forEach(
                         edge ->
-                                mappedGraph.getOrAddUndirectedEdge(
+                                graph.getOrAddDirectedEdge(
                                         edge.getU().getId(),
                                         edge.getV().getId(),
-                                        edgeMapper.apply(edge)));
-        return mappedGraph;
+                                        edgePropertyMapper.apply(edge)));
+        return graph;
     }
 
     public boolean isEmpty() {
