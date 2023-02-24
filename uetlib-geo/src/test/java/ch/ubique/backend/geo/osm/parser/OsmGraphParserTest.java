@@ -1,15 +1,15 @@
 package ch.ubique.backend.geo.osm.parser;
 
-import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.models.Weight;
 import ch.ubique.backend.geo.graph.routing.utils.RoutingGraphUtil;
 import ch.ubique.backend.geo.osm.parser.graph.OsmGraphParser;
 import ch.ubique.backend.geo.osm.parser.graph.OsmGraphParserConfig;
-import java.io.IOException;
-import java.net.URL;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.net.URL;
 
 class OsmGraphParserTest {
 
@@ -28,12 +28,7 @@ class OsmGraphParserTest {
                         .openStream()) {
             final var graph =
                     OsmGraphParser.parse(inputStream, config)
-                            .map(
-                                    v ->
-                                            new Vertex<>(
-                                                    v.getId(),
-                                                    v.getProperties().coordinate().toJts()),
-                                    e -> new Weight(0));
+                            .map(v -> v.getProperties().coordinate().toJts(), e -> new Weight(0));
 
             Assertions.assertTrue(graph.getVertices().size() > 0);
             Assertions.assertTrue(graph.getDirectedEdges().size() > 0);
