@@ -13,7 +13,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <org.geotools.version>28.0</org.geotools.version>
+        <org.geotools.version>28.2</org.geotools.version>
         <com.google.protobuf.version>3.21.12</com.google.protobuf.version>
     </properties>
 
