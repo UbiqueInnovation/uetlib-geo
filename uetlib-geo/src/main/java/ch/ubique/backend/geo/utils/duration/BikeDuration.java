@@ -1,15 +1,19 @@
 package ch.ubique.backend.geo.utils.duration;
 
+import ch.ubique.backend.core.utils.DurationUtils;
+
+import java.time.Duration;
+
 public class BikeDuration {
 
     private BikeDuration() {}
 
-    public static double calculateDuration(
+    public static Duration calculateDuration(
             final double distance, final double elevationDiff, final BikeType bikeType) {
         return calculateDuration(distance, elevationDiff, null, bikeType);
     }
 
-    public static double calculateDuration(
+    public static Duration calculateDuration(
             final double distance,
             final double elevationDiff,
             final Double speed,
@@ -112,6 +116,6 @@ public class BikeDuration {
             vn = 50.0 / 3.6;
         }
 
-        return distance / vn;
+        return DurationUtils.ofSeconds(distance / vn);
     }
 }
