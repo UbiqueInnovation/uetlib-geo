@@ -9,8 +9,12 @@ import ch.ubique.backend.geo.tile.common.models.Tile;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
-import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class RoutingGraphVectorTileEncoder implements TileEncoder {
 
@@ -33,26 +37,64 @@ public class RoutingGraphVectorTileEncoder implements TileEncoder {
         }
 
         final var vectorTile = (VectorTile) tile;
+        final var vertices = vectorTile.elements().stream().map(Vertex.class::cast).toList();
 
         final var pbfTile =
                 RoutingGraphTile.newBuilder()
-                        .addAllVertices(vectorTile.elements().stream().map(this::map).toList())
+                        .addAllCoordinates(getAllCoordinates(vertices, tile.tileInfo().envelope()))
+                        .addAllVertices(vertices.stream().map(this::map).toList())
                         .build();
 
         return new BinaryTile(tile.tileInfo(), config.getOutputFormat(), pbfTile.toByteArray());
     }
 
-    private RoutingGraphTile.Vertex map(final VectorTileElement element) {
-        final var vertex = (Vertex) element;
+    private List<RoutingGraphTile.VertexCoordinate> getAllCoordinates(
+            final List<Vertex> vertices, final Envelope envelope) {
 
-        final var builder = RoutingGraphTile.Vertex.newBuilder().setIdentifier((int) vertex.id());
+        final var vertexCoordinates = vertices.stream().map(IdAndCoordinate::new);
 
-        // Set coordinate
-        final var coordinate = vertex.coordinate();
-        builder.setX(coordinate.x).setY(coordinate.y);
+        final var neighborCoordinates =
+                vertices.stream().flatMap(Vertex::neighborStream).map(IdAndCoordinate::new);
+
+        final var routingNeighborCoordinates =
+                vertices.stream().flatMap(Vertex::routingNeighborStream).map(IdAndCoordinate::new);
+
+        return Stream.of(vertexCoordinates, neighborCoordinates, routingNeighborCoordinates)
+                .flatMap(Function.identity())
+                .distinct()
+                .map(idAndCoordinate -> map(idAndCoordinate, envelope))
+                .toList();
+    }
+
+    private RoutingGraphTile.VertexCoordinate map(
+            final IdAndCoordinate idAndCoordinate, final Envelope envelope) {
+
+        final var coordinate = idAndCoordinate.coordinate();
+
+        // Top left corner
+        final var x0 =
+                envelope.getMinX(); // All used coordinate systems increase towards east (right)
+        final var y0 =
+                envelope.getMaxY(); // All used coordinate systems increase towards north (up)
+
+        final var x = coordinate.getX() - x0;
+        final var y = coordinate.getY() - y0;
+
+        final var builder =
+                RoutingGraphTile.VertexCoordinate.newBuilder()
+                        .setIdentifier((int) idAndCoordinate.id())
+                        .setX((float) x)
+                        .setY((float) y);
+
         if (coordinate.getZ() != Coordinate.NULL_ORDINATE) {
             builder.setElevation((float) coordinate.getZ());
         }
+
+        return builder.build();
+    }
+
+    private RoutingGraphTile.Vertex map(final Vertex vertex) {
+        final var builder = RoutingGraphTile.Vertex.newBuilder().setIdentifier((int) vertex.id());
 
         // Set (routing) neighbors
         builder.addAllNeighbors(vertex.neighbors().stream().map(this::map).toList());
@@ -61,24 +103,33 @@ public class RoutingGraphVectorTileEncoder implements TileEncoder {
         return builder.build();
     }
 
-    private RoutingGraphTile.Vertex.Neighbor map(final Neighbor neighbor) {
-        final var coordinate = neighbor.coordinate();
-        return RoutingGraphTile.Vertex.Neighbor.newBuilder()
+    private RoutingGraphTile.Neighbor map(final Neighbor neighbor) {
+        return RoutingGraphTile.Neighbor.newBuilder()
                 .setIdentifier((int) neighbor.id())
-                .setX(coordinate.x)
-                .setY(coordinate.y)
                 .setWeight(neighbor.weight())
                 .build();
     }
 
-    private RoutingGraphTile.Vertex.RoutingNeighbor map(final RoutingNeighbor routingNeighbor) {
-        final var coordinate = routingNeighbor.coordinate();
-        return RoutingGraphTile.Vertex.RoutingNeighbor.newBuilder()
+    private RoutingGraphTile.RoutingNeighbor map(final RoutingNeighbor routingNeighbor) {
+        return RoutingGraphTile.RoutingNeighbor.newBuilder()
                 .setIdentifier((int) routingNeighbor.id())
-                .setX(coordinate.x)
-                .setY(coordinate.y)
                 .setWeight(routingNeighbor.weight())
                 .setDirection((int) routingNeighbor.direction())
                 .build();
+    }
+
+    private record IdAndCoordinate(long id, Coordinate coordinate) {
+
+        IdAndCoordinate(final Vertex vertex) {
+            this(vertex.id(), vertex.coordinate());
+        }
+
+        IdAndCoordinate(final Neighbor neighbor) {
+            this(neighbor.id(), neighbor.coordinate());
+        }
+
+        IdAndCoordinate(final RoutingNeighbor routingNeighbor) {
+            this(routingNeighbor.id(), routingNeighbor.coordinate());
+        }
     }
 }
