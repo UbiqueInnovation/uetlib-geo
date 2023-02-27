@@ -114,7 +114,7 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
                 new VectorTileElementSupplier<VectorTileElement>(completeVertices);
 
         logger.info("Returning graph outputs");
-        return Stream.of(TileOutputFormat.JSON, TileOutputFormat.PBF)
+        return outputFormats()
                 .flatMap(
                         format ->
                                 vectorTileOutputs(
@@ -122,6 +122,11 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
                                         routingGraphElementSupplier,
                                         completeGraphVertexSupplier,
                                         format));
+    }
+
+    @NotNull
+    protected Stream<TileOutputFormat> outputFormats() {
+        return Stream.of(TileOutputFormat.PBF);
     }
 
     @NotNull
