@@ -20,7 +20,7 @@ public class BikeDuration {
             final BikeType bikeType) {
 
         if (distance == 0) {
-            return 0;
+            return Duration.ZERO;
         }
 
         final double vh_kmh;
