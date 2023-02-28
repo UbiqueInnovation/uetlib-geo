@@ -1,5 +1,7 @@
 package ch.ubique.backend.geojob;
 
+import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV95;
+
 import ch.ubique.backend.core.service.DataAndInput;
 import ch.ubique.backend.core.service.InputDataLoaderService;
 import ch.ubique.backend.geo.graph.routing.GraphType;
@@ -18,13 +20,10 @@ import ch.ubique.backend.job.model.JobRunState;
 import ch.ubique.backend.job.model.JobRunnerKey;
 import com.pivovarit.function.ThrowingConsumer;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.context.ApplicationContext;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV95;
+import org.springframework.context.ApplicationContext;
 
 public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
 
@@ -138,13 +137,13 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
 
         final var routingGraphOutput =
                 new VectorTileOutput(
-                        VectorTileConfig.lv95().setZoomLevels(20, 21).setOutputFormat(format),
+                        VectorTileConfig.lv95().setZoomLevels(19, 20).setOutputFormat(format),
                         routingGraphVertexSupplier,
                         saveGraph(layer, GraphType.ROUTING, format));
 
         final VectorTileOutput completeGraphOutput =
                 new VectorTileOutput(
-                        VectorTileConfig.lv95().setZoomLevels(21).setOutputFormat(format),
+                        VectorTileConfig.lv95().setZoomLevels(20, 21).setOutputFormat(format),
                         completeGraphVertexSupplier,
                         saveGraph(layer, GraphType.COMPLETE, format));
 
