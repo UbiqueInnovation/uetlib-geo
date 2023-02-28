@@ -17,10 +17,10 @@ public class SkiTourDuration {
                 (distance / 40 + elevationDiff / (400.0 / 60)) * 60 * offsetFactor;
 
         if (elevationDiff >= 0) {
-            return DurationUtils.ofSeconds(durationAscent);
+            return DurationUtils.ofFractionalSeconds(durationAscent);
         }
 
         // descent is ~1/3 of ascent
-        return DurationUtils.ofSeconds(durationAscent / 3);
+        return DurationUtils.ofFractionalSeconds(durationAscent / 3);
     }
 }

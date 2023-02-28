@@ -1,7 +1,6 @@
 package ch.ubique.backend.geo.utils.duration;
 
 import ch.ubique.backend.core.utils.DurationUtils;
-
 import java.time.Duration;
 
 public class BikeDuration {
@@ -116,6 +115,6 @@ public class BikeDuration {
             vn = 50.0 / 3.6;
         }
 
-        return DurationUtils.ofSeconds(distance / vn);
+        return DurationUtils.ofFractionalSeconds(distance / vn);
     }
 }
