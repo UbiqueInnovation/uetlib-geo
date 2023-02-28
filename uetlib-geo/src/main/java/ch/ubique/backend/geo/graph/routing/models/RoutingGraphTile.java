@@ -2,12 +2,11 @@ package ch.ubique.backend.geo.graph.routing.models;
 
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import jakarta.validation.constraints.NotNull;
+import java.util.Collection;
+import java.util.stream.Stream;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
-
-import java.util.Collection;
-import java.util.stream.Stream;
 
 public interface RoutingGraphTile {
 
@@ -36,8 +35,8 @@ public interface RoutingGraphTile {
             return neighbors.stream();
         }
 
-        public Stream<Neighbor> routingNeighborStream() {
-            return neighbors.stream();
+        public Stream<RoutingNeighbor> routingNeighborStream() {
+            return routingNeighbors.stream();
         }
     }
 
