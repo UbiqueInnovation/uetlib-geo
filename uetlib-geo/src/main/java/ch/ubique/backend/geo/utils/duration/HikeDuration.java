@@ -43,7 +43,7 @@ public class HikeDuration {
         final var minutesPerMeter = minutesPerKilometer(distance, elevationDiff) / 1000;
         final var duration = distance * minutesPerMeter * 60; // [s]
 
-        return DurationUtils.ofSeconds(duration);
+        return DurationUtils.ofFractionalSeconds(duration);
     }
 
     private static double minutesPerKilometer(final double distance, final double elevationDiff) {
