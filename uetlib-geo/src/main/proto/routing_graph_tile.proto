@@ -29,12 +29,12 @@ message RoutingGraphTile {
 
   message Neighbor {
     int32 identifier = 1;
-    float weight = 4;
+    float weight = 2;
   }
 
   message RoutingNeighbor {
     int32 identifier = 1;
-    float weight = 4;
-    int32 direction = 5; // the direction is the identifier of a neighbor in which we can reach this routing neighbor
+    float weight = 2;
+    int32 direction = 3; // the direction is the identifier of a neighbor in which we can reach this routing neighbor
   }
 }
