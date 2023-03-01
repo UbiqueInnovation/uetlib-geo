@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.geometry.models;
 
 import java.util.Objects;
 
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class BoundingBox<P extends Point<P>> {
 
     private final P min;

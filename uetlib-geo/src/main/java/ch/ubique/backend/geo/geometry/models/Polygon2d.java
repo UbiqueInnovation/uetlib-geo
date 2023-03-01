@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.geometry.models;
 
 import java.util.List;
 
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class Polygon2d extends Polygon<Point2d> {
 
     public Polygon2d(Polygon<Point2d> polygon) {

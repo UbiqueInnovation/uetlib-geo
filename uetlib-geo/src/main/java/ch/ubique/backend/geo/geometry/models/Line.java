@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.geometry.models;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class Line<P extends Point<P>> {
 
     protected final P start;

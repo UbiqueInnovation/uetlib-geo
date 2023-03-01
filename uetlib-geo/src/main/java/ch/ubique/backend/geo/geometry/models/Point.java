@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.geometry.models;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
+@Deprecated(since = "1.3.0", forRemoval = true)
 public abstract class Point<P extends Point<P>> {
 
     protected final double[] coordinates;
