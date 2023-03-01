@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.geometry.models;
 
 import java.util.Arrays;
 
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class BoundingBox2d extends BoundingBox<Point2d> {
 
     public BoundingBox2d(BoundingBox<Point2d> box) {

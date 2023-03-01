@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.geometry.models;
 
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class Point2d extends Point<Point2d> {
 
     protected Point2d(double... coordinates) {

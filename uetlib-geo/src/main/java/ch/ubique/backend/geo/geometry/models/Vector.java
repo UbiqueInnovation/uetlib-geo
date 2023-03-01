@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.geometry.models;
 
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class Vector<P extends Point<P>> {
 
     private final double[] coefficients;

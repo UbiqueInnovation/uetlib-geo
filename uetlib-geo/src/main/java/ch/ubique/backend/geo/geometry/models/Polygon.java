@@ -1,11 +1,11 @@
 package ch.ubique.backend.geo.geometry.models;
 
 import ch.ubique.backend.geo.geometry.utils.BoundingBoxHelper;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class Polygon<P extends Point<P>> {
 
     private final List<P> points;

@@ -1,15 +1,15 @@
 package ch.ubique.backend.geo.geometry.utils;
 
-import ch.ubique.backend.geo.geometry.models.BoundingBox;
-import ch.ubique.backend.geo.geometry.models.Point;
-import org.locationtech.jts.geom.Envelope;
-
-import java.util.Collections;
-import java.util.List;
-
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import ch.ubique.backend.geo.geometry.models.BoundingBox;
+import ch.ubique.backend.geo.geometry.models.Point;
+import java.util.Collections;
+import java.util.List;
+import org.locationtech.jts.geom.Envelope;
+
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class BoundingBoxHelper {
 
     private BoundingBoxHelper() {}

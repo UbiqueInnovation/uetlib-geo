@@ -1,10 +1,10 @@
 package ch.ubique.backend.geo.geometry.models;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class Line2d extends Line<Point2d> {
 
     public Line2d(Line<Point2d> line) {

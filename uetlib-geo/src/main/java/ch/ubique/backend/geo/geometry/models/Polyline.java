@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class Polyline {
 
     List<Point2d> points;
