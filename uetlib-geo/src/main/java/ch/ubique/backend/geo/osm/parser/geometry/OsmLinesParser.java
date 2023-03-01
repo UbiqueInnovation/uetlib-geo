@@ -27,35 +27,42 @@ public class OsmLinesParser {
 
     private final InputStream inputStream;
 
-    private final Map<Long, Coordinate> nodes;
+    private final Map<Long, Coordinate> coordinates;
 
-    private final List<LineWithInfo<Map<String, String>>> ways;
+    private final List<LineWithInfo<Map<String, String>>> lines;
 
     private OsmLinesParser(InputStream inputStream) {
         this.inputStream = inputStream;
         this.geometryFactory = WGS84.geometryFactory();
-        this.nodes = new HashMap<>();
-        this.ways = new ArrayList<>();
+        this.coordinates = new HashMap<>();
+        this.lines = new ArrayList<>();
     }
 
     private List<LineWithInfo<Map<String, String>>> parse() {
         OsmParser.from(inputStream).onNode(this::onNode).onWay(this::onWay).parse();
-        return ways;
+        return lines;
     }
 
     private void onNode(Node node) {
-        nodes.put(node.getId(), OsmUtils.getCoordinate(node).toJts());
+        coordinates.put(node.getId(), OsmUtils.getCoordinate(node).toJts());
     }
 
     private void onWay(Way way) {
-        final var tags = OsmUtils.getTags(way);
-        final var coordinates =
+
+        final var lineCoordinates =
                 way.getWayNodes().stream()
                         .map(WayNode::getNodeId)
-                        .map(nodes::get)
+                        .map(coordinates::get)
+                        .distinct()
                         .toArray(Coordinate[]::new);
 
-        final var line = geometryFactory.createLineString(coordinates);
-        ways.add(new LineWithInfo<>(line, tags));
+        if (lineCoordinates.length < 2) {
+            return; // A non-empty and valid line needs at least two points
+        }
+
+        final var line = geometryFactory.createLineString(lineCoordinates);
+        final var tags = OsmUtils.getTags(way);
+
+        lines.add(new LineWithInfo<>(line, tags));
     }
 }
