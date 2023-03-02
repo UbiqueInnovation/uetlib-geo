@@ -1,13 +1,23 @@
 package ch.ubique.backend.geo.geometry.utils;
 
-import ch.ubique.backend.geo.geometry.models.*;
-
+import ch.ubique.backend.geo.geometry.models.BoundingBox2d;
+import ch.ubique.backend.geo.geometry.models.Line;
+import ch.ubique.backend.geo.geometry.models.Line2d;
+import ch.ubique.backend.geo.geometry.models.Point;
+import ch.ubique.backend.geo.geometry.models.Point2d;
+import ch.ubique.backend.geo.geometry.models.Polygon2d;
+import ch.ubique.backend.geo.geometry.models.Vector;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+/**
+ * @deprecated Please use JTS instead.
+ *     <p>This class will be removed with version 2.0.0 and should no longer be used
+ */
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class GeometryHelper {
 
     private GeometryHelper() {}
