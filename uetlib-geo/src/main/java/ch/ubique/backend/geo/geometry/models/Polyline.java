@@ -4,6 +4,11 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * @deprecated Please use JTS instead.
+ *     <p>This class will be removed with version 2.0.0 and should no longer be used
+ */
+@Deprecated(since = "1.3.0", forRemoval = true)
 public class Polyline {
 
     List<Point2d> points;
