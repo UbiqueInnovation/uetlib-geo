@@ -1,12 +1,19 @@
 package ch.ubique.backend.geo.graph.models;
 
-import ch.ubique.backend.core.utils.SetUtils;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import org.apache.commons.collections4.SetUtils;
 
 /**
  * @param <V> type of the vertex properties
@@ -24,57 +31,59 @@ public class Graph<V, E> {
         lastEdgeId = 0;
     }
 
-    public Vertex<V, E> getOrAddVertex(Vertex<V, E> vertex) {
+    public Vertex<V, E> getOrAddVertex(final Vertex<V, E> vertex) {
         if (!vertices.containsKey(vertex.getId())) {
             addVertex(vertex);
         }
         return vertices.get(vertex.getId());
     }
 
-    public Vertex<V, E> addVertex(long vertexId, V properties) {
+    public Vertex<V, E> addVertex(final long vertexId, final V properties) {
         return addVertex(new Vertex<>(vertexId, properties));
     }
 
-    public Vertex<V, E> getOrAddVertex(long vertexId) {
+    public Vertex<V, E> getOrAddVertex(final long vertexId) {
         return getOrAddVertex(vertexId, null);
     }
 
-    public Vertex<V, E> getOrAddVertex(long vertexId, V properties) {
+    public Vertex<V, E> getOrAddVertex(final long vertexId, final V properties) {
         return getOrAddVertex(new Vertex<>(vertexId, properties));
     }
 
-    public Vertex<V, E> addVertex(Vertex<V, E> vertex) {
+    public Vertex<V, E> addVertex(final Vertex<V, E> vertex) {
         vertices.put(vertex.getId(), vertex);
         return vertex;
     }
 
-    public Optional<Edge<V, E>> getEdge(long u, long v) {
+    public Optional<Edge<V, E>> getEdge(final long u, final long v) {
         return getVertex(u).flatMap(vertex -> vertex.getEdgeTo(v));
     }
 
-    public Edge<V, E> getEdge(long edgeId) {
+    public Edge<V, E> getEdge(final long edgeId) {
         return directedEdges.get(edgeId);
     }
 
-    public Edge<V, E> getOrAddUndirectedEdge(long u, long v) {
+    public Edge<V, E> getOrAddUndirectedEdge(final long u, final long v) {
         return getOrAddUndirectedEdge(u, v, null);
     }
 
-    public Edge<V, E> getOrAddUndirectedEdge(Vertex<V, E> u, Vertex<V, E> v) {
+    public Edge<V, E> getOrAddUndirectedEdge(final Vertex<V, E> u, final Vertex<V, E> v) {
         return getOrAddUndirectedEdge(u, v, null);
     }
 
-    public Edge<V, E> getOrAddUndirectedEdge(long u, long v, E properties) {
+    public Edge<V, E> getOrAddUndirectedEdge(final long u, final long v, final E properties) {
         return getOrAddUndirectedEdge(getOrAddVertex(u), getOrAddVertex(v), properties);
     }
 
-    public Edge<V, E> getOrAddUndirectedEdge(Vertex<V, E> a, Vertex<V, E> b, E properties) {
+    public Edge<V, E> getOrAddUndirectedEdge(
+            final Vertex<V, E> a, final Vertex<V, E> b, final E properties) {
         getOrAddDirectedEdge(b, a, properties);
         return getOrAddDirectedEdge(a, b, properties);
     }
 
     /** Gets or adds a <strong>directed</strong> edge */
-    public Edge<V, E> getOrAddDirectedEdge(Vertex<V, E> u, Vertex<V, E> v, E properties) {
+    public Edge<V, E> getOrAddDirectedEdge(
+            final Vertex<V, E> u, final Vertex<V, E> v, final E properties) {
         final var existingEdge = getEdge(u, v);
         if (existingEdge.isPresent()) {
             return existingEdge.get();
@@ -82,44 +91,44 @@ public class Graph<V, E> {
 
         final var edge = new Edge<>(lastEdgeId++, u, v, properties);
         directedEdges.put(edge.getId(), edge);
-        u.setEdges(SetUtils.union(u.getEdges(), Set.of(edge)));
+        u.setEdges(SetUtils.union(u.getEdges(), Set.of(edge)).toSet());
 
         return edge;
     }
 
-    public Edge<V, E> getOrAddUndirectedEdge(Edge<V, E> edge) {
+    public Edge<V, E> getOrAddUndirectedEdge(final Edge<V, E> edge) {
         return getOrAddUndirectedEdge(edge.getU(), edge.getV(), edge.getProperties());
     }
 
     /** Gets or adds a <strong>directed</strong> edge */
-    public Edge<V, E> getOrAddDirectedEdge(long u, long v) {
+    public Edge<V, E> getOrAddDirectedEdge(final long u, final long v) {
         return getOrAddDirectedEdge(u, v, null);
     }
 
     /** Gets or adds a <strong>directed</strong> edge */
-    public Edge<V, E> getOrAddDirectedEdge(long u, long v, E properties) {
+    public Edge<V, E> getOrAddDirectedEdge(final long u, final long v, final E properties) {
         return getOrAddDirectedEdge(getOrAddVertex(u), getOrAddVertex(v), properties);
     }
 
     /** Gets or adds a <strong>directed</strong> edge */
-    public Edge<V, E> getOrAddDirectedEdge(Vertex<V, E> u, Vertex<V, E> v) {
+    public Edge<V, E> getOrAddDirectedEdge(final Vertex<V, E> u, final Vertex<V, E> v) {
         return getOrAddDirectedEdge(u, v, null);
     }
 
     /** Gets or adds a <strong>directed</strong> edge */
-    public Edge<V, E> getOrAddDirectedEdge(Edge<V, E> edge) {
+    public Edge<V, E> getOrAddDirectedEdge(final Edge<V, E> edge) {
         return getOrAddDirectedEdge(edge.getU(), edge.getV(), edge.getProperties());
     }
 
-    public Optional<Edge<V, E>> getEdge(Edge<V, E> edge) {
+    public Optional<Edge<V, E>> getEdge(final Edge<V, E> edge) {
         return getEdge(edge.getU(), edge.getV());
     }
 
-    public Optional<Edge<V, E>> getEdge(Vertex<V, E> u, Vertex<V, E> v) {
+    public Optional<Edge<V, E>> getEdge(final Vertex<V, E> u, final Vertex<V, E> v) {
         return getEdge(u.getId(), v.getId());
     }
 
-    public Optional<Vertex<V, E>> getVertex(long vertexId) {
+    public Optional<Vertex<V, E>> getVertex(final long vertexId) {
         return Optional.ofNullable(vertices.get(vertexId));
     }
 
@@ -133,7 +142,7 @@ public class Graph<V, E> {
 
     public void removeEdge(final Edge<V, E> edge) {
         final var fromVertex = edge.getFrom();
-        fromVertex.setEdges(SetUtils.exclude(fromVertex.getEdges(), edge));
+        fromVertex.setEdges(SetUtils.difference(fromVertex.getEdges(), Set.of(edge)));
         directedEdges.remove(edge.getId());
     }
 
@@ -151,7 +160,7 @@ public class Graph<V, E> {
         final var visited = new HashSet<Vertex<V, E>>();
         final var cycles = new HashSet<List<Vertex<V, E>>>();
 
-        for (var start : getVertices()) {
+        for (final var start : getVertices()) {
 
             if (visited.contains(start) || start.degree() != 2) {
                 continue;
