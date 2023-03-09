@@ -9,15 +9,12 @@ import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
+
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+
 import jakarta.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.concurrent.ForkJoinPool;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
+
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
@@ -26,6 +23,13 @@ import org.locationtech.jts.geom.Polygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.concurrent.ForkJoinPool;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class VectorTileGenerator implements TileGenerator {
 
@@ -56,7 +60,7 @@ public class VectorTileGenerator implements TileGenerator {
     @Override
     public void generateTiles() {
         output.config().getZoomLevels().stream()
-                .map(this::getTileInfos)
+                .map(z -> getTileInfos(z, output.config().getOutputEnvelope()))
                 .forEach(this::generateTilesForInfos);
 
         envelopeCache.invalidateAll();
@@ -64,9 +68,9 @@ public class VectorTileGenerator implements TileGenerator {
     }
 
     @NotNull
-    private Collection<TileInfo> getTileInfos(final int level) {
+    private Collection<TileInfo> getTileInfos(final int level, ReferencedEnvelope outputEnvelope) {
         logger.info("Getting tile infos for zoom level {}", level);
-        return output.config().getTileLevelsDefinition().tileInfos(level).toList();
+        return output.config().getTileLevelsDefinition().tileInfos(level, outputEnvelope).toList();
     }
 
     private void generateTilesForInfos(final Collection<TileInfo> tileInfos) {
