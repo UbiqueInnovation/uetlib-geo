@@ -5,6 +5,7 @@ import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.constants.WebMercatorTileDefinitions;
 
@@ -12,12 +13,19 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Envelope;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-class TileLevelsDefinitionTest {
+final class TileLevelsDefinitionTest {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Test
     void testChildren() {
@@ -102,13 +110,11 @@ class TileLevelsDefinitionTest {
     }
 
     @Test
-    void testOutputBoundingBox() {
+    void testOutputBoundingBoxExamples() {
         final ReferencedEnvelope chEnvelope =
                 SwissConstants.swissTileDefinition().tileInfo(0, 0, 9).envelope();
         final List<TileInfo> tileInfos =
-                WebMercatorTileDefinitions.tileDefinitions()
-                        .tileInfos(7, chEnvelope)
-                        .collect(Collectors.toList());
+                WebMercatorTileDefinitions.tileDefinitions().tileInfos(7, chEnvelope).toList();
         assertEquals(9, tileInfos.size());
         for (int x = 65; x <= 67; x++) {
             for (int y = 44; y <= 46; y++) {
@@ -116,11 +122,9 @@ class TileLevelsDefinitionTest {
                 int finalY = y;
                 assertTrue(
                         tileInfos.stream()
-                                .filter(
+                                .anyMatch(
                                         tileInfo ->
-                                                tileInfo.x() == finalX && tileInfo.y() == finalY)
-                                .findAny()
-                                .isPresent());
+                                                tileInfo.x() == finalX && tileInfo.y() == finalY));
             }
         }
 
@@ -130,7 +134,7 @@ class TileLevelsDefinitionTest {
         final List<TileInfo> tileInfos2 =
                 WebMercatorTileDefinitions.tileDefinitions()
                         .tileInfos(7, closerChEnvelope)
-                        .collect(Collectors.toList());
+                        .toList();
         assertEquals(4, tileInfos2.size());
         for (int x = 66; x <= 67; x++) {
             for (int y = 44; y <= 45; y++) {
@@ -138,12 +142,41 @@ class TileLevelsDefinitionTest {
                 int finalY = y;
                 assertTrue(
                         tileInfos2.stream()
-                                .filter(
+                                .anyMatch(
                                         tileInfo ->
-                                                tileInfo.x() == finalX && tileInfo.y() == finalY)
-                                .findAny()
-                                .isPresent());
+                                                tileInfo.x() == finalX && tileInfo.y() == finalY));
             }
+        }
+    }
+
+    @Test
+    void testOutputBoundingBox() throws FactoryException, TransformException {
+        final var chEnvelope = SwissConstants.swissTileDefinition().tileInfo(0, 0, 9).envelope();
+        final var webMercatorChEnvelope =
+                chEnvelope.transform(JtsConverter.WEB_MERCATOR.crs(), false);
+
+        // Test from zoom level 0 (one tile for entire world) to 13 (size of Oerlikon)
+        for (final var level : IntStream.rangeClosed(0, 13).toArray()) {
+
+            logger.info("Testing level {}", level);
+
+            final var expected =
+                    WebMercatorTileDefinitions.tileDefinitions()
+                            .tileInfos(level)
+                            .filter(
+                                    info ->
+                                            info.envelope()
+                                                    .intersects((Envelope) webMercatorChEnvelope))
+                            .map(TileInfo::toString)
+                            .collect(Collectors.toUnmodifiableSet());
+
+            final var actual =
+                    WebMercatorTileDefinitions.tileDefinitions()
+                            .tileInfos(level, chEnvelope)
+                            .map(TileInfo::toString)
+                            .collect(Collectors.toUnmodifiableSet());
+
+            Assertions.assertEquals(expected, actual);
         }
     }
 }
