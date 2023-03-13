@@ -5,13 +5,16 @@ import ch.ubique.backend.geo.tile.common.constants.WebMercatorTileDefinitions;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class VectorTileConfig {
 
@@ -21,6 +24,7 @@ public class VectorTileConfig {
     private int clipBuffer = 0;
     private int extent = 4096;
     private TileOutputFormat outputFormat = TileOutputFormat.PBF;
+    private ReferencedEnvelope outputEnvelope;
     private final YAxisDirection yAxisDirection;
 
     private Set<Integer> zoomLevels;
@@ -73,6 +77,11 @@ public class VectorTileConfig {
         return this;
     }
 
+    public VectorTileConfig setOutputEnvelope(ReferencedEnvelope outputEnvelope) {
+        this.outputEnvelope = outputEnvelope;
+        return this;
+    }
+
     public VectorTileConfig setZoomLevels(Collection<Integer> zoomLevels) {
         this.zoomLevels = new HashSet<>(zoomLevels);
         return this;
@@ -88,6 +97,10 @@ public class VectorTileConfig {
 
     public int getClipBuffer() {
         return clipBuffer;
+    }
+
+    public ReferencedEnvelope getOutputEnvelope() {
+        return outputEnvelope;
     }
 
     public Optional<Double> getSimplifyTolerance() {
