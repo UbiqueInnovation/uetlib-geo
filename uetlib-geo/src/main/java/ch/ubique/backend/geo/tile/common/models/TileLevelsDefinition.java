@@ -1,8 +1,14 @@
 package ch.ubique.backend.geo.tile.common.models;
 
+import ch.ubique.backend.core.utils.IntervalUtils;
 import ch.ubique.backend.geo.coordinate.models.Coordinate;
 import ch.ubique.backend.geo.coordinate.util.JtsUtil;
+
 import jakarta.validation.constraints.NotNull;
+
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Envelope;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -12,8 +18,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.locationtech.jts.geom.Envelope;
 
 /**
  * @param origin Origin for all zoom levels
@@ -165,37 +169,11 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
      * TileInfo
      */
     private Set<TileInfo> overlappingTileInfos(TileInfo current, ZoomLevel otherLevel) {
-        final var currentLevel = current.zoomLevel();
         if (otherLevel == null) {
             return Set.of();
         }
 
-        final var minX = (int) (current.x() * currentLevel.tileWidth() / otherLevel.tileWidth());
-        final var minY = (int) (current.y() * currentLevel.tileWidth() / otherLevel.tileWidth());
-
-        final var maxX =
-                Math.min(
-                        otherLevel.tilesX(),
-                        (int)
-                                Math.ceil(
-                                        (current.x() + 1)
-                                                * currentLevel.tileWidth()
-                                                / otherLevel.tileWidth()));
-        final var maxY =
-                Math.min(
-                        otherLevel.tilesY(),
-                        (int)
-                                Math.ceil(
-                                        (current.y() + 1)
-                                                * currentLevel.tileWidth()
-                                                / otherLevel.tileWidth()));
-
-        return IntStream.range(minX, maxX)
-                .boxed()
-                .flatMap(
-                        x ->
-                                IntStream.range(minY, maxY)
-                                        .mapToObj(y -> new TileInfo(x, y, otherLevel, this)))
+        return tileInfos(otherLevel.level(), current.envelope())
                 .collect(Collectors.toUnmodifiableSet());
     }
 
@@ -207,6 +185,47 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
                         x ->
                                 IntStream.range(0, zoomLevel.tilesY())
                                         .mapToObj(y -> tileInfo(x, y, level)));
+    }
+
+    public Stream<TileInfo> tileInfos(final int level, final ReferencedEnvelope outputEnvelope) {
+        if (outputEnvelope == null) {
+            return tileInfos(level);
+        }
+
+        // Transform envelope to current crs if needed
+        final var transformedEnvelope = JtsUtil.transformEnvelope(outputEnvelope, origin().crs());
+
+        final var zoomLevel = getZoomLevel(level);
+
+        return findXRangeForZoomLevel(zoomLevel, transformedEnvelope)
+                .boxed()
+                .flatMap(
+                        x ->
+                                findYRangeForZoomLevel(zoomLevel, transformedEnvelope)
+                                        .mapToObj(y -> tileInfo(x, y, level)))
+                .filter(tileInfo -> isDefined(zoomLevel, tileInfo));
+    }
+
+    private IntStream findXRangeForZoomLevel(final ZoomLevel zoomLevel, final Envelope envelope) {
+        final var minX = (envelope.getMinX() - origin.toJts().x) / zoomLevel.tileWidth();
+        final var maxX = (envelope.getMaxX() - origin.toJts().x) / zoomLevel.tileWidth();
+
+        return IntervalUtils.intervalToIntRange(minX, maxX);
+    }
+
+    private IntStream findYRangeForZoomLevel(final ZoomLevel zoomLevel, final Envelope envelope) {
+        // Inverted axis. Envelope coordinate system increases north, tile info downwards.
+        final var minY = (origin.toJts().y - envelope.getMaxY()) / zoomLevel.tileHeight();
+        final var maxY = (origin.toJts().y - envelope.getMinY()) / zoomLevel.tileHeight();
+
+        return IntervalUtils.intervalToIntRange(minY, maxY);
+    }
+
+    private static boolean isDefined(final ZoomLevel zoomLevel, final TileInfo tileInfo) {
+        return tileInfo.x() >= 0
+                && tileInfo.y() >= 0
+                && tileInfo.x() < zoomLevel.tilesX()
+                && tileInfo.y() < zoomLevel.tilesY();
     }
 
     public TileInfo tileInfo(final int x, final int y, final int level) {

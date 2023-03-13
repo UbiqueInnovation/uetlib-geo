@@ -1,18 +1,16 @@
 package ch.ubique.backend.geo.coordinate.util;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
+
 import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
 import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
+
 import jakarta.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Stream;
+
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -32,6 +30,12 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coordinate> {
 
     public static final JtsConverter<WGS84Coordinate> WGS84 =
@@ -45,17 +49,24 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                     c -> new WGS84Coordinate(c.y, c.x, nullIfNaN(c.getZ())),
                     new WGS84Coordinate(-90, -180),
                     new WGS84Coordinate(90, 180));
-    public static final JtsConverter<WebMercatorCoordinate> WEB_MERCATOR =
-            new JtsConverter<>(
-                    3857,
-                    c ->
-                            new Coordinate(
-                                    c.getX(),
-                                    c.getY(),
-                                    c.getOptionalElevation().orElse(NULL_ORDINATE)),
-                    c -> new WebMercatorCoordinate(c.x, c.y, nullIfNaN(c.getZ())),
-                    new WebMercatorCoordinate(-20037508.34, -20048966.1),
-                    new WebMercatorCoordinate(20037508.34, 20048966.1));
+    public static final JtsConverter<WebMercatorCoordinate> WEB_MERCATOR;
+
+    static {
+        // See https://schemas.opengis.net/wmts/1.0/profiles/wmts-simple/wmtsTileMatrixSet.json
+        final double extent = 20_037_508.3427892;
+        WEB_MERCATOR =
+                new JtsConverter<>(
+                        3857,
+                        c ->
+                                new Coordinate(
+                                        c.getX(),
+                                        c.getY(),
+                                        c.getOptionalElevation().orElse(NULL_ORDINATE)),
+                        c -> new WebMercatorCoordinate(c.x, c.y, nullIfNaN(c.getZ())),
+                        new WebMercatorCoordinate(-extent, -extent),
+                        new WebMercatorCoordinate(extent, extent));
+    }
+
     /**
      * bounds equal to the min/max available coordinates with tiles on <a
      * href="https://map.geo.admin.ch/">map.geo.admin.ch</a>
