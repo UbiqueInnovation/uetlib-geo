@@ -169,37 +169,11 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
      * TileInfo
      */
     private Set<TileInfo> overlappingTileInfos(TileInfo current, ZoomLevel otherLevel) {
-        final var currentLevel = current.zoomLevel();
         if (otherLevel == null) {
             return Set.of();
         }
 
-        final var minX = (int) (current.x() * currentLevel.tileWidth() / otherLevel.tileWidth());
-        final var minY = (int) (current.y() * currentLevel.tileWidth() / otherLevel.tileWidth());
-
-        final var maxX =
-                Math.min(
-                        otherLevel.tilesX(),
-                        (int)
-                                Math.ceil(
-                                        (current.x() + 1)
-                                                * currentLevel.tileWidth()
-                                                / otherLevel.tileWidth()));
-        final var maxY =
-                Math.min(
-                        otherLevel.tilesY(),
-                        (int)
-                                Math.ceil(
-                                        (current.y() + 1)
-                                                * currentLevel.tileWidth()
-                                                / otherLevel.tileWidth()));
-
-        return IntStream.range(minX, maxX)
-                .boxed()
-                .flatMap(
-                        x ->
-                                IntStream.range(minY, maxY)
-                                        .mapToObj(y -> new TileInfo(x, y, otherLevel, this)))
+        return tileInfos(otherLevel.level(), current.envelope())
                 .collect(Collectors.toUnmodifiableSet());
     }
 
@@ -228,7 +202,8 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
                 .flatMap(
                         x ->
                                 findYRangeForZoomLevel(zoomLevel, transformedEnvelope)
-                                        .mapToObj(y -> tileInfo(x, y, level)));
+                                        .mapToObj(y -> tileInfo(x, y, level)))
+                .filter(tileInfo -> isDefined(zoomLevel, tileInfo));
     }
 
     private IntStream findXRangeForZoomLevel(final ZoomLevel zoomLevel, final Envelope envelope) {
@@ -244,6 +219,13 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
         final var maxY = (origin.toJts().y - envelope.getMinY()) / zoomLevel.tileHeight();
 
         return IntervalUtils.intervalToIntRange(minY, maxY);
+    }
+
+    private static boolean isDefined(final ZoomLevel zoomLevel, final TileInfo tileInfo) {
+        return tileInfo.x() >= 0
+                && tileInfo.y() >= 0
+                && tileInfo.x() < zoomLevel.tilesX()
+                && tileInfo.y() < zoomLevel.tilesY();
     }
 
     public TileInfo tileInfo(final int x, final int y, final int level) {
