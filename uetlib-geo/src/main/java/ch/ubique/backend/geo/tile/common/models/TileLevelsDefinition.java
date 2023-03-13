@@ -1,11 +1,11 @@
 package ch.ubique.backend.geo.tile.common.models;
 
+import ch.ubique.backend.core.utils.IntervalUtils;
 import ch.ubique.backend.geo.coordinate.models.Coordinate;
 import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 
 import jakarta.validation.constraints.NotNull;
 
-import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
 
@@ -213,84 +213,37 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
                                         .mapToObj(y -> tileInfo(x, y, level)));
     }
 
-    public Stream<TileInfo> tileInfos(final int level, ReferencedEnvelope outputEnvelope) {
+    public Stream<TileInfo> tileInfos(final int level, final ReferencedEnvelope outputEnvelope) {
         if (outputEnvelope == null) {
             return tileInfos(level);
         }
 
-        if (!outputEnvelope.getCoordinateReferenceSystem().equals(origin().crs())) {
-            try {
-                outputEnvelope = outputEnvelope.transform(origin().crs(), true);
-            } catch (Exception e) {
-                // rethrow as runtime exception. no way for caller to handle this
-                throw new WrappedException(e);
-            }
-        }
+        // Transform envelope to current crs if needed
+        final var transformedEnvelope = JtsUtil.transformEnvelope(outputEnvelope, origin().crs());
 
         final var zoomLevel = getZoomLevel(level);
-        final int minX = findMinXforZoomLevel(zoomLevel, outputEnvelope);
-        final int maxX = findMaxXforZoomLevel(zoomLevel, outputEnvelope);
-        final int minY = findMinYforZoomLevel(zoomLevel, outputEnvelope);
-        final int maxY = findMaxYforZoomLevel(zoomLevel, outputEnvelope);
 
-        return IntStream.rangeClosed(minX, maxX)
+        return findXRangeForZoomLevel(zoomLevel, transformedEnvelope)
                 .boxed()
                 .flatMap(
                         x ->
-                                IntStream.rangeClosed(minY, maxY)
+                                findYRangeForZoomLevel(zoomLevel, transformedEnvelope)
                                         .mapToObj(y -> tileInfo(x, y, level)));
     }
 
-    private int findMinXforZoomLevel(ZoomLevel zoomLevel, ReferencedEnvelope outputEnvelope) {
-        for (int x = 0; x < zoomLevel.tilesX(); x++) {
-            final ReferencedEnvelope tileEnvelope = envelopeOf(zoomLevel, x, 0);
-            if (tileEnvelope.getMaxX() > outputEnvelope.getMinX()) {
-                return x;
-            }
-        }
-        throw new RuntimeException(
-                String.format(
-                        "could not find minX for zoom level: %s and outputEnvelope: %s (crs: %s)",
-                        zoomLevel, outputEnvelope, origin.crs()));
+    private IntStream findXRangeForZoomLevel(final ZoomLevel zoomLevel, final Envelope envelope) {
+        final var minX = (envelope.getMinX() - origin.toJts().x) / zoomLevel.tileWidth();
+        final var maxX = (envelope.getMaxX() - origin.toJts().x) / zoomLevel.tileWidth();
+
+        return IntervalUtils.intervalToIntRange(minX, maxX);
     }
 
-    private int findMaxXforZoomLevel(ZoomLevel zoomLevel, ReferencedEnvelope outputEnvelope) {
-        for (int x = zoomLevel.tilesX() - 1; x >= 0; x--) {
-            final ReferencedEnvelope tileEnvelope = envelopeOf(zoomLevel, x, 0);
-            if (tileEnvelope.getMinX() < outputEnvelope.getMaxX()) {
-                return x;
-            }
-        }
-        throw new RuntimeException(
-                String.format(
-                        "could not find maxX for zoom level: %s and outputEnvelope: %s (crs: %s)",
-                        zoomLevel, outputEnvelope, origin.crs()));
-    }
+    private IntStream findYRangeForZoomLevel(final ZoomLevel zoomLevel, final Envelope envelope) {
+        // Inverted axis. Envelope coordinate system increases north, tile info downwards.
+        final var minY = (origin.toJts().y - envelope.getMaxY()) / zoomLevel.tileHeight();
+        final var maxY = (origin.toJts().y - envelope.getMinY()) / zoomLevel.tileHeight();
 
-    private int findMinYforZoomLevel(ZoomLevel zoomLevel, ReferencedEnvelope outputEnvelope) {
-        for (int y = 0; y < zoomLevel.tilesY(); y++) {
-            final ReferencedEnvelope tileEnvelope = envelopeOf(zoomLevel, 0, y);
-            if (tileEnvelope.getMinY() < outputEnvelope.getMaxY()) {
-                return y;
-            }
-        }
-        throw new RuntimeException(
-                String.format(
-                        "could not find minY for zoom level: %s and outputEnvelope: %s (crs: %s)",
-                        zoomLevel, outputEnvelope, origin.crs()));
-    }
-
-    private int findMaxYforZoomLevel(ZoomLevel zoomLevel, ReferencedEnvelope outputEnvelope) {
-        for (int y = zoomLevel.tilesY() - 1; y >= 0; y--) {
-            final ReferencedEnvelope tileEnvelope = envelopeOf(zoomLevel, 0, y);
-            if (tileEnvelope.getMaxY() > outputEnvelope.getMinY()) {
-                return y;
-            }
-        }
-        throw new RuntimeException(
-                String.format(
-                        "could not find maxY for zoom level: %s and outputEnvelope: %s (crs: %s)",
-                        zoomLevel, outputEnvelope, origin.crs()));
+        return IntervalUtils.intervalToIntRange(minY, maxY);
     }
 
     public TileInfo tileInfo(final int x, final int y, final int level) {

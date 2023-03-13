@@ -1,14 +1,14 @@
 package ch.ubique.backend.geo.coordinate.util;
 
 import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
+
 import jakarta.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.IntStream;
+
 import org.eclipse.emf.common.util.WrappedException;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.builder.MissingInfoException;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -27,6 +27,11 @@ import org.opengis.referencing.cs.AxisDirection;
 import org.opengis.referencing.cs.CoordinateSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.IntStream;
 
 public class JtsUtil {
     private static final Logger logger = LoggerFactory.getLogger(JtsUtil.class);
@@ -86,12 +91,7 @@ public class JtsUtil {
                 .toList();
     }
 
-    /**
-     * simple geometries are not geometry collections and not multi-geometries
-     *
-     * @param geometry
-     * @return
-     */
+    /** simple geometries are not geometry collections and not multi-geometries */
     public static List<Geometry> getSimpleGeometries(Geometry geometry) {
         if (!(geometry instanceof GeometryCollection)) {
             return IntStream.range(0, geometry.getNumGeometries())
@@ -152,6 +152,20 @@ public class JtsUtil {
         if (!coordinateSystem.getAxis(1).getDirection().equals(AxisDirection.NORTH)) {
             throw new UnsupportedOperationException(
                     "Only coordinate systems with y-axis direction north are supported.");
+        }
+    }
+
+    public static Envelope transformEnvelope(
+            final ReferencedEnvelope outputEnvelope, final CoordinateReferenceSystem targetCrs) {
+        if (outputEnvelope.getCoordinateReferenceSystem().equals(targetCrs)) {
+            return outputEnvelope;
+        } else {
+            try {
+                return outputEnvelope.transform(targetCrs, true);
+            } catch (Exception e) {
+                // rethrow as runtime exception. no way for caller to handle this
+                throw new WrappedException(e);
+            }
         }
     }
 }
