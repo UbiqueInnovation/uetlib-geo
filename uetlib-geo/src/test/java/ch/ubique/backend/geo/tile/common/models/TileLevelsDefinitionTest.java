@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -150,7 +151,7 @@ final class TileLevelsDefinitionTest {
     }
 
     @Test
-    void testOutputBoundingBox() throws FactoryException, TransformException {
+    void testOutputBoundingBoxLV95Bounds() throws FactoryException, TransformException {
         final var chEnvelope = SwissConstants.swissTileDefinition().tileInfo(0, 0, 9).envelope();
         final var webMercatorChEnvelope =
                 chEnvelope.transform(JtsConverter.WEB_MERCATOR.crs(), false);
@@ -175,6 +176,49 @@ final class TileLevelsDefinitionTest {
                             .tileInfos(level, chEnvelope)
                             .map(TileInfo::toString)
                             .collect(Collectors.toUnmodifiableSet());
+
+            Assertions.assertEquals(expected, actual);
+        }
+    }
+
+    @Test
+    void testOutputBoundingBoxWebmercatorBounds() {
+        final var tileDefinitions = WebMercatorTileDefinitions.tileDefinitions();
+
+        final var x0 = 33;
+        final var y0 = 22;
+        final var z0 = 6;
+        final var chEnvelope = tileDefinitions.tileInfo(x0, y0, z0).envelope();
+
+        // Test from zoom level 0 (one tile for entire world) to 11 (size of Zürich)
+        for (final var level : IntStream.rangeClosed(z0, 11).toArray()) {
+
+            logger.info("Testing level {}", level);
+
+            final var tilesPerSide = (int) Math.pow(2, level - z0);
+
+            final var expected =
+                    IntStream.range(x0 * tilesPerSide, (x0 + 1) * tilesPerSide)
+                            .mapToObj(
+                                    x ->
+                                            IntStream.range(
+                                                            y0 * tilesPerSide,
+                                                            (y0 + 1) * tilesPerSide)
+                                                    .mapToObj(
+                                                            y ->
+                                                                    tileDefinitions.tileInfo(
+                                                                            x, y, level)))
+                            .flatMap(Function.identity())
+                            .map(TileInfo::toString)
+                            .sorted()
+                            .toList();
+
+            final var actual =
+                    tileDefinitions
+                            .tileInfos(level, chEnvelope)
+                            .map(TileInfo::toString)
+                            .sorted()
+                            .toList();
 
             Assertions.assertEquals(expected, actual);
         }
