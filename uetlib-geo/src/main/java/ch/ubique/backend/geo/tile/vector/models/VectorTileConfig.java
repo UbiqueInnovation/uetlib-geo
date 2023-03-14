@@ -178,6 +178,7 @@ public class VectorTileConfig {
                 .append("extent", extent)
                 .append("yAxisDirection", yAxisDirection)
                 .append("zoomLevels", zoomLevels)
+                .append("outputEnvelope", outputEnvelope)
                 .toString();
     }
 }

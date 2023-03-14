@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.tile.common.constants;
 
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
+import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
 
@@ -51,5 +52,9 @@ public class SwissConstants {
     private static ZoomLevel zoomLevel(
             final int level, final int tilesX, final int tilesY, final double resolution) {
         return new ZoomLevel(level, tilesX, tilesY, resolution * 256, resolution * 256);
+    }
+
+    public static WGS84Coordinate getCenterOfCh() {
+        return new WGS84Coordinate(46.8012, 8.22669);
     }
 }
