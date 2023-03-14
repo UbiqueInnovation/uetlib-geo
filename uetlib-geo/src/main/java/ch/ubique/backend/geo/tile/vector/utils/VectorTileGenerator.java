@@ -138,6 +138,8 @@ public class VectorTileGenerator implements TileGenerator {
             final Polygon envelopeGeometry) {
 
         return element -> {
+            TileGeometryUtils.ensureCrsMatch(element.geometry(), tileEnvelope);
+
             if (!element.showElement(level)) {
                 return false;
             }
