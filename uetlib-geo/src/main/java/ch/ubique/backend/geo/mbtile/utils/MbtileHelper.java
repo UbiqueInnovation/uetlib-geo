@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.mbtile.utils;
 
+import ch.ubique.backend.db.sqlite.SQLiteDB;
 import ch.ubique.backend.db.sqlite.SQLiteHelper;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.mbtile.data.impl.JdbcMbtileDataServiceImpl;
@@ -19,7 +20,7 @@ public class MbtileHelper {
             "ch/ubique/backend/geo/mbtile/data/schema.sql";
     private static final String MBTILES_EXTENSION = ".mbtiles";
 
-    public static DataSource getInitializedChPbfDb(
+    public static SQLiteDB getInitializedChPbfDb(
             final String name, final int version, final VectorTileConfig config)
             throws SQLException, IOException, ClassNotFoundException {
         return getInitializedChDb(
@@ -30,14 +31,15 @@ public class MbtileHelper {
                 Collections.max(config.getZoomLevels()));
     }
 
-    public static DataSource getInitializedChDb(
+    public static SQLiteDB getInitializedChDb(
             final String name,
             final int version,
             final MbtileFormat mbtileFormat,
             int minZoom,
             int maxZoom)
             throws SQLException, IOException, ClassNotFoundException {
-        final DataSource dataSource = getUninitializedDb(name, version);
+        final SQLiteDB sqliteDb = getUninitializedDb(name, version);
+        final DataSource dataSource = sqliteDb.getDataSource();
         final JdbcMbtileDataServiceImpl dataService = new JdbcMbtileDataServiceImpl(dataSource);
 
         dataService.insertReplaceMetadataName(name);
@@ -59,10 +61,10 @@ public class MbtileHelper {
         dataService.insertReplaceMetadata(MetadataKey.MAXZOOM, maxZoom);
 
         dataSource.getConnection().commit();
-        return dataSource;
+        return sqliteDb;
     }
 
-    public static DataSource getUninitializedDb(String name, int version)
+    public static SQLiteDB getUninitializedDb(String name, int version)
             throws SQLException, IOException, ClassNotFoundException {
         return SQLiteHelper.createSQLiteDbInTempDir(
                 name + MBTILES_EXTENSION, MBTILE_DB_SCHEMA_PATH, version);
