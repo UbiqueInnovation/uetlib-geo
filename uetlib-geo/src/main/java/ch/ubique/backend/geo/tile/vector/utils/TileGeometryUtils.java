@@ -41,7 +41,7 @@ public class TileGeometryUtils {
         }
     }
 
-    private static void ensureCrsMatch(
+    public static void ensureCrsMatch(
             final Geometry geometry, final ReferencedEnvelope tileEnvelope) {
         final var crs = getCrs(geometry);
         if (!crs.equals(tileEnvelope.getCoordinateReferenceSystem())) {
