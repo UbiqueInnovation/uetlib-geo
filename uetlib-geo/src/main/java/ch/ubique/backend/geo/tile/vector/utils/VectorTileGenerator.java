@@ -31,6 +31,13 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.concurrent.ForkJoinPool;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
 public class VectorTileGenerator implements TileGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(VectorTileGenerator.class);
@@ -83,10 +90,16 @@ public class VectorTileGenerator implements TileGenerator {
                 .submit(
                         () ->
                                 tileInfos.parallelStream()
-                                        .map(this::createTile)
-                                        .map(this::generateTile)
-                                        .forEach(progressLogger.watch(this::consumeTile)))
+                                        .forEach(
+                                                progressLogger.watch(
+                                                        this::createGenerateAndConsumeTile)))
                 .join();
+    }
+
+    private void createGenerateAndConsumeTile(final TileInfo tileInfo) {
+        final var tile = createTile(tileInfo);
+        final var binaryTile = generateTile(tile);
+        consumeTile(binaryTile);
     }
 
     @NotNull
