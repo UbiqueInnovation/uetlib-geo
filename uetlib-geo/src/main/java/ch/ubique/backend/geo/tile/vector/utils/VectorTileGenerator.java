@@ -9,15 +9,12 @@ import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
+
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+
 import jakarta.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.concurrent.ForkJoinPool;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
+
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
@@ -25,6 +22,13 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.concurrent.ForkJoinPool;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class VectorTileGenerator implements TileGenerator {
 
@@ -81,10 +85,16 @@ public class VectorTileGenerator implements TileGenerator {
                 .submit(
                         () ->
                                 tileInfos.parallelStream()
-                                        .map(this::createTile)
-                                        .map(this::generateTile)
-                                        .forEach(progressLogger.watch(this::consumeTile)))
+                                        .forEach(
+                                                progressLogger.watch(
+                                                        this::createGenerateAndConsumeTile)))
                 .join();
+    }
+
+    private void createGenerateAndConsumeTile(final TileInfo tileInfo) {
+        final var tile = createTile(tileInfo);
+        final var binaryTile = generateTile(tile);
+        consumeTile(binaryTile);
     }
 
     @NotNull
