@@ -50,7 +50,7 @@ public class MbtileHelper {
         dataService.insertReplaceMetadata(
                 MetadataKey.CENTER,
                 String.format(
-                        "(%f,%f,%d)",
+                        "%f,%f,%d",
                         centerOfCh.getLongitude(),
                         centerOfCh.getLatitude(),
                         zoomLevelOfDefaultView));
