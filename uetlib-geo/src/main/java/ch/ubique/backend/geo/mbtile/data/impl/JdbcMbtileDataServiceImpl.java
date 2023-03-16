@@ -113,7 +113,7 @@ public class JdbcMbtileDataServiceImpl implements MbtileDataService {
         // only store non-empty tiles
         final List<TmsTile> nonEmptyTiles =
                 tiles.stream()
-                        .filter(t -> t.getData() != null && t.getData().length > 0)
+                        .filter(t -> t.data() != null && t.data().length > 0)
                         .collect(Collectors.toList());
         if (!nonEmptyTiles.isEmpty()) {
             tileInsert.executeBatch(createTileParams(nonEmptyTiles));
@@ -126,9 +126,9 @@ public class JdbcMbtileDataServiceImpl implements MbtileDataService {
 
     private static MapSqlParameterSource createTileParams(TmsTile tile) {
         return new MapSqlParameterSource()
-                .addValue("zoom_level", tile.getZoomLevel())
-                .addValue("tile_column", tile.getColumn())
-                .addValue("tile_row", tile.getRow())
-                .addValue("tile_data", new SqlLobValue(tile.getData()), Types.BLOB);
+                .addValue("zoom_level", tile.zoomLevel())
+                .addValue("tile_column", tile.column())
+                .addValue("tile_row", tile.row())
+                .addValue("tile_data", new SqlLobValue(tile.data()), Types.BLOB);
     }
 }
