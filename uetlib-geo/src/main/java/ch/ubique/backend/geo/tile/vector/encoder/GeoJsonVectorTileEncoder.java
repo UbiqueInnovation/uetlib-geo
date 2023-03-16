@@ -6,10 +6,12 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileElementUtils;
-import java.util.Optional;
-import java.util.function.Function;
+
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Geometry;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 public final class GeoJsonVectorTileEncoder extends JsonVectorTileEncoder {
 

@@ -1,14 +1,17 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
 import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
+
 import com.pivovarit.function.ThrowingFunction;
-import java.util.List;
-import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 class LinesToRoutingGraphUtilTest {
     private final WeightingFunction<String> weightingFunction =

@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.coordinate.util.distance;
 
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public class DistanceCalculatorFactory {

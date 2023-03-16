@@ -11,10 +11,10 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.utils.SimplifyGeometryUtils;
 import ch.ubique.backend.geo.tile.vector.utils.TileGeometryUtils;
+
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
-import java.util.Optional;
-import java.util.function.Function;
+
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
@@ -24,6 +24,9 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 abstract class AbstractVectorTileEncoder implements TileEncoder {
 

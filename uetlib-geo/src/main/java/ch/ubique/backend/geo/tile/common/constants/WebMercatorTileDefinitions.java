@@ -5,7 +5,9 @@ import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WEB_MERCATOR;
 import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
+
 import jakarta.validation.constraints.NotNull;
+
 import java.util.stream.IntStream;
 
 public class WebMercatorTileDefinitions {

@@ -13,12 +13,16 @@ public class Line<P extends Point<P>> {
     protected final P start;
     protected final P end;
 
-    public Line(P start, P end) {
+    public Line(final P start, final P end) {
         if (start.getDimension() != end.getDimension()) {
             throw new RuntimeException("Dimensions do not match");
         }
         this.start = start;
         this.end = end;
+    }
+
+    private static boolean isBetween(final double value, final double a, final double b) {
+        return min(a, b) <= value && value <= max(a, b);
     }
 
     public P getStart() {
@@ -29,7 +33,7 @@ public class Line<P extends Point<P>> {
         return end;
     }
 
-    public boolean outOfBounds(P point) {
+    public boolean outOfBounds(final P point) {
         if (start.getDimension() != point.getDimension()) {
             throw new RuntimeException("Dimensions do not match");
         }
@@ -39,10 +43,6 @@ public class Line<P extends Point<P>> {
             }
         }
         return false;
-    }
-
-    private static boolean isBetween(double value, double a, double b) {
-        return min(a, b) <= value && value <= max(a, b);
     }
 
     @Override

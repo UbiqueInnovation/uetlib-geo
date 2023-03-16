@@ -29,12 +29,12 @@ public class Polyline {
         return points;
     }
 
+    public void setPoints(List<Point2d> points) {
+        this.points = points;
+    }
+
     @Override
     public String toString() {
         return points.size() + " points";
-    }
-
-    public void setPoints(List<Point2d> points) {
-        this.points = points;
     }
 }

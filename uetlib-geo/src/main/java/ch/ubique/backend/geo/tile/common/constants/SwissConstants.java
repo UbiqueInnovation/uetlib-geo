@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.tile.common.constants;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
+
 import java.util.List;
 
 public class SwissConstants {

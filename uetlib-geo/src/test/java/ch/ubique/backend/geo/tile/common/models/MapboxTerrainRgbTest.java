@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.tile.common.models;
 
 
 import ch.ubique.backend.geo.tile.raster.utils.MapboxTerrainRgb;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

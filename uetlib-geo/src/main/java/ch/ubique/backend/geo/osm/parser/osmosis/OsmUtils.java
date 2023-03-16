@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.osm.parser.osmosis;
 
 import ch.ubique.backend.core.utils.LocaleHelper;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+
 import org.openstreetmap.osmosis.core.domain.v0_6.Entity;
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;

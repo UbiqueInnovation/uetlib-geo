@@ -2,12 +2,14 @@ package ch.ubique.backend.geo.tile.vector.encoder;
 
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pivovarit.function.exception.WrappedException;
+
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.n52.jackson.datatype.jts.JtsModule;

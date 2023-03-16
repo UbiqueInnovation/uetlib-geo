@@ -1,11 +1,13 @@
 package ch.ubique.backend.geo.tile.common.utils;
 
 import ch.ubique.backend.geo.tile.vector.models.TileOutput;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class TileGeneratorUtil {
 

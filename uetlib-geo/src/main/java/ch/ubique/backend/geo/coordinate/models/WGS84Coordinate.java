@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.coordinate.models;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WGS84;
+
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
@@ -10,12 +11,16 @@ import static java.lang.Math.toRadians;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import jakarta.annotation.Nullable;
-import java.util.Objects;
-import java.util.Optional;
+
 import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * World Geodetic System 1984 (also known as WGS84, WGS 1984, EPSG:4326). Most common coordinate

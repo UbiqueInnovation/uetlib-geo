@@ -3,6 +3,10 @@ package ch.ubique.backend.geo.tile.raster.utils;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.raster.models.RasterTile;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GradientPaint;
@@ -12,14 +16,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 
 @Disabled("For local testing only")
 class RasterTileGeneratorTest {

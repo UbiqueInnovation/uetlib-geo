@@ -4,7 +4,9 @@ import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
 import ch.ubique.backend.geo.tile.raster.models.RasterTile;
+
 import jakarta.validation.constraints.NotNull;
+
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.Collection;
@@ -34,7 +36,7 @@ public abstract class RasterTileGenerator {
             final TileLevelsDefinition levelsDefinition,
             final double sourceTileWidth,
             final double sourceTileHeight,
-            int outputResolution) {
+            final int outputResolution) {
         this(levelsDefinition, sourceTileWidth, sourceTileHeight, outputResolution, null);
     }
 
@@ -42,8 +44,8 @@ public abstract class RasterTileGenerator {
             final TileLevelsDefinition levelsDefinition,
             final double sourceTileWidth,
             final double sourceTileHeight,
-            int outputResolution,
-            double[] customEmptyPixelValue) {
+            final int outputResolution,
+            final double[] customEmptyPixelValue) {
         this.outputResolution = outputResolution;
         this.sourceTileWidth = sourceTileWidth;
         this.customEmptyPixelValue = customEmptyPixelValue;
@@ -99,7 +101,7 @@ public abstract class RasterTileGenerator {
             // - we are in the base case
             // - or all dependent tiles are ready
             if (children.isEmpty() || ready.keySet().containsAll(children)) {
-                RasterTile rasterTile;
+                final RasterTile rasterTile;
                 if (children.isEmpty()) {
                     // Base case: load the tile from the source
                     rasterTile = getSourceTile(current);

@@ -1,6 +1,7 @@
 package ch.ubique.backend.geodb.entity;
 
 import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 

@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.geometry.models;
 
 import ch.ubique.backend.geo.geometry.utils.BoundingBoxHelper;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;

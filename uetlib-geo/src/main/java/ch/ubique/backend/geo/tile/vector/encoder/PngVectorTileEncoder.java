@@ -2,14 +2,17 @@ package ch.ubique.backend.geo.tile.vector.encoder;
 
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
+
+import org.locationtech.jts.awt.ShapeWriter;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Optional;
+
 import javax.imageio.ImageIO;
-import org.locationtech.jts.awt.ShapeWriter;
 
 public final class PngVectorTileEncoder extends AbstractVectorTileEncoder {
 

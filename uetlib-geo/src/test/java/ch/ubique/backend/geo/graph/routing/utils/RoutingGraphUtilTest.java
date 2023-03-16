@@ -4,14 +4,26 @@ import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
 import ch.ubique.backend.geo.graph.routing.models.Weight;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 
 class RoutingGraphUtilTest {
 
-    private record VertexProperties(WGS84Coordinate coordinate)
-            implements CoordinateVertexProperties<WGS84Coordinate> {}
+    private static void routingGraphTests(Graph<Coordinate, Weight> testGraph) {
+        final var cycles = testGraph.findCycles().size();
+        final var routingVerticesByDegree =
+                testGraph.getVertices().stream()
+                        .filter(v -> v.degree() == 1 || v.degree() > 2)
+                        .count();
+
+        final var routingGraph = RoutingGraphUtil.createRoutingGraph(testGraph);
+
+        Assertions.assertEquals(
+                cycles + routingVerticesByDegree, routingGraph.getVertices().size());
+        Assertions.assertTrue(routingVerticesByDegree <= routingGraph.getDirectedEdges().size());
+    }
 
     @Test
     void testSimple() {
@@ -57,17 +69,6 @@ class RoutingGraphUtilTest {
         routingGraphTests(testGraph);
     }
 
-    private static void routingGraphTests(Graph<Coordinate, Weight> testGraph) {
-        final var cycles = testGraph.findCycles().size();
-        final var routingVerticesByDegree =
-                testGraph.getVertices().stream()
-                        .filter(v -> v.degree() == 1 || v.degree() > 2)
-                        .count();
-
-        final var routingGraph = RoutingGraphUtil.createRoutingGraph(testGraph);
-
-        Assertions.assertEquals(
-                cycles + routingVerticesByDegree, routingGraph.getVertices().size());
-        Assertions.assertTrue(routingVerticesByDegree <= routingGraph.getDirectedEdges().size());
-    }
+    private record VertexProperties(WGS84Coordinate coordinate)
+            implements CoordinateVertexProperties<WGS84Coordinate> {}
 }

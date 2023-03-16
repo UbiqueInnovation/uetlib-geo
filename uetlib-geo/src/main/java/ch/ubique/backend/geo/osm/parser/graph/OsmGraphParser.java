@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.osm.parser.graph;
 
 import ch.ubique.backend.geo.osm.parser.osmosis.OsmParser;
 import ch.ubique.backend.geo.osm.parser.osmosis.OsmUtils;
+
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
@@ -14,26 +15,19 @@ import java.util.Map;
 
 public class OsmGraphParser {
 
-    public static OsmGraph parse(InputStream inputStream, OsmGraphParserConfig config) {
-        var osmParser = new OsmGraphParser(inputStream, config);
-        return osmParser.parse();
-    }
+    private static final Logger logger = LoggerFactory.getLogger(OsmGraphParser.class);
 
     private final InputStream inputStream;
     private final OsmGraphParserConfig config;
 
     private final OsmGraph graph;
-
+    private final Map<Long, Long> nodeIdToVertexId;
     private long nodeCount;
     private long nodeStartMillis;
     private long wayCount;
     private long wayStartMillis;
 
-    private final Map<Long, Long> nodeIdToVertexId;
-
-    private static final Logger logger = LoggerFactory.getLogger(OsmGraphParser.class);
-
-    private OsmGraphParser(InputStream inputStream, OsmGraphParserConfig config) {
+    private OsmGraphParser(final InputStream inputStream, final OsmGraphParserConfig config) {
         this.inputStream = inputStream;
         this.config = config;
         this.nodeIdToVertexId = new HashMap<>();
@@ -47,19 +41,24 @@ public class OsmGraphParser {
         graph = new OsmGraph();
     }
 
+    public static OsmGraph parse(final InputStream inputStream, final OsmGraphParserConfig config) {
+        final var osmParser = new OsmGraphParser(inputStream, config);
+        return osmParser.parse();
+    }
+
     private OsmGraph parse() {
         OsmParser.from(inputStream).onNode(this::processNodes).onWay(this::processWays).parse();
 
         return graph;
     }
 
-    private void processNodes(Node node) {
+    private void processNodes(final Node node) {
         // Get or create vertex
-        var id = config.useSourceIds() ? node.getId() : nodeCount;
+        final var id = config.useSourceIds() ? node.getId() : nodeCount;
         nodeIdToVertexId.put(node.getId(), id);
 
         // Get coordinate
-        var coordinate = OsmUtils.getCoordinate(node);
+        final var coordinate = OsmUtils.getCoordinate(node);
 
         // Get tags
         final var tags = new HashMap<String, String>();
@@ -74,7 +73,7 @@ public class OsmGraphParser {
         logNodeProgress();
     }
 
-    private void processWays(Way way) {
+    private void processWays(final Way way) {
         final var nodeIds = way.getWayNodes().stream().map(WayNode::getNodeId).toList();
 
         // Get tags tags
@@ -83,11 +82,11 @@ public class OsmGraphParser {
             tags.putAll(OsmUtils.getTags(way));
         }
 
-        var properties = new OsmEdgeProperties(tags);
+        final var properties = new OsmEdgeProperties(tags);
 
         for (var i = 0; i < nodeIds.size() - 1; ++i) {
-            var u = nodeIdToVertexId.get(nodeIds.get(i));
-            var v = nodeIdToVertexId.get(nodeIds.get(i + 1));
+            final var u = nodeIdToVertexId.get(nodeIds.get(i));
+            final var v = nodeIdToVertexId.get(nodeIds.get(i + 1));
 
             final var existingEdge = graph.getEdge(u, v);
             if (existingEdge.isPresent()) {
@@ -130,10 +129,10 @@ public class OsmGraphParser {
     }
 
     private void logProgress(
-            long elementCount, int logInterval, long startMillis, String logFormat) {
-        double secondsPassed = (System.currentTimeMillis() - startMillis) / 1000.;
-        var count = String.format("%,d", elementCount);
-        var throughput = String.format("%,.0f", logInterval / secondsPassed);
+            final long elementCount, final int logInterval, final long startMillis, final String logFormat) {
+        final double secondsPassed = (System.currentTimeMillis() - startMillis) / 1000.;
+        final var count = String.format("%,d", elementCount);
+        final var throughput = String.format("%,.0f", logInterval / secondsPassed);
         logger.info(logFormat, count, throughput);
     }
 }

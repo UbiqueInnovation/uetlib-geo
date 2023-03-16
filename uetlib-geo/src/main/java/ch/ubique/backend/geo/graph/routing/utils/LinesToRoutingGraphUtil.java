@@ -8,8 +8,20 @@ import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
 import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
 import ch.ubique.backend.geo.graph.routing.models.Weight;
 import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
+
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
+
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.noding.NodedSegmentString;
+import org.locationtech.jts.noding.SegmentStringUtil;
+import org.locationtech.jts.noding.snap.SnappingNoder;
+import org.locationtech.jts.operation.linemerge.LineMerger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,15 +34,6 @@ import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.noding.NodedSegmentString;
-import org.locationtech.jts.noding.SegmentStringUtil;
-import org.locationtech.jts.noding.snap.SnappingNoder;
-import org.locationtech.jts.operation.linemerge.LineMerger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LinesToRoutingGraphUtil<T> {
 

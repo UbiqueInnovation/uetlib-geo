@@ -1,12 +1,13 @@
 package ch.ubique.backend.geo.coordinate.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 class CoordinateConverterTest {
 

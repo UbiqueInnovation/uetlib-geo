@@ -6,10 +6,13 @@ import ch.ubique.backend.geo.tile.common.utils.TileGeneratorUtil;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import ch.ubique.backend.job.BaseInputJob;
 import ch.ubique.backend.job.model.JobRunState;
+
 import jakarta.validation.constraints.NotNull;
+
+import org.springframework.context.ApplicationContext;
+
 import java.util.Collection;
 import java.util.stream.Stream;
-import org.springframework.context.ApplicationContext;
 
 public abstract class BaseVectorTileImporter<T> extends BaseInputJob<Collection<T>> {
 

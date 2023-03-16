@@ -5,22 +5,18 @@ import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.models.Weight;
 import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+
 import org.locationtech.jts.geom.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RoutingGraphUtil {
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+public final class RoutingGraphUtil {
 
-    public static Graph<Coordinate, WeightAndDirection> createRoutingGraph(
-            final Graph<Coordinate, Weight> graph) {
-        final var routingGraphUtil = new RoutingGraphUtil(graph);
-        return routingGraphUtil.createRoutingGraph();
-    }
+    private static final Logger logger = LoggerFactory.getLogger(RoutingGraphUtil.class);
 
     private final Graph<Coordinate, Weight> inputGraph;
     private final Graph<Coordinate, WeightAndDirection> routingGraph;
@@ -30,6 +26,12 @@ public class RoutingGraphUtil {
         this.inputGraph = inputGraph;
         routingGraph = new Graph<>();
         additionalRoutingVertices = new HashSet<>();
+    }
+
+    public static Graph<Coordinate, WeightAndDirection> createRoutingGraph(
+            final Graph<Coordinate, Weight> graph) {
+        final var routingGraphUtil = new RoutingGraphUtil(graph);
+        return routingGraphUtil.createRoutingGraph();
     }
 
     private Graph<Coordinate, WeightAndDirection> createRoutingGraph() {

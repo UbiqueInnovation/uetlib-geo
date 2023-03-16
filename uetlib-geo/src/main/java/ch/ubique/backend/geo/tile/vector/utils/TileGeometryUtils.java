@@ -5,9 +5,7 @@ import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.util.Arrays;
+
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -18,6 +16,10 @@ import org.locationtech.jts.geom.Geometry;
 import org.opengis.geometry.MismatchedReferenceSystemException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
+
+import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.util.Arrays;
 
 public class TileGeometryUtils {
 

@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.tile.vector.models.tlm;
 
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElementWithTags;
 import ch.ubique.backend.geo.tlm.models.TlmPath;
+
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.Objects;
@@ -13,14 +14,6 @@ public record TlmTileElement(
         TlmInfo tags
 ) implements VectorTileElementWithTags<TlmInfo> {
 
-    @Override
-    public String layer() {
-        return Optional
-                .ofNullable(tags.trailType()).map(Objects::toString)
-                .orElse(tags.type().toString())
-                .toLowerCase();
-    }
-
     private static long lastId = 0;
 
     public TlmTileElement(Geometry geometry, TlmInfo tags) {
@@ -31,5 +24,13 @@ public record TlmTileElement(
         return new TlmTileElement(
                 tlmPath.getLine(),
                 new TlmInfo(tlmPath));
+    }
+
+    @Override
+    public String layer() {
+        return Optional
+                .ofNullable(tags.trailType()).map(Objects::toString)
+                .orElse(tags.type().toString())
+                .toLowerCase();
     }
 }

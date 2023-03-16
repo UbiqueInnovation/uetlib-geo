@@ -1,8 +1,9 @@
 package ch.ubique.backend.geo.geometry.models;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @deprecated Please use JTS instead.

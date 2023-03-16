@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.utils.duration;
 
 import ch.ubique.backend.core.utils.DurationUtils;
+
 import java.time.Duration;
 
 public class BikeDuration {

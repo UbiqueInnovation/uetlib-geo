@@ -2,12 +2,15 @@ package ch.ubique.backend.geo.tile.vector.models;
 
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileElementSupplier;
+
 import com.pivovarit.function.ThrowingConsumer;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.function.Function;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 public record VectorTileOutput(
         VectorTileConfig config,

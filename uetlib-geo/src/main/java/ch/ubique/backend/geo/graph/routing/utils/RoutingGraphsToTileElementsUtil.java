@@ -7,10 +7,13 @@ import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.Neighbor;
 import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.RoutingNeighbor;
 import ch.ubique.backend.geo.graph.routing.models.Weight;
 import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
+
 import jakarta.validation.constraints.NotNull;
-import java.util.Collection;
+
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+
+import java.util.Collection;
 
 public class RoutingGraphsToTileElementsUtil {
 

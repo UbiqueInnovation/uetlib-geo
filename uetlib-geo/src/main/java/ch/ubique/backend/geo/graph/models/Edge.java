@@ -1,9 +1,11 @@
 package ch.ubique.backend.geo.graph.models;
 
 import jakarta.validation.constraints.NotNull;
-import java.util.Optional;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.util.Optional;
 
 /**
  * @param <V> type of the vertex properties
