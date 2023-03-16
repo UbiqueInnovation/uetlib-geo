@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.mbtile.metadata.json;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum FieldType {
     NUMBER("Number"),
     BOOLEAN("Boolean"),
@@ -12,6 +14,7 @@ public enum FieldType {
         this.value = value;
     }
 
+    @JsonValue
     public String getValue() {
         return value;
     }
