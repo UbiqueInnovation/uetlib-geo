@@ -34,7 +34,6 @@ public class VectorLayer {
     private Integer maxzoom;
 
     /** key: field name, value: data type */
-    @NotNull
     @NotEmpty
     @JsonProperty("fields")
     private Map<String, FieldType> fields;
