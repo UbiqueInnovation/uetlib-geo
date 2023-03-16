@@ -16,18 +16,16 @@ import java.util.function.Consumer;
 
 public class OsmParser {
 
+    private final InputStream inputStream;
+
     private Consumer<Way> onWay;
     private Consumer<Node> onNode;
     private Consumer<Relation> onRelation;
     private Consumer<Bound> onBound;
-
     private Consumer<Map<String, Object>> onMetadata;
 
     private Runnable onComplete;
-
     private Runnable onClose;
-
-    private final InputStream inputStream;
 
     private OsmParser(InputStream inputStream) {
         this.inputStream = inputStream;

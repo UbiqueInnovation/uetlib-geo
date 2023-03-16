@@ -3,7 +3,9 @@ package ch.ubique.backend.geo.tile.vector.encoder;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileElementUtils;
+
 import no.ecc.vectortile.VectorTileEncoder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

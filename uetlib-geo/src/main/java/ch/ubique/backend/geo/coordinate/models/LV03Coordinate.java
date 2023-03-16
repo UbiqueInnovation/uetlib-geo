@@ -1,18 +1,23 @@
 package ch.ubique.backend.geo.coordinate.models;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV03;
+
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import jakarta.annotation.Nullable;
-import java.util.Objects;
-import java.util.Optional;
+
 import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Swiss coordinates (1903) <a href="https://epsg.io/21781">https://epsg.io/21781</a> Imprecise, use

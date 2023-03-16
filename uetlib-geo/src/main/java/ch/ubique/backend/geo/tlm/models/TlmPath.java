@@ -71,13 +71,12 @@ public class TlmPath {
         return wanderwegType != null;
     }
 
-    public void setLine(LineString line) {
-        this.line = line;
-    }
-
-
     public LineString getLine() {
         return line;
+    }
+
+    public void setLine(LineString line) {
+        this.line = line;
     }
 
     @Override

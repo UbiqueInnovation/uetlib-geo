@@ -3,12 +3,14 @@ package ch.ubique.backend.geo.tile.vector.utils;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
-import java.util.Random;
-import java.util.stream.IntStream;
+
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Envelope;
+
+import java.util.Random;
+import java.util.stream.IntStream;
 
 class TileGeometryUtilsTest {
 

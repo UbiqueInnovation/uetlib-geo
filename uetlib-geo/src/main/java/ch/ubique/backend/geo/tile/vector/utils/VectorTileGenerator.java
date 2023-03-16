@@ -31,13 +31,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.concurrent.ForkJoinPool;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
 public class VectorTileGenerator implements TileGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(VectorTileGenerator.class);

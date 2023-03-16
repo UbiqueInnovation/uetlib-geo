@@ -2,11 +2,13 @@ package ch.ubique.backend.geo.tile.vector.utils;
 
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
+
+import org.locationtech.jts.index.SpatialIndex;
+import org.locationtech.jts.index.quadtree.Quadtree;
+
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import org.locationtech.jts.index.SpatialIndex;
-import org.locationtech.jts.index.quadtree.Quadtree;
 
 public class VectorTileElementSupplier<T extends VectorTileElement>
         implements Function<TileInfo, Collection<T>> {

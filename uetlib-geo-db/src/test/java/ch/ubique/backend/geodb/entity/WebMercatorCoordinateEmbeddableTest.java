@@ -1,6 +1,7 @@
 package ch.ubique.backend.geodb.entity;
 
 import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

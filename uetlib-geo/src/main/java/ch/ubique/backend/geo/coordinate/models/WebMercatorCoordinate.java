@@ -5,13 +5,17 @@ import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WEB_MERCATOR;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import jakarta.annotation.Nullable;
-import java.util.Objects;
-import java.util.Optional;
+
 import org.apache.commons.lang3.NotImplementedException;
 import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import java.util.Objects;
+import java.util.Optional;
 
 /** <a href="https://epsg.io/3857">https://epsg.io/3857</a> Pseudo-Mercator, Web Mercator */
 public final class WebMercatorCoordinate implements Coordinate {

@@ -18,6 +18,8 @@ import java.util.Set;
 
 public class VectorTileConfig {
 
+    private final YAxisDirection yAxisDirection;
+    private final TileLevelsDefinition tileLevelsDefinition;
     private Integer maxElementsPerTile;
     private Double simplifyTolerance;
     private Double smoothing;
@@ -25,14 +27,10 @@ public class VectorTileConfig {
     private int extent = 4096;
     private TileOutputFormat outputFormat = TileOutputFormat.PBF;
     private ReferencedEnvelope outputEnvelope;
-    private final YAxisDirection yAxisDirection;
-
     private Set<Integer> zoomLevels;
 
-    private final TileLevelsDefinition tileLevelsDefinition;
-
     private VectorTileConfig(
-            YAxisDirection yAxisDirection, final TileLevelsDefinition tileLevelsDefinition) {
+            final YAxisDirection yAxisDirection, final TileLevelsDefinition tileLevelsDefinition) {
         this.yAxisDirection = yAxisDirection;
         this.tileLevelsDefinition = tileLevelsDefinition;
     }
@@ -59,7 +57,7 @@ public class VectorTileConfig {
         return new VectorTileConfig(YAxisDirection.UP, SwissConstants.swissTileDefinition());
     }
 
-    public VectorTileConfig setMaxElementsPerTile(int maxElementsPerTile) {
+    public VectorTileConfig setMaxElementsPerTile(final int maxElementsPerTile) {
         if (maxElementsPerTile <= 0) {
             throw new IllegalArgumentException("The limit needs to be positive.");
         }
@@ -67,40 +65,31 @@ public class VectorTileConfig {
         return this;
     }
 
-    public VectorTileConfig setClipBuffer(int clipBuffer) {
-        this.clipBuffer = clipBuffer;
-        return this;
-    }
-
-    public VectorTileConfig setExtent(int extent) {
-        this.extent = extent;
-        return this;
-    }
-
-    public VectorTileConfig setOutputEnvelope(ReferencedEnvelope outputEnvelope) {
-        this.outputEnvelope = outputEnvelope;
-        return this;
-    }
-
-    public VectorTileConfig setZoomLevels(Collection<Integer> zoomLevels) {
-        this.zoomLevels = new HashSet<>(zoomLevels);
-        return this;
-    }
-
-    public VectorTileConfig setZoomLevels(Integer... zoomLevels) {
-        return setZoomLevels(Arrays.asList(zoomLevels));
-    }
-
     public int getExtent() {
         return extent;
+    }
+
+    public VectorTileConfig setExtent(final int extent) {
+        this.extent = extent;
+        return this;
     }
 
     public int getClipBuffer() {
         return clipBuffer;
     }
 
+    public VectorTileConfig setClipBuffer(final int clipBuffer) {
+        this.clipBuffer = clipBuffer;
+        return this;
+    }
+
     public ReferencedEnvelope getOutputEnvelope() {
         return outputEnvelope;
+    }
+
+    public VectorTileConfig setOutputEnvelope(final ReferencedEnvelope outputEnvelope) {
+        this.outputEnvelope = outputEnvelope;
+        return this;
     }
 
     public Optional<Double> getSimplifyTolerance() {
@@ -112,7 +101,7 @@ public class VectorTileConfig {
      * (in output coordinates on of the vector tile, the output coordinates are between 0 and
      * extent). The tolerance value must be positive.
      */
-    public VectorTileConfig setSimplifyTolerance(double simplifyTolerance) {
+    public VectorTileConfig setSimplifyTolerance(final double simplifyTolerance) {
         if (simplifyTolerance <= 0) {
             throw new IllegalArgumentException("The simplify tolerance needs to be positive.");
         }
@@ -147,12 +136,21 @@ public class VectorTileConfig {
         return zoomLevels;
     }
 
+    public VectorTileConfig setZoomLevels(final Collection<Integer> zoomLevels) {
+        this.zoomLevels = new HashSet<>(zoomLevels);
+        return this;
+    }
+
+    public VectorTileConfig setZoomLevels(final Integer... zoomLevels) {
+        return setZoomLevels(Arrays.asList(zoomLevels));
+    }
+
     /**
      * Returns the maximum allowed elements per tile. This depends on the zoomlevel, meaning that on
      * the maximum level we never limit the allowed number of elements, so we never miss any
      * elements.
      */
-    public Optional<Integer> getLimit(int zoomLevel) {
+    public Optional<Integer> getLimit(final int zoomLevel) {
         final var isMaxZoomLevel = zoomLevels.stream().allMatch(level -> zoomLevel >= level);
         if (isMaxZoomLevel) {
             return Optional.empty();

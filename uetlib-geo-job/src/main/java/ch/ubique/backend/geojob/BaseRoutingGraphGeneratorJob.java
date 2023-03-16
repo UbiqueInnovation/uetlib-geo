@@ -18,12 +18,16 @@ import ch.ubique.backend.job.BaseInputJob;
 import ch.ubique.backend.job.model.JobPropertyKey;
 import ch.ubique.backend.job.model.JobRunState;
 import ch.ubique.backend.job.model.JobRunnerKey;
+
 import com.pivovarit.function.ThrowingConsumer;
+
 import jakarta.validation.constraints.NotNull;
+
+import org.springframework.context.ApplicationContext;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.springframework.context.ApplicationContext;
 
 public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
 

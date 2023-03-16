@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.graph.routing.models;
 
 import ch.ubique.backend.geo.graph.models.Vertex;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.locationtech.jts.geom.Coordinate;

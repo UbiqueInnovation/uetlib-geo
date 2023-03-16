@@ -2,6 +2,9 @@ package ch.ubique.backend.geo.graph.models;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
+
+import org.apache.commons.collections4.SetUtils;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import org.apache.commons.collections4.SetUtils;
 
 /**
  * @param <V> type of the vertex properties

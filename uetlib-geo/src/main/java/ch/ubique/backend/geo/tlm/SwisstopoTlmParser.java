@@ -7,20 +7,23 @@ import ch.ubique.backend.geo.tlm.models.TlmPath;
 import ch.ubique.backend.geo.tlm.models.Verkehrsbedeutung;
 import ch.ubique.backend.geo.tlm.models.WanderwegType;
 import ch.ubique.backend.geo.tlm.models.WegType;
+
+import org.apache.commons.lang3.StringUtils;
+import org.locationtech.jts.geom.LineString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import org.apache.commons.lang3.StringUtils;
-import org.locationtech.jts.geom.LineString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SwisstopoTlmParser {
 

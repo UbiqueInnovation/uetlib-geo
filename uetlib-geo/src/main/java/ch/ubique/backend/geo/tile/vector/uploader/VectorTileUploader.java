@@ -1,8 +1,11 @@
 package ch.ubique.backend.geo.tile.vector.uploader;
 
+import static java.lang.Math.max;
+
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.storage.StorageClient;
 import ch.ubique.backend.storage.output.ByteOutput;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,8 +16,6 @@ import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static java.lang.Math.max;
 
 public class VectorTileUploader {
 

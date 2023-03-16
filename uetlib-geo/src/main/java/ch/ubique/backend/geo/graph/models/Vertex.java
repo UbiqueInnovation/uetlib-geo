@@ -1,11 +1,12 @@
 package ch.ubique.backend.geo.graph.models;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
  * @param <V> type of the vertex properties
@@ -18,11 +19,11 @@ public final class Vertex<V, E> {
 
     private V properties;
 
-    public Vertex(long id) {
+    public Vertex(final long id) {
         this(id, null);
     }
 
-    public Vertex(long id, V properties) {
+    public Vertex(final long id, final V properties) {
         this.id = id;
         this.properties = properties;
         this.edges = Set.of();
@@ -30,10 +31,6 @@ public final class Vertex<V, E> {
 
     public long getId() {
         return id;
-    }
-
-    void setEdges(final Set<Edge<V, E>> edges) {
-        this.edges = Collections.unmodifiableSet(edges);
     }
 
     /**
@@ -45,7 +42,11 @@ public final class Vertex<V, E> {
         return edges;
     }
 
-    public Optional<Edge<V, E>> getEdgeTo(long neighborId) {
+    void setEdges(final Set<Edge<V, E>> edges) {
+        this.edges = Collections.unmodifiableSet(edges);
+    }
+
+    public Optional<Edge<V, E>> getEdgeTo(final long neighborId) {
         return edges.stream().filter(e -> e.connects(id, neighborId)).findFirst();
     }
 
@@ -57,12 +58,12 @@ public final class Vertex<V, E> {
         return edges.stream().map(e -> this.id == e.getU().id ? e.getV() : e.getU());
     }
 
-    public void setProperties(V properties) {
-        this.properties = properties;
-    }
-
     public V getProperties() {
         return properties;
+    }
+
+    public void setProperties(final V properties) {
+        this.properties = properties;
     }
 
     public int degree() {
@@ -79,7 +80,7 @@ public final class Vertex<V, E> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
 
         if (o == null || getClass() != o.getClass()) return false;

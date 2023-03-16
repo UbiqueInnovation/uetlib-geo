@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.tile.common.utils;
 import ch.ubique.backend.geo.tile.vector.models.TileOutput;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileGenerator;
+
 import org.apache.commons.lang3.NotImplementedException;
 
 public final class TileGeneratorFactory {

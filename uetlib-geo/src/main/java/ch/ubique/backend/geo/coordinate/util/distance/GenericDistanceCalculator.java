@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.coordinate.util.distance;
 
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
