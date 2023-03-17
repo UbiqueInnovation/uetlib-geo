@@ -260,8 +260,8 @@ public abstract class RasterTileGenerator {
             final var affineTransform = new AffineTransform();
             affineTransform.translate(-leftCrop, -topCrop);
             affineTransform.scale(
-                    1. * scaledWidth / child.data().getWidth(),
-                    1. * scaledHeight / child.data().getHeight());
+                    1.0 * scaledWidth / child.data().getWidth(),
+                    1.0 * scaledHeight / child.data().getHeight());
             RasterTransform.transform(child.data().getData(), target.getRaster(), affineTransform);
         }
 
@@ -280,7 +280,7 @@ public abstract class RasterTileGenerator {
             final Map<TileInfo, RasterTile> ready,
             final Map<TileInfo, Set<TileInfo>> pendingParents,
             final TileInfo current,
-            Set<TileInfo> children) {
+            final Set<TileInfo> children) {
         for (final var child : children) {
             pendingParents.get(child).remove(current);
             if (pendingParents.get(child).isEmpty()) {

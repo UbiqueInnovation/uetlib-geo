@@ -7,16 +7,16 @@ package ch.ubique.backend.geo.geometry.models;
 @Deprecated(since = "1.3.0", forRemoval = true)
 public class Point2d extends Point<Point2d> {
 
-    protected Point2d(double... coordinates) {
+    protected Point2d(final double... coordinates) {
         this(coordinates[0], coordinates[1]);
     }
 
-    public Point2d(double x, double y) {
+    public Point2d(final double x, final double y) {
         super(x, y);
     }
 
     @Override
-    public Point2d create(double... coordinates) {
+    public Point2d create(final double... coordinates) {
         if (coordinates.length < 2) {
             throw new RuntimeException("Not enough coordinates to construct a 2d point");
         }
@@ -27,8 +27,8 @@ public class Point2d extends Point<Point2d> {
         return coordinates[0];
     }
 
-    public Point2d setX(double x) {
-        this.coordinates[0] = x;
+    public Point2d setX(final double x) {
+        coordinates[0] = x;
         return this;
     }
 
@@ -36,8 +36,8 @@ public class Point2d extends Point<Point2d> {
         return coordinates[1];
     }
 
-    public Point2d setY(double y) {
-        this.coordinates[1] = y;
+    public Point2d setY(final double y) {
+        coordinates[1] = y;
         return this;
     }
 

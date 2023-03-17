@@ -41,7 +41,7 @@ public final class PngVectorTileEncoder extends AbstractVectorTileEncoder {
         try (final var outputStream = new ByteArrayOutputStream()) {
             ImageIO.write(image, "png", outputStream);
             return outputStream.toByteArray();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }

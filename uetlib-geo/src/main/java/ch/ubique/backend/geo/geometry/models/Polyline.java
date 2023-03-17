@@ -17,11 +17,11 @@ public class Polyline {
         this.points = new LinkedList<>();
     }
 
-    public void add(Point2d point) {
+    public void add(final Point2d point) {
         points.add(point);
     }
 
-    public void addAll(Collection<Point2d> point) {
+    public void addAll(final Collection<Point2d> point) {
         points.addAll(point);
     }
 
@@ -29,7 +29,7 @@ public class Polyline {
         return points;
     }
 
-    public void setPoints(List<Point2d> points) {
+    public void setPoints(final List<Point2d> points) {
         this.points = points;
     }
 

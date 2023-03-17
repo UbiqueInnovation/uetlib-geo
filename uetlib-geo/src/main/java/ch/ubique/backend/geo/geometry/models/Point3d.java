@@ -7,16 +7,16 @@ package ch.ubique.backend.geo.geometry.models;
 @Deprecated(since = "1.3.0", forRemoval = true)
 public class Point3d extends Point<Point3d> {
 
-    protected Point3d(double... coordinates) {
+    protected Point3d(final double... coordinates) {
         this(coordinates[0], coordinates[1], coordinates[2]);
     }
 
-    public Point3d(double x, double y, double z) {
+    public Point3d(final double x, final double y, final double z) {
         super(x, y, z);
     }
 
     @Override
-    public Point3d create(double... coordinates) {
+    public Point3d create(final double... coordinates) {
         if (coordinates.length < 3) {
             throw new RuntimeException("Not enough coordinates to construct a 3d point");
         }
@@ -27,8 +27,8 @@ public class Point3d extends Point<Point3d> {
         return coordinates[0];
     }
 
-    public Point3d setX(double x) {
-        this.coordinates[0] = x;
+    public Point3d setX(final double x) {
+        coordinates[0] = x;
         return this;
     }
 
@@ -36,8 +36,8 @@ public class Point3d extends Point<Point3d> {
         return coordinates[1];
     }
 
-    public Point3d setY(double y) {
-        this.coordinates[1] = y;
+    public Point3d setY(final double y) {
+        coordinates[1] = y;
         return this;
     }
 
@@ -45,8 +45,8 @@ public class Point3d extends Point<Point3d> {
         return coordinates[2];
     }
 
-    public Point3d setZ(double z) {
-        this.coordinates[2] = z;
+    public Point3d setZ(final double z) {
+        coordinates[2] = z;
         return this;
     }
 

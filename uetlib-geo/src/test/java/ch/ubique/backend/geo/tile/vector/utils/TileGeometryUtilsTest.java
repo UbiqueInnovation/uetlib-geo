@@ -26,7 +26,7 @@ class TileGeometryUtilsTest {
 
         final var random = new Random();
 
-        for (var i : IntStream.range(0, 1000).toArray()) {
+        for (final var i : IntStream.range(0, 1000).toArray()) {
             final var testCoordinate =
                     new LV95Coordinate(
                             east + random.nextInt(-tileSize, 2 * tileSize),

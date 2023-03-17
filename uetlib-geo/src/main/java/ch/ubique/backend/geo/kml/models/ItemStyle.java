@@ -11,7 +11,7 @@ public class ItemStyle {
         return color;
     }
 
-    public ItemStyle setColor(String color) {
+    public ItemStyle setColor(final String color) {
         this.color = color;
         return this;
     }
@@ -20,7 +20,7 @@ public class ItemStyle {
         return scale;
     }
 
-    public ItemStyle setScale(Double scale) {
+    public ItemStyle setScale(final Double scale) {
         this.scale = scale;
         return this;
     }
@@ -29,7 +29,7 @@ public class ItemStyle {
         return width;
     }
 
-    public ItemStyle setWidth(Double width) {
+    public ItemStyle setWidth(final Double width) {
         this.width = width;
         return this;
     }
@@ -38,7 +38,7 @@ public class ItemStyle {
         return icon;
     }
 
-    public ItemStyle setIcon(Icon icon) {
+    public ItemStyle setIcon(final Icon icon) {
         this.icon = icon;
         return this;
     }

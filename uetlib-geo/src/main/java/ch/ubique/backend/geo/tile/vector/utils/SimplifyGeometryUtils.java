@@ -8,11 +8,11 @@ public class SimplifyGeometryUtils {
 
     private SimplifyGeometryUtils() {}
 
-    public static Geometry simplify(final Geometry geometry, double tolerance) {
+    public static Geometry simplify(final Geometry geometry, final double tolerance) {
         return DouglasPeuckerSimplifier.simplify(geometry, tolerance);
     }
 
-    public static Geometry smooth(final Geometry geometry, double alpha) {
+    public static Geometry smooth(final Geometry geometry, final double alpha) {
         return CubicBezierCurve.bezierCurve(geometry, alpha);
     }
 

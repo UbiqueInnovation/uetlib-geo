@@ -91,7 +91,8 @@ public class Graph<V, E> {
             return existingEdge.get();
         }
 
-        final var edge = new Edge<>(lastEdgeId++, u, v, properties);
+        final var edge = new Edge<>(lastEdgeId, u, v, properties);
+        lastEdgeId++;
         directedEdges.put(edge.getId(), edge);
         u.setEdges(SetUtils.union(u.getEdges(), Set.of(edge)).toSet());
 

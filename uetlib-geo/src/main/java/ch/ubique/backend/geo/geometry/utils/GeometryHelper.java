@@ -23,7 +23,7 @@ public class GeometryHelper {
 
     private GeometryHelper() {}
 
-    public static Polygon2d intersection(Polygon2d polygon, BoundingBox2d boundingBox) {
+    public static Polygon2d intersection(final Polygon2d polygon, final BoundingBox2d boundingBox) {
 
         // Empty box -> no intersection
         if (polygon.getPoints().isEmpty()) {
@@ -33,15 +33,15 @@ public class GeometryHelper {
         // Find out where the points are in relation to the box
         boolean anyPointInsideBox = false;
         boolean anyPointOutsideBox = false;
-        for (Point2d point : polygon.getPoints()) {
+        for (final Point2d point : polygon.getPoints()) {
             if (boundingBox.contains(point)) {
                 anyPointInsideBox = true;
             } else {
                 anyPointOutsideBox = true;
             }
         }
-        boolean allPointsInsideBox = anyPointInsideBox && !anyPointOutsideBox;
-        boolean allPointsOutsideBox = anyPointOutsideBox && !anyPointInsideBox;
+        final boolean allPointsInsideBox = anyPointInsideBox && !anyPointOutsideBox;
+        final boolean allPointsOutsideBox = anyPointOutsideBox && !anyPointInsideBox;
 
         // BoundingBox contains entire polygon
         if (allPointsInsideBox) {
@@ -62,7 +62,7 @@ public class GeometryHelper {
         final var newPolygon = new Polygon2d();
         Line<Point2d> lastIntersection = null;
 
-        for (Line<Point2d> line : polygon.getLines()) {
+        for (final Line<Point2d> line : polygon.getLines()) {
             final var boundingBoxLines = boundingBox.toPolygon().getLines();
             final var intersections = new Line2d(line).intersections(boundingBoxLines);
 
@@ -74,12 +74,12 @@ public class GeometryHelper {
             final var end = line.getEnd();
 
             // Add corners if needed
-            BiConsumer<Line<Point2d>, Line<Point2d>> addCorners =
+            final BiConsumer<Line<Point2d>, Line<Point2d>> addCorners =
                     (last, current) -> {
                         if (last != null && last != current) {
-                            boolean forwards = polygon.contains(last.getEnd());
-                            int firstIndex = boundingBoxLines.indexOf(last);
-                            int lastIndex = boundingBoxLines.indexOf(current);
+                            final boolean forwards = polygon.contains(last.getEnd());
+                            final int firstIndex = boundingBoxLines.indexOf(last);
+                            final int lastIndex = boundingBoxLines.indexOf(current);
                             if (forwards) {
                                 for (int i = firstIndex; i != lastIndex; i = (i + 1) % 4) {
                                     newPolygon.getPoints().add(polygon.getLines().get(i).getEnd());
@@ -130,14 +130,14 @@ public class GeometryHelper {
     }
 
     public static <P extends Point<P>> List<P> simplify(
-            final List<P> points, double minAngle, double minDistance) {
+            final List<P> points, final double minAngle, final double minDistance) {
 
         if (points.size() <= 2) {
             return points;
         }
 
-        Iterator<P> oldPoints = points.iterator();
-        List<P> newPoints = new LinkedList<>();
+        final Iterator<P> oldPoints = points.iterator();
+        final List<P> newPoints = new LinkedList<>();
 
         P start;
         P middle = null;
@@ -160,8 +160,8 @@ public class GeometryHelper {
             }
 
             // Get distance and angle
-            double distance = start.distanceTo(middle);
-            double angle = angle(start, middle, end);
+            final double distance = start.distanceTo(middle);
+            final double angle = angle(start, middle, end);
 
             // Add point if distance and angle are big enough
             if (distance >= minDistance && angle >= minAngle) {
@@ -174,8 +174,7 @@ public class GeometryHelper {
         return newPoints;
     }
 
-    public static <P extends Point<P>> double angle(P start, P middle, P end) {
+    public static <P extends Point<P>> double angle(final P start, final P middle, final P end) {
         return new Vector<>(start, middle).angle(new Vector<>(middle, end));
     }
-
 }

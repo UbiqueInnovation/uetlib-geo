@@ -7,7 +7,7 @@ public class Icon {
         return href;
     }
 
-    public Icon setHref(String href) {
+    public Icon setHref(final String href) {
         this.href = href;
         return this;
     }

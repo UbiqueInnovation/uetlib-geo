@@ -8,8 +8,7 @@ import java.util.List;
 
 public class SwissConstants {
 
-    private SwissConstants() {
-    }
+    private SwissConstants() {}
 
     public static TileLevelsDefinition swissTileDefinition() {
         final var origin = new LV95Coordinate(2420000, 1350000);
@@ -46,11 +45,11 @@ public class SwissConstants {
                 zoomLevel(25, 1875, 1250, 1),
                 zoomLevel(26, 3750, 2500, 0.5),
                 zoomLevel(27, 7500, 5000, 0.25),
-                zoomLevel(28, 18750, 12500, 0.1)
-        );
+                zoomLevel(28, 18750, 12500, 0.1));
     }
 
-    private static ZoomLevel zoomLevel(int level, int tilesX, int tilesY, double resolution) {
+    private static ZoomLevel zoomLevel(
+            final int level, final int tilesX, final int tilesY, final double resolution) {
         return new ZoomLevel(level, tilesX, tilesY, resolution * 256, resolution * 256);
     }
 }

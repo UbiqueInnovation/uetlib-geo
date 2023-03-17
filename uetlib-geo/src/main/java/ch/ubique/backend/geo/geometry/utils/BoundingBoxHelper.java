@@ -20,19 +20,19 @@ public class BoundingBoxHelper {
 
     private BoundingBoxHelper() {}
 
-    public static <P extends Point<P>> BoundingBox<P> getBoundingBox(P point) {
+    public static <P extends Point<P>> BoundingBox<P> getBoundingBox(final P point) {
         return getBoundingBox(Collections.singletonList(point));
     }
 
-    public static <P extends Point<P>> BoundingBox<P> getBoundingBox(List<P> points) {
+    public static <P extends Point<P>> BoundingBox<P> getBoundingBox(final List<P> points) {
         if (points.isEmpty()) {
             return null;
         }
 
-        P min = points.get(0).copy();
-        P max = points.get(0).copy();
+        final P min = points.get(0).copy();
+        final P max = points.get(0).copy();
 
-        for (P point : points) {
+        for (final P point : points) {
             for (int i = 0; i < min.getDimension(); ++i) {
                 min.set(i, min(min.get(i), point.get(i)));
                 max.set(i, max(max.get(i), point.get(i)));
@@ -41,7 +41,7 @@ public class BoundingBoxHelper {
         return new BoundingBox<>(min, max);
     }
 
-    public static Envelope getEnvelope(BoundingBox<?> boundingBox) {
+    public static Envelope getEnvelope(final BoundingBox<?> boundingBox) {
         if (boundingBox == null) {
             return null;
         }

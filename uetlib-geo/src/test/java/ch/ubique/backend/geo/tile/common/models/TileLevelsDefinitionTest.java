@@ -119,8 +119,8 @@ final class TileLevelsDefinitionTest {
         assertEquals(9, tileInfos.size());
         for (int x = 65; x <= 67; x++) {
             for (int y = 44; y <= 46; y++) {
-                int finalX = x;
-                int finalY = y;
+                final int finalX = x;
+                final int finalY = y;
                 assertTrue(
                         tileInfos.stream()
                                 .anyMatch(
@@ -139,8 +139,8 @@ final class TileLevelsDefinitionTest {
         assertEquals(4, tileInfos2.size());
         for (int x = 66; x <= 67; x++) {
             for (int y = 44; y <= 45; y++) {
-                int finalX = x;
-                int finalY = y;
+                final int finalX = x;
+                final int finalY = y;
                 assertTrue(
                         tileInfos2.stream()
                                 .anyMatch(
@@ -177,7 +177,7 @@ final class TileLevelsDefinitionTest {
                             .map(TileInfo::toString)
                             .collect(Collectors.toUnmodifiableSet());
 
-            Assertions.assertEquals(expected, actual);
+            assertEquals(expected, actual);
         }
     }
 
@@ -220,7 +220,7 @@ final class TileLevelsDefinitionTest {
                             .sorted()
                             .toList();
 
-            Assertions.assertEquals(expected, actual);
+            assertEquals(expected, actual);
         }
     }
 }

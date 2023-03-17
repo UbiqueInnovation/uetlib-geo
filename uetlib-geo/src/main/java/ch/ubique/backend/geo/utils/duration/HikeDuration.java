@@ -6,25 +6,24 @@ import java.time.Duration;
 
 public class HikeDuration {
 
-    private static final double[] CHMOB_CONSTANTS =
-            new double[] {
-                14.271,
-                3.6991,
-                2.5922,
-                -1.4384,
-                0.32105,
-                0.81542,
-                -0.090261,
-                -0.20757,
-                0.010192,
-                0.028588,
-                -0.00057466,
-                -0.0021842,
-                1.5176e-5,
-                8.6894e-5,
-                -1.3584e-7,
-                -1.4026e-6
-            };
+    private static final double[] CHMOB_CONSTANTS = {
+        14.271,
+        3.6991,
+        2.5922,
+        -1.4384,
+        0.32105,
+        0.81542,
+        -0.090261,
+        -0.20757,
+        0.010192,
+        0.028588,
+        -0.00057466,
+        -0.0021842,
+        1.5176e-5,
+        8.6894e-5,
+        -1.3584e-7,
+        -1.4026e-6
+    };
 
     private HikeDuration() {}
 

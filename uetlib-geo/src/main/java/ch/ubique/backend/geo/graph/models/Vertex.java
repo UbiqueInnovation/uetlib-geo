@@ -55,7 +55,7 @@ public final class Vertex<V, E> {
     }
 
     public Stream<Vertex<V, E>> getNeighborsStream() {
-        return edges.stream().map(e -> this.id == e.getU().id ? e.getV() : e.getU());
+        return edges.stream().map(e -> id == e.getU().id ? e.getV() : e.getU());
     }
 
     public V getProperties() {

@@ -30,7 +30,8 @@ public abstract class SimpleBaseVectorTileImporter
     protected abstract void consumeTile(BinaryTile tile) throws IOException;
 
     @Override
-    protected final Stream<VectorTileOutput> getOutputs(Collection<VectorTileElement> elements) {
+    protected final Stream<VectorTileOutput> getOutputs(
+            final Collection<VectorTileElement> elements) {
         return Stream.of(new VectorTileOutput(config(), elements, this::consumeTile));
     }
 }

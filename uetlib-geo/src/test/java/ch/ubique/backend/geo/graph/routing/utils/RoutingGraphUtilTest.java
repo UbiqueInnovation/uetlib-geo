@@ -11,7 +11,7 @@ import org.locationtech.jts.geom.Coordinate;
 
 class RoutingGraphUtilTest {
 
-    private static void routingGraphTests(Graph<Coordinate, Weight> testGraph) {
+    private static void routingGraphTests(final Graph<Coordinate, Weight> testGraph) {
         final var cycles = testGraph.findCycles().size();
         final var routingVerticesByDegree =
                 testGraph.getVertices().stream()

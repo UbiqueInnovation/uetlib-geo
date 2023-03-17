@@ -29,7 +29,7 @@ public interface VectorTileElement {
 
     /** Defines if this VectorTileElement is shown at the specified zoom level */
     @JsonIgnore
-    default boolean showElement(int zoomLevel) {
+    default boolean showElement(final int zoomLevel) {
         return true;
     }
 
@@ -43,7 +43,7 @@ public interface VectorTileElement {
      * @param tileGeometry the geometry as computed to be outputted to the tile
      */
     @JsonIgnore
-    default boolean includeForOutput(Geometry tileGeometry) {
+    default boolean includeForOutput(final Geometry tileGeometry) {
         return true;
     }
 

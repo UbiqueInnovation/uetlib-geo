@@ -141,7 +141,7 @@ public final class WGS84Coordinate implements Coordinate {
                                     * cos(toRadians(otherWgs84.latitude))
                                     * sin(dLon / 2)
                                     * sin(dLon / 2);
-            final var c = 2 * atan2(Math.sqrt(a), sqrt(1 - a));
+            final var c = 2 * atan2(sqrt(a), sqrt(1 - a));
             final var d = r * c; // Distance in [km]
             return d * 1000; // Distance in [m]
         }

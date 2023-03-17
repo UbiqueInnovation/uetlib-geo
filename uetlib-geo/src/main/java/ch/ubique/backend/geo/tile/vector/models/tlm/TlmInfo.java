@@ -18,7 +18,7 @@ public record TlmInfo(
         @JsonProperty("verkehrsbedeutung")
         Verkehrsbedeutung significanceForTraffic
 ) {
-    public TlmInfo(TlmPath tlmPath) {
+    public TlmInfo(final TlmPath tlmPath) {
         this(
                 tlmPath.getUuid(),
                 tlmPath.getType(),

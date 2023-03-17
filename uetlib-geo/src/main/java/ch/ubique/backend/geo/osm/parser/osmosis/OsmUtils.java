@@ -31,7 +31,7 @@ public class OsmUtils {
         if (elevationTagValue != null) {
             try {
                 elevation = Double.parseDouble(elevationTagValue);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 /* Nothing to do here*/
             }
         }

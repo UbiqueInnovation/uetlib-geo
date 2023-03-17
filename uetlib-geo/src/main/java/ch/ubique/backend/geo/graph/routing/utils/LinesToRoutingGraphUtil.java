@@ -296,7 +296,7 @@ public class LinesToRoutingGraphUtil<T> {
             final LineString lineString,
             final Graph<Coordinate, Weight> completeGraph,
             final Map<Coordinate, Vertex<Coordinate, Weight>> coordinateToVertex) {
-        var weight = 0f;
+        var weight = 0.0f;
         for (final var segment : JtsUtil.segments(lineString)) {
             final var first = coordinateToVertex.get(segment.p0);
             final var second = coordinateToVertex.get(segment.p1);
@@ -306,7 +306,7 @@ public class LinesToRoutingGraphUtil<T> {
     }
 
     private void mergeEdgesAndRemoveVertex(
-            Vertex<Coordinate, WeightAndDirection> vertex,
+            final Vertex<Coordinate, WeightAndDirection> vertex,
             final Graph<Coordinate, WeightAndDirection> routingGraph) {
 
         if (vertex.degree() != 2) {
@@ -349,7 +349,7 @@ public class LinesToRoutingGraphUtil<T> {
     }
 
     @NotNull
-    private Comparator<T> comparator(final @Nullable ToDoubleFunction<T> priorityExtractor) {
+    private Comparator<T> comparator(@Nullable final ToDoubleFunction<T> priorityExtractor) {
         if (priorityExtractor == null) {
             return Comparator.comparingInt(x -> 0);
         }

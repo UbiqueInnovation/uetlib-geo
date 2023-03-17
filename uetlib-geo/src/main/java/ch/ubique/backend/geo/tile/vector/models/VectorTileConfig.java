@@ -23,7 +23,7 @@ public class VectorTileConfig {
     private Integer maxElementsPerTile;
     private Double simplifyTolerance;
     private Double smoothing;
-    private int clipBuffer = 0;
+    private int clipBuffer  ;
     private int extent = 4096;
     private TileOutputFormat outputFormat = TileOutputFormat.PBF;
     private ReferencedEnvelope outputEnvelope;
@@ -155,7 +155,7 @@ public class VectorTileConfig {
         if (isMaxZoomLevel) {
             return Optional.empty();
         } else {
-            return Optional.ofNullable(this.maxElementsPerTile);
+            return Optional.ofNullable(maxElementsPerTile);
         }
     }
 

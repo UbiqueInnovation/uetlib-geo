@@ -44,28 +44,28 @@ public class JtsUtil {
     }
 
     @NotNull
-    public static MultiLineString toJtsMultiLineString(Collection<LineString> lineStrings) {
+    public static MultiLineString toJtsMultiLineString(final Collection<LineString> lineStrings) {
         return factoryFromGeometryCollection(lineStrings)
                 .createMultiLineString(lineStrings.toArray(LineString[]::new));
     }
 
     @NotNull
-    public static MultiPolygon toJtsMultiPolygon(Collection<Polygon> polygons) {
+    public static MultiPolygon toJtsMultiPolygon(final Collection<Polygon> polygons) {
         return factoryFromGeometryCollection(polygons)
                 .createMultiPolygon(polygons.toArray(Polygon[]::new));
     }
 
     public static GeometryFactory factoryFromGeometryCollection(
-            Collection<? extends Geometry> geometries) {
+            final Collection<? extends Geometry> geometries) {
         final var geometryMaybe = geometries.stream().findAny();
         return geometryMaybe.map(Geometry::getFactory).orElse(new GeometryFactory());
     }
 
-    public static CoordinateReferenceSystem getCrs(Geometry geometry) {
+    public static CoordinateReferenceSystem getCrs(final Geometry geometry) {
         return getCrs(geometry.getSRID());
     }
 
-    public static CoordinateReferenceSystem getCrs(int srid) {
+    public static CoordinateReferenceSystem getCrs(final int srid) {
         if (srid == 0) {
             throw new WrappedException(
                     new MissingInfoException(
@@ -78,7 +78,7 @@ public class JtsUtil {
                 return CRS.decode("EPSG:4326", true);
             }
             return CRS.decode("EPSG:" + srid);
-        } catch (FactoryException e) {
+        } catch (final FactoryException e) {
             throw new WrappedException(
                     e); // rethrow as runtime exception. no way for caller to handle this
         }
@@ -92,7 +92,7 @@ public class JtsUtil {
     }
 
     /** simple geometries are not geometry collections and not multi-geometries */
-    public static List<Geometry> getSimpleGeometries(Geometry geometry) {
+    public static List<Geometry> getSimpleGeometries(final Geometry geometry) {
         if (!(geometry instanceof GeometryCollection)) {
             return IntStream.range(0, geometry.getNumGeometries())
                     .mapToObj(geometry::getGeometryN)
@@ -107,7 +107,7 @@ public class JtsUtil {
                 .toList();
     }
 
-    public static Iterator<Geometry> getSimpleGeometriesIterator(Geometry geometry) {
+    public static Iterator<Geometry> getSimpleGeometriesIterator(final Geometry geometry) {
         return getSimpleGeometries(geometry).iterator();
     }
 
@@ -136,7 +136,7 @@ public class JtsUtil {
         throw new UnfixableGeometryException(fixedValidator.getValidationError());
     }
 
-    public static void updateSrid(Geometry geometry, int srid) {
+    public static void updateSrid(final Geometry geometry, final int srid) {
         geometry.setSRID(srid);
         getSimpleGeometriesIterator(geometry).forEachRemaining(g -> g.setSRID(srid));
     }
@@ -162,7 +162,7 @@ public class JtsUtil {
         } else {
             try {
                 return outputEnvelope.transform(targetCrs, true);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // rethrow as runtime exception. no way for caller to handle this
                 throw new WrappedException(e);
             }

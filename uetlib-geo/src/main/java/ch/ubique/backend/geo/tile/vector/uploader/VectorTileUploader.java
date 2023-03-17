@@ -22,16 +22,16 @@ public class VectorTileUploader {
     private static final Logger logger = LoggerFactory.getLogger(VectorTileUploader.class);
     private final StorageClient storageClient;
 
-    public VectorTileUploader(StorageClient storageClient) {
+    public VectorTileUploader(final StorageClient storageClient) {
         this.storageClient = storageClient;
     }
 
-    public void upload(String path, Collection<BinaryTile> binaryTiles) {
+    public void upload(final String path, final Collection<BinaryTile> binaryTiles) {
         final AtomicInteger count = new AtomicInteger();
         final long startTime = System.currentTimeMillis();
-        int onePercent = max(1, binaryTiles.size() / 100);
+        final int onePercent = max(1, binaryTiles.size() / 100);
         logger.info("Starting upload. {} tiles in total", binaryTiles.size());
-        ForkJoinPool customThreadPool = new ForkJoinPool(12);
+        final ForkJoinPool customThreadPool = new ForkJoinPool(12);
         try {
             customThreadPool
                     .submit(
@@ -42,20 +42,21 @@ public class VectorTileUploader {
                                                         // Upload tile
                                                         try {
                                                             upload(path, tile);
-                                                        } catch (IOException e) {
+                                                        } catch (final IOException e) {
                                                             throw new UncheckedIOException(e);
                                                         }
 
                                                         // Log progress
-                                                        int countValue = count.incrementAndGet();
+                                                        final int countValue =
+                                                                count.incrementAndGet();
                                                         if (countValue % onePercent == 0) {
-                                                            int percent =
+                                                            final int percent =
                                                                     100
                                                                             * countValue
                                                                             / binaryTiles.size();
-                                                            long currentTime =
+                                                            final long currentTime =
                                                                     System.currentTimeMillis();
-                                                            double tilesPerSecond =
+                                                            final double tilesPerSecond =
                                                                     countValue
                                                                             / ((double)
                                                                                     (currentTime
@@ -68,18 +69,18 @@ public class VectorTileUploader {
                                                         }
                                                     }))
                     .get();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             logger.error("Exception uploading tiles: ", e);
             Thread.currentThread().interrupt();
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             logger.error("Exception uploading tiles: ", e);
         }
         logger.info("Upload done");
     }
 
-    public void upload(String path, BinaryTile tile) throws IOException {
-        String tilePath = Paths.get(path, tile.info().path()).toString();
-        String contentType = "application/protobuf";
+    public void upload(final String path, final BinaryTile tile) throws IOException {
+        final String tilePath = Paths.get(path, tile.info().path()).toString();
+        final String contentType = "application/protobuf";
         storageClient.write(new ByteOutput(tile.bytes(), contentType), tilePath);
     }
 }

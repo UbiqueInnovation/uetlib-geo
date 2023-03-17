@@ -14,9 +14,9 @@ public record TlmTileElement(
         TlmInfo tags
 ) implements VectorTileElementWithTags<TlmInfo> {
 
-    private static long lastId = 0;
+    private static long lastId  ;
 
-    public TlmTileElement(Geometry geometry, TlmInfo tags) {
+    public TlmTileElement(final Geometry geometry, final TlmInfo tags) {
         this(lastId++, geometry, tags);
     }
 

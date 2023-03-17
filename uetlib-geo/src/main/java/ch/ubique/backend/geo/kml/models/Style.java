@@ -10,7 +10,7 @@ public class Style {
         return iconStyle;
     }
 
-    public Style setIconStyle(ItemStyle iconStyle) {
+    public Style setIconStyle(final ItemStyle iconStyle) {
         this.iconStyle = iconStyle;
         return this;
     }
@@ -19,7 +19,7 @@ public class Style {
         return labelStyle;
     }
 
-    public Style setLabelStyle(ItemStyle labelStyle) {
+    public Style setLabelStyle(final ItemStyle labelStyle) {
         this.labelStyle = labelStyle;
         return this;
     }
@@ -28,7 +28,7 @@ public class Style {
         return lineStyle;
     }
 
-    public Style setLineStyle(ItemStyle lineStyle) {
+    public Style setLineStyle(final ItemStyle lineStyle) {
         this.lineStyle = lineStyle;
         return this;
     }
