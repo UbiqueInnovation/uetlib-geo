@@ -17,6 +17,8 @@ public class Polygon2d extends Polygon<Point2d> {
         super(points);
     }
 
+    public Polygon2d() {}
+
     public int countBoundaryIntersections(final Line<Point2d> line) {
         return new Line2d(line).intersections(this).size();
     }
