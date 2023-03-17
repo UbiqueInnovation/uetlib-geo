@@ -23,7 +23,7 @@ public class VectorTileConfig {
     private Integer maxElementsPerTile;
     private Double simplifyTolerance;
     private Double smoothing;
-    private int clipBuffer  ;
+    private int clipBuffer;
     private int extent = 4096;
     private TileOutputFormat outputFormat = TileOutputFormat.PBF;
     private ReferencedEnvelope outputEnvelope;
