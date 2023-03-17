@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 public class SwisstopoTlmParser {
 
-    private static final String PATH_XML_TAG_NAME = "swissTLM3D_ili2_V2_0.TLM_STRASSEN.TLM_STRASSE";
+    private static final String PATH_XML_TAG_NAME = "swissTLM3D_ili2_V2_1.TLM_STRASSEN.TLM_STRASSE";
     private static final Logger logger = LoggerFactory.getLogger(SwisstopoTlmParser.class);
 
     private SwisstopoTlmParser() {}
