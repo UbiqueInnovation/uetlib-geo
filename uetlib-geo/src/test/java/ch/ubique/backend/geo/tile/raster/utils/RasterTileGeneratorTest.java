@@ -27,7 +27,7 @@ import javax.swing.WindowConstants;
 @Disabled("For local testing only")
 class RasterTileGeneratorTest {
 
-//    @Test
+    //    @Test
     void test() {
         final var tileLevelsDefinition = SwissConstants.swissTileDefinition().withMaxLevel(17);
         final var sourceTileSize = 1000;
@@ -38,14 +38,14 @@ class RasterTileGeneratorTest {
         final var generator =
                 new RasterTileGenerator(tileLevelsDefinition, sourceTileSize, sourceTileSize, 256) {
                     @Override
-                    protected RasterTile getSourceTile(TileInfo tileInfo) {
+                    protected RasterTile getSourceTile(final TileInfo tileInfo) {
                         Assertions.assertFalse(queriedSourceTiles.contains(tileInfo));
                         queriedSourceTiles.add(tileInfo);
                         return tileWithRandomColor(tileInfo);
                     }
 
                     @Override
-                    protected void onTileGenerated(RasterTile rasterTile) {
+                    protected void onTileGenerated(final RasterTile rasterTile) {
                         Assertions.assertFalse(generatedTiles.contains(rasterTile.tileInfo()));
                         generatedTiles.add(rasterTile.tileInfo());
                         writeToFile(rasterTile);
@@ -59,7 +59,7 @@ class RasterTileGeneratorTest {
         Assertions.assertEquals(tileLevelsDefinition.numberOfTiles(), generatedTiles.size());
     }
 
-//    @Test
+    //    @Test
     @Disabled("Only for visualizing locally. ")
     void testImages() {
         final var tileLevelsDefinition = SwissConstants.swissTileDefinition().onlyWithLevels(12);
@@ -73,18 +73,17 @@ class RasterTileGeneratorTest {
                 new RasterTileGenerator(
                         tileLevelsDefinition, sourceTileSize, sourceTileSize, outputResolution) {
                     @Override
-                    protected RasterTile getSourceTile(TileInfo tileInfo) {
+                    protected RasterTile getSourceTile(final TileInfo tileInfo) {
                         return tileWithRandomColor(tileInfo);
                     }
 
                     @Override
-                    protected void onTileGenerated(RasterTile rasterTile) {
+                    protected void onTileGenerated(final RasterTile rasterTile) {
                         generatedTiles.add(rasterTile);
                     }
                 };
 
         generator.generateTiles();
-
 
         final var frame = new JDialog();
         frame.setSize(new Dimension(outputResolution * 3 + 20, outputResolution * 2 + 100));
@@ -97,7 +96,11 @@ class RasterTileGeneratorTest {
                 image.setBounds(0, 0, outputResolution, outputResolution);
                 panel.add(image);
                 panel.setLayout(null);
-                panel.setBounds(rasterTile.tileInfo().x() * outputResolution,  rasterTile.tileInfo().y() * outputResolution, outputResolution, outputResolution);
+                panel.setBounds(
+                        rasterTile.tileInfo().x() * outputResolution,
+                        rasterTile.tileInfo().y() * outputResolution,
+                        outputResolution,
+                        outputResolution);
                 frame.add(panel);
             }
 
@@ -111,26 +114,40 @@ class RasterTileGeneratorTest {
         Assertions.assertTrue(true);
     }
 
-    private void writeToFile(RasterTile rasterTile) {
+    private void writeToFile(final RasterTile rasterTile) {
         try {
-            final var output = new File("/tmp/" + getClass().getName() + '/' + rasterTile.tileInfo().path() + ".png");
+            final var output =
+                    new File(
+                            "/tmp/"
+                                    + getClass().getName()
+                                    + '/'
+                                    + rasterTile.tileInfo().path()
+                                    + ".png");
             output.mkdirs();
             ImageIO.write(rasterTile.data(), "png", output);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private RasterTile tileWithRandomColor(TileInfo tileInfo) {
+    private RasterTile tileWithRandomColor(final TileInfo tileInfo) {
         final var data = new BufferedImage(20, 20, BufferedImage.TYPE_4BYTE_ABGR);
-        Graphics2D g = (Graphics2D) data.getGraphics();
-        g.setPaint(new GradientPaint(new Point(0, 0), randomColor(), new Point(data.getHeight(), data.getWidth()), Color.black));
+        final Graphics2D g = (Graphics2D) data.getGraphics();
+        g.setPaint(
+                new GradientPaint(
+                        new Point(0, 0),
+                        randomColor(),
+                        new Point(data.getHeight(), data.getWidth()),
+                        Color.black));
         g.fillRect(0, 0, data.getWidth(), data.getHeight());
         g.dispose();
         return new RasterTile(tileInfo, data);
     }
 
     private Color randomColor() {
-        return new Color((int)(Math.random() * 255), (int)(Math.random() * 255), (int)(Math.random() * 255));
+        return new Color(
+                (int) (Math.random() * 255),
+                (int) (Math.random() * 255),
+                (int) (Math.random() * 255));
     }
 }

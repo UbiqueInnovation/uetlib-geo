@@ -39,9 +39,6 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         this.service = service;
     }
 
-    public record RoutingGraphOutput(
-            BinaryTile tile, String layer, GraphType graphType, TileOutputFormat format) {}
-
     protected abstract Stream<RoutingGraphsWithLayer> getGraphs(T data);
 
     protected abstract void saveGraph(final RoutingGraphOutput output) throws IOException;
@@ -66,7 +63,7 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
     }
 
     @Override
-    protected final JobRunState processInputs(T data) throws Exception {
+    protected final JobRunState processInputs(final T data) throws Exception {
         logger.info("Getting graphs.");
         final var graphs = getGraphs(data);
 
@@ -158,4 +155,7 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
             final String layer, final GraphType graphType, final TileOutputFormat format) {
         return tile -> saveGraph(new RoutingGraphOutput(tile, layer, graphType, format));
     }
+
+    public record RoutingGraphOutput(
+            BinaryTile tile, String layer, GraphType graphType, TileOutputFormat format) {}
 }

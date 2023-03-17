@@ -8,7 +8,7 @@ public class DistanceCalculatorFactory {
 
     private DistanceCalculatorFactory() {}
 
-    public static DistanceCalculator create(CoordinateReferenceSystem crs) {
+    public static DistanceCalculator create(final CoordinateReferenceSystem crs) {
         if (crs.equals(JtsConverter.LV95.crs()) || crs.equals(JtsConverter.LV03.crs())) {
             return new SwissDistanceCalculator();
         }

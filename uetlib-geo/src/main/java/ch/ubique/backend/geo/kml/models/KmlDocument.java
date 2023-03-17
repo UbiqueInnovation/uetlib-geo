@@ -13,7 +13,7 @@ public class KmlDocument {
         return placemarks;
     }
 
-    public KmlDocument setPlacemarks(Collection<Placemark> placemarks) {
+    public KmlDocument setPlacemarks(final Collection<Placemark> placemarks) {
         this.placemarks = placemarks;
         return this;
     }
@@ -22,7 +22,7 @@ public class KmlDocument {
         return styleMaps;
     }
 
-    public KmlDocument setStyleMaps(Map<String, StyleMap> styleMaps) {
+    public KmlDocument setStyleMaps(final Map<String, StyleMap> styleMaps) {
         this.styleMaps = styleMaps;
         return this;
     }
@@ -31,7 +31,7 @@ public class KmlDocument {
         return styles;
     }
 
-    public KmlDocument setStyles(Map<String, Style> styles) {
+    public KmlDocument setStyles(final Map<String, Style> styles) {
         this.styles = styles;
         return this;
     }

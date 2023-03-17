@@ -10,7 +10,7 @@ public final class TileEncoderFactory {
 
     private TileEncoderFactory() {}
 
-    public static TileEncoder getEncoder(VectorTileConfig config) {
+    public static TileEncoder getEncoder(final VectorTileConfig config) {
         final var format = config.getOutputFormat();
         return switch (format) {
             case PBF -> new PbfVectorTileEncoder(config);

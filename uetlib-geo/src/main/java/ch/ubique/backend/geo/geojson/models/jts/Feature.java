@@ -30,8 +30,9 @@ public class Feature {
     @JsonInclude private Geometry geometry;
 
     @JsonIgnore
-    public <T> T getProperty(String key) {
+    public <T> T getProperty(final String key) {
         if (properties.containsKey(key)) {
+            //noinspection unchecked
             return (T) properties.get(key);
         }
         return null;
@@ -41,7 +42,7 @@ public class Feature {
         return id;
     }
 
-    public Feature setId(String id) {
+    public Feature setId(final String id) {
         this.id = id;
         return this;
     }
@@ -50,7 +51,7 @@ public class Feature {
         return properties;
     }
 
-    public Feature setProperties(Map<String, Object> properties) {
+    public Feature setProperties(final Map<String, Object> properties) {
         this.properties = properties;
         return this;
     }
@@ -68,7 +69,7 @@ public class Feature {
         @JsonSubTypes.Type(value = Point.class, name = "Point"),
         @JsonSubTypes.Type(value = MultiPoint.class, name = "MultiPoint"),
     })
-    public Feature setGeometry(Geometry geometry) {
+    public Feature setGeometry(final Geometry geometry) {
         this.geometry = geometry;
         return this;
     }
@@ -77,7 +78,7 @@ public class Feature {
         return type;
     }
 
-    public Feature setType(String type) {
+    public Feature setType(final String type) {
         this.type = type;
         return this;
     }

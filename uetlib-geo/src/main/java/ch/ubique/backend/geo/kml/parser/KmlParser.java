@@ -96,7 +96,7 @@ public class KmlParser {
                 switch (elementName) {
                     case "name" -> {
                         placemark.setName(reader.getElementText());
-                        if (placemark.getName().equals("286-TI-40015")) {
+                        if ("286-TI-40015".equals(placemark.getName())) {
                             logger.info("debug");
                         }
                     }
@@ -139,9 +139,9 @@ public class KmlParser {
                 }
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                 elementName = reader.getLocalName();
-                if (elementName.equals("Placemark")) {
+                if ("Placemark".equals(elementName)) {
                     return placemark;
-                } else if (elementName.equals("Polygon")) {
+                } else if ("Polygon".equals(elementName)) {
                     isPolygon = false;
                 }
             }
@@ -167,7 +167,7 @@ public class KmlParser {
                 }
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                 elementName = reader.getLocalName();
-                if (elementName.equals("Style")) {
+                if ("Style".equals(elementName)) {
                     return style;
                 }
             }
@@ -211,12 +211,12 @@ public class KmlParser {
             final String elementName;
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
-                if (elementName.equals("Pair")) {
+                if ("Pair".equals(elementName)) {
                     addPairToStyleMap(reader, styleMap);
                 }
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                 elementName = reader.getLocalName();
-                if (elementName.equals("StyleMap")) {
+                if ("StyleMap".equals(elementName)) {
                     return styleMap;
                 }
             }
@@ -241,7 +241,7 @@ public class KmlParser {
                 }
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                 elementName = reader.getLocalName();
-                if (elementName.equals("Pair")) {
+                if ("Pair".equals(elementName)) {
                     if (key != null && value != null) {
                         styleMap.getMap().put(key, value);
                     }
@@ -264,7 +264,7 @@ public class KmlParser {
                 }
             } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                 elementName = reader.getLocalName();
-                if (elementName.equals("Icon")) {
+                if ("Icon".equals(elementName)) {
                     return icon;
                 }
             }

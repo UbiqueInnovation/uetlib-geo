@@ -27,45 +27,45 @@ public class OsmParser {
     private Runnable onComplete;
     private Runnable onClose;
 
-    private OsmParser(InputStream inputStream) {
+    private OsmParser(final InputStream inputStream) {
         this.inputStream = inputStream;
     }
 
-    public static OsmParser from(InputStream inputStream) {
+    public static OsmParser from(final InputStream inputStream) {
         return new OsmParser(inputStream);
     }
 
-    public OsmParser onWay(Consumer<Way> onWay) {
+    public OsmParser onWay(final Consumer<Way> onWay) {
         this.onWay = onWay;
         return this;
     }
 
-    public OsmParser onNode(Consumer<Node> onNode) {
+    public OsmParser onNode(final Consumer<Node> onNode) {
         this.onNode = onNode;
         return this;
     }
 
-    public OsmParser onRelation(Consumer<Relation> onRelation) {
+    public OsmParser onRelation(final Consumer<Relation> onRelation) {
         this.onRelation = onRelation;
         return this;
     }
 
-    public OsmParser onBound(Consumer<Bound> onBound) {
+    public OsmParser onBound(final Consumer<Bound> onBound) {
         this.onBound = onBound;
         return this;
     }
 
-    public OsmParser onMetadata(Consumer<Map<String, Object>> onMetadata) {
+    public OsmParser onMetadata(final Consumer<Map<String, Object>> onMetadata) {
         this.onMetadata = onMetadata;
         return this;
     }
 
-    public OsmParser onComplete(Runnable onComplete) {
+    public OsmParser onComplete(final Runnable onComplete) {
         this.onComplete = onComplete;
         return this;
     }
 
-    public OsmParser onClose(Runnable onClose) {
+    public OsmParser onClose(final Runnable onClose) {
         this.onClose = onClose;
         return this;
     }
@@ -75,7 +75,7 @@ public class OsmParser {
         reader.setSink(
                 new Sink() {
                     @Override
-                    public void process(EntityContainer entityContainer) {
+                    public void process(final EntityContainer entityContainer) {
                         final var entity = entityContainer.getEntity();
 
                         if (entity instanceof Way way) {
@@ -90,7 +90,7 @@ public class OsmParser {
                     }
 
                     @Override
-                    public void initialize(Map<String, Object> metaData) {
+                    public void initialize(final Map<String, Object> metaData) {
                         invoke(onMetadata, metaData);
                     }
 
@@ -104,11 +104,11 @@ public class OsmParser {
                         invoke(onClose);
                     }
 
-                    private <T> void invoke(Consumer<T> consumer, T arg) {
+                    private <T> void invoke(final Consumer<T> consumer, final T arg) {
                         Optional.ofNullable(consumer).ifPresent(c -> c.accept(arg));
                     }
 
-                    private void invoke(Runnable runnable) {
+                    private void invoke(final Runnable runnable) {
                         Optional.ofNullable(runnable).ifPresent(Runnable::run);
                     }
                 });

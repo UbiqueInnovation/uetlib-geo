@@ -12,7 +12,9 @@ public class GeoTiffParser {
 
     private GeoTiffParser() {}
 
-    public static GridCoverage2D parse(final InputStream inputStream, CoordinateReferenceSystem referenceSystem) throws IOException {
+    public static GridCoverage2D parse(
+            final InputStream inputStream, final CoordinateReferenceSystem referenceSystem)
+            throws IOException {
         final var hints = new Hints(Hints.DEFAULT_COORDINATE_REFERENCE_SYSTEM, referenceSystem);
         final var reader = new GeoTiffReader(inputStream, hints);
         return reader.read(null);

@@ -66,7 +66,7 @@ public class SwisstopoTlmParser {
             final String elementName;
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 elementName = reader.getLocalName();
-                if (elementName.equals("POLYLINE")) {
+                if ("POLYLINE".equals(elementName)) {
                     path.setLine(parsePolyline(reader));
                 }
                 readPathAttributes(reader, path);
@@ -131,7 +131,7 @@ public class SwisstopoTlmParser {
             final var type = reader.getEventType();
             if (type == XMLStreamConstants.START_ELEMENT) {
                 final var elementName = reader.getLocalName();
-                if (elementName.equals("COORD")) {
+                if ("COORD".equals(elementName)) {
                     polyline.add(parseCoordinate(reader));
                 } else {
                     logger.warn("Unexpected element in Polyline: {}", elementName);
@@ -139,7 +139,7 @@ public class SwisstopoTlmParser {
             }
             if (type == XMLStreamConstants.END_ELEMENT) {
                 final var elementName = reader.getLocalName();
-                if (elementName.equals("POLYLINE")) {
+                if ("POLYLINE".equals(elementName)) {
                     return JtsConverter.LV95.toJtsLineString(polyline);
                 }
             }
@@ -166,7 +166,7 @@ public class SwisstopoTlmParser {
             }
             if (type == XMLStreamConstants.END_ELEMENT) {
                 final var elementName = reader.getLocalName();
-                if (elementName.equals("COORD")) {
+                if ("COORD".equals(elementName)) {
                     return new LV95Coordinate(east, north, elevation);
                 }
             }

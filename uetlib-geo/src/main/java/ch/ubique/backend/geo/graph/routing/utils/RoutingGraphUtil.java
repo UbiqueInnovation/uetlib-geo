@@ -38,9 +38,9 @@ public final class RoutingGraphUtil {
         logger.info("Creating routing graphs");
 
         logger.info("Finding cycles");
-        var cycles = inputGraph.findCycles();
+        final var cycles = inputGraph.findCycles();
         logger.info("Found {} cycles", cycles.size());
-        for (var cycle : cycles) {
+        for (final var cycle : cycles) {
             final var vertexOnCycle = cycle.get(0);
             additionalRoutingVertices.add(vertexOnCycle);
         }
@@ -58,24 +58,24 @@ public final class RoutingGraphUtil {
         return routingGraph;
     }
 
-    private boolean isRoutingVertex(Vertex<Coordinate, Weight> vertex) {
+    private boolean isRoutingVertex(final Vertex<Coordinate, Weight> vertex) {
         return vertex.degree() == 1
                 || vertex.degree() > 2
                 || additionalRoutingVertices.contains(vertex);
     }
 
-    private void addToRoutingGraph(Vertex<Coordinate, Weight> vertex) {
+    private void addToRoutingGraph(final Vertex<Coordinate, Weight> vertex) {
         routingGraph.getOrAddVertex(new Vertex<>(vertex.getId(), vertex.getProperties()));
     }
 
-    private void linkRoutingNode(Vertex<Coordinate, Weight> vertex) {
+    private void linkRoutingNode(final Vertex<Coordinate, Weight> vertex) {
         for (final var direction : vertex.getEdges()) {
             linkRoutingNodeForNeighbor(vertex, direction);
         }
     }
 
     private void linkRoutingNodeForNeighbor(
-            Vertex<Coordinate, Weight> start, Edge<Coordinate, Weight> direction) {
+            final Vertex<Coordinate, Weight> start, final Edge<Coordinate, Weight> direction) {
 
         final var visitedEdges = new HashSet<Edge<Coordinate, Weight>>();
 
@@ -86,7 +86,7 @@ public final class RoutingGraphUtil {
         while (true) {
             visitedEdges.add(current);
             final var to = current.getOther(from);
-            weight += Optional.ofNullable(current.getProperties()).map(Weight::weight).orElse(0f);
+            weight += Optional.ofNullable(current.getProperties()).map(Weight::weight).orElse(0.0f);
 
             // Link routing vertex and return
             if (isRoutingVertex(to)) {
@@ -106,10 +106,10 @@ public final class RoutingGraphUtil {
     }
 
     private void upsertRoutingEdge(
-            long vertexId,
-            long routingNeighborId,
-            Vertex<Coordinate, Weight> direction,
-            float weight) {
+            final long vertexId,
+            final long routingNeighborId,
+            final Vertex<Coordinate, Weight> direction,
+            final float weight) {
 
         // Try to get existing routing edge
         final var existingRoutingEdgeMaybe = routingGraph.getEdge(vertexId, routingNeighborId);

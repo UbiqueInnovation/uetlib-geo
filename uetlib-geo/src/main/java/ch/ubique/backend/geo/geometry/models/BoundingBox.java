@@ -12,7 +12,7 @@ public class BoundingBox<P extends Point<P>> {
     private final P min;
     private final P max;
 
-    public BoundingBox(P min, P max) {
+    public BoundingBox(final P min, final P max) {
         if (min.getDimension() != max.getDimension()) {
             throw new RuntimeException("Dimensions do not match");
         }
@@ -32,7 +32,7 @@ public class BoundingBox<P extends Point<P>> {
         return new Vector<>(min, max);
     }
 
-    public boolean contains(P point) {
+    public boolean contains(final P point) {
         if (min.getDimension() != point.getDimension()) {
             throw new RuntimeException("Dimensions do not match");
         }
@@ -46,10 +46,10 @@ public class BoundingBox<P extends Point<P>> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BoundingBox<?> that = (BoundingBox<?>) o;
+        final BoundingBox<?> that = (BoundingBox<?>) o;
         if (!Objects.equals(min, that.min)) return false;
         return Objects.equals(max, that.max);
     }

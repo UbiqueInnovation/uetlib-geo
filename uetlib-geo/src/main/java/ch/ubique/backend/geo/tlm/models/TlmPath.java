@@ -23,7 +23,7 @@ public class TlmPath {
         return type;
     }
 
-    public void setType(WegType type) {
+    public void setType(final WegType type) {
         this.type = type;
     }
 
@@ -31,7 +31,7 @@ public class TlmPath {
         return wanderwegType;
     }
 
-    public void setWanderwegType(WanderwegType wanderwegType) {
+    public void setWanderwegType(final WanderwegType wanderwegType) {
         this.wanderwegType = wanderwegType;
     }
 
@@ -39,7 +39,7 @@ public class TlmPath {
         return stufe;
     }
 
-    public void setStufe(Integer stufe) {
+    public void setStufe(final Integer stufe) {
         this.stufe = stufe;
     }
 
@@ -47,7 +47,7 @@ public class TlmPath {
         return belagsart;
     }
 
-    public void setBelagsart(BelagType belagsart) {
+    public void setBelagsart(final BelagType belagsart) {
         this.belagsart = belagsart;
     }
 
@@ -55,7 +55,7 @@ public class TlmPath {
         return verkehrsbedeutung;
     }
 
-    public void setVerkehrsbedeutung(Verkehrsbedeutung verkehrsbedeutung) {
+    public void setVerkehrsbedeutung(final Verkehrsbedeutung verkehrsbedeutung) {
         this.verkehrsbedeutung = verkehrsbedeutung;
     }
 
@@ -63,7 +63,7 @@ public class TlmPath {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
+    public void setUuid(final String uuid) {
         this.uuid = uuid;
     }
 
@@ -75,7 +75,7 @@ public class TlmPath {
         return line;
     }
 
-    public void setLine(LineString line) {
+    public void setLine(final LineString line) {
         this.line = line;
     }
 
@@ -85,7 +85,7 @@ public class TlmPath {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final var path = (TlmPath) o;

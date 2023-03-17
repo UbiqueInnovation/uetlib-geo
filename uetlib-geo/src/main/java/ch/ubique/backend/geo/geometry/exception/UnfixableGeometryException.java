@@ -4,7 +4,7 @@ import org.locationtech.jts.operation.valid.TopologyValidationError;
 
 public class UnfixableGeometryException extends Exception {
 
-    public UnfixableGeometryException(TopologyValidationError validationError) {
+    public UnfixableGeometryException(final TopologyValidationError validationError) {
         super(validationError.getMessage());
     }
 }

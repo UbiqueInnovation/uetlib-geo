@@ -15,7 +15,7 @@ public class StyleMap {
         return map;
     }
 
-    public StyleMap setMap(Map<String, String> map) {
+    public StyleMap setMap(final Map<String, String> map) {
         this.map = map;
         return this;
     }

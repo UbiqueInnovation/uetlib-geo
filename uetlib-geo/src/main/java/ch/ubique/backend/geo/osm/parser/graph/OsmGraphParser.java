@@ -129,8 +129,11 @@ public class OsmGraphParser {
     }
 
     private void logProgress(
-            final long elementCount, final int logInterval, final long startMillis, final String logFormat) {
-        final double secondsPassed = (System.currentTimeMillis() - startMillis) / 1000.;
+            final long elementCount,
+            final int logInterval,
+            final long startMillis,
+            final String logFormat) {
+        final double secondsPassed = (System.currentTimeMillis() - startMillis) / 1000.0;
         final var count = String.format("%,d", elementCount);
         final var throughput = String.format("%,.0f", logInterval / secondsPassed);
         logger.info(logFormat, count, throughput);

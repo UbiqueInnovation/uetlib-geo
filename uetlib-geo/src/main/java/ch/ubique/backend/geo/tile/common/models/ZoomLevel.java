@@ -11,7 +11,8 @@ package ch.ubique.backend.geo.tile.common.models;
  */
 public record ZoomLevel(int level, int tilesX, int tilesY, double tileWidth, double tileHeight) {
 
-    public static ZoomLevel unbounded(int level, double tileWidth, double tileHeight) {
+    public static ZoomLevel unbounded(
+            final int level, final double tileWidth, final double tileHeight) {
         return new ZoomLevel(level, Integer.MAX_VALUE, Integer.MAX_VALUE, tileWidth, tileHeight);
     }
 

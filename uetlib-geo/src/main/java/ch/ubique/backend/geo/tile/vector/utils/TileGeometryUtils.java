@@ -70,7 +70,7 @@ public class TileGeometryUtils {
     public static MathTransform tileTransform(
             final ReferencedEnvelope tileEnvelope,
             final VectorTileConfig config,
-            boolean withHeight)
+            final boolean withHeight)
             throws TransformException {
         final var extent = config.getExtent();
         final var tileArea = new Rectangle(extent, extent);

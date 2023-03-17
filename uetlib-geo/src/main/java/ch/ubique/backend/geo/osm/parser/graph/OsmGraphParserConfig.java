@@ -8,7 +8,8 @@ public class OsmGraphParserConfig {
 
     private final boolean useSourceIds;
 
-    private OsmGraphParserConfig(boolean parseNodeTags, boolean parseWayTags, boolean useSourceIds) {
+    private OsmGraphParserConfig(
+            final boolean parseNodeTags, final boolean parseWayTags, final boolean useSourceIds) {
         this.parseNodeTags = parseNodeTags;
         this.parseWayTags = parseWayTags;
         this.useSourceIds = useSourceIds;
@@ -37,17 +38,17 @@ public class OsmGraphParserConfig {
 
         private OsmParserConfigBuilder() {}
 
-        public OsmParserConfigBuilder parseNodeTags(boolean parseNodeTags) {
+        public OsmParserConfigBuilder parseNodeTags(final boolean parseNodeTags) {
             this.parseNodeTags = parseNodeTags;
             return this;
         }
 
-        public OsmParserConfigBuilder parseWayTags(boolean parseWayTags) {
+        public OsmParserConfigBuilder parseWayTags(final boolean parseWayTags) {
             this.parseWayTags = parseWayTags;
             return this;
         }
 
-        public OsmParserConfigBuilder useSourceIds(boolean useSourceIds) {
+        public OsmParserConfigBuilder useSourceIds(final boolean useSourceIds) {
             this.useSourceIds = useSourceIds;
             return this;
         }

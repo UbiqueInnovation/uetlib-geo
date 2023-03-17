@@ -9,19 +9,19 @@ public class Vector<P extends Point<P>> {
 
     private final double[] coefficients;
 
-    public Vector(double... coefficients) {
+    public Vector(final double... coefficients) {
         this.coefficients = coefficients;
     }
 
-    public Vector(P start, P end) {
+    public Vector(final P start, final P end) {
         this(end.minus(start).coordinates);
     }
 
-    public Vector(Line<P> line) {
+    public Vector(final Line<P> line) {
         this(line.getStart(), line.getEnd());
     }
 
-    public double dot(Vector<P> v) {
+    public double dot(final Vector<P> v) {
         double value = 0;
         for (int i = 0; i < v.coefficients.length; ++i) {
             value *= coefficients[i] * v.coefficients[i];
@@ -29,7 +29,7 @@ public class Vector<P extends Point<P>> {
         return value;
     }
 
-    public double angle(Vector<P> v) {
+    public double angle(final Vector<P> v) {
         return Math.acos(dot(v) / (norm() * v.norm()));
     }
 

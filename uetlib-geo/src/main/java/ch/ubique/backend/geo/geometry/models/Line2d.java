@@ -12,47 +12,47 @@ import java.util.List;
 @Deprecated(since = "1.3.0", forRemoval = true)
 public class Line2d extends Line<Point2d> {
 
-    public Line2d(Line<Point2d> line) {
+    public Line2d(final Line<Point2d> line) {
         this(line.start, line.end);
     }
 
-    public Line2d(Point2d start, Point2d end) {
+    public Line2d(final Point2d start, final Point2d end) {
         super(start, end);
     }
 
-    public boolean intersects(Line<Point2d> other) {
+    public boolean intersects(final Line<Point2d> other) {
         return intersection(other) != null;
     }
 
-    public Point2d intersection(Line<Point2d> other) {
-        double a1 = end.getY() - start.getY();
-        double b1 = start.getX() - end.getX();
-        double c1 = a1 * start.getX() + b1 * start.getY();
+    public Point2d intersection(final Line<Point2d> other) {
+        final double a1 = end.getY() - start.getY();
+        final double b1 = start.getX() - end.getX();
+        final double c1 = a1 * start.getX() + b1 * start.getY();
 
-        double a2 = other.end.getY() - other.start.getY();
-        double b2 = other.start.getX() - other.end.getX();
-        double c2 = a2 * other.start.getX() + b2 * other.start.getY();
+        final double a2 = other.end.getY() - other.start.getY();
+        final double b2 = other.start.getX() - other.end.getX();
+        final double c2 = a2 * other.start.getX() + b2 * other.start.getY();
 
-        double delta = a1 * b2 - a2 * b1;
-        double x = (b2 * c1 - b1 * c2) / delta;
-        double y = (a1 * c2 - a2 * c1) / delta;
+        final double delta = a1 * b2 - a2 * b1;
+        final double x = (b2 * c1 - b1 * c2) / delta;
+        final double y = (a1 * c2 - a2 * c1) / delta;
 
         if (outOfBounds(new Point2d(x, y)) || other.outOfBounds(new Point2d(x, y))) {
             return null;
         }
 
-        double t = (end.getX() - x) / (end.getX() - start.getX());
+        final double t = (end.getX() - x) / (end.getX() - start.getX());
         return start.interpolate(end, t);
     }
 
-    public List<Pair<Point2d, Line<Point2d>>> intersections(Polygon2d polygon) {
+    public List<Pair<Point2d, Line<Point2d>>> intersections(final Polygon2d polygon) {
         return intersections(polygon.getLines());
     }
 
-    public List<Pair<Point2d, Line<Point2d>>> intersections(List<Line<Point2d>> lines) {
-        List<Pair<Point2d, Line<Point2d>>> intersections = new LinkedList<>();
-        for (Line<Point2d> line : lines) {
-            Point2d intersection = this.intersection(line);
+    public List<Pair<Point2d, Line<Point2d>>> intersections(final List<Line<Point2d>> lines) {
+        final List<Pair<Point2d, Line<Point2d>>> intersections = new LinkedList<>();
+        for (final Line<Point2d> line : lines) {
+            final Point2d intersection = intersection(line);
             if (intersection != null) {
                 intersections.add(Pair.of(intersection, line));
             }
@@ -60,11 +60,11 @@ public class Line2d extends Line<Point2d> {
         return intersections;
     }
 
-    public boolean intersectsBoundary(Polygon<Point2d> polygon) {
+    public boolean intersectsBoundary(final Polygon<Point2d> polygon) {
         return new Polygon2d(polygon).intersectsBoundary(this);
     }
 
-    public boolean intersects(BoundingBox<Point2d> boundingBox) {
+    public boolean intersects(final BoundingBox<Point2d> boundingBox) {
         return new BoundingBox2d(boundingBox).intersects(this);
     }
 }

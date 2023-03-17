@@ -12,14 +12,15 @@ public abstract class Point<P extends Point<P>> {
 
     protected final double[] coordinates;
 
-    protected Point(double... coordinates) {
+    protected Point(final double... coordinates) {
         this.coordinates = coordinates;
     }
 
-    public static <P extends Point<P>> P newInstance(Class<P> cls, double... coordinates) {
+    public static <P extends Point<P>> P newInstance(
+            final Class<P> cls, final double... coordinates) {
         try {
             return cls.getDeclaredConstructor(double[].class).newInstance(coordinates);
-        } catch (NoSuchMethodException
+        } catch (final NoSuchMethodException
                 | InstantiationException
                 | IllegalAccessException
                 | InvocationTargetException e) {
@@ -30,11 +31,11 @@ public abstract class Point<P extends Point<P>> {
 
     protected abstract P create(double... coordinates);
 
-    public P plus(P other) {
+    public P plus(final P other) {
         if (coordinates.length != other.coordinates.length) {
             throw new RuntimeException("Dimensions do not match");
         }
-        double[] newValues = new double[coordinates.length];
+        final double[] newValues = new double[coordinates.length];
         for (int i = 0; i < coordinates.length; ++i) {
             newValues[i] = coordinates[i] + other.coordinates[i];
         }
@@ -45,39 +46,39 @@ public abstract class Point<P extends Point<P>> {
         return coordinates.length;
     }
 
-    public double get(int i) {
+    public double get(final int i) {
         return coordinates[i];
     }
 
-    public double set(int i, double value) {
+    public double set(final int i, final double value) {
         return coordinates[i] = value;
     }
 
-    public P multiply(double multiplier) {
-        double[] newValues = new double[coordinates.length];
+    public P multiply(final double multiplier) {
+        final double[] newValues = new double[coordinates.length];
         for (int i = 0; i < coordinates.length; ++i) {
             newValues[i] = multiplier * coordinates[i];
         }
         return create(newValues);
     }
 
-    public P interpolate(P other, double t) {
-        return this.multiply(t).plus(other.multiply(1 - t));
+    public P interpolate(final P other, final double t) {
+        return multiply(t).plus(other.multiply(1 - t));
     }
 
-    public P over(double divisor) {
+    public P over(final double divisor) {
         return multiply(1 / divisor);
     }
 
-    public P minus(double... delta) {
+    public P minus(final double... delta) {
         return minus(create(delta));
     }
 
-    public P plus(double... delta) {
+    public P plus(final double... delta) {
         return plus(create(delta));
     }
 
-    public P minus(P delta) {
+    public P minus(final P delta) {
         return plus(delta.multiply(-1));
     }
 
@@ -85,7 +86,7 @@ public abstract class Point<P extends Point<P>> {
         return create(coordinates);
     }
 
-    public double distanceTo(P b) {
+    public double distanceTo(final P b) {
         return new Vector<>(copy(), b).norm();
     }
 

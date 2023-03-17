@@ -20,11 +20,15 @@ public final class Edge<V, E> {
 
     private E properties;
 
-    public Edge(long id, @NotNull Vertex<V, E> u, @NotNull Vertex<V, E> v) {
+    public Edge(final long id, @NotNull final Vertex<V, E> u, @NotNull final Vertex<V, E> v) {
         this(id, u, v, null);
     }
 
-    public Edge(long id, @NotNull Vertex<V, E> u, @NotNull Vertex<V, E> v, E properties) {
+    public Edge(
+            final long id,
+            @NotNull final Vertex<V, E> u,
+            @NotNull final Vertex<V, E> v,
+            final E properties) {
         this.id = id;
         this.u = u;
         this.v = v;
@@ -54,7 +58,7 @@ public final class Edge<V, E> {
         return id;
     }
 
-    public Vertex<V, E> getOther(Vertex<V, E> firstVertex) {
+    public Vertex<V, E> getOther(final Vertex<V, E> firstVertex) {
         if (firstVertex.equals(u)) {
             return v;
         }
@@ -69,12 +73,12 @@ public final class Edge<V, E> {
         return v;
     }
 
-    public boolean connects(long vertexId1, long vertexId2) {
+    public boolean connects(final long vertexId1, final long vertexId2) {
         return (vertexId1 == u.getId() && vertexId2 == v.getId())
                 || (vertexId1 == v.getId() && vertexId2 == u.getId());
     }
 
-    public boolean connects(Vertex<V, E> a, Vertex<V, E> b) {
+    public boolean connects(final Vertex<V, E> a, final Vertex<V, E> b) {
         return (a.equals(u) && b.equals(v)) || (a.equals(v) && b.equals(u));
     }
 
@@ -82,7 +86,7 @@ public final class Edge<V, E> {
         return properties;
     }
 
-    public Edge<V, E> setProperties(E properties) {
+    public Edge<V, E> setProperties(final E properties) {
         this.properties = properties;
         return this;
     }
@@ -93,7 +97,7 @@ public final class Edge<V, E> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
 
         if (o == null || getClass() != o.getClass()) return false;

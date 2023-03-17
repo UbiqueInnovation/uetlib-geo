@@ -52,7 +52,7 @@ public class VectorTileGenerator implements TileGenerator {
         generateTiles(output, 64);
     }
 
-    public static void generateTiles(final VectorTileOutput output, int parallelism) {
+    public static void generateTiles(final VectorTileOutput output, final int parallelism) {
         final var generator = new VectorTileGenerator(output, parallelism);
         generator.generateTiles();
     }
@@ -68,7 +68,8 @@ public class VectorTileGenerator implements TileGenerator {
     }
 
     @NotNull
-    private Collection<TileInfo> getTileInfos(final int level, ReferencedEnvelope outputEnvelope) {
+    private Collection<TileInfo> getTileInfos(
+            final int level, final ReferencedEnvelope outputEnvelope) {
         logger.info("Getting tile infos for zoom level {}", level);
         return output.config().getTileLevelsDefinition().tileInfos(level, outputEnvelope).toList();
     }

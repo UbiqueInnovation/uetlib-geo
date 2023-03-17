@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  */
 public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels) {
 
-    public TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels) {
+    public TileLevelsDefinition(final Coordinate origin, final List<ZoomLevel> zoomLevels) {
         if (zoomLevels == null || zoomLevels.isEmpty()) {
             throw new IllegalArgumentException("Zoom levels are not allowed to be null or empty");
         }
@@ -53,7 +53,7 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
         return maxZoomLevel().level();
     }
 
-    public Optional<ZoomLevel> nextSmaller(ZoomLevel level) {
+    public Optional<ZoomLevel> nextSmaller(final ZoomLevel level) {
         final var index = zoomLevels.indexOf(level) - 1;
         if (index < 0) {
             return Optional.empty();
@@ -62,7 +62,7 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
         return Optional.of(zoomLevels.get(index));
     }
 
-    public Optional<ZoomLevel> nextLarger(ZoomLevel level) {
+    public Optional<ZoomLevel> nextLarger(final ZoomLevel level) {
         final var index = zoomLevels.indexOf(level) + 1;
         if (index >= zoomLevels.size()) {
             return Optional.empty();
@@ -71,40 +71,40 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
         return Optional.of(zoomLevels.get(index));
     }
 
-    public TileLevelsDefinition withMaxLevel(int maxLevel) {
+    public TileLevelsDefinition withMaxLevel(final int maxLevel) {
         return new TileLevelsDefinition(
                 origin, zoomLevels.stream().filter(z -> z.level() <= maxLevel).toList());
     }
 
-    public TileLevelsDefinition withMinLevel(int minLevel) {
+    public TileLevelsDefinition withMinLevel(final int minLevel) {
         return new TileLevelsDefinition(
                 origin, zoomLevels.stream().filter(z -> z.level() >= minLevel).toList());
     }
 
-    public boolean isMin(ZoomLevel zoomLevel) {
+    public boolean isMin(final ZoomLevel zoomLevel) {
         return zoomLevel.equals(minZoomLevel());
     }
 
-    public boolean isMax(ZoomLevel zoomLevel) {
+    public boolean isMax(final ZoomLevel zoomLevel) {
         return zoomLevel.equals(maxZoomLevel());
     }
 
-    public TileLevelsDefinition onlyWithLevels(Integer... levels) {
+    public TileLevelsDefinition onlyWithLevels(final Integer... levels) {
         return onlyWithLevels(List.of(levels));
     }
 
-    public TileLevelsDefinition onlyWithLevels(Collection<Integer> levels) {
+    public TileLevelsDefinition onlyWithLevels(final Collection<Integer> levels) {
         return new TileLevelsDefinition(
                 origin, zoomLevels.stream().filter(z -> levels.contains(z.level())).toList());
     }
 
-    public TileLevelsDefinition addLevel(ZoomLevel zoomLevel) {
+    public TileLevelsDefinition addLevel(final ZoomLevel zoomLevel) {
         final var combinedLevels = new ArrayList<>(zoomLevels);
         combinedLevels.add(zoomLevel);
         return new TileLevelsDefinition(origin, combinedLevels);
     }
 
-    public TileLevelsDefinition withMinMaxLevel(int minLevel, int maxLevel) {
+    public TileLevelsDefinition withMinMaxLevel(final int minLevel, final int maxLevel) {
         return new TileLevelsDefinition(
                 origin,
                 zoomLevels.stream()
@@ -138,11 +138,11 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
 
     /** Return given zoom level object */
     @NotNull
-    public ZoomLevel getZoomLevel(int level) {
+    public ZoomLevel getZoomLevel(final int level) {
         return getZoomLevelOptional(level).orElseThrow();
     }
 
-    public Optional<ZoomLevel> getZoomLevelOptional(int level) {
+    public Optional<ZoomLevel> getZoomLevelOptional(final int level) {
         return zoomLevels.stream().filter(zoomLevel -> zoomLevel.level() == level).findAny();
     }
 
@@ -150,7 +150,7 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
      * Returns a collection of all tile infos of the next larger level (larger level = smaller area
      * covered) that overlap with the provided TileInfo
      */
-    public Set<TileInfo> childrenTileInfos(TileInfo current) {
+    public Set<TileInfo> childrenTileInfos(final TileInfo current) {
         final var currentLevel = current.zoomLevel();
         return overlappingTileInfos(current, nextLarger(currentLevel).orElse(null));
     }
@@ -159,7 +159,7 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
      * Returns a collection of all tile infos of the next smaller level (smaller level = larger area
      * covered) that overlap with the provided TileInfo
      */
-    public Set<TileInfo> parentTileInfos(TileInfo current) {
+    public Set<TileInfo> parentTileInfos(final TileInfo current) {
         final var currentLevel = current.zoomLevel();
         return overlappingTileInfos(current, nextSmaller(currentLevel).orElse(null));
     }
@@ -168,7 +168,7 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
      * Returns a collection of all tile infos at level otherLevel that overlap with the given
      * TileInfo
      */
-    private Set<TileInfo> overlappingTileInfos(TileInfo current, ZoomLevel otherLevel) {
+    private Set<TileInfo> overlappingTileInfos(final TileInfo current, final ZoomLevel otherLevel) {
         if (otherLevel == null) {
             return Set.of();
         }

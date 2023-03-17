@@ -11,10 +11,10 @@ class PointConverterTest {
 
     @Test
     void testPointConverter() {
-        var coordinate = new LV95Coordinate(2600000, 1200000, 400.);
+        final var coordinate = new LV95Coordinate(2600000, 1200000, 400.0);
 
-        var point2d = PointConverter.toPoint(Point2d.class, coordinate);
-        var point3d = PointConverter.toPoint(Point3d.class, coordinate);
+        final var point2d = PointConverter.toPoint(Point2d.class, coordinate);
+        final var point3d = PointConverter.toPoint(Point3d.class, coordinate);
 
         Assertions.assertEquals(new Point2d(2600000, 1200000).toString(), point2d.toString());
         Assertions.assertEquals(new Point3d(2600000, 1200000, 400).toString(), point3d.toString());

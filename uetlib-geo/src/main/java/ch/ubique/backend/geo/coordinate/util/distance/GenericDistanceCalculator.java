@@ -23,21 +23,23 @@ public class GenericDistanceCalculator implements DistanceCalculator {
         this.geodeticCalculator = new GeodeticCalculator(crs);
         try {
             this.geographicTransform = CRS.findMathTransform(crs, JtsConverter.WGS84.crs());
-        } catch (FactoryException e) {
-            throw new WrappedException(e); // rethrow as runtime exception. no way for caller to handle this
+        } catch (final FactoryException e) {
+            throw new WrappedException(
+                    e); // rethrow as runtime exception. no way for caller to handle this
         }
     }
 
     @Override
-    public double getDistance(Coordinate c1, Coordinate c2) {
+    public double getDistance(final Coordinate c1, final Coordinate c2) {
         try {
             start = JTS.transform(c1, start, geographicTransform);
             end = JTS.transform(c2, end, geographicTransform);
             geodeticCalculator.setStartingGeographicPoint(start.x, start.y);
             geodeticCalculator.setDestinationGeographicPoint(end.x, end.y);
             return geodeticCalculator.getOrthodromicDistance();
-        } catch (TransformException e) {
-            throw new WrappedException(e); // rethrow as runtime exception. no way for caller to handle this
+        } catch (final TransformException e) {
+            throw new WrappedException(
+                    e); // rethrow as runtime exception. no way for caller to handle this
         }
     }
 }

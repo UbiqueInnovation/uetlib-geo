@@ -18,10 +18,9 @@ public class VectorTileElementUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper(); // TODO pass as parameter
     private static final Logger logger = LoggerFactory.getLogger(VectorTileElementUtils.class);
 
-    private VectorTileElementUtils() {
-    }
+    private VectorTileElementUtils() {}
 
-    public static Map<String, Object> getFinalTags(VectorTileElement element) {
+    public static Map<String, Object> getFinalTags(final VectorTileElement element) {
 
         final var tags = new HashMap<String, Object>();
 
@@ -30,10 +29,11 @@ public class VectorTileElementUtils {
             tags.putAll(objectMapper.convertValue(withTags.tags(), Map.class));
         }
 
-        if (element instanceof VectorTileElementWithMetadata<?> withMetadata && withMetadata.metadata() != null) {
+        if (element instanceof VectorTileElementWithMetadata<?> withMetadata
+                && withMetadata.metadata() != null) {
             try {
                 tags.put("metadata", objectMapper.writeValueAsString(withMetadata.metadata()));
-            } catch (JsonProcessingException e) {
+            } catch (final JsonProcessingException e) {
                 logger.error("Could not serialize metadata to JSON");
             }
         }

@@ -28,7 +28,7 @@ public class Placemark {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -36,7 +36,7 @@ public class Placemark {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -44,11 +44,11 @@ public class Placemark {
         return coordinates;
     }
 
-    public void setCoordinates(List<List<LV95Coordinate>> coordinates) {
+    public void setCoordinates(final List<List<LV95Coordinate>> coordinates) {
         this.coordinates = coordinates;
     }
 
-    public void addCoordinates(List<LV95Coordinate> coordinates) {
+    public void addCoordinates(final List<LV95Coordinate> coordinates) {
         this.coordinates.add(coordinates);
     }
 
@@ -56,7 +56,7 @@ public class Placemark {
         return extendedData;
     }
 
-    public void setExtendedData(Map<String, String> extendedData) {
+    public void setExtendedData(final Map<String, String> extendedData) {
         this.extendedData = extendedData;
     }
 
@@ -64,7 +64,7 @@ public class Placemark {
         return styleId;
     }
 
-    public void setStyleId(String styleId) {
+    public void setStyleId(final String styleId) {
         this.styleId = styleId;
     }
 }

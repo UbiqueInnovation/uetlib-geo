@@ -14,7 +14,8 @@ public class RasterTransform {
 
     private RasterTransform() {}
 
-    public static void transform(final Raster src, final WritableRaster dst, AffineTransform transform) {
+    public static void transform(
+            final Raster src, final WritableRaster dst, final AffineTransform transform) {
 
         final var dstWidth = dst.getWidth();
         final var dstHeight = dst.getHeight();
@@ -22,7 +23,7 @@ public class RasterTransform {
         final AffineTransform inverseTransform;
         try {
             inverseTransform = transform.createInverse();
-        } catch (NoninvertibleTransformException e) {
+        } catch (final NoninvertibleTransformException e) {
             throw new WrappedException(e);
         }
 
@@ -42,14 +43,14 @@ public class RasterTransform {
         }
     }
 
-    private static boolean withinBounds(Raster src, Point2D.Double srcPoint) {
-        return Math.ceil(srcPoint.x) >= 0 &&
-                Math.ceil(srcPoint.y) >= 0 &&
-                Math.floor(srcPoint.x) < src.getWidth() &&
-                Math.floor(srcPoint.y) < src.getHeight();
+    private static boolean withinBounds(final Raster src, final Point2D.Double srcPoint) {
+        return Math.ceil(srcPoint.x) >= 0
+                && Math.ceil(srcPoint.y) >= 0
+                && Math.floor(srcPoint.x) < src.getWidth()
+                && Math.floor(srcPoint.y) < src.getHeight();
     }
 
-    public static void interpolate(final Raster src, final Point2D sample, double[] result) {
+    public static void interpolate(final Raster src, final Point2D sample, final double[] result) {
 
         final var xSample = sample.getX();
         final var ySample = sample.getY();
@@ -68,7 +69,9 @@ public class RasterTransform {
         final var p22 = src.getPixel(x2, y2, (double[]) null);
 
         for (var i = 0; i < result.length; ++i) {
-            result[i] = (1 - tx) * ((1 - ty) * p11[i] +  ty * p12[i]) + tx * ((1 - ty) * p21[i] + ty * p22[i]);
+            result[i] =
+                    (1 - tx) * ((1 - ty) * p11[i] + ty * p12[i])
+                            + tx * ((1 - ty) * p21[i] + ty * p22[i]);
         }
     }
 }

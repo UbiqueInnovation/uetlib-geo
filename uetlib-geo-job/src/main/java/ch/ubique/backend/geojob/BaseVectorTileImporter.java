@@ -34,7 +34,7 @@ public abstract class BaseVectorTileImporter<T> extends BaseInputJob<Collection<
     }
 
     @Override
-    protected JobRunState processInputs(Collection<T> data) throws Exception {
+    protected JobRunState processInputs(final Collection<T> data) throws Exception {
 
         if (data.isEmpty()) {
             if (allowEmpty()) {

@@ -15,7 +15,7 @@ public class Polygon<P extends Point<P>> {
 
     private final List<P> points;
 
-    public Polygon(List<P> points) {
+    public Polygon(final List<P> points) {
         this.points = points;
     }
 
@@ -32,7 +32,7 @@ public class Polygon<P extends Point<P>> {
     }
 
     public List<Line<P>> getLines() {
-        List<Line<P>> lines = new ArrayList<>(points.size());
+        final List<Line<P>> lines = new ArrayList<>(points.size());
         for (int i = 0; i < points.size(); ++i) {
             lines.add(new Line<>(points.get(i), points.get((i + 1) % points.size())));
         }
