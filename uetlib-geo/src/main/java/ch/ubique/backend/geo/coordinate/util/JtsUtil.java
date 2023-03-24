@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.coordinate.util;
 
+import static org.locationtech.jts.noding.SegmentStringUtil.extractSegmentStrings;
+
 import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
 
 import jakarta.validation.constraints.NotNull;
@@ -20,6 +22,9 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.util.GeometryFixer;
+import org.locationtech.jts.noding.SegmentStringUtil;
+import org.locationtech.jts.noding.snap.SnappingNoder;
+import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -167,5 +172,40 @@ public class JtsUtil {
                 throw new WrappedException(e);
             }
         }
+    }
+
+    public static Geometry snapSegments(final Geometry geometry, final double snapTolerance) {
+        final var noder = new SnappingNoder(snapTolerance);
+        noder.computeNodes(extractSegmentStrings(geometry));
+        return SegmentStringUtil.toGeometry(noder.getNodedSubstrings(), geometry.getFactory());
+    }
+
+    public static Geometry mergeLines(final Geometry geometry) {
+        final var lineMerger = new LineMerger();
+        lineMerger.add(geometry);
+        final var mergedLineStrings = lineMerger.getMergedLineStrings();
+
+        //noinspection unchecked
+        final var merged = toJtsMultiLineString(mergedLineStrings);
+        return unwrapIfGeometryCollectionHasOnlyOneGeometry(merged);
+    }
+
+    public static Geometry unwrapIfGeometryCollectionHasOnlyOneGeometry(final Geometry geometry) {
+        if (geometry instanceof GeometryCollection && geometry.getNumGeometries() == 1) {
+            return getSimpleGeometries(geometry).get(0);
+        }
+        return geometry;
+    }
+
+    public static Geometry snapAndMergeLines(final Geometry geometry, final double snapTolerance) {
+
+        // Snap nodes of lines
+        final var snapped = JtsUtil.snapSegments(geometry, snapTolerance);
+
+        // Self-union removes duplicate segments
+        final var snappedWithoutDuplicates = snapped.union();
+
+        // Merge lines
+        return JtsUtil.mergeLines(snappedWithoutDuplicates);
     }
 }
