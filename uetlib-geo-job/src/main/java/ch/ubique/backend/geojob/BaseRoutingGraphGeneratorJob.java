@@ -15,9 +15,11 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileElementSupplier;
 import ch.ubique.backend.job.BaseInputJob;
-import ch.ubique.backend.job.model.JobPropertyKey;
 import ch.ubique.backend.job.model.JobRunState;
-import ch.ubique.backend.job.model.JobRunnerKey;
+import ch.ubique.backend.job.model.properties.JobProperty;
+import ch.ubique.backend.job.model.properties.JobPropertyDefinitions;
+import ch.ubique.backend.job.model.properties.enums.JobRunnerKey;
+import ch.ubique.backend.job.model.properties.enums.KubernetesSku;
 
 import com.pivovarit.function.ThrowingConsumer;
 
@@ -26,7 +28,8 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
@@ -49,12 +52,12 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
     }
 
     @Override
-    public Map<JobPropertyKey, String> initialProperties() {
-        return Map.ofEntries(
-                Map.entry(JobPropertyKey.RUNNER, JobRunnerKey.DEDICATED_K8S_JOB.name()),
-                Map.entry(JobPropertyKey.K8S_SKU, "highmem"),
-                Map.entry(JobPropertyKey.K8S_REQUESTS_CPU, "2"),
-                Map.entry(JobPropertyKey.K8S_REQUESTS_MEMORY, "40Gi"));
+    public Collection<JobProperty<?>> initialProperties() {
+        return Set.of(
+                JobPropertyDefinitions.RUNNER.createProperty(JobRunnerKey.DEDICATED_K8S_JOB),
+                JobPropertyDefinitions.K8S_SKU.createProperty(KubernetesSku.HIGH_MEMORY),
+                JobPropertyDefinitions.K8S_REQUESTS_CPU.createProperty("2"),
+                JobPropertyDefinitions.K8S_REQUESTS_MEMORY.createProperty("40Gi"));
     }
 
     @Override
