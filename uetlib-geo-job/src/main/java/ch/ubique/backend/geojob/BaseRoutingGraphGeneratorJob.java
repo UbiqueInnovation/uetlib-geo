@@ -19,8 +19,8 @@ import ch.ubique.backend.job.model.JobRunState;
 import ch.ubique.backend.job.model.properties.JobProperty;
 import ch.ubique.backend.job.model.properties.JobPropertyDefinitions;
 import ch.ubique.backend.job.model.properties.enums.JobRunnerKey;
-import ch.ubique.backend.job.model.properties.enums.KubernetesSku;
 
+import ch.ubique.backend.job.model.properties.enums.KubernetesSku;
 import com.pivovarit.function.ThrowingConsumer;
 
 import jakarta.validation.constraints.NotNull;
@@ -55,7 +55,7 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
     public Collection<JobProperty<?>> initialProperties() {
         return Set.of(
                 JobPropertyDefinitions.RUNNER.createProperty(JobRunnerKey.DEDICATED_K8S_JOB),
-                JobPropertyDefinitions.K8S_SKU.createProperty(KubernetesSku.HIGH_MEMORY),
+                JobPropertyDefinitions.K8S_SKU.createProperty(KubernetesSku.HIGH_MEMORY.value()),
                 JobPropertyDefinitions.K8S_REQUESTS_CPU.createProperty("2"),
                 JobPropertyDefinitions.K8S_REQUESTS_MEMORY.createProperty("40Gi"));
     }
