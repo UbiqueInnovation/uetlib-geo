@@ -79,14 +79,11 @@ public class VectorTileGenerator implements TileGenerator {
         final var prefix = String.format("Level %d: ", currentLevel);
         final var mdcContextMap = MDC.getCopyOfContextMap();
         final var progressLogger = new ProgressLogger(prefix, tileInfos.size(), mdcContextMap);
+        final var watchCreateGenerateAndConsumeTile =
+                progressLogger.watch(this::createGenerateAndConsumeTile);
 
         forkJoinPool
-                .submit(
-                        () ->
-                                tileInfos.parallelStream()
-                                        .forEach(
-                                                progressLogger.watch(
-                                                        this::createGenerateAndConsumeTile)))
+                .submit(() -> tileInfos.parallelStream().forEach(watchCreateGenerateAndConsumeTile))
                 .join();
     }
 
@@ -145,7 +142,7 @@ public class VectorTileGenerator implements TileGenerator {
                 return false;
             }
 
-            if (element.geometry() instanceof Point point) {
+            if (element.geometry() instanceof final Point point) {
                 return tileEnvelope.covers(point.getCoordinate());
             }
 
