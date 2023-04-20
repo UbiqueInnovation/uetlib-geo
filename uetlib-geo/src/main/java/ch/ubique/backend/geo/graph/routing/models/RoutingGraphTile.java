@@ -15,6 +15,7 @@ public interface RoutingGraphTile {
 
     record Vertex(
             long id,
+            boolean isHighway,
             @NotNull Point point,
             @NotNull Collection<RoutingGraphTile.Neighbor> neighbors,
             @NotNull Collection<RoutingGraphTile.RoutingNeighbor> routingNeighbors)
@@ -43,7 +44,12 @@ public interface RoutingGraphTile {
         }
     }
 
-    record Neighbor(long id, @NotNull Coordinate coordinate, float weight) {}
+    record Neighbor(long id, boolean isHighway, @NotNull Coordinate coordinate, float weight) {}
 
-    record RoutingNeighbor(long id, @NotNull Coordinate coordinate, float weight, long direction) {}
+    record RoutingNeighbor(
+            long id,
+            boolean isHighway,
+            @NotNull Coordinate coordinate,
+            float weight,
+            long direction) {}
 }

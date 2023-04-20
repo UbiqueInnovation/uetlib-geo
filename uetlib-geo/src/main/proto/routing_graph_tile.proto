@@ -18,6 +18,7 @@ message RoutingGraphTile {
     int32 identifier = 1;
     repeated Neighbor neighbors = 2;
     repeated RoutingNeighbor routingNeighbors = 3;
+    bool isHighway = 4;
   }
 
   message VertexCoordinate {
@@ -30,11 +31,13 @@ message RoutingGraphTile {
   message Neighbor {
     int32 identifier = 1;
     float weight = 2;
+    bool isHighway = 3;
   }
 
   message RoutingNeighbor {
     int32 identifier = 1;
     float weight = 2;
     int32 direction = 3; // the direction is the identifier of a neighbor in which we can reach this routing neighbor
+    bool isHighway = 4;
   }
 }

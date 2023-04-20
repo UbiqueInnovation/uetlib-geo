@@ -6,6 +6,7 @@ import ch.ubique.backend.core.service.DataAndInput;
 import ch.ubique.backend.core.service.InputDataLoaderService;
 import ch.ubique.backend.geo.graph.routing.GraphType;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphsWithLayer;
+import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.Vertex;
 import ch.ubique.backend.geo.graph.routing.utils.RoutingGraphsToTileElementsUtil;
 import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.common.utils.TileGeneratorUtil;
@@ -19,8 +20,8 @@ import ch.ubique.backend.job.model.JobRunState;
 import ch.ubique.backend.job.model.properties.JobProperty;
 import ch.ubique.backend.job.model.properties.JobPropertyDefinitions;
 import ch.ubique.backend.job.model.properties.enums.JobRunnerKey;
-
 import ch.ubique.backend.job.model.properties.enums.KubernetesSku;
+
 import com.pivovarit.function.ThrowingConsumer;
 
 import jakarta.validation.constraints.NotNull;
@@ -28,8 +29,10 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
@@ -89,7 +92,7 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         final var routingGraph = graphs.routingGraph();
 
         logger.info(
-                "Creating outputs for complete graph {} and routing graph {}.",
+                "Creating outputs for complete graph {} and routing graph {}",
                 completeGraph,
                 routingGraph);
 
@@ -108,6 +111,9 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         final var routingVertices =
                 completeVertices.stream().filter(vertex -> !vertex.routingNeighbors().isEmpty());
 
+        logger.info("Filtering highway vertices.");
+        final var highwayVertices = completeVertices.stream().filter(Vertex::isHighway).toList();
+
         logger.info("Creating vertex supplier for routing graph.");
         final var routingGraphElementSupplier =
                 new VectorTileElementSupplier<VectorTileElement>(routingVertices);
@@ -115,6 +121,14 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         logger.info("Creating vertex supplier for complete graph.");
         final var completeGraphVertexSupplier =
                 new VectorTileElementSupplier<VectorTileElement>(completeVertices);
+
+        logger.info("Creating vertex supplier for highway graph.");
+        final VectorTileElementSupplier<VectorTileElement> highwayGraphVertexSupplier;
+        if (highwayVertices.isEmpty()) {
+            highwayGraphVertexSupplier = null;
+        } else {
+            highwayGraphVertexSupplier = new VectorTileElementSupplier<>(highwayVertices);
+        }
 
         logger.info("Returning graph outputs");
         return outputFormats()
@@ -124,6 +138,7 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
                                         graphsWithLayer.layer(),
                                         routingGraphElementSupplier,
                                         completeGraphVertexSupplier,
+                                        highwayGraphVertexSupplier,
                                         format));
     }
 
@@ -137,21 +152,38 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
             final String layer,
             final VectorTileElementSupplier<VectorTileElement> routingGraphVertexSupplier,
             final VectorTileElementSupplier<VectorTileElement> completeGraphVertexSupplier,
+            final VectorTileElementSupplier<VectorTileElement> highwayGraphVertexSupplier,
             final TileOutputFormat format) {
 
-        final var routingGraphOutput =
+        final var outputs = new ArrayList<VectorTileOutput>();
+
+        if (highwayGraphVertexSupplier != null) {
+            outputs.add(
+                    new VectorTileOutput(
+                            baseConfig()
+                                    .setZoomLevels(IntStream.rangeClosed(8, 18).boxed().toList())
+                                    .setOutputFormat(format),
+                            highwayGraphVertexSupplier,
+                            saveGraph(layer, GraphType.HIGHWAY, format)));
+        }
+
+        outputs.add(
                 new VectorTileOutput(
-                        VectorTileConfig.lv95().setZoomLevels(19, 20).setOutputFormat(format),
+                        baseConfig().setZoomLevels(19, 20).setOutputFormat(format),
                         routingGraphVertexSupplier,
-                        saveGraph(layer, GraphType.ROUTING, format));
+                        saveGraph(layer, GraphType.ROUTING, format)));
 
-        final VectorTileOutput completeGraphOutput =
+        outputs.add(
                 new VectorTileOutput(
-                        VectorTileConfig.lv95().setZoomLevels(20, 21).setOutputFormat(format),
+                        baseConfig().setZoomLevels(20, 21).setOutputFormat(format),
                         completeGraphVertexSupplier,
-                        saveGraph(layer, GraphType.COMPLETE, format));
+                        saveGraph(layer, GraphType.COMPLETE, format)));
 
-        return Stream.of(routingGraphOutput, completeGraphOutput);
+        return outputs.stream();
+    }
+
+    protected VectorTileConfig baseConfig() {
+        return VectorTileConfig.lv95();
     }
 
     private ThrowingConsumer<BinaryTile, IOException> saveGraph(

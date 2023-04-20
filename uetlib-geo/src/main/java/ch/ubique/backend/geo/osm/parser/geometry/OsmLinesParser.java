@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.osm.parser.geometry;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WGS84;
 
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
 import ch.ubique.backend.geo.osm.parser.osmosis.OsmParser;
 import ch.ubique.backend.geo.osm.parser.osmosis.OsmUtils;
@@ -25,11 +26,25 @@ public class OsmLinesParser {
     private final Map<Long, Coordinate> coordinates;
     private final List<LineWithInfo<Map<String, String>>> lines;
 
-    private OsmLinesParser(final InputStream inputStream) {
+    private final JtsConverter<?> coordinateConverter;
+
+    public OsmLinesParser(
+            final InputStream inputStream, final JtsConverter<?> coordinateConverter) {
         this.inputStream = inputStream;
+        this.coordinateConverter = coordinateConverter;
         this.geometryFactory = WGS84.geometryFactory();
         this.coordinates = new HashMap<>();
         this.lines = new ArrayList<>();
+    }
+
+    private OsmLinesParser(final InputStream inputStream) {
+        this(inputStream, WGS84);
+    }
+
+    public static List<LineWithInfo<Map<String, String>>> parse(
+            final InputStream inputStream, final JtsConverter<?> coordinateConverter) {
+        final var osmParser = new OsmLinesParser(inputStream, coordinateConverter);
+        return osmParser.parse();
     }
 
     public static List<LineWithInfo<Map<String, String>>> parse(final InputStream inputStream) {
@@ -43,7 +58,12 @@ public class OsmLinesParser {
     }
 
     private void onNode(final Node node) {
-        coordinates.put(node.getId(), OsmUtils.getCoordinate(node).toJts());
+        coordinates.put(node.getId(), parseCoordinate(node));
+    }
+
+    private Coordinate parseCoordinate(final Node node) {
+        final var wgs84Coordinate = OsmUtils.getCoordinate(node).toJts();
+        return coordinateConverter.transform(wgs84Coordinate, WGS84.srid());
     }
 
     private void onWay(final Way way) {
