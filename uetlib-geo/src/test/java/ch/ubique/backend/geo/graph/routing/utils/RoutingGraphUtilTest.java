@@ -1,8 +1,10 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
+import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
 import ch.ubique.backend.geo.graph.routing.models.Weight;
 
 import org.junit.jupiter.api.Assertions;
@@ -11,7 +13,8 @@ import org.locationtech.jts.geom.Coordinate;
 
 class RoutingGraphUtilTest {
 
-    private static void routingGraphTests(final Graph<Coordinate, Weight> testGraph) {
+    private static void routingGraphTests(
+            final Graph<RoutingGraphVertexProperties, Weight> testGraph) {
         final var cycles = testGraph.findCycles().size();
         final var routingVerticesByDegree =
                 testGraph.getVertices().stream()
@@ -39,7 +42,7 @@ class RoutingGraphUtilTest {
         testGraph.getOrAddUndirectedEdge(2, 3);
         testGraph.getOrAddUndirectedEdge(3, 0);
 
-        routingGraphTests(testGraph);
+        routingGraphTests(toRoutingGraph(testGraph));
     }
 
     @Test
@@ -66,9 +69,16 @@ class RoutingGraphUtilTest {
         testGraph.getOrAddUndirectedEdge(5, 6);
         testGraph.getOrAddUndirectedEdge(5, 7);
 
-        routingGraphTests(testGraph);
+        routingGraphTests(toRoutingGraph(testGraph));
     }
 
     private record VertexProperties(WGS84Coordinate coordinate)
             implements CoordinateVertexProperties<WGS84Coordinate> {}
+
+    private static Graph<RoutingGraphVertexProperties, Weight> toRoutingGraph(
+            final Graph<Coordinate, Weight> testGraph) {
+        return testGraph.map(
+                v -> new RoutingGraphVertexProperties(v.getProperties(), false),
+                Edge::getProperties);
+    }
 }

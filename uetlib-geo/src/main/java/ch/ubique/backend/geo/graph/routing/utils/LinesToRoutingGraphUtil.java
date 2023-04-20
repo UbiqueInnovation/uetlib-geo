@@ -6,6 +6,7 @@ import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
 import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
+import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
 import ch.ubique.backend.geo.graph.routing.models.Weight;
 import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
 
@@ -46,6 +47,7 @@ public class LinesToRoutingGraphUtil<T> {
     private double snapTolerance = DEFAULT_SNAP_TOLERANCE;
     private ToDoubleFunction<T> snappingPriority;
     private ToDoubleFunction<T> edgePriority;
+    private Predicate<T> isHighway;
 
     public LinesToRoutingGraphUtil(
             final Collection<LineString> lines, final WeightingFunction<T> weightingFunction) {
@@ -69,6 +71,15 @@ public class LinesToRoutingGraphUtil<T> {
 
     public LinesToRoutingGraphUtil<T> snapTolerance(final double snapTolerance) {
         this.snapTolerance = snapTolerance;
+        return this;
+    }
+
+    /**
+     * Set a predicate that determines whether vertices of the given line should be considered
+     * highway vertices.
+     */
+    public LinesToRoutingGraphUtil<T> isHighway(final Predicate<T> isHighway) {
+        this.isHighway = isHighway;
         return this;
     }
 
@@ -116,23 +127,24 @@ public class LinesToRoutingGraphUtil<T> {
 
         logger.info("Creating complete graph.");
         final var nodedSegmentStrings = computeNodedSegmentStrings(lines, snapTolerance);
-        final var completeGraph = new Graph<Coordinate, Weight>();
+        final var completeGraph = new Graph<RoutingGraphVertexProperties, Weight>();
         final var coordinateToVertex = createVertices(completeGraph, nodedSegmentStrings);
         createEdges(completeGraph, nodedSegmentStrings, coordinateToVertex);
         logger.info("Created complete graph {}.", completeGraph);
 
         logger.info("Creating routing graph.");
         final var routingGraph =
-                buildRoutingGraph(lines, nodedSegmentStrings, completeGraph, coordinateToVertex);
+                buildRoutingGraph(nodedSegmentStrings, completeGraph, coordinateToVertex);
         logger.info("Created routing graph {}.", routingGraph);
 
         return new RoutingGraphs(completeGraph, routingGraph);
     }
 
     private void createEdges(
-            final Graph<Coordinate, Weight> graph,
+            final Graph<RoutingGraphVertexProperties, Weight> graph,
             final List<LineString> lineStrings,
-            final Map<Coordinate, Vertex<Coordinate, Weight>> coordinateToVertex) {
+            final Map<Coordinate, Vertex<RoutingGraphVertexProperties, Weight>>
+                    coordinateToVertex) {
         logger.info("Creating edges by linking neighbors of each path");
         for (final var lineString : lineStrings) {
             final var info = userData(lineString);
@@ -187,17 +199,25 @@ public class LinesToRoutingGraphUtil<T> {
                 .toList();
     }
 
-    private Map<Coordinate, Vertex<Coordinate, Weight>> createVertices(
-            final Graph<Coordinate, Weight> graph, final List<LineString> nodedSegmentStrings) {
+    private Map<Coordinate, Vertex<RoutingGraphVertexProperties, Weight>> createVertices(
+            final Graph<RoutingGraphVertexProperties, Weight> graph,
+            final List<LineString> nodedSegmentStrings) {
         logger.info(
                 "Getting distinct coordinates from {} noded segment strings",
                 nodedSegmentStrings.size());
+
         final var coordinates =
                 nodedSegmentStrings.stream()
                         .map(Geometry::getCoordinates)
                         .flatMap(Arrays::stream)
-                        .distinct()
-                        .toList();
+                        .collect(Collectors.toUnmodifiableSet());
+
+        final var highwayCoordinates =
+                nodedSegmentStrings.stream()
+                        .filter(this::isHighway)
+                        .map(Geometry::getCoordinates)
+                        .flatMap(Arrays::stream)
+                        .collect(Collectors.toUnmodifiableSet());
 
         logger.info("Creating vertices for {} coordinates", coordinates.size());
         final var lastId = new AtomicInteger();
@@ -206,17 +226,28 @@ public class LinesToRoutingGraphUtil<T> {
                         Collectors.toMap(
                                 coordinate -> coordinate,
                                 coordinate ->
-                                        graph.addVertex(lastId.incrementAndGet(), coordinate)));
+                                        graph.addVertex(
+                                                lastId.incrementAndGet(),
+                                                new RoutingGraphVertexProperties(
+                                                        coordinate,
+                                                        highwayCoordinates.contains(coordinate)))));
+    }
+
+    private boolean isHighway(final LineString s) {
+        if (isHighway == null) {
+            return false;
+        }
+        return isHighway.test(userData(s));
     }
 
     @NotNull
-    private Graph<Coordinate, WeightAndDirection> buildRoutingGraph(
-            final Collection<LineString> lines,
+    private Graph<RoutingGraphVertexProperties, WeightAndDirection> buildRoutingGraph(
             final List<LineString> nodedSegmentStrings,
-            final Graph<Coordinate, Weight> completeGraph,
-            final Map<Coordinate, Vertex<Coordinate, Weight>> coordinateToVertex) {
+            final Graph<RoutingGraphVertexProperties, Weight> completeGraph,
+            final Map<Coordinate, Vertex<RoutingGraphVertexProperties, Weight>>
+                    coordinateToVertex) {
 
-        final var mergedLines = mergeSegmentStrings(lines, nodedSegmentStrings);
+        final var mergedLines = mergeSegmentStrings(nodedSegmentStrings);
         final var routingGraph =
                 mergedLinesToRoutingGraph(completeGraph, coordinateToVertex, mergedLines);
         removeDegreeTwoVertices(routingGraph, completeGraph);
@@ -224,8 +255,7 @@ public class LinesToRoutingGraphUtil<T> {
     }
 
     @NotNull
-    private List<LineString> mergeSegmentStrings(
-            final Collection<LineString> lines, final List<LineString> nodedSegmentStrings) {
+    private List<LineString> mergeSegmentStrings(final List<LineString> nodedSegmentStrings) {
         logger.info("Merging segment strings.");
         final var lineMerger = new LineMerger();
         lineMerger.add(nodedSegmentStrings);
@@ -234,13 +264,13 @@ public class LinesToRoutingGraphUtil<T> {
     }
 
     @NotNull
-    private Graph<Coordinate, WeightAndDirection> mergedLinesToRoutingGraph(
-            final Graph<Coordinate, Weight> completeGraph,
-            final Map<Coordinate, Vertex<Coordinate, Weight>> coordinateToVertex,
+    private Graph<RoutingGraphVertexProperties, WeightAndDirection> mergedLinesToRoutingGraph(
+            final Graph<RoutingGraphVertexProperties, Weight> completeGraph,
+            final Map<Coordinate, Vertex<RoutingGraphVertexProperties, Weight>> coordinateToVertex,
             final List<LineString> mergedLines) {
         logger.info("Creating routing graph from {} merged lines.", mergedLines.size());
 
-        final var routingGraph = new Graph<Coordinate, WeightAndDirection>();
+        final var routingGraph = new Graph<RoutingGraphVertexProperties, WeightAndDirection>();
         for (final var line : mergedLines) {
             insertRoutingEdge(completeGraph, coordinateToVertex, routingGraph, line);
             insertRoutingEdge(completeGraph, coordinateToVertex, routingGraph, line.reverse());
@@ -249,8 +279,8 @@ public class LinesToRoutingGraphUtil<T> {
     }
 
     private void removeDegreeTwoVertices(
-            final Graph<Coordinate, WeightAndDirection> routingGraph,
-            final Graph<Coordinate, Weight> completeGraph) {
+            final Graph<RoutingGraphVertexProperties, WeightAndDirection> routingGraph,
+            final Graph<RoutingGraphVertexProperties, Weight> completeGraph) {
         new ArrayList<>(routingGraph.getVertices())
                 .stream()
                         .filter(
@@ -265,9 +295,9 @@ public class LinesToRoutingGraphUtil<T> {
     }
 
     private void insertRoutingEdge(
-            final Graph<Coordinate, Weight> completeGraph,
-            final Map<Coordinate, Vertex<Coordinate, Weight>> coordinateToVertex,
-            final Graph<Coordinate, WeightAndDirection> routingGraph,
+            final Graph<RoutingGraphVertexProperties, Weight> completeGraph,
+            final Map<Coordinate, Vertex<RoutingGraphVertexProperties, Weight>> coordinateToVertex,
+            final Graph<RoutingGraphVertexProperties, WeightAndDirection> routingGraph,
             final LineString line) {
 
         final var coordinates = line.getCoordinates();
@@ -294,8 +324,9 @@ public class LinesToRoutingGraphUtil<T> {
 
     private float weight(
             final LineString lineString,
-            final Graph<Coordinate, Weight> completeGraph,
-            final Map<Coordinate, Vertex<Coordinate, Weight>> coordinateToVertex) {
+            final Graph<RoutingGraphVertexProperties, Weight> completeGraph,
+            final Map<Coordinate, Vertex<RoutingGraphVertexProperties, Weight>>
+                    coordinateToVertex) {
         var weight = 0.0f;
         for (final var segment : JtsUtil.segments(lineString)) {
             final var first = coordinateToVertex.get(segment.p0);
@@ -306,8 +337,8 @@ public class LinesToRoutingGraphUtil<T> {
     }
 
     private void mergeEdgesAndRemoveVertex(
-            final Vertex<Coordinate, WeightAndDirection> vertex,
-            final Graph<Coordinate, WeightAndDirection> routingGraph) {
+            final Vertex<RoutingGraphVertexProperties, WeightAndDirection> vertex,
+            final Graph<RoutingGraphVertexProperties, WeightAndDirection> routingGraph) {
 
         if (vertex.degree() != 2) {
             logger.warn(

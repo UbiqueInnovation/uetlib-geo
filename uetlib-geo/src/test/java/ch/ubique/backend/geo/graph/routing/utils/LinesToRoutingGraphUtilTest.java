@@ -77,10 +77,10 @@ class LinesToRoutingGraphUtilTest {
 
         Assertions.assertTrue(
                 completeGraph.getVertices().stream()
-                        .allMatch(v -> Double.isNaN(v.getProperties().getZ())));
+                        .allMatch(v -> Double.isNaN(v.getProperties().coordinate().getZ())));
         Assertions.assertTrue(
                 routingGraph.getVertices().stream()
-                        .allMatch(v -> Double.isNaN(v.getProperties().getZ())));
+                        .allMatch(v -> Double.isNaN(v.getProperties().coordinate().getZ())));
 
         Assertions.assertTrue(
                 graphs.routingGraph().getVertices().stream().allMatch(v -> v.degree() != 2));
@@ -127,10 +127,10 @@ class LinesToRoutingGraphUtilTest {
 
         Assertions.assertTrue(
                 completeGraph.getVertices().stream()
-                        .noneMatch(v -> Double.isNaN(v.getProperties().getZ())));
+                        .noneMatch(v -> Double.isNaN(v.getProperties().coordinate().getZ())));
         Assertions.assertTrue(
                 routingGraph.getVertices().stream()
-                        .noneMatch(v -> Double.isNaN(v.getProperties().getZ())));
+                        .noneMatch(v -> Double.isNaN(v.getProperties().coordinate().getZ())));
         Assertions.assertTrue(
                 graphs.routingGraph().getVertices().stream().allMatch(v -> v.degree() != 2));
     }

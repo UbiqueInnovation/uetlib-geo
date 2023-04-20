@@ -4,9 +4,9 @@ import ch.ubique.backend.geo.graph.models.Vertex;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.locationtech.jts.geom.Coordinate;
 
-public record WeightAndDirection(float weight, Vertex<Coordinate, Weight> direction) {
+public record WeightAndDirection(
+        float weight, Vertex<RoutingGraphVertexProperties, Weight> direction) {
 
     @Override
     public String toString() {

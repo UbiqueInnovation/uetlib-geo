@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.osm.parser;
 
+import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
 import ch.ubique.backend.geo.graph.routing.models.Weight;
 import ch.ubique.backend.geo.graph.routing.utils.RoutingGraphUtil;
 import ch.ubique.backend.geo.osm.parser.graph.OsmGraphParser;
@@ -29,7 +30,11 @@ class OsmGraphParserTest {
                         .openStream()) {
             final var graph =
                     OsmGraphParser.parse(inputStream, config)
-                            .map(v -> v.getProperties().coordinate().toJts(), e -> new Weight(0));
+                            .map(
+                                    v ->
+                                            new RoutingGraphVertexProperties(
+                                                    v.getProperties().coordinate().toJts(), false),
+                                    e -> new Weight(0));
 
             Assertions.assertTrue(graph.getVertices().size() > 0);
             Assertions.assertTrue(graph.getDirectedEdges().size() > 0);

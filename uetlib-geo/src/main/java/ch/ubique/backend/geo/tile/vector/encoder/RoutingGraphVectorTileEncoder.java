@@ -26,7 +26,7 @@ public class RoutingGraphVectorTileEncoder implements TileEncoder {
     }
 
     public static boolean isRoutingGraphTile(final Tile tile) {
-        return tile instanceof VectorTile vectorTile
+        return tile instanceof final VectorTile vectorTile
                 && vectorTile.elements().stream().allMatch(Vertex.class::isInstance);
     }
 
@@ -95,7 +95,10 @@ public class RoutingGraphVectorTileEncoder implements TileEncoder {
     }
 
     private RoutingGraphTile.Vertex map(final Vertex vertex) {
-        final var builder = RoutingGraphTile.Vertex.newBuilder().setIdentifier((int) vertex.id());
+        final var builder =
+                RoutingGraphTile.Vertex.newBuilder()
+                        .setIdentifier((int) vertex.id())
+                        .setIsHighway(vertex.isHighway());
 
         // Set (routing) neighbors
         builder.addAllNeighbors(vertex.neighbors().stream().map(this::map).toList());
@@ -107,6 +110,7 @@ public class RoutingGraphVectorTileEncoder implements TileEncoder {
     private RoutingGraphTile.Neighbor map(final Neighbor neighbor) {
         return RoutingGraphTile.Neighbor.newBuilder()
                 .setIdentifier((int) neighbor.id())
+                .setIsHighway(neighbor.isHighway())
                 .setWeight(neighbor.weight())
                 .build();
     }
@@ -114,6 +118,7 @@ public class RoutingGraphVectorTileEncoder implements TileEncoder {
     private RoutingGraphTile.RoutingNeighbor map(final RoutingNeighbor routingNeighbor) {
         return RoutingGraphTile.RoutingNeighbor.newBuilder()
                 .setIdentifier((int) routingNeighbor.id())
+                .setIsHighway(routingNeighbor.isHighway())
                 .setWeight(routingNeighbor.weight())
                 .setDirection((int) routingNeighbor.direction())
                 .build();
