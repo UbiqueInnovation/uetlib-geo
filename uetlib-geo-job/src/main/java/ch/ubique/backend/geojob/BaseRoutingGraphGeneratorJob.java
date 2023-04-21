@@ -12,7 +12,6 @@ import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.common.utils.TileGeneratorUtil;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
-import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileElementSupplier;
 import ch.ubique.backend.job.BaseInputJob;
@@ -29,7 +28,6 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -106,29 +104,10 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         logger.info("Creating vector tile elements for each vertex.");
         final var completeVertices =
                 RoutingGraphsToTileElementsUtil.mapToTileElements(graphs, LV95.geometryFactory());
+        final var hasHighwayVertices = completeVertices.stream().anyMatch(Vertex::isHighway);
 
-        logger.info("Filtering routing vertices.");
-        final var routingVertices =
-                completeVertices.stream().filter(vertex -> !vertex.routingNeighbors().isEmpty());
-
-        logger.info("Filtering highway vertices.");
-        final var highwayVertices = completeVertices.stream().filter(Vertex::isHighway).toList();
-
-        logger.info("Creating vertex supplier for routing graph.");
-        final var routingGraphElementSupplier =
-                new VectorTileElementSupplier<VectorTileElement>(routingVertices);
-
-        logger.info("Creating vertex supplier for complete graph.");
-        final var completeGraphVertexSupplier =
-                new VectorTileElementSupplier<VectorTileElement>(completeVertices);
-
-        logger.info("Creating vertex supplier for highway graph.");
-        final VectorTileElementSupplier<VectorTileElement> highwayGraphVertexSupplier;
-        if (highwayVertices.isEmpty()) {
-            highwayGraphVertexSupplier = null;
-        } else {
-            highwayGraphVertexSupplier = new VectorTileElementSupplier<>(highwayVertices);
-        }
+        logger.info("Creating vertex supplier.");
+        final var vertexSupplier = new VectorTileElementSupplier<>(completeVertices);
 
         logger.info("Returning graph outputs");
         return outputFormats()
@@ -136,10 +115,13 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
                         format ->
                                 vectorTileOutputs(
                                         graphsWithLayer.layer(),
-                                        routingGraphElementSupplier,
-                                        completeGraphVertexSupplier,
-                                        highwayGraphVertexSupplier,
+                                        vertexSupplier,
+                                        hasHighwayVertices,
                                         format));
+    }
+
+    private boolean isRoutingVertex(final Vertex vertex) {
+        return !vertex.routingNeighbors().isEmpty();
     }
 
     @NotNull
@@ -150,36 +132,55 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
     @NotNull
     private Stream<VectorTileOutput> vectorTileOutputs(
             final String layer,
-            final VectorTileElementSupplier<VectorTileElement> routingGraphVertexSupplier,
-            final VectorTileElementSupplier<VectorTileElement> completeGraphVertexSupplier,
-            final VectorTileElementSupplier<VectorTileElement> highwayGraphVertexSupplier,
+            final VectorTileElementSupplier<Vertex> vertexSupplier,
+            final boolean hasHighwayVertices,
             final TileOutputFormat format) {
 
-        final var outputs = new ArrayList<VectorTileOutput>();
+        return Stream.concat(
+                regularGraphOutputs(layer, vertexSupplier, format),
+                highwayGraphOutputs(layer, vertexSupplier, format, hasHighwayVertices));
+    }
 
-        if (highwayGraphVertexSupplier != null) {
-            outputs.add(
-                    new VectorTileOutput(
-                            baseConfig()
-                                    .setZoomLevels(IntStream.rangeClosed(8, 18).boxed().toList())
-                                    .setOutputFormat(format),
-                            highwayGraphVertexSupplier,
-                            saveGraph(layer, GraphType.HIGHWAY, format)));
-        }
-
-        outputs.add(
-                new VectorTileOutput(
-                        baseConfig().setZoomLevels(19, 20).setOutputFormat(format),
-                        routingGraphVertexSupplier,
-                        saveGraph(layer, GraphType.ROUTING, format)));
-
-        outputs.add(
+    private Stream<VectorTileOutput> regularGraphOutputs(
+            final String layer,
+            final VectorTileElementSupplier<Vertex> vertexSupplier,
+            final TileOutputFormat format) {
+        logger.info("Creating outputs for regular graphs");
+        return Stream.of(
                 new VectorTileOutput(
                         baseConfig().setZoomLevels(20, 21).setOutputFormat(format),
-                        completeGraphVertexSupplier,
-                        saveGraph(layer, GraphType.COMPLETE, format)));
+                        vertexSupplier,
+                        saveGraph(layer, GraphType.COMPLETE, format)),
+                new VectorTileOutput(
+                        baseConfig().setZoomLevels(19, 20).setOutputFormat(format),
+                        vertexSupplier.withFilter(this::isRoutingVertex),
+                        saveGraph(layer, GraphType.ROUTING, format)));
+    }
 
-        return outputs.stream();
+    private Stream<VectorTileOutput> highwayGraphOutputs(
+            final String layer,
+            final VectorTileElementSupplier<Vertex> vertexSupplier,
+            final TileOutputFormat format,
+            final boolean hasHighwayVertices) {
+
+        if (!hasHighwayVertices) {
+            return Stream.of();
+        }
+
+        logger.info("Creating outputs for highway graphs");
+        return Stream.of(
+                new VectorTileOutput(
+                        baseConfig()
+                                .setZoomLevels(IntStream.rangeClosed(8, 18).boxed().toList())
+                                .setOutputFormat(format),
+                        vertexSupplier.withFilter(Vertex::isHighway),
+                        saveGraph(layer, GraphType.HIGHWAY_COMPLETE, format)),
+                new VectorTileOutput(
+                        baseConfig()
+                                .setZoomLevels(IntStream.rangeClosed(8, 18).boxed().toList())
+                                .setOutputFormat(format),
+                        vertexSupplier.withFilter(v -> v.isHighway() && isRoutingVertex(v)),
+                        saveGraph(layer, GraphType.HIGHWAY_ROUTING, format)));
     }
 
     protected VectorTileConfig baseConfig() {

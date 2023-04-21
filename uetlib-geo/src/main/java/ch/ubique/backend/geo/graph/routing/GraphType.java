@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum GraphType {
     COMPLETE,
     ROUTING,
-    HIGHWAY;
+    HIGHWAY_COMPLETE,
+    HIGHWAY_ROUTING;
 
     @Override
     @JsonValue
