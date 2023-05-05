@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
 public class JtsUtil {
@@ -207,5 +208,24 @@ public class JtsUtil {
 
         // Merge lines
         return JtsUtil.mergeLines(snappedWithoutDuplicates);
+    }
+
+    /**
+     * @return A referenced envelope that is the smallest axis aligned bounding box containing all
+     *     geometries
+     */
+    public static ReferencedEnvelope getEnvelope(final Collection<Geometry> geometries) {
+
+        if (geometries == null || geometries.isEmpty()) {
+            throw new NoSuchElementException("No geometries provided.");
+        }
+
+        final var geometriesArray = geometries.toArray(Geometry[]::new);
+        final var anyGeometry = geometriesArray[0];
+        final var geometryCollection =
+                new GeometryCollection(geometriesArray, anyGeometry.getFactory());
+
+        final var envelope = geometryCollection.getEnvelopeInternal();
+        return new ReferencedEnvelope(envelope, getCrs(anyGeometry));
     }
 }
