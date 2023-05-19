@@ -98,6 +98,11 @@
             <artifactId>gt-shapefile</artifactId>
             <version>${org.geotools.version}</version>
         </dependency>
+        <dependency>
+            <groupId>mil.nga.geopackage</groupId>
+            <artifactId>geopackage</artifactId>
+            <version>6.6.1</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
