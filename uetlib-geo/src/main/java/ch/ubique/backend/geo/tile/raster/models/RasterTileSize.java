@@ -1,8 +1,8 @@
 package ch.ubique.backend.geo.tile.raster.models;
 
 /**
- * @param tileWidth     the width of the tile in coordinate units
- * @param resolution    the number of pixels in each row (typical values are 256 or 512)
+ * @param tileWidth the width of the tile in coordinate units
+ * @param resolution the number of pixels in each row (typical values are 256 or 512)
  */
 public record RasterTileSize(double tileWidth, int resolution) {
 

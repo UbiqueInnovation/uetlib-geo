@@ -50,6 +50,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                     new WGS84Coordinate(-90, -180),
                     new WGS84Coordinate(90, 180));
     public static final JtsConverter<WebMercatorCoordinate> WEB_MERCATOR;
+
     /**
      * bounds equal to the min/max available coordinates with tiles on <a
      * href="https://map.geo.admin.ch/">map.geo.admin.ch</a>
@@ -65,6 +66,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                     c -> new LV95Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new LV95Coordinate(2_420_000.0, 1_000_000.0),
                     new LV95Coordinate(2_900_000.0, 1_350_000.0));
+
     /**
      * bounds equal to the min/max available coordinates with tiles on <a
      * href="https://map.geo.admin.ch/">map.geo.admin.ch</a>

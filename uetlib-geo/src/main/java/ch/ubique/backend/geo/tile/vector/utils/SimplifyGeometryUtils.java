@@ -15,5 +15,4 @@ public class SimplifyGeometryUtils {
     public static Geometry smooth(final Geometry geometry, final double alpha) {
         return CubicBezierCurve.bezierCurve(geometry, alpha);
     }
-
 }

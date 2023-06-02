@@ -84,7 +84,8 @@ public class KmlParser {
         }
     }
 
-    private static Placemark parsePlacemark(final XMLStreamReader reader) throws XMLStreamException {
+    private static Placemark parsePlacemark(final XMLStreamReader reader)
+            throws XMLStreamException {
         final var placemark = new Placemark();
         var isPolygon = false;
         while (reader.hasNext()) {
