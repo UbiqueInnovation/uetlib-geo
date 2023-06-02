@@ -18,7 +18,6 @@ public class TlmPath {
 
     private LineString line;
 
-
     public WegType getType() {
         return type;
     }

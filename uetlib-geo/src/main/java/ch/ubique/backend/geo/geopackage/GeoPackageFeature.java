@@ -4,7 +4,4 @@ import org.locationtech.jts.geom.Geometry;
 
 import java.util.Map;
 
-public record GeoPackageFeature(
-        Geometry geometry,
-        Map<String, Object> attributes
-) {}
+public record GeoPackageFeature(Geometry geometry, Map<String, Object> attributes) {}

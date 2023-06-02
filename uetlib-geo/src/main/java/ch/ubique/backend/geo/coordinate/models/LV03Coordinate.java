@@ -128,7 +128,8 @@ public final class LV03Coordinate implements Coordinate {
             return sqrt(pow(east - otherLv03.east, 2) + pow(north - otherLv03.north, 2));
         }
         throw new IllegalArgumentException(
-                "Calculating the flat distance between different coordinate systems is not possible.");
+                "Calculating the flat distance between different coordinate systems is not"
+                        + " possible.");
     }
 
     @Override

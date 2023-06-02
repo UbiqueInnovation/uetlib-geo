@@ -129,7 +129,8 @@ public final class LV95Coordinate implements Coordinate {
             return sqrt(pow(east - otherLv95.east, 2) + pow(north - otherLv95.north, 2));
         }
         throw new IllegalArgumentException(
-                "Calculating the flat distance between different coordinate systems is not possible.");
+                "Calculating the flat distance between different coordinate systems is not"
+                        + " possible.");
     }
 
     @Override

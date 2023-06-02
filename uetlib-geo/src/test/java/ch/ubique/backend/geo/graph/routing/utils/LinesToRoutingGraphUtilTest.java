@@ -146,7 +146,8 @@ class LinesToRoutingGraphUtilTest {
         final var line2 =
                 (LineString)
                         wktReader.read(
-                                "LINESTRING (0 0 100, 10 0.8 100, 20 .2 100, 30 0.8 100, 40 0.5 100, 50 0.8 100)");
+                                "LINESTRING (0 0 100, 10 0.8 100, 20 .2 100, 30 0.8 100, 40 0.5"
+                                        + " 100, 50 0.8 100)");
         line2.setUserData("TLM");
 
         final var graphs =
@@ -184,7 +185,8 @@ class LinesToRoutingGraphUtilTest {
         final var line1 =
                 (LineString)
                         wktReader.read(
-                                "LINESTRING (0 0 100, 10 -0.8 100, 20 .2 100, 30 0.8 100, 40 -0.5 100, 50 0.8 100)");
+                                "LINESTRING (0 0 100, 10 -0.8 100, 20 .2 100, 30 0.8 100, 40 -0.5"
+                                        + " 100, 50 0.8 100)");
         line1.setUserData("TLM");
         final var line2 = (LineString) wktReader.read("LINESTRING (0 0, 50 0)");
         line2.setUserData("SAC");
@@ -227,12 +229,16 @@ class LinesToRoutingGraphUtilTest {
         final var lineSac =
                 (LineString)
                         wktReader.read(
-                                "LINESTRING( 898.0 2973.0 , 894.0 2942.0 , 939.0 2836.0 , 915.0 2780.0 , 860.0 2749.0 , 781.0 2735.0 )");
+                                "LINESTRING( 898.0 2973.0 , 894.0 2942.0 , 939.0 2836.0 , 915.0"
+                                        + " 2780.0 , 860.0 2749.0 , 781.0 2735.0 )");
         lineSac.setUserData("SAC");
         final var lineTlm =
                 (LineString)
                         wktReader.read(
-                                "LINESTRING(896.0 2941.0 , 902.0 2926.0 , 916.0 2901.0 , 932.0 2869.0 , 942.0 2835.0 , 941.0 2815.0 , 933.0 2797.0 , 918.0 2779.0 , 891.0 2760.0 , 862.0 2748.0 , 826.0 2740.0 , 802.0 2740.0 , 784.0 2734.0)");
+                                "LINESTRING(896.0 2941.0 , 902.0 2926.0 , 916.0 2901.0 , 932.0"
+                                    + " 2869.0 , 942.0 2835.0 , 941.0 2815.0 , 933.0 2797.0 , 918.0"
+                                    + " 2779.0 , 891.0 2760.0 , 862.0 2748.0 , 826.0 2740.0 , 802.0"
+                                    + " 2740.0 , 784.0 2734.0)");
         lineTlm.setUserData("TLM");
 
         final var graphs =

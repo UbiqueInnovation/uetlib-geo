@@ -60,8 +60,9 @@ public class TileGeometryUtils {
                         coordinate -> {
                             if (!coordinateSystemBounds.covers(coordinate)) {
                                 throw new IllegalArgumentException(
-                                        "The given geometry has a coordinate outside the defined bounds of the coordinate system. "
-                                                + "Violating coordinate: "
+                                        "The given geometry has a coordinate outside the defined"
+                                                + " bounds of the coordinate system. Violating"
+                                                + " coordinate: "
                                                 + coordinate);
                             }
                         });
