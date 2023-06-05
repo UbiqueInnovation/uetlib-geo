@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.tile.vector.models;
 
+import ch.ubique.backend.core.utils.ValidationUtils;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileElementSupplier;
 
@@ -35,6 +36,10 @@ public record VectorTileOutput(
     }
 
     public Collection<VectorTileElement> elements(final TileInfo tileInfo) {
-        return elementSupplier.apply(tileInfo);
+        final var elements = elementSupplier.apply(tileInfo);
+        if (config.validateElements()) {
+            elements.forEach(ValidationUtils::requireIsValid);
+        }
+        return elements;
     }
 }

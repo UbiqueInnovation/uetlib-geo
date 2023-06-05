@@ -24,6 +24,7 @@ public class VectorTileConfig {
     private Double simplifyTolerance;
     private Double smoothing;
     private int clipBuffer;
+    private boolean validateElements = true;
     private int extent = 4096;
     private TileOutputFormat outputFormat = TileOutputFormat.PBF;
     private ReferencedEnvelope outputEnvelope;
@@ -72,6 +73,15 @@ public class VectorTileConfig {
     public VectorTileConfig setExtent(final int extent) {
         this.extent = extent;
         return this;
+    }
+
+    public VectorTileConfig setValidateElements(final boolean validateElements) {
+        this.validateElements = validateElements;
+        return this;
+    }
+
+    public boolean validateElements() {
+        return validateElements;
     }
 
     public int getClipBuffer() {
