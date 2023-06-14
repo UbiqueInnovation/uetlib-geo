@@ -104,7 +104,11 @@ public final class Edge<V, E> {
 
         final var edge = (Edge<?, ?>) o;
 
-        return new EqualsBuilder().append(u, edge.u).append(v, edge.v).isEquals();
+        return new EqualsBuilder()
+                .append(u, edge.u)
+                .append(v, edge.v)
+                .append(properties, edge.properties)
+                .isEquals();
     }
 
     @Override

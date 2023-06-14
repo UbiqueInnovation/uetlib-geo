@@ -5,15 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.SetUtils;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -24,12 +16,15 @@ import java.util.function.Predicate;
 public class Graph<V, E> {
     private final Map<Long, Vertex<V, E>> vertices;
     private final Map<Long, Edge<V, E>> directedEdges;
-
+    private final Map<Long, Set<Long>> outgoingEdgesIndex;
+    private final Map<Long, Set<Long>> ingoingEdgesIndex;
     private long lastEdgeId;
 
     public Graph() {
         vertices = new HashMap<>();
         directedEdges = new HashMap<>();
+        outgoingEdgesIndex = new HashMap<>();
+        ingoingEdgesIndex = new HashMap<>();
         lastEdgeId = 0;
     }
 
@@ -44,17 +39,22 @@ public class Graph<V, E> {
         return addVertex(new Vertex<>(vertexId, properties));
     }
 
+    public Vertex<V, E> addVertex(final Vertex<V, E> vertex) {
+        vertices.put(vertex.getId(), vertex);
+        return vertex;
+    }
+
+    public Vertex<V, E> createVertex(final V properties) {
+        final var vertexId = vertices.isEmpty() ? 0 : Collections.max(vertices.keySet()) + 1;
+        return addVertex(vertexId, properties);
+    }
+
     public Vertex<V, E> getOrAddVertex(final long vertexId) {
         return getOrAddVertex(vertexId, null);
     }
 
     public Vertex<V, E> getOrAddVertex(final long vertexId, final V properties) {
         return getOrAddVertex(new Vertex<>(vertexId, properties));
-    }
-
-    public Vertex<V, E> addVertex(final Vertex<V, E> vertex) {
-        vertices.put(vertex.getId(), vertex);
-        return vertex;
     }
 
     public Optional<Edge<V, E>> getEdge(final long u, final long v) {
@@ -86,16 +86,22 @@ public class Graph<V, E> {
     /** Gets or adds a <strong>directed</strong> edge */
     public Edge<V, E> getOrAddDirectedEdge(
             final Vertex<V, E> u, final Vertex<V, E> v, final E properties) {
-        final var existingEdge = getEdge(u, v);
-        if (existingEdge.isPresent()) {
-            return existingEdge.get();
-        }
+        return getEdge(u, v).orElseGet(() -> addDirectedEdge(u, v, properties));
+    }
+
+    public Edge<V, E> addDirectedEdge(
+            final Vertex<V, E> u, final Vertex<V, E> v, final E properties) {
 
         final var edge = new Edge<>(lastEdgeId, u, v, properties);
         lastEdgeId++;
         directedEdges.put(edge.getId(), edge);
+        outgoingEdgesIndex
+                .computeIfAbsent(edge.getFrom().getId(), key -> new HashSet<>())
+                .add(edge.getId());
+        ingoingEdgesIndex
+                .computeIfAbsent(edge.getTo().getId(), key -> new HashSet<>())
+                .add(edge.getId());
         u.setEdges(SetUtils.union(u.getEdges(), Set.of(edge)).toSet());
-
         return edge;
     }
 
@@ -143,14 +149,26 @@ public class Graph<V, E> {
         return directedEdges.values();
     }
 
+    public void removeEdge(final long edgeId) {
+        removeEdge(getEdge(edgeId));
+    }
+
     public void removeEdge(final Edge<V, E> edge) {
         final var fromVertex = edge.getFrom();
         fromVertex.setEdges(SetUtils.difference(fromVertex.getEdges(), Set.of(edge)));
         directedEdges.remove(edge.getId());
+        outgoingEdgesIndex.get(edge.getFrom().getId()).remove(edge.getId());
+        ingoingEdgesIndex.get(edge.getTo().getId()).remove(edge.getId());
     }
 
     public void removeVertex(final Vertex<V, E> vertex) {
+        outgoingEdgesIndex.getOrDefault(vertex.getId(), Set.of()).forEach(this::removeEdge);
+        ingoingEdgesIndex.getOrDefault(vertex.getId(), Set.of()).forEach(this::removeEdge);
         vertices.remove(vertex.getId());
+    }
+
+    public void removeVertex(final long vertexId) {
+        getVertex(vertexId).ifPresent(this::removeVertex);
     }
 
     @Override

@@ -50,6 +50,10 @@ public final class Vertex<V, E> {
         return edges.stream().filter(e -> e.connects(id, neighborId)).findFirst();
     }
 
+    public Optional<Edge<V, E>> getEdgeTo(final Vertex<V, E> neighbor) {
+        return edges.stream().filter(e -> e.connects(this, neighbor)).findFirst();
+    }
+
     public List<Vertex<V, E>> getNeighbors() {
         return getNeighborsStream().toList();
     }
