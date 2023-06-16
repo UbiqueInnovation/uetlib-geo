@@ -286,64 +286,115 @@ public class LinesToRoutingGraphUtil<T> {
             final Graph<RoutingGraphVertexProperties, WeightAndDirection> routingGraph,
             final Graph<RoutingGraphVertexProperties, Weight> completeGraph) {
 
-        final var candidates = findCandidatesWithDifferentElevation(completeGraph);
+        final var candidates = findCandidatesToSplitUp(completeGraph);
         logger.info("Splitting up the following vertices for different elevations: {}", candidates);
-
         for (final var vertex : candidates) {
-            logger.debug("Processing candidate {} {}", vertex, vertex.getProperties().coordinate());
-
-            final var routingVertex = routingGraph.getVertex(vertex.getId()).orElseThrow();
-            final var heightClasses = groupNeighborsByElevation(vertex);
-
-            // Create new replacement vertex for each height class
-            for (final var heightClass : heightClasses.entrySet()) {
-                logger.debug("Processing height class {}", heightClass);
-                final var height = heightClass.getKey();
-                final var neighbors = heightClass.getValue();
-
-                final var properties = vertex.getProperties().copy();
-                properties.coordinate().setZ(height);
-                final var newVertex = completeGraph.createVertex(properties);
-                final var newRoutingVertex = routingGraph.addVertex(newVertex.getId(), properties);
-                logger.debug(
-                        "Created vertex {} and routing vertex {}", newVertex, newRoutingVertex);
-
-                for (final var neighbor : neighbors) {
-                    final var edge = vertex.getEdgeTo(neighbor).orElseThrow();
-                    final var twin = edge.getTwin().orElseThrow();
-
-                    completeGraph.addDirectedEdge(newVertex, neighbor, edge.getProperties());
-                    completeGraph.addDirectedEdge(neighbor, newVertex, twin.getProperties());
-                    completeGraph.removeEdge(edge);
-                    completeGraph.removeEdge(twin);
-
-                    final var routingEdgeMaybe =
-                            routingVertex.getEdges().stream()
-                                    .filter(e -> e.getProperties().direction().equals(neighbor))
-                                    .findAny();
-
-                    if (routingEdgeMaybe.isPresent()) {
-                        final var routingEdge = routingEdgeMaybe.get();
-                        final var routingTwin = routingEdge.getTwin().orElseThrow();
-                        final var routingNeighbor = routingEdge.getTo();
-                        routingGraph.addDirectedEdge(
-                                newRoutingVertex, routingNeighbor, routingEdge.getProperties());
-                        routingGraph.addDirectedEdge(
-                                routingNeighbor, newRoutingVertex, routingTwin.getProperties());
-                        routingGraph.removeEdge(routingEdge);
-                        routingGraph.removeEdge(routingTwin);
-                    }
-                }
-            }
-
-            completeGraph.removeVertex(vertex);
-            routingGraph.removeVertex(routingVertex);
+            splitUpVertex(routingGraph, completeGraph, vertex);
         }
     }
 
-    private Collection<Vertex<RoutingGraphVertexProperties, Weight>>
-            findCandidatesWithDifferentElevation(
-                    final Graph<RoutingGraphVertexProperties, Weight> completeGraph) {
+    private void splitUpVertex(
+            final Graph<RoutingGraphVertexProperties, WeightAndDirection> routingGraph,
+            final Graph<RoutingGraphVertexProperties, Weight> completeGraph,
+            final Vertex<RoutingGraphVertexProperties, Weight> vertex) {
+
+        logger.debug("Processing candidate {} {}", vertex, vertex.getProperties().coordinate());
+
+        final var routingVertex = routingGraph.getVertex(vertex.getId()).orElseThrow();
+        final var heightClasses = groupNeighborsByElevation(vertex);
+
+        // Create new replacement vertex for each height class
+        for (final var heightClass : heightClasses.entrySet()) {
+            createNewVertexForHeightClass(
+                    completeGraph, routingGraph, vertex, routingVertex, heightClass);
+        }
+
+        completeGraph.removeVertex(vertex);
+        routingGraph.removeVertex(routingVertex);
+    }
+
+    private void createNewVertexForHeightClass(
+            final Graph<RoutingGraphVertexProperties, Weight> completeGraph,
+            final Graph<RoutingGraphVertexProperties, WeightAndDirection> routingGraph,
+            final Vertex<RoutingGraphVertexProperties, Weight> vertex,
+            final Vertex<RoutingGraphVertexProperties, WeightAndDirection> routingVertex,
+            final Map.Entry<Double, Collection<Vertex<RoutingGraphVertexProperties, Weight>>>
+                    heightClass) {
+
+        logger.debug("Processing height class {}", heightClass);
+        final var height = heightClass.getKey();
+        final var neighbors = heightClass.getValue();
+
+        final var properties = vertex.getProperties().copy();
+        properties.coordinate().setZ(height);
+        final var newVertex = completeGraph.createVertex(properties);
+        final var newRoutingVertex = routingGraph.addVertex(newVertex.getId(), properties);
+        logger.debug("Created vertex {} and routing vertex {}", newVertex, newRoutingVertex);
+
+        for (final var neighbor : neighbors) {
+            updateEdgesToNewVertex(completeGraph, vertex, newVertex, neighbor);
+            updateRoutingEdgesToNewVertex(routingGraph, routingVertex, newRoutingVertex, neighbor);
+            updateDirectionsToNewVertex(routingGraph, neighbor, vertex, newVertex);
+        }
+    }
+
+    private static void updateEdgesToNewVertex(
+            final Graph<RoutingGraphVertexProperties, Weight> completeGraph,
+            final Vertex<RoutingGraphVertexProperties, Weight> vertex,
+            final Vertex<RoutingGraphVertexProperties, Weight> newVertex,
+            final Vertex<RoutingGraphVertexProperties, Weight> neighbor) {
+
+        final var edge = vertex.getEdgeTo(neighbor).orElseThrow();
+        final var twin = edge.getTwin().orElseThrow();
+
+        completeGraph.addDirectedEdge(newVertex, neighbor, edge.getProperties());
+        completeGraph.addDirectedEdge(neighbor, newVertex, twin.getProperties());
+        completeGraph.removeEdge(edge);
+        completeGraph.removeEdge(twin);
+    }
+
+    private static void updateRoutingEdgesToNewVertex(
+            final Graph<RoutingGraphVertexProperties, WeightAndDirection> routingGraph,
+            final Vertex<RoutingGraphVertexProperties, WeightAndDirection> routingVertex,
+            final Vertex<RoutingGraphVertexProperties, WeightAndDirection> newRoutingVertex,
+            final Vertex<RoutingGraphVertexProperties, Weight> neighbor) {
+
+        final var routingEdgeMaybe =
+                routingVertex.getEdges().stream()
+                        .filter(e -> e.getProperties().direction().equals(neighbor))
+                        .findAny();
+
+        if (routingEdgeMaybe.isEmpty()) {
+            return;
+        }
+
+        final var routingEdge = routingEdgeMaybe.get();
+        final var routingTwin = routingEdge.getTwin().orElseThrow();
+        final var routingNeighbor = routingEdge.getTo();
+        routingGraph.addDirectedEdge(
+                newRoutingVertex, routingNeighbor, routingEdge.getProperties());
+        routingGraph.addDirectedEdge(
+                routingNeighbor, newRoutingVertex, routingTwin.getProperties());
+        routingGraph.removeEdge(routingEdge);
+        routingGraph.removeEdge(routingTwin);
+    }
+
+    private static void updateDirectionsToNewVertex(
+            final Graph<RoutingGraphVertexProperties, WeightAndDirection> routingGraph,
+            final Vertex<RoutingGraphVertexProperties, Weight> neighbor,
+            final Vertex<RoutingGraphVertexProperties, Weight> vertex,
+            final Vertex<RoutingGraphVertexProperties, Weight> newVertex) {
+
+        // If the neighbor has routing edges in direction of vertex,
+        // replace direction with newVertex
+        routingGraph.getVertex(neighbor.getId()).map(Vertex::getEdges).stream()
+                .flatMap(Collection::stream)
+                .filter(e -> e.getProperties().direction().equals(vertex))
+                .forEach(e -> e.setProperties(e.getProperties().withDirection(newVertex)));
+    }
+
+    private Collection<Vertex<RoutingGraphVertexProperties, Weight>> findCandidatesToSplitUp(
+            final Graph<RoutingGraphVertexProperties, Weight> completeGraph) {
 
         return completeGraph.getVertices().stream()
                 .filter(vertex -> vertex.degree() > 2)

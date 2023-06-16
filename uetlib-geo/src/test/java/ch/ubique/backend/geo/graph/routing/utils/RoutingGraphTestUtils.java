@@ -58,7 +58,7 @@ public class RoutingGraphTestUtils {
                                                                 .setProperties(Map.of()))
                                         .toList());
 
-        final var tempFile = Files.createTempFile("routing-graph", ".geojson");
+        final var tempFile = Files.createTempFile("routing-graph-", ".geojson");
         objectMapper.writeValue(tempFile.toFile(), featureCollection);
 
         logger.info("Dumped to geojson: {}", tempFile);
