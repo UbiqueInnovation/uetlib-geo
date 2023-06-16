@@ -95,12 +95,8 @@ public class Graph<V, E> {
         final var edge = new Edge<>(lastEdgeId, u, v, properties);
         lastEdgeId++;
         directedEdges.put(edge.getId(), edge);
-        outgoingEdgesIndex
-                .computeIfAbsent(edge.getFrom().getId(), key -> new HashSet<>())
-                .add(edge.getId());
-        ingoingEdgesIndex
-                .computeIfAbsent(edge.getTo().getId(), key -> new HashSet<>())
-                .add(edge.getId());
+        outgoingEdgesIndex.computeIfAbsent(u.getId(), key -> new HashSet<>()).add(edge.getId());
+        ingoingEdgesIndex.computeIfAbsent(v.getId(), key -> new HashSet<>()).add(edge.getId());
         u.setEdges(SetUtils.union(u.getEdges(), Set.of(edge)).toSet());
         return edge;
     }
