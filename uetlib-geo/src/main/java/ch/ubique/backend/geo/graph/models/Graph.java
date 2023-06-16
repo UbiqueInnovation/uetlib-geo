@@ -158,8 +158,8 @@ public class Graph<V, E> {
     }
 
     public void removeVertex(final Vertex<V, E> vertex) {
-        outgoingEdgesIndex.getOrDefault(vertex.getId(), Set.of()).forEach(this::removeEdge);
-        ingoingEdgesIndex.getOrDefault(vertex.getId(), Set.of()).forEach(this::removeEdge);
+        outgoingEdgesIndex.getOrDefault(vertex.getId(), Set.of()).stream().toList().forEach(this::removeEdge);
+        ingoingEdgesIndex.getOrDefault(vertex.getId(), Set.of()).stream().toList().forEach(this::removeEdge);
         vertices.remove(vertex.getId());
     }
 
