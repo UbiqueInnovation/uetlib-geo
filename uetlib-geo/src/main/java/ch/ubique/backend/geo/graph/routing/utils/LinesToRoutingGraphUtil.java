@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 public class LinesToRoutingGraphUtil<T> {
 
     private static final double DEFAULT_SNAP_TOLERANCE = 1;
-    private static final double DEFAULT_VERTICAL_SPLIT_THRESHOLD = 10;
+    private static final double DEFAULT_VERTICAL_SPLIT_THRESHOLD = 50;
 
     private final Collection<LineString> lines;
     private final WeightingFunction<T> weightingFunction;
