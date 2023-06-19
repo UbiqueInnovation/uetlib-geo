@@ -5,6 +5,7 @@ import static ch.ubique.backend.core.utils.InputStreamUtils.zipStreamForEntry;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ch.ubique.backend.core.utils.DurationUtils;
+import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 import ch.ubique.backend.geo.graph.algorithms.BasicAlgorithms;
@@ -14,6 +15,8 @@ import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
 import ch.ubique.backend.geo.tlm.SwisstopoTlmParser;
 import ch.ubique.backend.geo.tlm.TlmToGraphUtil;
+import ch.ubique.backend.geo.tlm.models.TlmPath;
+import ch.ubique.backend.geo.tlm.models.WegType;
 import ch.ubique.backend.geo.utils.duration.HikeDuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +25,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.n52.jackson.datatype.jts.JtsModule;
@@ -29,6 +33,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Set;
 
 class RoutingGraphTest {
 
@@ -84,9 +89,9 @@ class RoutingGraphTest {
     }
 
     @Test
-    void testLargeExample() throws IOException {
+    void testFurka() throws IOException {
 
-        final var featureCollection = readFile("large_example.geojson");
+        final var featureCollection = readFile("furka.geojson");
 
         final var graphs =
                 new LinesToRoutingGraphUtil<>(
@@ -94,7 +99,25 @@ class RoutingGraphTest {
                                         .map(feature -> (LineString) feature.getGeometry())
                                         .toList(),
                                 (from, to, context) -> weight(from, to))
-                        .verticalSplitThreshold(10)
+                        .buildGraph();
+
+        RoutingGraphTestUtils.dumpAsGeoJson(graphs);
+        assertFalse(graphs.completeGraph().isEmpty());
+        assertFalse(graphs.routingGraph().isEmpty());
+        checkRoutingGraphsValid(graphs);
+    }
+
+    @Test
+    void testLargeExample() throws IOException {
+
+        final var featureCollection = readFile("large_example.geojson");
+
+        final var graphs =
+                new LinesToRoutingGraphUtil<>(
+                        featureCollection.getFeatures().stream()
+                                .map(feature -> (LineString) feature.getGeometry())
+                                .toList(),
+                        (from, to, context) -> weight(from, to))
                         .buildGraph();
 
         RoutingGraphTestUtils.dumpAsGeoJson(graphs);
@@ -123,6 +146,41 @@ class RoutingGraphTest {
             assertFalse(graphs.routingGraph().isEmpty());
             checkRoutingGraphsValid(graphs);
         }
+    }
+
+    @Test
+    @Disabled("Not an actual test. This is just a helper for creating extracts to use in other tests.")
+    void extractTlmRegionToGeoJson() throws IOException {
+        final var url =
+                "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.xtf.zip";
+
+        try (final var inputStream =
+                zipStreamForEntry(new URL(url).openStream(), "TLM_STRASSEN.xtf")) {
+
+            final var excludedTypes =
+                    Set.of(
+                            WegType.AUSFAHRT,
+                            WegType.EINFAHRT,
+                            WegType.FAEHRE,
+                            WegType.AUTOBAHN,
+                            WegType.AUTOSTRASSE,
+                            WegType.AUTOZUG);
+
+            final var bounds =
+                    new Envelope(
+                            new LV95Coordinate(2_692_575, 1_166_925).toJts(),
+                            new LV95Coordinate(2_668_175, 1_152_375).toJts());
+
+            final var selectedPaths =
+                    SwisstopoTlmParser.parseData(inputStream).stream()
+                            .filter(path -> !excludedTypes.contains(path.getType()))
+                            .map(TlmPath::getLine)
+                            .filter(geometry -> bounds.intersects(geometry.getEnvelopeInternal()))
+                            .toList();
+
+            RoutingGraphTestUtils.dumpAsGeoJson(selectedPaths);
+        }
+        fail("Please disable this test, it's just a helper to generated geojson extracts.");
     }
 
     private static FeatureCollection readFile(final String path) throws IOException {
@@ -155,13 +213,13 @@ class RoutingGraphTest {
                             + " not present in complete graph");
         }
 
-        assertEquals(
-                BasicAlgorithms.connectedComponents(graphs.completeGraph()).size(),
-                BasicAlgorithms.connectedComponents(graphs.routingGraph()).size());
         checkTwins(graphs.completeGraph());
         checkTwins(graphs.routingGraph());
         checkDegrees(graphs.completeGraph());
         checkDegrees(graphs.routingGraph());
+        assertEquals(
+                BasicAlgorithms.connectedComponents(graphs.completeGraph()).size(),
+                BasicAlgorithms.connectedComponents(graphs.routingGraph()).size());
     }
 
     private static void checkDegrees(final Graph<?, ?> graph) {
