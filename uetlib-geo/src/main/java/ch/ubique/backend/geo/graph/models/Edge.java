@@ -2,8 +2,6 @@ package ch.ubique.backend.geo.graph.models;
 
 import jakarta.validation.constraints.NotNull;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import java.util.Optional;
 
 /**
@@ -103,7 +101,7 @@ public final class Edge<V, E> {
 
         final var edge = (Edge<?, ?>) o;
 
-        return new EqualsBuilder().append(id, edge.id).isEquals();
+        return id == edge.id;
     }
 
     @Override

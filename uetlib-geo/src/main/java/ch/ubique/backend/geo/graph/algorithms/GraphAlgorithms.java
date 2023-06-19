@@ -8,12 +8,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-public class BasicAlgorithms {
-    private BasicAlgorithms() {}
-
-    public static <V, E> boolean isConnected(final Graph<V, E> graph) {
-        return connectedComponents(graph).size() <= 1;
-    }
+public class GraphAlgorithms {
+    private GraphAlgorithms() {}
 
     public static <V, E> Collection<Collection<Vertex<V, E>>> connectedComponents(
             final Graph<V, E> graph) {

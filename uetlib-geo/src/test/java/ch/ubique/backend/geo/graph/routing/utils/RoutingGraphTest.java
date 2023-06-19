@@ -8,7 +8,7 @@ import ch.ubique.backend.core.utils.DurationUtils;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
-import ch.ubique.backend.geo.graph.algorithms.BasicAlgorithms;
+import ch.ubique.backend.geo.graph.algorithms.ConnectedComponents;
 import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
@@ -60,8 +60,8 @@ class RoutingGraphTest {
         assertFalse(graphs.routingGraph().isEmpty());
         assertEquals(4, graphs.routingGraph().getVertices().size());
         assertEquals(4, graphs.routingGraph().getDirectedEdges().size());
-        assertEquals(2, BasicAlgorithms.connectedComponents(graphs.completeGraph()).size());
-        assertEquals(2, BasicAlgorithms.connectedComponents(graphs.routingGraph()).size());
+        assertEquals(2, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
+        assertEquals(2, ConnectedComponents.computeComponents(graphs.routingGraph()).size());
         checkRoutingGraphsValid(graphs);
     }
 
@@ -83,8 +83,8 @@ class RoutingGraphTest {
         assertFalse(graphs.routingGraph().isEmpty());
         assertEquals(39, graphs.routingGraph().getVertices().size());
         assertEquals(86, graphs.routingGraph().getDirectedEdges().size());
-        assertEquals(1, BasicAlgorithms.connectedComponents(graphs.completeGraph()).size());
-        assertEquals(1, BasicAlgorithms.connectedComponents(graphs.routingGraph()).size());
+        assertEquals(1, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
+        assertEquals(1, ConnectedComponents.computeComponents(graphs.routingGraph()).size());
         checkRoutingGraphsValid(graphs);
     }
 
@@ -218,8 +218,8 @@ class RoutingGraphTest {
         checkDegrees(graphs.completeGraph());
         checkDegrees(graphs.routingGraph());
         assertEquals(
-                BasicAlgorithms.connectedComponents(graphs.completeGraph()).size(),
-                BasicAlgorithms.connectedComponents(graphs.routingGraph()).size());
+                ConnectedComponents.computeComponents(graphs.completeGraph()).size(),
+                ConnectedComponents.computeComponents(graphs.routingGraph()).size());
     }
 
     private static void checkDegrees(final Graph<?, ?> graph) {
