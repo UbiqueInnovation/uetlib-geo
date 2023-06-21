@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.shapefile;
 import ch.ubique.backend.core.file.ByteFile;
 import ch.ubique.backend.core.service.DataAndInput;
 import ch.ubique.backend.core.service.InputCollectionLoaderService;
+import ch.ubique.backend.geo.utils.GeotoolsUtils;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -31,7 +32,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ShapefileParser implements InputCollectionLoaderService<SimpleFeature> {
 
@@ -111,10 +111,7 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
 
         final var featureIterator = source.getFeatures(filter).features();
 
-        final var features =
-                Stream.generate(() -> featureIterator.hasNext() ? featureIterator.next() : null)
-                        .takeWhile(Objects::nonNull)
-                        .toList();
+        final var features = GeotoolsUtils.stream(featureIterator).toList();
 
         logger.info("Parsed {} features", features.size());
 
