@@ -332,6 +332,10 @@ public class LinesToRoutingGraphUtil<T> {
         logger.debug("Created vertex {} and routing vertex {}", newVertex, newRoutingVertex);
 
         for (final var neighbor : neighbors) {
+            logger.debug(
+                    "Processing neighbor {} with elevation {}",
+                    neighbor,
+                    neighbor.getProperties().coordinate().getZ());
             updateEdgesToNewVertex(completeGraph, vertex, newVertex, neighbor);
             updateRoutingEdgesToNewVertex(routingGraph, routingVertex, newRoutingVertex, neighbor);
             updateDirectionsToNewVertex(routingGraph, neighbor, vertex, newVertex);

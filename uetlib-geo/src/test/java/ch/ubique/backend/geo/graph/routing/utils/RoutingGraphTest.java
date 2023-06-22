@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -43,86 +45,30 @@ class RoutingGraphTest {
 
     @Test
     void testMountainTunnel() throws IOException {
+        final var graphs = createGraphsFromGeoJson("mountain_tunnel.geojson");
 
-        final var featureCollection = readFile("mountain_tunnel.geojson");
-
-        final var graphs =
-                new LinesToRoutingGraphUtil<>(
-                                featureCollection.getFeatures().stream()
-                                        .map(feature -> (LineString) feature.getGeometry())
-                                        .toList(),
-                                (from, to, context) -> weight(from, to))
-                        .buildGraph();
-
-        RoutingGraphTestUtils.dumpAsGeoJson(graphs);
-
-        assertFalse(graphs.completeGraph().isEmpty());
-        assertFalse(graphs.routingGraph().isEmpty());
+        checkRoutingGraphsValid(graphs);
         assertEquals(4, graphs.routingGraph().getVertices().size());
         assertEquals(4, graphs.routingGraph().getDirectedEdges().size());
         assertEquals(2, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
         assertEquals(2, ConnectedComponents.computeComponents(graphs.routingGraph()).size());
-        checkRoutingGraphsValid(graphs);
     }
 
     @Test
     void testMountainTunnelLargerArea() throws IOException {
+        final var graphs = createGraphsFromGeoJson("mountain_tunnel_larger_area.geojson");
 
-        final var featureCollection = readFile("mountain_tunnel_larger_area.geojson");
-
-        final var graphs =
-                new LinesToRoutingGraphUtil<>(
-                                featureCollection.getFeatures().stream()
-                                        .map(feature -> (LineString) feature.getGeometry())
-                                        .toList(),
-                                (from, to, context) -> weight(from, to))
-                        .buildGraph();
-
-        RoutingGraphTestUtils.dumpAsGeoJson(graphs);
-        assertFalse(graphs.completeGraph().isEmpty());
-        assertFalse(graphs.routingGraph().isEmpty());
+        checkRoutingGraphsValid(graphs);
         assertEquals(39, graphs.routingGraph().getVertices().size());
         assertEquals(86, graphs.routingGraph().getDirectedEdges().size());
         assertEquals(1, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
         assertEquals(1, ConnectedComponents.computeComponents(graphs.routingGraph()).size());
-        checkRoutingGraphsValid(graphs);
     }
 
-    @Test
-    void testFurka() throws IOException {
-
-        final var featureCollection = readFile("furka.geojson");
-
-        final var graphs =
-                new LinesToRoutingGraphUtil<>(
-                                featureCollection.getFeatures().stream()
-                                        .map(feature -> (LineString) feature.getGeometry())
-                                        .toList(),
-                                (from, to, context) -> weight(from, to))
-                        .buildGraph();
-
-        RoutingGraphTestUtils.dumpAsGeoJson(graphs);
-        assertFalse(graphs.completeGraph().isEmpty());
-        assertFalse(graphs.routingGraph().isEmpty());
-        checkRoutingGraphsValid(graphs);
-    }
-
-    @Test
-    void testLargeExample() throws IOException {
-
-        final var featureCollection = readFile("large_example.geojson");
-
-        final var graphs =
-                new LinesToRoutingGraphUtil<>(
-                        featureCollection.getFeatures().stream()
-                                .map(feature -> (LineString) feature.getGeometry())
-                                .toList(),
-                        (from, to, context) -> weight(from, to))
-                        .buildGraph();
-
-        RoutingGraphTestUtils.dumpAsGeoJson(graphs);
-        assertFalse(graphs.completeGraph().isEmpty());
-        assertFalse(graphs.routingGraph().isEmpty());
+    @ParameterizedTest
+    @ValueSource(strings = {"furka", "alp_la_schera", "large_example"})
+    void testFurka(final String test) throws IOException {
+        final var graphs = createGraphsFromGeoJson(test + ".geojson");
         checkRoutingGraphsValid(graphs);
     }
 
@@ -141,15 +87,13 @@ class RoutingGraphTest {
             final var graphs =
                     TlmToGraphUtil.buildGraph(paths, (from, to, context) -> weight(from, to));
 
-            RoutingGraphTestUtils.dumpAsGeoJson(graphs);
-            assertFalse(graphs.completeGraph().isEmpty());
-            assertFalse(graphs.routingGraph().isEmpty());
             checkRoutingGraphsValid(graphs);
         }
     }
 
     @Test
-    @Disabled("Not an actual test. This is just a helper for creating extracts to use in other tests.")
+    @Disabled(
+            "Not an actual test. This is just a helper for creating extracts to use in other tests.")
     void extractTlmRegionToGeoJson() throws IOException {
         final var url =
                 "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.xtf.zip";
@@ -168,8 +112,8 @@ class RoutingGraphTest {
 
             final var bounds =
                     new Envelope(
-                            new LV95Coordinate(2_692_575, 1_166_925).toJts(),
-                            new LV95Coordinate(2_668_175, 1_152_375).toJts());
+                            new LV95Coordinate(2_809_230, 1_170_855).toJts(),
+                            new LV95Coordinate(2_812_120, 1_167_265).toJts());
 
             final var selectedPaths =
                     SwisstopoTlmParser.parseData(inputStream).stream()
@@ -190,7 +134,12 @@ class RoutingGraphTest {
         }
     }
 
-    private static void checkRoutingGraphsValid(final RoutingGraphs graphs) {
+    private static void checkRoutingGraphsValid(final RoutingGraphs graphs) throws IOException {
+        RoutingGraphTestUtils.dumpAsGeoJson(graphs);
+
+        assertFalse(graphs.completeGraph().isEmpty());
+        assertFalse(graphs.routingGraph().isEmpty());
+
         for (final var edge : graphs.routingGraph().getDirectedEdges()) {
             assertTrue(
                     graphs.routingGraph().getVertex(edge.getFrom().getId()).isPresent(),
@@ -239,5 +188,16 @@ class RoutingGraphTest {
         final var duration =
                 HikeDuration.calculateDuration(from.distance(to), to.getZ() - from.getZ());
         return (float) DurationUtils.toFractionalSeconds(duration);
+    }
+
+    private static RoutingGraphs createGraphsFromGeoJson(final String path) throws IOException {
+        final var featureCollection = readFile(path);
+
+        return new LinesToRoutingGraphUtil<>(
+                        featureCollection.getFeatures().stream()
+                                .map(feature -> (LineString) feature.getGeometry())
+                                .toList(),
+                        (from, to, context) -> weight(from, to))
+                .buildGraph();
     }
 }
