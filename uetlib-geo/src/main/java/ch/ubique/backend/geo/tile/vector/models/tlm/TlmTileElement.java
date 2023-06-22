@@ -11,10 +11,8 @@ import java.util.Optional;
 public record TlmTileElement(long id, Geometry geometry, TlmTags tags)
         implements VectorTileElementWithTags<TlmTags> {
 
-    private static long lastId;
-
-    public TlmTileElement(final TlmPath path) {
-        this(lastId++, path.line(), new TlmTags(path.info()));
+    public TlmTileElement(final long id, final TlmPath path) {
+        this(id, path.line(), new TlmTags(path.info()));
     }
 
     @Override
