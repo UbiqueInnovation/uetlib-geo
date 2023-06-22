@@ -1,194 +1,119 @@
 package ch.ubique.backend.geo.tlm;
 
-import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
-import ch.ubique.backend.geo.tlm.models.BelagType;
-import ch.ubique.backend.geo.tlm.models.TlmPath;
-import ch.ubique.backend.geo.tlm.models.Verkehrsbedeutung;
-import ch.ubique.backend.geo.tlm.models.WanderwegType;
-import ch.ubique.backend.geo.tlm.models.WegType;
+import ch.ubique.backend.geo.tile.vector.models.tlm.TlmPathInfo;
+import ch.ubique.backend.geo.tile.vector.models.tlm.TrafficRestriction;
+import ch.ubique.backend.geo.tlm.models.*;
+import ch.ubique.backend.geo.utils.GeotoolsUtils;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.geotools.geopkg.GeoPackage;
 import org.locationtech.jts.geom.LineString;
+import org.opengis.feature.simple.SimpleFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.nio.file.Files;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import java.util.Optional;
 
 public class SwisstopoTlmParser {
 
-    private static final String PATH_XML_TAG_NAME = "swissTLM3D_ili2_V2_1.TLM_STRASSEN.TLM_STRASSE";
     private static final Logger logger = LoggerFactory.getLogger(SwisstopoTlmParser.class);
 
     private SwisstopoTlmParser() {}
 
-    public static Collection<TlmPath> parseData(final InputStream inputStream) throws IOException {
-        final var paths = new LinkedList<TlmPath>();
-        final var inputFactory = XMLInputFactory.newInstance();
+    public static Collection<TlmPath> parsePaths(final InputStream inputStream) throws IOException {
 
-        try {
-            final var reader = inputFactory.createXMLStreamReader(inputStream, "UTF-8");
+        final var path = Files.createTempFile("swissTLM3D-", ".gpkg");
+        final var file = path.toFile();
 
-            logger.info("Parsing TLM");
-            while (reader.hasNext()) {
-                reader.next();
-                final var type = reader.getEventType();
-                if (type == XMLStreamConstants.START_ELEMENT) {
-                    final var elementName = reader.getLocalName();
-                    if (elementName.equals(PATH_XML_TAG_NAME)) {
-                        final var path = parsePath(reader);
-                        paths.add(path);
-                    }
-                }
-            }
-            logger.info("Parsing TLM finished");
+        logger.info("Saving input to temporary file {}.", path);
+        FileUtils.copyToFile(inputStream, file);
+
+        final var paths = parsePaths(file);
+
+        logger.info("Deleted temporary file.");
+        Files.delete(path);
+
+        return paths;
+    }
+
+    public static Collection<TlmPath> parsePaths(final File file) throws IOException {
+        logger.info("Parsing swissTLM3D.");
+
+        try (final var geopackage = new GeoPackage(file)) {
+
+            final var landCover =
+                    geopackage.reader(geopackage.feature("tlm_strassen_strasse"), null, null);
+
+            final var paths =
+                    GeotoolsUtils.stream(landCover).map(SwisstopoTlmParser::toTlmPath).toList();
+
+            logger.info("Parsing swissTLM3D finished.");
             return paths;
-        } catch (final XMLStreamException e) {
-            throw new IOException(e);
         }
     }
 
-    private static TlmPath parsePath(final XMLStreamReader reader) throws XMLStreamException {
-        final var path = new TlmPath();
-        while (reader.hasNext()) {
-            reader.next();
-            final var eventType = reader.getEventType();
-            final String elementName;
-            if (eventType == XMLStreamConstants.START_ELEMENT) {
-                elementName = reader.getLocalName();
-                if ("POLYLINE".equals(elementName)) {
-                    path.setLine(parsePolyline(reader));
-                }
-                readPathAttributes(reader, path);
-            } else if (eventType == XMLStreamConstants.END_ELEMENT) {
-                elementName = reader.getLocalName();
-                if (elementName.equals(PATH_XML_TAG_NAME)) {
-                    return path;
-                }
-            }
+    private static TlmPath toTlmPath(final SimpleFeature feature) {
+        return new TlmPath(
+                (LineString) feature.getDefaultGeometry(),
+                new TlmPathInfo(
+                        asString(feature, "uuid").orElseThrow(),
+                        asString(feature, "objektart").map(WegType::parse).orElseThrow(),
+                        asEnum(feature, WanderwegType.class, "wanderwege").orElse(null),
+                        asString(feature, "stufe").map(SwisstopoTlmParser::parseStufe).orElse(null),
+                        asEnum(feature, BelagType.class, "belagsart").orElse(null),
+                        asEnum(feature, Verkehrsbedeutung.class, "verkehrsbedeutung").orElse(null),
+                        asString(feature, "verkehrsbeschraenkung")
+                                .map(TrafficRestriction::parse)
+                                .orElse(TrafficRestriction.NONE),
+                        asString(feature, "name").orElse(null),
+                        asString(feature, "strassenname").orElse(null),
+                        asBoolean(feature, "richtungsgetrennt").orElse(false),
+                        asBoolean(feature, "kreisel").orElse(false),
+                        asBoolean(feature, "befahrbarkeit").orElse(null)));
+    }
+
+    private static Optional<Boolean> asBoolean(final SimpleFeature feature, final String key) {
+        return asString(feature, key).map(SwisstopoTlmParser::parseBoolean);
+    }
+
+    private static Boolean parseBoolean(final String value) {
+        return switch (value.toLowerCase()) {
+            case "wahr" -> true;
+            case "falsch" -> false;
+            default -> throw new IllegalStateException(
+                    "Unexpected boolean value: " + value.toLowerCase());
+        };
+    }
+
+    private static <E extends Enum<E>> Optional<E> asEnum(
+            final SimpleFeature feature, final Class<E> enumClass, final String key) {
+        return asString(feature, key)
+                .map(value -> Enum.valueOf(enumClass, value.toUpperCase().replace(' ', '_')));
+    }
+
+    private static int parseStufe(final String value) {
+        final var split = value.split("_");
+        final var stufe = Integer.parseInt(split[split.length - 1]);
+        if (value.contains("minus")) {
+            return -stufe;
         }
-        return null;
+        return stufe;
     }
 
-    private static void readPathAttributes(final XMLStreamReader reader, final TlmPath path)
-            throws XMLStreamException {
-        final String value;
-        switch (reader.getLocalName()) {
-            case "Objektart" -> {
-                value = reader.getElementText();
-                if (isPresent(value)) {
-                    path.setType(WegType.valueOf(value.toUpperCase()));
-                }
-            }
-            case "UUID" -> {
-                value = reader.getElementText();
-                if (isPresent(value)) {
-                    path.setUuid(value);
-                }
-            }
-            case "Stufe" -> {
-                value = reader.getElementText();
-                if (isPresent(value)) {
-                    path.setStufe(parseStufe(value));
-                }
-            }
-            case "Belagsart" -> {
-                value = reader.getElementText();
-                if (isPresent(value)) {
-                    path.setBelagsart(BelagType.valueOf(value.toUpperCase()));
-                }
-            }
-            case "Verkehrsbedeutung" -> {
-                value = reader.getElementText();
-                if (isPresent(value)) {
-                    path.setVerkehrsbedeutung(Verkehrsbedeutung.valueOf(value.toUpperCase()));
-                }
-            }
-            case "Wanderwege" -> {
-                value = reader.getElementText();
-                if (isPresent(value)) {
-                    path.setWanderwegType(WanderwegType.valueOf(value.toUpperCase()));
-                }
-            }
+    private static final Collection<String> NULL_VALUES = List.of("k_W", "ub");
+
+    private static Optional<String> asString(final SimpleFeature feature, final String key) {
+        final var value = (String) feature.getAttribute(key);
+        if (StringUtils.isBlank(value) || NULL_VALUES.contains(value)) {
+            return Optional.empty();
         }
-    }
-
-    private static LineString parsePolyline(final XMLStreamReader reader)
-            throws XMLStreamException {
-        final List<LV95Coordinate> polyline = new ArrayList<>();
-        while (reader.hasNext()) {
-            reader.next();
-            final var type = reader.getEventType();
-            if (type == XMLStreamConstants.START_ELEMENT) {
-                final var elementName = reader.getLocalName();
-                if ("COORD".equals(elementName)) {
-                    polyline.add(parseCoordinate(reader));
-                } else {
-                    logger.warn("Unexpected element in Polyline: {}", elementName);
-                }
-            }
-            if (type == XMLStreamConstants.END_ELEMENT) {
-                final var elementName = reader.getLocalName();
-                if ("POLYLINE".equals(elementName)) {
-                    return JtsConverter.LV95.toJtsLineString(polyline);
-                }
-            }
-        }
-        return JtsConverter.LV95.toJtsLineString(polyline);
-    }
-
-    private static LV95Coordinate parseCoordinate(final XMLStreamReader reader)
-            throws XMLStreamException {
-        double east = -1;
-        double north = -1;
-        Double elevation = null;
-        while (reader.hasNext()) {
-            reader.next();
-            final var type = reader.getEventType();
-            if (type == XMLStreamConstants.START_ELEMENT) {
-                final var elementName = reader.getLocalName();
-                switch (elementName) {
-                    case "C1" -> east = Double.parseDouble(reader.getElementText());
-                    case "C2" -> north = Double.parseDouble(reader.getElementText());
-                    case "C3" -> elevation = Double.parseDouble(reader.getElementText());
-                    default -> logger.warn("Unexpected element in Coord {}", elementName);
-                }
-            }
-            if (type == XMLStreamConstants.END_ELEMENT) {
-                final var elementName = reader.getLocalName();
-                if ("COORD".equals(elementName)) {
-                    return new LV95Coordinate(east, north, elevation);
-                }
-            }
-        }
-        return null;
-    }
-
-    private static Integer parseStufe(final String stufeString) {
-        final var split = stufeString.split("_");
-        var value = Integer.parseInt(split[split.length - 1]);
-        if (stufeString.contains("minus")) {
-            value = -value;
-        }
-        return value;
-    }
-
-    private static boolean isPresent(final String value) {
-        return !isNull(value);
-    }
-
-    private static boolean isNull(final String value) {
-        final var nullValues = List.of("k_W", "ub");
-        return StringUtils.isBlank(value) || nullValues.contains(value);
+        return Optional.of(value);
     }
 }
