@@ -86,6 +86,8 @@ public final class RoutingGraphUtil {
         var current = direction;
         while (true) {
             visitedEdges.add(current);
+            current.getTwin().ifPresent(visitedEdges::add);
+
             final var to = current.getOther(from);
             weight += Optional.ofNullable(current.getProperties()).map(Weight::weight).orElse(0.0f);
 
