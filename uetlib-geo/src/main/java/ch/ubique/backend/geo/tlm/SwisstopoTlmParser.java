@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.tlm;
 
+import ch.ubique.backend.geo.tile.vector.models.tlm.Structure;
 import ch.ubique.backend.geo.tile.vector.models.tlm.TlmPathInfo;
 import ch.ubique.backend.geo.tile.vector.models.tlm.TrafficRestriction;
 import ch.ubique.backend.geo.tlm.models.*;
@@ -74,6 +75,7 @@ public class SwisstopoTlmParser {
                         asString(feature, "verkehrsbeschraenkung")
                                 .map(TrafficRestriction::parse)
                                 .orElse(TrafficRestriction.NONE),
+                        asString(feature, "kunstbaute").map(Structure::parse).orElse(null),
                         asString(feature, "name").orElse(null),
                         asString(feature, "strassenname").orElse(null),
                         asBoolean(feature, "richtungsgetrennt").orElse(false),
