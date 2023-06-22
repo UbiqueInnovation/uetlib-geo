@@ -8,17 +8,13 @@ import org.locationtech.jts.geom.Geometry;
 import java.util.Objects;
 import java.util.Optional;
 
-public record TlmTileElement(long id, Geometry geometry, TlmInfo tags)
-        implements VectorTileElementWithTags<TlmInfo> {
+public record TlmTileElement(long id, Geometry geometry, TlmTags tags)
+        implements VectorTileElementWithTags<TlmTags> {
 
     private static long lastId;
 
-    public TlmTileElement(final Geometry geometry, final TlmInfo tags) {
-        this(lastId++, geometry, tags);
-    }
-
-    public static TlmTileElement fromTlmPath(final TlmPath tlmPath) {
-        return new TlmTileElement(tlmPath.getLine(), new TlmInfo(tlmPath));
+    public TlmTileElement(final TlmPath path) {
+        this(lastId++, path.line(), new TlmTags(path.info()));
     }
 
     @Override

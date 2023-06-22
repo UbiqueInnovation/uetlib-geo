@@ -82,7 +82,7 @@ class RoutingGraphTest {
         try (final var inputStream =
                 zipStreamForEntry(new URL(url).openStream(), "TLM_STRASSEN.xtf")) {
 
-            final var paths = SwisstopoTlmParser.parseData(inputStream);
+            final var paths = SwisstopoTlmParser.parsePaths(inputStream);
 
             final var graphs =
                     TlmToGraphUtil.buildGraph(paths, (from, to, context) -> weight(from, to));
@@ -116,9 +116,9 @@ class RoutingGraphTest {
                             new LV95Coordinate(2_812_120, 1_167_265).toJts());
 
             final var selectedPaths =
-                    SwisstopoTlmParser.parseData(inputStream).stream()
-                            .filter(path -> !excludedTypes.contains(path.getType()))
-                            .map(TlmPath::getLine)
+                    SwisstopoTlmParser.parsePaths(inputStream).stream()
+                            .filter(path -> !excludedTypes.contains(path.info().type()))
+                            .map(TlmPath::line)
                             .filter(geometry -> bounds.intersects(geometry.getEnvelopeInternal()))
                             .toList();
 
