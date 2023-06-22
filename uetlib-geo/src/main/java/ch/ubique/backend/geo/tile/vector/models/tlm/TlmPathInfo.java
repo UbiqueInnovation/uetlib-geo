@@ -13,6 +13,7 @@ public record TlmPathInfo(
         @Nullable BelagType surfaceType,
         @Nullable Verkehrsbedeutung significanceForTraffic,
         @NotNull TrafficRestriction trafficRestriction,
+        @Nullable Structure structure,
         @Nullable String name,
         @Nullable String streetName,
         boolean directionsSeparated,
