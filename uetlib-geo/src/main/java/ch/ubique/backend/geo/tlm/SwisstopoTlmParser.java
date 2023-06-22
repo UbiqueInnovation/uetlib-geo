@@ -48,11 +48,13 @@ public class SwisstopoTlmParser {
 
         try (final var geopackage = new GeoPackage(file)) {
 
-            final var landCover =
+            final var streetsFeatureReader =
                     geopackage.reader(geopackage.feature("tlm_strassen_strasse"), null, null);
 
             final var paths =
-                    GeotoolsUtils.stream(landCover).map(SwisstopoTlmParser::toTlmPath).toList();
+                    GeotoolsUtils.stream(streetsFeatureReader)
+                            .map(SwisstopoTlmParser::toTlmPath)
+                            .toList();
 
             logger.info("Parsing swissTLM3D finished.");
             return paths;
