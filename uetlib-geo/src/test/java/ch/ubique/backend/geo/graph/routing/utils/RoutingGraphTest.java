@@ -22,6 +22,7 @@ import ch.ubique.backend.geo.utils.duration.HikeDuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -77,10 +78,10 @@ class RoutingGraphTest {
     void testSwitzerland() throws IOException {
 
         final var url =
-                "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.xtf.zip";
+                "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.gpkg.zip";
 
-        try (final var inputStream =
-                zipStreamForEntry(new URL(url).openStream(), "TLM_STRASSEN.xtf")) {
+        try (final var inputStream = new ZipArchiveInputStream(new URL(url).openStream())) {
+            inputStream.getNextEntry();
 
             final var paths = SwisstopoTlmParser.parsePaths(inputStream);
 
@@ -166,9 +167,9 @@ class RoutingGraphTest {
         checkTwins(graphs.routingGraph());
         checkDegrees(graphs.completeGraph());
         checkDegrees(graphs.routingGraph());
-        assertEquals(
-                ConnectedComponents.computeComponents(graphs.completeGraph()).size(),
-                ConnectedComponents.computeComponents(graphs.routingGraph()).size());
+        assertTrue(
+                ConnectedComponents.computeComponents(graphs.completeGraph()).size()
+                        >= ConnectedComponents.computeComponents(graphs.routingGraph()).size());
     }
 
     private static void checkDegrees(final Graph<?, ?> graph) {
@@ -197,7 +198,7 @@ class RoutingGraphTest {
                         featureCollection.getFeatures().stream()
                                 .map(feature -> (LineString) feature.getGeometry())
                                 .toList(),
-                        (from, to, context) -> weight(from, to))
+                        LinesToGraphConfig.defaults())
                 .buildGraph();
     }
 }

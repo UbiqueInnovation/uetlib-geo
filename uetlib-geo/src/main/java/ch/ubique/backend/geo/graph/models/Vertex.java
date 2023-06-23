@@ -1,7 +1,5 @@
 package ch.ubique.backend.geo.graph.models;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -91,7 +89,7 @@ public final class Vertex<V, E> {
 
         final var vertex = (Vertex<?, ?>) o;
 
-        return new EqualsBuilder().append(id, vertex.id).isEquals();
+        return id == vertex.id;
     }
 
     @Override

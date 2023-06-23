@@ -1,10 +1,8 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
+import ch.ubique.backend.geo.spatial.TypedQuadtree;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
-
-import org.locationtech.jts.index.SpatialIndex;
-import org.locationtech.jts.index.quadtree.Quadtree;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -14,19 +12,17 @@ import java.util.stream.Stream;
 public final class VectorTileElementSupplier<T extends VectorTileElement>
         implements Function<TileInfo, Collection<VectorTileElement>> {
 
-    private final SpatialIndex spatialIndex;
+    private final TypedQuadtree<T> spatialIndex;
 
     public VectorTileElementSupplier(final Collection<? extends T> elements) {
         this(elements.stream());
     }
 
     public VectorTileElementSupplier(final Stream<? extends T> elements) {
-        spatialIndex = new Quadtree();
-        elements.forEach(element -> spatialIndex.insert(element.boundingBox(), element));
+        spatialIndex = new TypedQuadtree<>(elements, VectorTileElement::boundingBox);
     }
 
     public Stream<T> getElements(final TileInfo tileInfo) {
-        //noinspection unchecked
         return spatialIndex.query(tileInfo.envelope()).stream();
     }
 

@@ -79,6 +79,14 @@ public final class Edge<V, E> {
         return (a.equals(u) && b.equals(v)) || (a.equals(v) && b.equals(u));
     }
 
+    public boolean hasCommonVertex(final Edge<V, E> other) {
+        return containsVertex(other.u) || containsVertex(other.v);
+    }
+
+    public boolean containsVertex(final Vertex<V, E> vertex) {
+        return vertex.equals(u) || vertex.equals(v);
+    }
+
     public E getProperties() {
         return properties;
     }

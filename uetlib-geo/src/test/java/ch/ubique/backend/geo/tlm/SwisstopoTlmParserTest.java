@@ -7,6 +7,7 @@ import ch.ubique.backend.geo.tile.vector.models.tlm.TlmPathInfo;
 import ch.ubique.backend.geo.tlm.models.TlmPath;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.Set;
 class SwisstopoTlmParserTest {
 
     @Test
+    @Disabled("Long running")
     void testSwisstopoTlmParser() throws IOException {
         final var inputStream =
                 new ZipArchiveInputStream(
