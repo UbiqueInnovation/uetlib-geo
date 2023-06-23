@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.tlm;
 
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
 import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
+import ch.ubique.backend.geo.graph.routing.utils.LinesToGraphConfig;
 import ch.ubique.backend.geo.graph.routing.utils.LinesToRoutingGraphUtil;
 import ch.ubique.backend.geo.graph.routing.utils.WeightingFunction;
 import ch.ubique.backend.geo.tile.vector.models.tlm.TlmPathInfo;
@@ -28,6 +29,11 @@ public final class TlmToGraphUtil {
                         .map(path -> new LineWithInfo<>(path.line(), path.info()))
                         .toList();
 
-        return LinesToRoutingGraphUtil.withInfo(relevantPaths, weightingFunction).buildGraph();
+        return LinesToRoutingGraphUtil.withInfo(
+                        relevantPaths,
+                        LinesToGraphConfig.<TlmPathInfo>builder()
+                                .weightingFunction(weightingFunction)
+                                .build())
+                .buildGraph();
     }
 }

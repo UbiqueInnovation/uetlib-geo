@@ -10,17 +10,7 @@ import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.builder.MissingInfoException;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineSegment;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.MultiLineString;
-import org.locationtech.jts.geom.MultiPoint;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.noding.SegmentStringUtil;
 import org.locationtech.jts.noding.snap.SnappingNoder;
@@ -227,5 +217,16 @@ public class JtsUtil {
 
         final var envelope = geometryCollection.getEnvelopeInternal();
         return new ReferencedEnvelope(envelope, getCrs(anyGeometry));
+    }
+
+    public static Envelope getEnvelope(final LineSegment lineSegment) {
+        return new Envelope(lineSegment.p0, lineSegment.p1);
+    }
+
+    public static double zDistance(final Coordinate a, final Coordinate b) {
+        if (Double.isNaN(a.getZ()) || Double.isNaN(b.getZ())) {
+            return 0;
+        }
+        return Math.abs(b.getZ() - a.getZ());
     }
 }
