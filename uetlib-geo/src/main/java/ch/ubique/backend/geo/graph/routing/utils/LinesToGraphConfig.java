@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
@@ -50,7 +51,7 @@ public record LinesToGraphConfig<T>(
 
         public LinesToGraphConfigBuilder<T> weightingFunction(
                 final WeightingFunction<T> weightingFunction) {
-            this.weightingFunction = weightingFunction;
+            this.weightingFunction = Objects.requireNonNull(weightingFunction);
             return this;
         }
 
@@ -59,7 +60,7 @@ public record LinesToGraphConfig<T>(
          * highway vertices.
          */
         public LinesToGraphConfigBuilder<T> isHighway(final Predicate<T> isHighway) {
-            this.isHighway = isHighway;
+            this.isHighway = Objects.requireNonNull(isHighway);
             return this;
         }
 
@@ -68,6 +69,7 @@ public record LinesToGraphConfig<T>(
          * predicate have priority over lines, that do not match it.
          */
         public LinesToGraphConfigBuilder<T> hasSnappingPriority(final Predicate<T> hasPriority) {
+            Objects.requireNonNull(hasPriority);
             return snappingPriority(x -> hasPriority.test(x) ? 1 : 0);
         }
 
@@ -77,7 +79,7 @@ public record LinesToGraphConfig<T>(
          */
         public LinesToGraphConfigBuilder<T> snappingPriority(
                 final ToDoubleFunction<T> priorityExtractor) {
-            this.snappingPriority = priorityExtractor;
+            this.snappingPriority = Objects.requireNonNull(priorityExtractor);
             return this;
         }
 
@@ -86,6 +88,7 @@ public record LinesToGraphConfig<T>(
          * predicate have priority over lines, that do not match it.
          */
         public LinesToGraphConfigBuilder<T> hasEdgePriority(final Predicate<T> hasPriority) {
+            Objects.requireNonNull(hasPriority);
             return edgePriority(x -> hasPriority.test(x) ? 1 : 0);
         }
 
@@ -95,7 +98,7 @@ public record LinesToGraphConfig<T>(
          */
         public LinesToGraphConfigBuilder<T> edgePriority(
                 final ToDoubleFunction<T> priorityExtractor) {
-            this.edgePriority = priorityExtractor;
+            this.edgePriority = Objects.requireNonNull(priorityExtractor);
             return this;
         }
 
