@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>backend-jvm-lib</artifactId>
         <groupId>ch.ubique</groupId>
@@ -14,7 +14,7 @@
 
     <properties>
         <org.geotools.version>29.1</org.geotools.version>
-        <com.google.protobuf.version>3.23.3</com.google.protobuf.version>
+        <com.google.protobuf.version>3.23.2</com.google.protobuf.version>
     </properties>
 
     <dependencies>
@@ -38,6 +38,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.yaml</groupId>
+                    <artifactId>snakeyaml</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Protobuf java integration -->
@@ -153,7 +159,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:${com.google.protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+                    <protocArtifact>
+                        com.google.protobuf:protoc:${com.google.protobuf.version}:exe:${os.detected.classifier}
+                    </protocArtifact>
                 </configuration>
             </plugin>
         </plugins>
