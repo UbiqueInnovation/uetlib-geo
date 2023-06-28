@@ -8,7 +8,7 @@ import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
 import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
 import ch.ubique.backend.geo.graph.routing.models.Weight;
-import ch.ubique.backend.geo.spatial.TypedQuadtree;
+import ch.ubique.backend.geo.spatial.TypedStrTree;
 import ch.ubique.backend.geo.utils.InterpolationUtils;
 
 import jakarta.validation.constraints.NotNull;
@@ -77,7 +77,7 @@ public class LinesToGraphUtil<T> {
 
     private void findIntersections() {
         logger.info("Finding intersecting edges.");
-        final var quadTree = new TypedQuadtree<>(graph.getDirectedEdges(), this::envelope);
+        final var spatialIndex = new TypedStrTree<>(graph.getDirectedEdges(), this::envelope);
 
         final var progressLogger = new ProgressLogger(graph.getDirectedEdges().size());
 
@@ -87,7 +87,7 @@ public class LinesToGraphUtil<T> {
             queryEnvelope.expandBy(config.snapTolerance());
 
             final var intersectionMaybe =
-                    quadTree.query(queryEnvelope).stream()
+                    spatialIndex.query(queryEnvelope).stream()
                             .map(e -> findIntersection(edge, e))
                             .flatMap(Optional::stream)
                             .findAny();
