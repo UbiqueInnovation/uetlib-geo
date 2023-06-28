@@ -10,10 +10,10 @@ import java.util.stream.Stream;
 
 public class TypedStrTree<T> {
 
-    private final STRtree quadTree;
+    private final STRtree strTree;
 
     public TypedStrTree() {
-        quadTree = new STRtree();
+        strTree = new STRtree();
     }
 
     public TypedStrTree(
@@ -29,31 +29,31 @@ public class TypedStrTree<T> {
     }
 
     public int depth() {
-        return quadTree.depth();
+        return strTree.depth();
     }
 
     public boolean isEmpty() {
-        return quadTree.isEmpty();
+        return strTree.isEmpty();
     }
 
     public int size() {
-        return quadTree.size();
+        return strTree.size();
     }
 
     public void insert(final Envelope itemEnv, final T item) {
-        quadTree.insert(itemEnv, item);
+        strTree.insert(itemEnv, item);
     }
 
     public boolean remove(final Envelope itemEnv, final T item) {
-        return quadTree.remove(itemEnv, item);
+        return strTree.remove(itemEnv, item);
     }
 
     public Collection<T> query(final Envelope searchEnv) {
         //noinspection unchecked
-        return quadTree.query(searchEnv);
+        return strTree.query(searchEnv);
     }
 
     public void query(final Envelope searchEnv, final ItemVisitor visitor) {
-        quadTree.query(searchEnv, visitor);
+        strTree.query(searchEnv, visitor);
     }
 }
