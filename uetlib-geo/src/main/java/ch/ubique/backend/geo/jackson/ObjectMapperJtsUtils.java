@@ -3,9 +3,7 @@ package ch.ubique.backend.geo.jackson;
 import ch.ubique.backend.core.jackson.ObjectMapperUtils;
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import org.locationtech.jts.geom.GeometryFactory;
 import org.n52.jackson.datatype.jts.JtsModule;
@@ -17,8 +15,6 @@ public final class ObjectMapperJtsUtils {
     public static ObjectMapper objectMapperWithJts(final GeometryFactory geometryFactory) {
         return ObjectMapperUtils.objectMapperBuilder()
                 .addModule(new JtsModule(geometryFactory))
-                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                 .build();
     }
 
