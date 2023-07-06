@@ -40,4 +40,16 @@ public final class ObjectMapperJtsUtils {
     public static ObjectMapper objectMapperLv95() {
         return objectMapperWithJts(JtsConverter.LV95.geometryFactory());
     }
+
+    public static ObjectMapper objectMapperLv03() {
+        return objectMapperWithJts(JtsConverter.LV03.geometryFactory());
+    }
+
+    public static ObjectMapper objectMapperWgs84() {
+        return objectMapperWithJts(JtsConverter.WGS84.geometryFactory());
+    }
+
+    public static ObjectMapper objectMapperWebMercator() {
+        return objectMapperWithJts(JtsConverter.WEB_MERCATOR.geometryFactory());
+    }
 }
