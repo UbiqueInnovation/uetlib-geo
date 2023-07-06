@@ -1,4 +1,4 @@
-package ch.ubique.backend.geo.utils;
+package ch.ubique.backend.geo.jackson;
 
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 
