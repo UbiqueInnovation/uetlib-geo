@@ -289,9 +289,8 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
         }
     }
 
-    public BoundingBox<C> transform(
-            final BoundingBox<? extends ch.ubique.backend.geo.coordinate.models.Coordinate>
-                    boundingBox) {
+    public <T extends ch.ubique.backend.geo.coordinate.models.Coordinate> BoundingBox<C> transform(
+            final BoundingBox<T> boundingBox) {
         return new BoundingBox<>(transform(boundingBox.min()), transform(boundingBox.max()));
     }
 }
