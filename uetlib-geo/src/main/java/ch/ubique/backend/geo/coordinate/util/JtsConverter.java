@@ -4,10 +4,7 @@ import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 
 import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
-import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
-import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
-import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
-import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
+import ch.ubique.backend.geo.coordinate.models.*;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -290,5 +287,11 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
             throw new WrappedException(
                     e); // rethrow as runtime exception. no way for caller to handle this
         }
+    }
+
+    public BoundingBox<C> transform(
+            final BoundingBox<? extends ch.ubique.backend.geo.coordinate.models.Coordinate>
+                    boundingBox) {
+        return new BoundingBox<>(transform(boundingBox.min()), transform(boundingBox.max()));
     }
 }
