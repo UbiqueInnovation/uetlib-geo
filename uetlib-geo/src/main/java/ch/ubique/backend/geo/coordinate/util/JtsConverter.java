@@ -78,7 +78,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                     new LV03Coordinate(900_000.0, 350_000.0));
 
     // See https://schemas.opengis.net/wmts/1.0/profiles/wmts-simple/wmtsTileMatrixSet.json
-    public static final double WEB_MERCATOR_MAX_EXTENT = 20_037_508.3427892;
+    private static final double WEB_MERCATOR_MAX_EXTENT = 20_037_508.3427892;
     public static final JtsConverter<WebMercatorCoordinate> WEB_MERCATOR =
             new JtsConverter<>(
                     3857,
