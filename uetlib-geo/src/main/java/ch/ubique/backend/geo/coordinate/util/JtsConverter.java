@@ -46,8 +46,6 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                     c -> new WGS84Coordinate(c.y, c.x, nullIfNaN(c.getZ())),
                     new WGS84Coordinate(-90, -180),
                     new WGS84Coordinate(90, 180));
-    public static final JtsConverter<WebMercatorCoordinate> WEB_MERCATOR;
-
     /**
      * bounds equal to the min/max available coordinates with tiles on <a
      * href="https://map.geo.admin.ch/">map.geo.admin.ch</a>
@@ -63,7 +61,6 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                     c -> new LV95Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new LV95Coordinate(2_420_000.0, 1_000_000.0),
                     new LV95Coordinate(2_900_000.0, 1_350_000.0));
-
     /**
      * bounds equal to the min/max available coordinates with tiles on <a
      * href="https://map.geo.admin.ch/">map.geo.admin.ch</a>
@@ -80,21 +77,19 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                     new LV03Coordinate(420_000.0, 0.0),
                     new LV03Coordinate(900_000.0, 350_000.0));
 
-    static {
-        // See https://schemas.opengis.net/wmts/1.0/profiles/wmts-simple/wmtsTileMatrixSet.json
-        final double extent = 20_037_508.3427892;
-        WEB_MERCATOR =
-                new JtsConverter<>(
-                        3857,
-                        c ->
-                                new Coordinate(
-                                        c.getX(),
-                                        c.getY(),
-                                        c.getOptionalElevation().orElse(NULL_ORDINATE)),
-                        c -> new WebMercatorCoordinate(c.x, c.y, nullIfNaN(c.getZ())),
-                        new WebMercatorCoordinate(-extent, -extent),
-                        new WebMercatorCoordinate(extent, extent));
-    }
+    // See https://schemas.opengis.net/wmts/1.0/profiles/wmts-simple/wmtsTileMatrixSet.json
+    public static final double WEB_MERCATOR_MAX_EXTENT = 20_037_508.3427892;
+    public static final JtsConverter<WebMercatorCoordinate> WEB_MERCATOR =
+            new JtsConverter<>(
+                    3857,
+                    c ->
+                            new Coordinate(
+                                    c.getX(),
+                                    c.getY(),
+                                    c.getOptionalElevation().orElse(NULL_ORDINATE)),
+                    c -> new WebMercatorCoordinate(c.x, c.y, nullIfNaN(c.getZ())),
+                    new WebMercatorCoordinate(-WEB_MERCATOR_MAX_EXTENT, -WEB_MERCATOR_MAX_EXTENT),
+                    new WebMercatorCoordinate(WEB_MERCATOR_MAX_EXTENT, WEB_MERCATOR_MAX_EXTENT));
 
     private final int srid;
     private final CoordinateReferenceSystem crs;
