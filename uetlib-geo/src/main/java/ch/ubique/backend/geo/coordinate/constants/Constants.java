@@ -1,7 +1,5 @@
 package ch.ubique.backend.geo.coordinate.constants;
 
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WEB_MERCATOR_MAX_EXTENT;
-
 import ch.ubique.backend.geo.coordinate.models.*;
 
 /**
@@ -21,16 +19,6 @@ public final class Constants {
             new BoundingBox<>(
                     new LV03Coordinate(485_000.0, 70_000.0),
                     new LV03Coordinate(840_000.0, 300_000.0));
-
-    /** EPSG 4326 / WGS 84 */
-    public static final BoundingBox<WGS84Coordinate> BOUNDING_BOX_SWITZERLAND_WGS84 =
-            new BoundingBox<>(new WGS84Coordinate(-90.0, -180.0), new WGS84Coordinate(90.0, 180.0));
-
-    /** EPSG 3857 / Web Mercator */
-    public static final BoundingBox<WebMercatorCoordinate> BOUNDING_BOX_SWITZERLAND_WEB_MERCATOR =
-            new BoundingBox<>(
-                    new WebMercatorCoordinate(-WEB_MERCATOR_MAX_EXTENT, -WEB_MERCATOR_MAX_EXTENT),
-                    new WebMercatorCoordinate(WEB_MERCATOR_MAX_EXTENT, WEB_MERCATOR_MAX_EXTENT));
 
     private Constants() {}
 }
