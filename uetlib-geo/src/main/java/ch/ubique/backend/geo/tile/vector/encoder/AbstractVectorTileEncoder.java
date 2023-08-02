@@ -43,7 +43,7 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
 
     @Override
     public final BinaryTile encode(final Tile tile) {
-        if (!(tile instanceof VectorTile vectorTile)) {
+        if (!(tile instanceof final VectorTile vectorTile)) {
             throw new UnsupportedOperationException(
                     "This encoder can only encode tiles of type " + VectorTile.class);
         }
@@ -78,7 +78,7 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
 
     private Function<Geometry, Optional<Geometry>> validateGeometry(@NotNull final String context) {
         return geometry -> {
-            if (geometry.isValid()) {
+            if (!geometry.isEmpty() && geometry.isValid()) {
                 return Optional.of(geometry);
             }
             try {
