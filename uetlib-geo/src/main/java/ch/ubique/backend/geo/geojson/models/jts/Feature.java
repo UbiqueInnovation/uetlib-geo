@@ -10,10 +10,7 @@ public class Feature extends GenericFeature<Map<String, Object>, Feature> {
 
     @JsonIgnore
     public <V> V getProperty(final String key) {
-        if (getProperties().containsKey(key)) {
-            //noinspection unchecked
-            return (V) getProperties().get(key);
-        }
-        return null;
+        //noinspection unchecked
+        return (V) getProperties().get(key);
     }
 }
