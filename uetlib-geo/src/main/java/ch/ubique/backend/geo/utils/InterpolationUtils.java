@@ -5,10 +5,26 @@ import org.locationtech.jts.geom.LineSegment;
 
 public class InterpolationUtils {
 
-    private InterpolationUtils() {}
+    private InterpolationUtils() {
+    }
 
     public static double interpolate(final double a, final double b, final double t) {
         return (1 - t) * a + t * b;
+    }
+
+    /**
+     * Bilinear interpolation of parameters u and v inside the bounding box {@code u0v0} to {@code u1v1}.
+     *
+     * @return the interpolated value
+     */
+    public static double interpolate(
+            final double u0v0,
+            final double u0v1,
+            final double u1v0,
+            final double u1v1,
+            final double u,
+            final double v) {
+        return interpolate(interpolate(u0v0, u0v1, v), interpolate(u1v0, u1v1, v), u);
     }
 
     /**
