@@ -5,8 +5,7 @@ import org.locationtech.jts.geom.LineSegment;
 
 public class InterpolationUtils {
 
-    private InterpolationUtils() {
-    }
+    private InterpolationUtils() {}
 
     public static double interpolate(final double a, final double b, final double t) {
         return (1 - t) * a + t * b;
