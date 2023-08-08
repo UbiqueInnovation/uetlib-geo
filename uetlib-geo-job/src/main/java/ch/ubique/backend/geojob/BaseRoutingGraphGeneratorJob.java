@@ -16,7 +16,7 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileElementSupplier;
 import ch.ubique.backend.job.BaseInputJob;
 import ch.ubique.backend.job.model.JobRunState;
-import ch.ubique.backend.job.model.properties.JobProperty;
+import ch.ubique.backend.job.model.properties.JobPropertiesConfig;
 import ch.ubique.backend.job.model.properties.JobPropertyDefinitions;
 import ch.ubique.backend.job.model.properties.enums.JobRunnerKey;
 import ch.ubique.backend.job.model.properties.enums.KubernetesSku;
@@ -25,15 +25,17 @@ import com.pivovarit.function.ThrowingConsumer;
 
 import jakarta.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final InputDataLoaderService<T> service;
 
@@ -53,8 +55,8 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
     }
 
     @Override
-    public Collection<JobProperty<?>> initialProperties() {
-        return Set.of(
+    public JobPropertiesConfig propertiesConfig() {
+        return JobPropertiesConfig.initial(
                 JobPropertyDefinitions.RUNNER.createProperty(JobRunnerKey.DEDICATED_K8S_JOB),
                 JobPropertyDefinitions.K8S_SKU.createProperty(KubernetesSku.HIGH_MEMORY.value()),
                 JobPropertyDefinitions.K8S_REQUESTS_CPU.createProperty("2"),
