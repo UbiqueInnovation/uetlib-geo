@@ -7,7 +7,7 @@ public class InterpolationUtils {
 
     private InterpolationUtils() {}
 
-    public static double interpolateLinear(final double a, final double b, final double t) {
+    public static double linear(final double a, final double b, final double t) {
         return (1 - t) * a + t * b;
     }
 
@@ -16,14 +16,14 @@ public class InterpolationUtils {
      *
      * @return the interpolated value
      */
-    public static double interpolateBilinear(
+    public static double bilinear(
             final double u0v0,
             final double u0v1,
             final double u1v0,
             final double u1v1,
             final double u,
             final double v) {
-        return interpolateLinear(interpolateLinear(u0v0, u0v1, v), interpolateLinear(u1v0, u1v1, v), u);
+        return linear(linear(u0v0, u0v1, v), linear(u1v0, u1v1, v), u);
     }
 
     /**
@@ -32,6 +32,6 @@ public class InterpolationUtils {
      */
     public static double zInterpolate(final Coordinate coordinate, final LineSegment segment) {
         final var t = segment.projectionFactor(coordinate);
-        return interpolateLinear(segment.p0.getZ(), segment.p1.getZ(), t);
+        return linear(segment.p0.getZ(), segment.p1.getZ(), t);
     }
 }
