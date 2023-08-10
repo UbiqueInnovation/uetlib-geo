@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 public abstract class BaseTileJob implements Job {
 
     @Override
-    public final JobRunState run(final JobRunContext context)
+    public final JobRunState run(final JobRunContext jobRunContext)
             throws InterruptedException, ExecutionException {
         TileGeneratorUtil.generateTiles(outputs());
         return JobRunState.DONE;

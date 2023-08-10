@@ -21,8 +21,8 @@ import java.util.stream.Stream;
 public abstract class SimpleBaseVectorTileImporter
         extends BaseVectorTileImporter<VectorTileElement> {
 
-    protected SimpleBaseVectorTileImporter(@NotNull final ApplicationContext context) {
-        super(context);
+    protected SimpleBaseVectorTileImporter(@NotNull final ApplicationContext applicationContext) {
+        super(applicationContext);
     }
 
     protected abstract VectorTileConfig config();
