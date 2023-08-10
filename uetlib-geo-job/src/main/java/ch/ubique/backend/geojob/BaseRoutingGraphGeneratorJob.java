@@ -25,8 +25,6 @@ import com.pivovarit.function.ThrowingConsumer;
 
 import jakarta.validation.constraints.NotNull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -34,8 +32,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final InputDataLoaderService<T> service;
 
