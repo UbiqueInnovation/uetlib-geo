@@ -40,8 +40,8 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
     private final InputDataLoaderService<T> service;
 
     protected BaseRoutingGraphGeneratorJob(
-            final ApplicationContext context, final InputDataLoaderService<T> service) {
-        super(context);
+            final ApplicationContext applicationContext, final InputDataLoaderService<T> service) {
+        super(applicationContext);
         this.service = service;
     }
 

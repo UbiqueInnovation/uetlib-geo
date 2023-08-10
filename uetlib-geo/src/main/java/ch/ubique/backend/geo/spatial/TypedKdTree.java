@@ -21,7 +21,8 @@ public class TypedKdTree<T> {
         kdTree = new KdTree(tolerance);
     }
 
-    public TypedKdTree(final Collection<T> collection, final Function<T, Coordinate> coordinateExtractor) {
+    public TypedKdTree(
+            final Collection<T> collection, final Function<T, Coordinate> coordinateExtractor) {
         this();
         collection.forEach(item -> insert(coordinateExtractor.apply(item), item));
     }

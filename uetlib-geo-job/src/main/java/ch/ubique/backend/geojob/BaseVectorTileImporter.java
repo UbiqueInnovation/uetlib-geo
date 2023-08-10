@@ -18,10 +18,8 @@ import java.util.stream.Stream;
 
 public abstract class BaseVectorTileImporter<T> extends BaseInputJob<Collection<T>> {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
-    protected BaseVectorTileImporter(@NotNull final ApplicationContext context) {
-        super(context);
+    protected BaseVectorTileImporter(@NotNull final ApplicationContext applicationContext) {
+        super(applicationContext);
     }
 
     protected abstract InputCollectionLoaderService<T> getService();
