@@ -35,12 +35,12 @@ public final class GeoJsonVectorTileEncoder extends JsonVectorTileEncoder {
         return e -> getTileGeometry(e, bounds).map(toFeature(e));
     }
 
-    private static Function<Geometry, Feature> toFeature(final VectorTileElement element) {
+    private Function<Geometry, Feature> toFeature(final VectorTileElement element) {
         return geometry ->
                 new Feature()
                         .setType("Feature")
                         .setGeometry(geometry)
-                        .setProperties(VectorTileElementUtils.getFinalTags(element))
+                        .setProperties(VectorTileElementUtils.getFinalTags(element, getConfig()))
                         .setId(String.valueOf(element.id()));
     }
 }

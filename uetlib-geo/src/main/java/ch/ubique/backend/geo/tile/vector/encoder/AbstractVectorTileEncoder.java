@@ -121,6 +121,10 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
         return GeometryPrecisionReducer.reduce(geometry, new PrecisionModel(1));
     }
 
+    public VectorTileConfig getConfig() {
+        return config;
+    }
+
     private static Function<Geometry, Optional<Geometry>> includeForOutput(
             @NotNull final VectorTileElement element) {
         return tileGeometry ->
