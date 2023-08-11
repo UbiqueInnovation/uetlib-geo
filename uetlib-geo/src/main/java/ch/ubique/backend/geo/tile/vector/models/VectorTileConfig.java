@@ -1,20 +1,18 @@
 package ch.ubique.backend.geo.tile.vector.models;
 
+import ch.ubique.backend.core.jackson.ObjectMapperUtils;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.constants.WebMercatorTileDefinitions;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class VectorTileConfig {
 
@@ -29,11 +27,13 @@ public class VectorTileConfig {
     private TileOutputFormat outputFormat = TileOutputFormat.PBF;
     private ReferencedEnvelope outputEnvelope;
     private Set<Integer> zoomLevels;
+    private ObjectMapper objectMapper;
 
     private VectorTileConfig(
             final YAxisDirection yAxisDirection, final TileLevelsDefinition tileLevelsDefinition) {
         this.yAxisDirection = yAxisDirection;
         this.tileLevelsDefinition = tileLevelsDefinition;
+        this.objectMapper = ObjectMapperUtils.objectMapper();
     }
 
     public static VectorTileConfig lv95() {
@@ -43,6 +43,15 @@ public class VectorTileConfig {
     public static VectorTileConfig webMercator() {
         return new VectorTileConfig(
                 YAxisDirection.DOWN, WebMercatorTileDefinitions.tileDefinitions());
+    }
+
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
+
+    public VectorTileConfig objectMapper(final ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        return this;
     }
 
     /**
