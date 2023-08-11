@@ -45,7 +45,7 @@ public class TypedKdTree<T> {
 
     public Collection<T> query(final Envelope searchEnv) {
         //noinspection unchecked
-        return kdTree.query(searchEnv);
+        return kdTree.query(searchEnv).stream().map(node -> ((KdNode) node).getData()).toList();
     }
 
     public void query(final Envelope searchEnv, final KdNodeVisitor visitor) {
