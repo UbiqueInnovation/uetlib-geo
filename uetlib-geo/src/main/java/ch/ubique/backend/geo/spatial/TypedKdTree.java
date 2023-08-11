@@ -7,6 +7,7 @@ import org.locationtech.jts.index.kdtree.KdNodeVisitor;
 import org.locationtech.jts.index.kdtree.KdTree;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 public class TypedKdTree<T> {
@@ -43,7 +44,7 @@ public class TypedKdTree<T> {
         kdTree.insert(itemEnv, item);
     }
 
-    public Collection<T> query(final Envelope searchEnv) {
+    public List<T> query(final Envelope searchEnv) {
         //noinspection unchecked
         return kdTree.query(searchEnv).stream().map(node -> ((KdNode) node).getData()).toList();
     }
