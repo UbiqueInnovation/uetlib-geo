@@ -9,6 +9,7 @@ import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -20,14 +21,14 @@ import java.util.*;
 public record VectorTileConfig(
         @NotNull YAxisDirection yAxisDirection,
         @NotNull TileLevelsDefinition tileLevelsDefinition,
-        Integer maxElementsPerTile,
+        @Nullable Integer maxElementsPerTile,
         @PositiveOrZero double simplifyTolerance,
         @PositiveOrZero double smoothing,
         int clipBuffer,
         boolean validateElements,
         @Positive int extent,
         @NotNull TileOutputFormat outputFormat,
-        ReferencedEnvelope outputEnvelope,
+        @Nullable ReferencedEnvelope outputEnvelope,
         @NotNull Set<Integer> zoomLevels,
         @NotNull ObjectMapper objectMapper) {
 
@@ -103,6 +104,7 @@ public record VectorTileConfig(
         }
 
         public VectorTileConfigBuilder maxElementsPerTile(final Integer maxElementsPerTile) {
+            Objects.requireNonNull(yAxisDirection, "maxElementsPerTile must be non-null");
             this.maxElementsPerTile = maxElementsPerTile;
             return this;
         }
@@ -158,6 +160,7 @@ public record VectorTileConfig(
         }
 
         public VectorTileConfigBuilder outputEnvelope(final ReferencedEnvelope outputEnvelope) {
+            Objects.requireNonNull(yAxisDirection, "outputEnvelope must be non-null");
             this.outputEnvelope = outputEnvelope;
             return this;
         }
