@@ -146,11 +146,11 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         logger.info("Creating outputs for regular graphs");
         return Stream.of(
                 new VectorTileOutput(
-                        baseConfig().setZoomLevels(20, 21).setOutputFormat(format),
+                        baseConfig().zoomLevels(20, 21).outputFormat(format).build(),
                         vertexSupplier,
                         saveGraph(layer, GraphType.COMPLETE, format)),
                 new VectorTileOutput(
-                        baseConfig().setZoomLevels(19, 20).setOutputFormat(format),
+                        baseConfig().zoomLevels(19, 20).outputFormat(format).build(),
                         vertexSupplier.withFilter(this::isRoutingVertex),
                         saveGraph(layer, GraphType.ROUTING, format)));
     }
@@ -169,19 +169,21 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         return Stream.of(
                 new VectorTileOutput(
                         baseConfig()
-                                .setZoomLevels(IntStream.rangeClosed(8, 18).boxed().toList())
-                                .setOutputFormat(format),
+                                .zoomLevels(IntStream.rangeClosed(8, 18).boxed().toList())
+                                .outputFormat(format)
+                                .build(),
                         vertexSupplier.withFilter(Vertex::isHighway),
                         saveGraph(layer, GraphType.HIGHWAY_COMPLETE, format)),
                 new VectorTileOutput(
                         baseConfig()
-                                .setZoomLevels(IntStream.rangeClosed(8, 18).boxed().toList())
-                                .setOutputFormat(format),
+                                .zoomLevels(IntStream.rangeClosed(8, 18).boxed().toList())
+                                .outputFormat(format)
+                                .build(),
                         vertexSupplier.withFilter(v -> v.isHighway() && isRoutingVertex(v)),
                         saveGraph(layer, GraphType.HIGHWAY_ROUTING, format)));
     }
 
-    protected VectorTileConfig baseConfig() {
+    protected VectorTileConfig.VectorTileConfigBuilder baseConfig() {
         return VectorTileConfig.lv95();
     }
 
