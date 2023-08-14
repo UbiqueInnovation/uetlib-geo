@@ -25,7 +25,7 @@ public final class PngVectorTileEncoder extends AbstractVectorTileEncoder {
 
     @Override
     public byte[] encodeVectorTile(final VectorTile tile) {
-        final int extent = config.getExtent();
+        final var extent = config.extent();
         final var image = new BufferedImage(extent, extent, BufferedImage.TYPE_INT_ARGB);
         final var shapeWriter = new ShapeWriter();
         final var graphics = image.createGraphics();

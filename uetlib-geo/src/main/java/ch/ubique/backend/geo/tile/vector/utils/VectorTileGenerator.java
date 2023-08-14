@@ -59,8 +59,8 @@ public class VectorTileGenerator implements TileGenerator {
 
     @Override
     public void generateTiles() {
-        output.config().getZoomLevels().stream()
-                .map(z -> getTileInfos(z, output.config().getOutputEnvelope()))
+        output.config().zoomLevels().stream()
+                .map(z -> getTileInfos(z, output.config().outputEnvelope()))
                 .forEach(this::generateTilesForInfos);
 
         envelopeCache.invalidateAll();
@@ -71,7 +71,7 @@ public class VectorTileGenerator implements TileGenerator {
     private Collection<TileInfo> getTileInfos(
             final int level, final ReferencedEnvelope outputEnvelope) {
         logger.info("Getting tile infos for zoom level {}", level);
-        return output.config().getTileLevelsDefinition().tileInfos(level, outputEnvelope).toList();
+        return output.config().tileLevelsDefinition().tileInfos(level, outputEnvelope).toList();
     }
 
     private void generateTilesForInfos(final Collection<TileInfo> tileInfos) {

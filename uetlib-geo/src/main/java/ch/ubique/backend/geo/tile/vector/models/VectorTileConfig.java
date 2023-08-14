@@ -8,165 +8,72 @@ import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.util.*;
 
-public class VectorTileConfig {
+public record VectorTileConfig(
+        @NotNull YAxisDirection yAxisDirection,
+        @NotNull TileLevelsDefinition tileLevelsDefinition,
+        Integer maxElementsPerTile,
+        @Positive Double simplifyTolerance,
+        Double smoothing,
+        int clipBuffer,
+        boolean validateElements,
+        int extent,
+        @NotNull TileOutputFormat outputFormat,
+        ReferencedEnvelope outputEnvelope,
+        @NotNull Set<Integer> zoomLevels,
+        @NotNull ObjectMapper objectMapper) {
 
-    private final YAxisDirection yAxisDirection;
-    private final TileLevelsDefinition tileLevelsDefinition;
-    private Integer maxElementsPerTile;
-    private Double simplifyTolerance;
-    private Double smoothing;
-    private int clipBuffer;
-    private boolean validateElements = true;
-    private int extent = 4096;
-    private TileOutputFormat outputFormat = TileOutputFormat.PBF;
-    private ReferencedEnvelope outputEnvelope;
-    private Set<Integer> zoomLevels;
-    private ObjectMapper objectMapper;
-
-    private VectorTileConfig(
-            final YAxisDirection yAxisDirection, final TileLevelsDefinition tileLevelsDefinition) {
-        this.yAxisDirection = yAxisDirection;
-        this.tileLevelsDefinition = tileLevelsDefinition;
-        this.objectMapper = ObjectMapperUtils.objectMapper();
+    public static VectorTileConfigBuilder lv95() {
+        return new VectorTileConfigBuilder()
+                .yAxisDirection(YAxisDirection.DOWN)
+                .tileLevelsDefinition(SwissConstants.swissTileDefinition());
     }
 
-    public static VectorTileConfig lv95() {
-        return new VectorTileConfig(YAxisDirection.DOWN, SwissConstants.swissTileDefinition());
-    }
-
-    public static VectorTileConfig webMercator() {
-        return new VectorTileConfig(
-                YAxisDirection.DOWN, WebMercatorTileDefinitions.tileDefinitions());
-    }
-
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
-
-    public VectorTileConfig objectMapper(final ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-        return this;
+    public static VectorTileConfigBuilder webMercator() {
+        return new VectorTileConfigBuilder()
+                .yAxisDirection(YAxisDirection.DOWN)
+                .tileLevelsDefinition(WebMercatorTileDefinitions.tileDefinitions());
     }
 
     /**
-     * This sets {@linkplain VectorTileConfig#yAxisDirection} to {@link YAxisDirection#DOWN}, which
-     * is the wrong direction, but has been used for multiple layers already.
+     * This sets {@linkplain VectorTileConfig#yAxisDirection} to {@link YAxisDirection#UP}, which is
+     * the wrong direction, but has been used for multiple layers already.
      *
      * <p>Use this method only if you need backwards compatibility.
      *
      * @deprecated Will be removed with 2.0.0
      */
     @Deprecated(forRemoval = true, since = "1.2.0")
-    public static VectorTileConfig lv95WrongDirection() {
-        return new VectorTileConfig(YAxisDirection.UP, SwissConstants.swissTileDefinition());
+    public static VectorTileConfigBuilder lv95WrongDirection() {
+        return new VectorTileConfigBuilder()
+                .yAxisDirection(YAxisDirection.UP)
+                .tileLevelsDefinition(SwissConstants.swissTileDefinition());
     }
 
-    public VectorTileConfig setMaxElementsPerTile(final int maxElementsPerTile) {
-        if (maxElementsPerTile <= 0) {
-            throw new IllegalArgumentException("The limit needs to be positive.");
-        }
-        this.maxElementsPerTile = maxElementsPerTile;
-        return this;
-    }
-
+    /**
+     * @deprecated since 1.5, use {@link #extent()}
+     */
+    @Deprecated(forRemoval = true, since = "1.5.0")
     public int getExtent() {
         return extent;
     }
 
-    public VectorTileConfig setExtent(final int extent) {
-        this.extent = extent;
-        return this;
-    }
-
-    public VectorTileConfig setValidateElements(final boolean validateElements) {
-        this.validateElements = validateElements;
-        return this;
-    }
-
-    public boolean validateElements() {
-        return validateElements;
-    }
-
-    public int getClipBuffer() {
-        return clipBuffer;
-    }
-
-    public VectorTileConfig setClipBuffer(final int clipBuffer) {
-        this.clipBuffer = clipBuffer;
-        return this;
-    }
-
-    public ReferencedEnvelope getOutputEnvelope() {
-        return outputEnvelope;
-    }
-
-    public VectorTileConfig setOutputEnvelope(final ReferencedEnvelope outputEnvelope) {
-        this.outputEnvelope = outputEnvelope;
-        return this;
-    }
-
-    public Optional<Double> getSimplifyTolerance() {
-        return Optional.ofNullable(simplifyTolerance);
-    }
-
     /**
-     * All vertices in the simplified geometry will be within this distance of the original geometry
-     * (in output coordinates on of the vector tile, the output coordinates are between 0 and
-     * extent). The tolerance value must be positive.
+     * @deprecated since 1.5, use {@link #tileLevelsDefinition()}
      */
-    public VectorTileConfig setSimplifyTolerance(final double simplifyTolerance) {
-        if (simplifyTolerance <= 0) {
-            throw new IllegalArgumentException("The simplify tolerance needs to be positive.");
-        }
-        this.simplifyTolerance = simplifyTolerance;
-        return this;
-    }
-
-    public Optional<Double> getSmoothing() {
-        return Optional.ofNullable(smoothing);
-    }
-
-    /**
-     * @param alpha curved-ness parameter (0 is linear, 1 is round, >1 is increasingly curved)
-     */
-    public VectorTileConfig setSmoothing(final double alpha) {
-        if (alpha <= 0) {
-            throw new IllegalArgumentException("The smoothing value alpha needs to be positive.");
-        }
-        this.smoothing = alpha;
-        return this;
-    }
-
-    public YAxisDirection getYAxisDirection() {
-        return yAxisDirection;
-    }
-
+    @Deprecated(forRemoval = true, since = "1.5.0")
     public TileLevelsDefinition getTileLevelsDefinition() {
         return tileLevelsDefinition;
     }
 
-    public Set<Integer> getZoomLevels() {
-        return zoomLevels;
-    }
-
-    public VectorTileConfig setZoomLevels(final Collection<Integer> zoomLevels) {
-        this.zoomLevels = new HashSet<>(zoomLevels);
-        return this;
-    }
-
-    public VectorTileConfig setZoomLevels(final Integer... zoomLevels) {
-        return setZoomLevels(Arrays.asList(zoomLevels));
-    }
-
     /**
-     * Returns the maximum allowed elements per tile. This depends on the zoomlevel, meaning that on
-     * the maximum level we never limit the allowed number of elements, so we never miss any
+     * Returns the maximum allowed elements per tile. This depends on the zoom level, meaning that
+     * on the maximum level we never limit the allowed number of elements, so we never miss any
      * elements.
      */
     public Optional<Integer> getLimit(final int zoomLevel) {
@@ -178,26 +85,124 @@ public class VectorTileConfig {
         }
     }
 
-    public TileOutputFormat getOutputFormat() {
-        return outputFormat;
-    }
+    public static class VectorTileConfigBuilder {
+        private YAxisDirection yAxisDirection;
+        private TileLevelsDefinition tileLevelsDefinition;
+        private Integer maxElementsPerTile;
+        private Double simplifyTolerance;
+        private Double smoothing;
+        private int clipBuffer;
+        private boolean validateElements = true;
+        private int extent = 4096;
+        private TileOutputFormat outputFormat = TileOutputFormat.PBF;
+        private ReferencedEnvelope outputEnvelope;
+        private Set<Integer> zoomLevels;
+        private ObjectMapper objectMapper = ObjectMapperUtils.objectMapper();
 
-    public VectorTileConfig setOutputFormat(final TileOutputFormat outputFormat) {
-        this.outputFormat = outputFormat;
-        return this;
-    }
+        private VectorTileConfigBuilder() {}
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("maxElementsPerTile", maxElementsPerTile)
-                .append("outputFormat", outputFormat)
-                .append("simplifyTolerance", simplifyTolerance)
-                .append("clipBuffer", clipBuffer)
-                .append("extent", extent)
-                .append("yAxisDirection", yAxisDirection)
-                .append("zoomLevels", zoomLevels)
-                .append("outputEnvelope", outputEnvelope)
-                .toString();
+        public VectorTileConfigBuilder yAxisDirection(
+                @NotNull final YAxisDirection yAxisDirection) {
+            Objects.requireNonNull(yAxisDirection, "yAxisDirection must be non-null");
+            this.yAxisDirection = yAxisDirection;
+            return this;
+        }
+
+        public VectorTileConfigBuilder tileLevelsDefinition(
+                @NotNull final TileLevelsDefinition tileLevelsDefinition) {
+            Objects.requireNonNull(yAxisDirection, "tileLevelsDefinition must be non-null");
+            this.tileLevelsDefinition = tileLevelsDefinition;
+            return this;
+        }
+
+        public VectorTileConfigBuilder maxElementsPerTile(final Integer maxElementsPerTile) {
+            this.maxElementsPerTile = maxElementsPerTile;
+            return this;
+        }
+
+        /**
+         * All vertices in the simplified geometry will be within this distance of the original
+         * geometry (in output coordinates on of the vector tile, the output coordinates are between
+         * 0 and extent). The tolerance value must be positive.
+         */
+        public VectorTileConfigBuilder simplifyTolerance(@Positive final double simplifyTolerance) {
+            if (simplifyTolerance <= 0) {
+                throw new IllegalArgumentException("simplifyTolerance must be positive");
+            }
+            this.simplifyTolerance = simplifyTolerance;
+            return this;
+        }
+
+        /**
+         * @param smoothing curved-ness parameter (0 is linear, 1 is round, >1 is increasingly
+         *     curved)
+         */
+        public VectorTileConfigBuilder smoothing(final double smoothing) {
+            this.smoothing = smoothing;
+            return this;
+        }
+
+        public VectorTileConfigBuilder clipBuffer(final int clipBuffer) {
+            this.clipBuffer = clipBuffer;
+            return this;
+        }
+
+        public VectorTileConfigBuilder validateElements(final boolean validateElements) {
+            this.validateElements = validateElements;
+            return this;
+        }
+
+        public VectorTileConfigBuilder extent(final int extent) {
+            this.extent = extent;
+            return this;
+        }
+
+        public VectorTileConfigBuilder outputFormat(@NotNull final TileOutputFormat outputFormat) {
+            Objects.requireNonNull(yAxisDirection, "outputFormat must be non-null");
+            this.outputFormat = outputFormat;
+            return this;
+        }
+
+        public VectorTileConfigBuilder outputEnvelope(final ReferencedEnvelope outputEnvelope) {
+            this.outputEnvelope = outputEnvelope;
+            return this;
+        }
+
+        public VectorTileConfigBuilder zoomLevels(final Set<Integer> zoomLevels) {
+            this.zoomLevels = zoomLevels;
+            return this;
+        }
+
+        public VectorTileConfigBuilder zoomLevels(final Collection<Integer> zoomLevels) {
+            this.zoomLevels = Set.copyOf(zoomLevels);
+            return this;
+        }
+
+        public VectorTileConfigBuilder zoomLevels(final Integer... zoomLevels) {
+            this.zoomLevels = Set.of(zoomLevels);
+            return this;
+        }
+
+        public VectorTileConfigBuilder objectMapper(@NotNull final ObjectMapper objectMapper) {
+            Objects.requireNonNull(yAxisDirection, "objectMapper must be non-null");
+            this.objectMapper = objectMapper;
+            return this;
+        }
+
+        public VectorTileConfig build() {
+            return new VectorTileConfig(
+                    yAxisDirection,
+                    tileLevelsDefinition,
+                    maxElementsPerTile,
+                    simplifyTolerance,
+                    smoothing,
+                    clipBuffer,
+                    validateElements,
+                    extent,
+                    outputFormat,
+                    outputEnvelope,
+                    zoomLevels,
+                    objectMapper);
+        }
     }
 }

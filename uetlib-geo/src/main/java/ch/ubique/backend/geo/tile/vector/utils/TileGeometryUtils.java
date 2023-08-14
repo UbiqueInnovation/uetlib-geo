@@ -73,11 +73,11 @@ public class TileGeometryUtils {
             final VectorTileConfig config,
             final boolean withHeight)
             throws TransformException {
-        final var extent = config.getExtent();
+        final var extent = config.extent();
         final var tileArea = new Rectangle(extent, extent);
         final var affineTransform = new AffineTransform();
 
-        if (config.getYAxisDirection() == YAxisDirection.UP) {
+        if (config.yAxisDirection() == YAxisDirection.UP) {
             affineTransform.translate(0, extent);
             affineTransform.scale(1, -1);
         }
