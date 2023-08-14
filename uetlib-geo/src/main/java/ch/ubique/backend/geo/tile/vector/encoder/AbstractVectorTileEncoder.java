@@ -68,7 +68,8 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
 
     protected Optional<Geometry> getTileGeometry(
             @Nullable final VectorTileElement element, @NotNull final ReferencedEnvelope bounds) {
-        return Optional.ofNullable(element.geometry())
+        return Optional.ofNullable(element)
+                .map(VectorTileElement::geometry)
                 .flatMap(validateGeometry("Source"))
                 .map(convertToTileCoordinates(bounds))
                 .flatMap(validateGeometry("Tile"))
