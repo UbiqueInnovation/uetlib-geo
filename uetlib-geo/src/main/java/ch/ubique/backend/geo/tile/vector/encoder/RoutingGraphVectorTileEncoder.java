@@ -46,7 +46,7 @@ public class RoutingGraphVectorTileEncoder implements TileEncoder {
                         .addAllVertices(vertices.stream().map(this::map).toList())
                         .build();
 
-        return new BinaryTile(tile.tileInfo(), config.getOutputFormat(), pbfTile.toByteArray());
+        return new BinaryTile(tile.tileInfo(), config.outputFormat(), pbfTile.toByteArray());
     }
 
     private List<RoutingGraphTile.VertexCoordinate> getAllCoordinates(

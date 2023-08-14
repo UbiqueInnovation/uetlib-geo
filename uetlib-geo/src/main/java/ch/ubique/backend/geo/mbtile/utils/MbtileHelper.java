@@ -27,8 +27,8 @@ public class MbtileHelper {
                 name,
                 version,
                 MbtileFormat.PBF,
-                Collections.min(config.getZoomLevels()),
-                Collections.max(config.getZoomLevels()));
+                Collections.min(config.zoomLevels()),
+                Collections.max(config.zoomLevels()));
     }
 
     public static SQLiteDB getInitializedChDb(

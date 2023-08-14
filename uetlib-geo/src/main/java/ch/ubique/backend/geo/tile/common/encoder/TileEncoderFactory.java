@@ -11,7 +11,7 @@ public final class TileEncoderFactory {
     private TileEncoderFactory() {}
 
     public static TileEncoder getEncoder(final VectorTileConfig config) {
-        final var format = config.getOutputFormat();
+        final var format = config.outputFormat();
         return switch (format) {
             case PBF -> new PbfVectorTileEncoder(config);
             case JSON -> new JsonVectorTileEncoder(config);

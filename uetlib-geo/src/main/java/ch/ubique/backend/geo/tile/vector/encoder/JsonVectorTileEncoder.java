@@ -20,7 +20,7 @@ public class JsonVectorTileEncoder extends AbstractVectorTileEncoder {
 
     public JsonVectorTileEncoder(final VectorTileConfig config) {
         super(config);
-        final var srid = config.getTileLevelsDefinition().origin().srid();
+        final var srid = config.tileLevelsDefinition().origin().srid();
         final var geometryFactory = new GeometryFactory(new PrecisionModel(1), srid);
 
         this.objectMapper =

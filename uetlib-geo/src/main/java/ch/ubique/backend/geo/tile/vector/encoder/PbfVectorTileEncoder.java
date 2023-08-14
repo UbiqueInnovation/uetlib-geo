@@ -17,8 +17,7 @@ public final class PbfVectorTileEncoder extends AbstractVectorTileEncoder {
 
     public PbfVectorTileEncoder(final VectorTileConfig config) {
         super(config);
-        this.encoder =
-                new VectorTileEncoder(config.getExtent(), config.getClipBuffer(), false, false);
+        this.encoder = new VectorTileEncoder(config.extent(), config.clipBuffer(), false, false);
     }
 
     @Override

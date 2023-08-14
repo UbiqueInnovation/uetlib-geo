@@ -6,7 +6,6 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileElementWithMetadata;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElementWithTags;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +19,14 @@ public class VectorTileElementUtils {
 
     private VectorTileElementUtils() {}
 
-    public static Map<String, Object> getFinalTags(final VectorTileElement element, final VectorTileConfig config) {
+    public static Map<String, Object> getFinalTags(
+            final VectorTileElement element, final VectorTileConfig config) {
 
         final var tags = new HashMap<String, Object>();
-        final var objectMapper = config.getObjectMapper();
+        final var objectMapper = config.objectMapper();
 
-        if (element instanceof final VectorTileElementWithTags<?> withTags && withTags.tags() != null) {
+        if (element instanceof final VectorTileElementWithTags<?> withTags
+                && withTags.tags() != null) {
             //noinspection unchecked
             tags.putAll(objectMapper.convertValue(withTags.tags(), Map.class));
         }

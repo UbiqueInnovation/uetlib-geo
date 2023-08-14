@@ -36,9 +36,17 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
 
     protected AbstractVectorTileEncoder(final VectorTileConfig config) {
         this.config = config;
-        final var envelope = new Envelope(0, config.getExtent(), 0, config.getExtent());
-        envelope.expandBy(config.getClipBuffer());
+        final var envelope = new Envelope(0, config.extent(), 0, config.extent());
+        envelope.expandBy(config.clipBuffer());
         tileBoundsPlusClipBuffer = JTS.toGeometry(envelope);
+    }
+
+    private static Function<Geometry, Optional<Geometry>> includeForOutput(
+            @NotNull final VectorTileElement element) {
+        return tileGeometry ->
+                element.includeForOutput(tileGeometry)
+                        ? Optional.of(tileGeometry)
+                        : Optional.empty();
     }
 
     @Override
@@ -48,13 +56,12 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
                     "This encoder can only encode tiles of type " + VectorTile.class);
         }
 
-        if (config.getOutputFormat() == TileOutputFormat.PBF
+        if (config.outputFormat() == TileOutputFormat.PBF
                 && RoutingGraphVectorTileEncoder.isRoutingGraphTile(tile)) {
             return new RoutingGraphVectorTileEncoder(config).encode(vectorTile);
         }
 
-        return new BinaryTile(
-                tile.tileInfo(), config.getOutputFormat(), encodeVectorTile(vectorTile));
+        return new BinaryTile(tile.tileInfo(), config.outputFormat(), encodeVectorTile(vectorTile));
     }
 
     protected abstract byte[] encodeVectorTile(final VectorTile vectorTile);
@@ -102,13 +109,13 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
     }
 
     private Geometry simplifyIfNeeded(@NotNull final Geometry geometry) {
-        return config.getSimplifyTolerance()
+        return Optional.ofNullable(config.simplifyTolerance())
                 .map(tolerance -> SimplifyGeometryUtils.simplify(geometry, tolerance))
                 .orElse(geometry);
     }
 
     private Geometry smoothingIfNeeded(@NotNull final Geometry geometry) {
-        return config.getSmoothing()
+        return Optional.ofNullable(config.smoothing())
                 .map(alpha -> SimplifyGeometryUtils.smooth(geometry, alpha))
                 .orElse(geometry);
     }
@@ -123,13 +130,5 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
 
     public VectorTileConfig getConfig() {
         return config;
-    }
-
-    private static Function<Geometry, Optional<Geometry>> includeForOutput(
-            @NotNull final VectorTileElement element) {
-        return tileGeometry ->
-                element.includeForOutput(tileGeometry)
-                        ? Optional.of(tileGeometry)
-                        : Optional.empty();
     }
 }
