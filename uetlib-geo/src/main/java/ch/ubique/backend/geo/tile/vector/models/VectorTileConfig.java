@@ -123,7 +123,7 @@ public record VectorTileConfig(
          *     curved)
          */
         public VectorTileConfigBuilder smoothing(@PositiveOrZero final double smoothing) {
-            if (simplifyTolerance < 0) {
+            if (smoothing < 0) {
                 throw new IllegalArgumentException("smoothing must be positive or zero");
             }
             this.smoothing = smoothing;
@@ -141,7 +141,8 @@ public record VectorTileConfig(
         }
 
         public VectorTileConfigBuilder extent(@Positive final int extent) {
-            if (simplifyTolerance < 1) {
+            //noinspection ConstantValue
+            if (extent < 1) {
                 throw new IllegalArgumentException("extent must be positive");
             }
             this.extent = extent;
