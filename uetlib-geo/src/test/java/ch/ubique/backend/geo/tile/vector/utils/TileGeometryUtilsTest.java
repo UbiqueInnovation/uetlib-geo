@@ -21,7 +21,7 @@ class TileGeometryUtilsTest {
         final var north = 1200000;
         final var extend = 1000;
         final var tileSize = 100;
-        final var config = VectorTileConfig.lv95().setExtent(extend);
+        final var config = VectorTileConfig.lv95().extent(extend).build();
         final var tileEnvelope = new Envelope(east, east + tileSize, north, north + tileSize);
 
         final var random = new Random();
