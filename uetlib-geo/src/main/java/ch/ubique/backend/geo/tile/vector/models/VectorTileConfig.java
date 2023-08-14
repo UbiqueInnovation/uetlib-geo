@@ -59,22 +59,6 @@ public record VectorTileConfig(
     }
 
     /**
-     * @deprecated since 1.5, use {@link #extent()}
-     */
-    @Deprecated(forRemoval = true, since = "1.5.0")
-    public int getExtent() {
-        return extent;
-    }
-
-    /**
-     * @deprecated since 1.5, use {@link #tileLevelsDefinition()}
-     */
-    @Deprecated(forRemoval = true, since = "1.5.0")
-    public TileLevelsDefinition getTileLevelsDefinition() {
-        return tileLevelsDefinition;
-    }
-
-    /**
      * Returns the maximum allowed elements per tile. This depends on the zoom level, meaning that
      * on the maximum level we never limit the allowed number of elements, so we never miss any
      * elements.
