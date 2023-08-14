@@ -109,15 +109,11 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
     }
 
     private Geometry simplifyIfNeeded(@NotNull final Geometry geometry) {
-        return Optional.ofNullable(config.simplifyTolerance())
-                .map(tolerance -> SimplifyGeometryUtils.simplify(geometry, tolerance))
-                .orElse(geometry);
+        return SimplifyGeometryUtils.simplify(geometry, config.simplifyTolerance());
     }
 
     private Geometry smoothingIfNeeded(@NotNull final Geometry geometry) {
-        return Optional.ofNullable(config.smoothing())
-                .map(alpha -> SimplifyGeometryUtils.smooth(geometry, alpha))
-                .orElse(geometry);
+        return SimplifyGeometryUtils.simplify(geometry, config.simplifyTolerance());
     }
 
     private Geometry clip(final Geometry geometry) {

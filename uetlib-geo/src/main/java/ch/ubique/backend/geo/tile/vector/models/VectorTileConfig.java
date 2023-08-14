@@ -8,8 +8,11 @@ import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import java.util.*;
@@ -18,11 +21,11 @@ public record VectorTileConfig(
         @NotNull YAxisDirection yAxisDirection,
         @NotNull TileLevelsDefinition tileLevelsDefinition,
         Integer maxElementsPerTile,
-        @Positive Double simplifyTolerance,
-        Double smoothing,
+        @PositiveOrZero double simplifyTolerance,
+        @PositiveOrZero double smoothing,
         int clipBuffer,
         boolean validateElements,
-        int extent,
+        @Positive int extent,
         @NotNull TileOutputFormat outputFormat,
         ReferencedEnvelope outputEnvelope,
         @NotNull Set<Integer> zoomLevels,
@@ -89,8 +92,8 @@ public record VectorTileConfig(
         private YAxisDirection yAxisDirection;
         private TileLevelsDefinition tileLevelsDefinition;
         private Integer maxElementsPerTile;
-        private Double simplifyTolerance;
-        private Double smoothing;
+        private double simplifyTolerance;
+        private double smoothing;
         private int clipBuffer;
         private boolean validateElements = true;
         private int extent = 4096;
@@ -125,9 +128,10 @@ public record VectorTileConfig(
          * geometry (in output coordinates on of the vector tile, the output coordinates are between
          * 0 and extent). The tolerance value must be positive.
          */
-        public VectorTileConfigBuilder simplifyTolerance(@Positive final double simplifyTolerance) {
-            if (simplifyTolerance <= 0) {
-                throw new IllegalArgumentException("simplifyTolerance must be positive");
+        public VectorTileConfigBuilder simplifyTolerance(
+                @PositiveOrZero final double simplifyTolerance) {
+            if (simplifyTolerance < 0) {
+                throw new IllegalArgumentException("simplifyTolerance must be positive or zero");
             }
             this.simplifyTolerance = simplifyTolerance;
             return this;
@@ -137,7 +141,10 @@ public record VectorTileConfig(
          * @param smoothing curved-ness parameter (0 is linear, 1 is round, >1 is increasingly
          *     curved)
          */
-        public VectorTileConfigBuilder smoothing(final double smoothing) {
+        public VectorTileConfigBuilder smoothing(@PositiveOrZero final double smoothing) {
+            if (simplifyTolerance < 0) {
+                throw new IllegalArgumentException("smoothing must be positive or zero");
+            }
             this.smoothing = smoothing;
             return this;
         }
@@ -152,7 +159,10 @@ public record VectorTileConfig(
             return this;
         }
 
-        public VectorTileConfigBuilder extent(final int extent) {
+        public VectorTileConfigBuilder extent(@Positive final int extent) {
+            if (simplifyTolerance < 1) {
+                throw new IllegalArgumentException("extent must be positive");
+            }
             this.extent = extent;
             return this;
         }
