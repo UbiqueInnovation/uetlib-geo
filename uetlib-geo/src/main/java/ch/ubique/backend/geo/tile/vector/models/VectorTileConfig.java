@@ -34,13 +34,11 @@ public record VectorTileConfig(
 
     public static VectorTileConfigBuilder lv95() {
         return new VectorTileConfigBuilder()
-                .yAxisDirection(YAxisDirection.DOWN)
                 .tileLevelsDefinition(SwissConstants.swissTileDefinition());
     }
 
     public static VectorTileConfigBuilder webMercator() {
         return new VectorTileConfigBuilder()
-                .yAxisDirection(YAxisDirection.DOWN)
                 .tileLevelsDefinition(WebMercatorTileDefinitions.tileDefinitions());
     }
 
@@ -54,8 +52,7 @@ public record VectorTileConfig(
      */
     @Deprecated(forRemoval = true, since = "1.2.0")
     public static VectorTileConfigBuilder lv95WrongDirection() {
-        return new VectorTileConfigBuilder()
-                .yAxisDirection(YAxisDirection.UP)
+        return new VectorTileConfigBuilder(YAxisDirection.UP)
                 .tileLevelsDefinition(SwissConstants.swissTileDefinition());
     }
 
@@ -74,7 +71,7 @@ public record VectorTileConfig(
     }
 
     public static class VectorTileConfigBuilder {
-        private YAxisDirection yAxisDirection;
+        private YAxisDirection yAxisDirection = YAxisDirection.DOWN;
         private TileLevelsDefinition tileLevelsDefinition;
         private Integer maxElementsPerTile;
         private double simplifyTolerance;
@@ -89,11 +86,9 @@ public record VectorTileConfig(
 
         private VectorTileConfigBuilder() {}
 
-        public VectorTileConfigBuilder yAxisDirection(
-                @NotNull final YAxisDirection yAxisDirection) {
+        private VectorTileConfigBuilder(@NotNull final YAxisDirection yAxisDirection) {
             Objects.requireNonNull(yAxisDirection, "yAxisDirection must be non-null");
             this.yAxisDirection = yAxisDirection;
-            return this;
         }
 
         public VectorTileConfigBuilder tileLevelsDefinition(
