@@ -229,4 +229,12 @@ public class JtsUtil {
         }
         return Math.abs(b.getZ() - a.getZ());
     }
+
+    public static Coordinate minCoordinate(final Envelope envelope) {
+        return new Coordinate(envelope.getMinX(), envelope.getMinY());
+    }
+
+    public static Coordinate maxCoordinate(final Envelope envelope) {
+        return new Coordinate(envelope.getMaxX(), envelope.getMaxY());
+    }
 }

@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.tile.common.constants;
 
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WEB_MERCATOR;
+import static ch.ubique.backend.geo.coordinate.constants.Constants.WEB_MERCATOR;
 
 import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
@@ -29,8 +29,8 @@ public class WebMercatorTileDefinitions {
     @NotNull
     private static ZoomLevel zoomLevel(final int level) {
         final var numTiles = (int) Math.pow(2, level);
-        final var tileWidth = WEB_MERCATOR.coordinateSystemBounds().getWidth() / numTiles;
-        final var tileHeight = WEB_MERCATOR.coordinateSystemBounds().getHeight() / numTiles;
+        final var tileWidth = WEB_MERCATOR.bounds().getWidth() / numTiles;
+        final var tileHeight = WEB_MERCATOR.bounds().getHeight() / numTiles;
         return new ZoomLevel(level, numTiles, numTiles, tileWidth, tileHeight);
     }
 }
