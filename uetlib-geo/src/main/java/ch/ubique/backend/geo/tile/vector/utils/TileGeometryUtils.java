@@ -2,7 +2,7 @@ package ch.ubique.backend.geo.tile.vector.utils;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import ch.ubique.backend.geo.coordinate.constants.Constants;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 
@@ -54,7 +54,7 @@ public class TileGeometryUtils {
 
     private static void ensureCoordinatesAreWellDefined(final Geometry geometry) {
         final var crs = getCrs(geometry);
-        final var coordinateSystemBounds = JtsConverter.forCrs(crs).coordinateSystemBounds();
+        final var coordinateSystemBounds = Constants.coordinateSystemForCrs(crs).bounds();
         Arrays.stream(geometry.getCoordinates())
                 .forEach(
                         coordinate -> {
