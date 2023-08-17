@@ -2,8 +2,8 @@ package ch.ubique.backend.geo.coordinate.util;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 
-import ch.ubique.backend.geo.coordinate.constants.Constants;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.models.*;
 
 import jakarta.validation.constraints.NotNull;
@@ -27,12 +27,15 @@ import java.util.stream.Stream;
 
 public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coordinate> {
 
-    public static final JtsConverter<WGS84Coordinate> WGS84 = new JtsConverter<>(Constants.WGS84);
+    public static final JtsConverter<WGS84Coordinate> WGS84 =
+            new JtsConverter<>(CoordinateSystems.WGS84);
 
-    public static final JtsConverter<LV95Coordinate> LV95 = new JtsConverter<>(Constants.LV95);
-    public static final JtsConverter<LV03Coordinate> LV03 = new JtsConverter<>(Constants.LV03);
+    public static final JtsConverter<LV95Coordinate> LV95 =
+            new JtsConverter<>(CoordinateSystems.LV95);
+    public static final JtsConverter<LV03Coordinate> LV03 =
+            new JtsConverter<>(CoordinateSystems.LV03);
     public static final JtsConverter<WebMercatorCoordinate> WEB_MERCATOR =
-            new JtsConverter<>(Constants.WEB_MERCATOR);
+            new JtsConverter<>(CoordinateSystems.WEB_MERCATOR);
 
     private final CoordinateSystem<C> coordinateSystem;
 
