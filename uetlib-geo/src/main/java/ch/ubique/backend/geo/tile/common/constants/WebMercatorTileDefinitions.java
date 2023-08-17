@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.tile.common.constants;
 
-import static ch.ubique.backend.geo.coordinate.constants.Constants.WEB_MERCATOR;
+import static ch.ubique.backend.geo.coordinate.constants.CoordinateSystems.WEB_MERCATOR;
 
 import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
