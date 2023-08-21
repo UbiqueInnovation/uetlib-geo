@@ -16,18 +16,25 @@ public final class BoundingBoxUtil {
     public static <C extends Coordinate> Optional<BoundingBox<C>> findBoundingBox(
             final Stream<C> coordinateStream) {
 
+        // This collects an arbitrary coordinate
+        final var anyCoordinateCollector = Collectors.reducing(null, (C ignored, C c) -> c);
+
+        // This collects:
+        // - the min and max value for the x dimension
+        // - the min and max value for the y dimension
         final var minMaxPerDimensionCollector =
                 Collectors.teeing(
                         Collectors.mapping((C c) -> c.toJts().x, MinMaxCollector.collectOptional()),
                         Collectors.mapping((C c) -> c.toJts().y, MinMaxCollector.collectOptional()),
                         Pair::of);
 
-        final var anyCoordinateCollector = Collectors.reducing(null, (C ignored, C c) -> c);
+        // This combines the two collectors defined above. I.e. we get a collector that returns both
+        // an arbitrary coordinate and the min/max for the two dimension
+        final var compositeCollector =
+                Collectors.teeing(anyCoordinateCollector, minMaxPerDimensionCollector, Pair::of);
 
-        final var anyCoordinateAndMinMax =
-                coordinateStream.collect(
-                        Collectors.teeing(
-                                anyCoordinateCollector, minMaxPerDimensionCollector, Pair::of));
+        // Go over the stream and apply the composite collector defined above
+        final var anyCoordinateAndMinMax = coordinateStream.collect(compositeCollector);
 
         final var anyCoordinate = anyCoordinateAndMinMax.getKey();
         final var minMax = anyCoordinateAndMinMax.getValue();
