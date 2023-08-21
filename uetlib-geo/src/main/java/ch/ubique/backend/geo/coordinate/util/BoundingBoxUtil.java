@@ -52,34 +52,34 @@ public final class BoundingBoxUtil {
 
     private static <C extends Coordinate> Optional<BoundingBox<C>> findBoundingBox(
             final Stream<C> coordinateStream,
-            final Function<C, Double> firstOordinate,
-            final Function<C, Double> secondOordinate,
+            final Function<C, Double> firstOrdinate,
+            final Function<C, Double> secondOrdinate,
             final BiFunction<Double, Double, C> coordinateConstructor) {
         final var oordinates =
                 coordinateStream.collect(
                         Collectors.teeing(
-                                Collectors.mapping(firstOordinate, Collectors.toList()),
-                                Collectors.mapping(secondOordinate, Collectors.toList()),
+                                Collectors.mapping(firstOrdinate, Collectors.toList()),
+                                Collectors.mapping(secondOrdinate, Collectors.toList()),
                                 Pair::of));
 
-        final var firstOordinates = oordinates.getLeft();
-        final var secondOordinates = oordinates.getRight();
+        final var firstOrdinates = oordinates.getLeft();
+        final var secondOrdinates = oordinates.getRight();
 
-        if (firstOordinates.isEmpty()) {
+        if (firstOrdinates.isEmpty()) {
             return Optional.empty();
         }
 
-        final var minFirstOordinate =
-                firstOordinates.stream().mapToDouble(d -> d).min().orElseThrow();
-        final var maxFirstOordinate =
-                firstOordinates.stream().mapToDouble(d -> d).max().orElseThrow();
-        final var minSecondOordinate =
-                secondOordinates.stream().mapToDouble(d -> d).min().orElseThrow();
-        final var maxSecondOordinate =
-                secondOordinates.stream().mapToDouble(d -> d).max().orElseThrow();
+        final var minFirstOrdinate =
+                firstOrdinates.stream().mapToDouble(d -> d).min().orElseThrow();
+        final var maxFirstOrdinate =
+                firstOrdinates.stream().mapToDouble(d -> d).max().orElseThrow();
+        final var minSecondOrdinate =
+                secondOrdinates.stream().mapToDouble(d -> d).min().orElseThrow();
+        final var maxSecondOrdinate =
+                secondOrdinates.stream().mapToDouble(d -> d).max().orElseThrow();
 
-        final var min = coordinateConstructor.apply(minFirstOordinate, minSecondOordinate);
-        final var max = coordinateConstructor.apply(maxFirstOordinate, maxSecondOordinate);
+        final var min = coordinateConstructor.apply(minFirstOrdinate, minSecondOrdinate);
+        final var max = coordinateConstructor.apply(maxFirstOrdinate, maxSecondOrdinate);
         return Optional.of(new BoundingBox<>(min, max));
     }
 }
