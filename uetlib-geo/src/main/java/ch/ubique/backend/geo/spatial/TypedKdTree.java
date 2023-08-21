@@ -7,7 +7,6 @@ import org.locationtech.jts.index.kdtree.KdNodeVisitor;
 import org.locationtech.jts.index.kdtree.KdTree;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Function;
 
 public class TypedKdTree<T> {

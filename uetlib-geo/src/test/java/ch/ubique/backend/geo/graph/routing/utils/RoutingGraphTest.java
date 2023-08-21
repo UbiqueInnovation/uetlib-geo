@@ -44,90 +44,6 @@ class RoutingGraphTest {
     private static final ObjectMapper objectMapper =
             JsonMapper.builder().addModule(new JtsModule(geometryFactory)).build();
 
-    @Test
-    void testMountainTunnel() throws IOException {
-        final var graphs = createGraphsFromGeoJson("mountain_tunnel.geojson");
-
-        checkRoutingGraphsValid(graphs);
-        assertEquals(4, graphs.routingGraph().getVertices().size());
-        assertEquals(4, graphs.routingGraph().getDirectedEdges().size());
-        assertEquals(2, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
-        assertEquals(2, ConnectedComponents.computeComponents(graphs.routingGraph()).size());
-    }
-
-    @Test
-    void testMountainTunnelLargerArea() throws IOException {
-        final var graphs = createGraphsFromGeoJson("mountain_tunnel_larger_area.geojson");
-
-        checkRoutingGraphsValid(graphs);
-        assertEquals(39, graphs.routingGraph().getVertices().size());
-        assertEquals(86, graphs.routingGraph().getDirectedEdges().size());
-        assertEquals(1, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
-        assertEquals(1, ConnectedComponents.computeComponents(graphs.routingGraph()).size());
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"furka", "alp_la_schera", "large_example"})
-    void testFurka(final String test) throws IOException {
-        final var graphs = createGraphsFromGeoJson(test + ".geojson");
-        checkRoutingGraphsValid(graphs);
-    }
-
-    @Test
-    @Disabled("Uses > 40GB of memory")
-    void testSwitzerland() throws IOException {
-
-        final var url =
-                "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.gpkg.zip";
-
-        try (final var inputStream = new ZipArchiveInputStream(new URL(url).openStream())) {
-            inputStream.getNextEntry();
-
-            final var paths = SwisstopoTlmParser.parsePaths(inputStream);
-
-            final var graphs =
-                    TlmToGraphUtil.buildGraph(paths, (from, to, context) -> weight(from, to));
-
-            checkRoutingGraphsValid(graphs);
-        }
-    }
-
-    @Test
-    @Disabled(
-            "Not an actual test. This is just a helper for creating extracts to use in other tests.")
-    void extractTlmRegionToGeoJson() throws IOException {
-        final var url =
-                "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.xtf.zip";
-
-        try (final var inputStream =
-                zipStreamForEntry(new URL(url).openStream(), "TLM_STRASSEN.xtf")) {
-
-            final var excludedTypes =
-                    Set.of(
-                            WegType.AUSFAHRT,
-                            WegType.EINFAHRT,
-                            WegType.FAEHRE,
-                            WegType.AUTOBAHN,
-                            WegType.AUTOSTRASSE,
-                            WegType.AUTOZUG);
-
-            final var bounds =
-                    new Envelope(
-                            new LV95Coordinate(2_809_230, 1_170_855).toJts(),
-                            new LV95Coordinate(2_812_120, 1_167_265).toJts());
-
-            final var selectedPaths =
-                    SwisstopoTlmParser.parsePaths(inputStream).stream()
-                            .filter(path -> !excludedTypes.contains(path.info().type()))
-                            .map(TlmPath::line)
-                            .filter(geometry -> bounds.intersects(geometry.getEnvelopeInternal()))
-                            .toList();
-
-            RoutingGraphTestUtils.dumpAsGeoJson(selectedPaths);
-        }
-        fail("Please disable this test, it's just a helper to generated geojson extracts.");
-    }
-
     private static FeatureCollection readFile(final String path) throws IOException {
 
         try (final var inputStream = new ClassPathResource(path).getInputStream()) {
@@ -200,5 +116,90 @@ class RoutingGraphTest {
                                 .toList(),
                         LinesToGraphConfig.defaults())
                 .buildGraph();
+    }
+
+    @Test
+    void testMountainTunnel() throws IOException {
+        final var graphs = createGraphsFromGeoJson("mountain_tunnel.geojson");
+
+        checkRoutingGraphsValid(graphs);
+        assertEquals(4, graphs.routingGraph().getVertices().size());
+        assertEquals(4, graphs.routingGraph().getDirectedEdges().size());
+        assertEquals(2, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
+        assertEquals(2, ConnectedComponents.computeComponents(graphs.routingGraph()).size());
+    }
+
+    @Test
+    void testMountainTunnelLargerArea() throws IOException {
+        final var graphs = createGraphsFromGeoJson("mountain_tunnel_larger_area.geojson");
+
+        checkRoutingGraphsValid(graphs);
+        assertEquals(39, graphs.routingGraph().getVertices().size());
+        assertEquals(86, graphs.routingGraph().getDirectedEdges().size());
+        assertEquals(1, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
+        assertEquals(1, ConnectedComponents.computeComponents(graphs.routingGraph()).size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"furka", "alp_la_schera", "large_example"})
+    void testFurka(final String test) throws IOException {
+        final var graphs = createGraphsFromGeoJson(test + ".geojson");
+        checkRoutingGraphsValid(graphs);
+    }
+
+    @Test
+    @Disabled("Uses > 40GB of memory")
+    void testSwitzerland() throws IOException {
+
+        final var url =
+                "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.gpkg.zip";
+
+        try (final var inputStream = new ZipArchiveInputStream(new URL(url).openStream())) {
+            inputStream.getNextEntry();
+
+            final var paths = SwisstopoTlmParser.parsePaths(inputStream);
+
+            final var graphs =
+                    TlmToGraphUtil.buildGraph(paths, (from, to, context) -> weight(from, to));
+
+            checkRoutingGraphsValid(graphs);
+        }
+    }
+
+    @Test
+    @Disabled(
+            "Not an actual test. This is just a helper for creating extracts to use in other"
+                + " tests.")
+    void extractTlmRegionToGeoJson() throws IOException {
+        final var url =
+                "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.xtf.zip";
+
+        try (final var inputStream =
+                zipStreamForEntry(new URL(url).openStream(), "TLM_STRASSEN.xtf")) {
+
+            final var excludedTypes =
+                    Set.of(
+                            WegType.AUSFAHRT,
+                            WegType.EINFAHRT,
+                            WegType.FAEHRE,
+                            WegType.AUTOBAHN,
+                            WegType.AUTOSTRASSE,
+                            WegType.AUTOZUG);
+
+            final var bounds =
+                    new Envelope(
+                            new LV95Coordinate(2_809_230, 1_170_855).toJts(),
+                            new LV95Coordinate(2_812_120, 1_167_265).toJts());
+
+            final var selectedPaths =
+                    SwisstopoTlmParser.parsePaths(inputStream).stream()
+                            .filter(path -> !excludedTypes.contains(path.info().type()))
+                            .map(TlmPath::line)
+                            .filter(geometry -> bounds.intersects(geometry.getEnvelopeInternal()))
+                            .toList();
+
+            RoutingGraphTestUtils.dumpAsGeoJson(selectedPaths);
+        }
+        fail("Please disable this test, it's just a helper to generated geojson extracts.");
     }
 }
