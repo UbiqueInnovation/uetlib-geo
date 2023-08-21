@@ -23,7 +23,6 @@ import org.opengis.referencing.operation.TransformException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coordinate> {
 
@@ -37,6 +36,9 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     public static final JtsConverter<WebMercatorCoordinate> WEB_MERCATOR =
             new JtsConverter<>(CoordinateSystems.WEB_MERCATOR);
 
+    private static final Collection<JtsConverter<?>> ALL_CONVERTERS =
+            Set.of(LV95, LV03, WGS84, WEB_MERCATOR);
+
     private final CoordinateSystem<C> coordinateSystem;
 
     public JtsConverter(final CoordinateSystem<C> coordinateSystem) {
@@ -45,10 +47,26 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
 
     @SuppressWarnings("java:S1452") // No way of knowing the generic type here
     public static JtsConverter<?> forCrs(final CoordinateReferenceSystem crs) {
-        return Stream.of(LV95, LV03, WGS84, WEB_MERCATOR)
+        return ALL_CONVERTERS.stream()
                 .filter(jtsConverter -> jtsConverter.coordinateSystem.crs().equals(crs))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    public static <C extends ch.ubique.backend.geo.coordinate.models.Coordinate>
+            JtsConverter<C> forClass(final Class<C> cls) {
+        //noinspection unchecked
+        return (JtsConverter<C>)
+                ALL_CONVERTERS.stream()
+                        .filter(c -> c.coordinateSystem.coordinateClass().equals(cls))
+                        .findFirst()
+                        .orElseThrow();
+    }
+
+    public static <C extends ch.ubique.backend.geo.coordinate.models.Coordinate>
+            JtsConverter<C> forInstance(final C instance) {
+        //noinspection unchecked
+        return forClass((Class<C>) instance.getClass());
     }
 
     /**

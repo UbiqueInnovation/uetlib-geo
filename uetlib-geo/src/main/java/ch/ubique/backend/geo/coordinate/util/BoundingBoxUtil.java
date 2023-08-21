@@ -36,8 +36,7 @@ public final class BoundingBoxUtil {
             return Optional.empty();
         }
 
-        //noinspection unchecked
-        final var jtsConverter = (JtsConverter<C>) JtsConverter.forCrs(anyCoordinate.crs());
+        final var jtsConverter = JtsConverter.forInstance(anyCoordinate);
 
         final var minMaxX = minMax.getLeft().orElseThrow();
         final var minMaxY = minMax.getRight().orElseThrow();

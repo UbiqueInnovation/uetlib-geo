@@ -21,6 +21,7 @@ public final class CoordinateSystem<C extends Coordinate> {
     private final Function<org.locationtech.jts.geom.Coordinate, C> fromJtsMapper;
 
     // Derived fields
+    private final Class<C> coordinateClass;
     private final org.locationtech.jts.geom.Coordinate minJtsCoordinate;
     private final org.locationtech.jts.geom.Coordinate maxJtsCoordinate;
     private final ReferencedEnvelope bounds;
@@ -38,6 +39,8 @@ public final class CoordinateSystem<C extends Coordinate> {
         this.maxCoordinate = maxCoordinate;
         this.toJtsMapper = toJtsMapper;
         this.fromJtsMapper = fromJtsMapper;
+        //noinspection unchecked
+        this.coordinateClass = (Class<C>) minCoordinate.getClass();
         this.geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
         this.crs = getCrs(srid);
         this.minJtsCoordinate = toJtsMapper.apply(minCoordinate);
@@ -83,5 +86,9 @@ public final class CoordinateSystem<C extends Coordinate> {
 
     public ReferencedEnvelope bounds() {
         return bounds;
+    }
+
+    public Class<C> coordinateClass() {
+        return coordinateClass;
     }
 }
