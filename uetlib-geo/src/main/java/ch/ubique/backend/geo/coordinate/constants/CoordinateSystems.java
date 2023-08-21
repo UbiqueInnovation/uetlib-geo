@@ -29,6 +29,7 @@ public class CoordinateSystems {
                     c -> new WGS84Coordinate(c.y, c.x, nullIfNaN(c.getZ())),
                     new WGS84Coordinate(-90, -180),
                     new WGS84Coordinate(90, 180));
+
     /**
      * bounds equal to the min/max available coordinates with tiles on <a
      * href="https://map.geo.admin.ch/">map.geo.admin.ch</a>
@@ -44,6 +45,7 @@ public class CoordinateSystems {
                     c -> new LV95Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new LV95Coordinate(2_420_000.0, 1_000_000.0),
                     new LV95Coordinate(2_900_000.0, 1_350_000.0));
+
     /**
      * bounds equal to the min/max available coordinates with tiles on <a
      * href="https://map.geo.admin.ch/">map.geo.admin.ch</a>
@@ -59,6 +61,7 @@ public class CoordinateSystems {
                     c -> new LV03Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new LV03Coordinate(420_000.0, 0.0),
                     new LV03Coordinate(900_000.0, 350_000.0));
+
     // See https://schemas.opengis.net/wmts/1.0/profiles/wmts-simple/wmtsTileMatrixSet.json
     private static final double WEB_MERCATOR_MAX_EXTENT = 20_037_508.3427892;
     public static final CoordinateSystem<WebMercatorCoordinate> WEB_MERCATOR =

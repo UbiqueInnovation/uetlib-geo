@@ -9,8 +9,6 @@ import ch.ubique.backend.job.model.JobRunState;
 
 import jakarta.validation.constraints.NotNull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Collection;

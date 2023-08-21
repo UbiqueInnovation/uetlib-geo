@@ -12,7 +12,8 @@ public class InterpolationUtils {
     }
 
     /**
-     * Bilinear interpolation of parameters u and v inside the bounding box {@code u0v0} to {@code u1v1}.
+     * Bilinear interpolation of parameters u and v inside the bounding box {@code u0v0} to {@code
+     * u1v1}.
      *
      * @return the interpolated value
      */
