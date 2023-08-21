@@ -22,12 +22,12 @@ public final class BoundingBoxUtil {
                         Collectors.mapping((C c) -> c.toJts().y, MinMaxCollector.collectOptional()),
                         Pair::of);
 
+        final var anyCoordinateCollector = Collectors.reducing(null, (C ignored, C c) -> c);
+
         final var anyCoordinateAndMinMax =
                 coordinateStream.collect(
                         Collectors.teeing(
-                                Collectors.reducing(null, (ignored, c) -> c),
-                                minMaxPerDimensionCollector,
-                                Pair::of));
+                                anyCoordinateCollector, minMaxPerDimensionCollector, Pair::of));
 
         final var anyCoordinate = anyCoordinateAndMinMax.getKey();
         final var minMax = anyCoordinateAndMinMax.getValue();
