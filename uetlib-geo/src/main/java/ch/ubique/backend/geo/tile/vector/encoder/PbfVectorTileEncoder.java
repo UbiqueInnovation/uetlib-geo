@@ -25,7 +25,8 @@ public final class PbfVectorTileEncoder extends AbstractVectorTileEncoder {
         for (final var element : tile.elements()) {
             final var geometry = getTileGeometry(element, tile.tileInfo().envelope());
             if (geometry.isEmpty()) {
-                logger.warn("Skipping {}, since no tile geometry could be created", element);
+                logger.atLevel(getConfig().emptyGeometryLogLevel())
+                        .log("Skipping {}, since no tile geometry could be created", element);
             } else {
                 final var tags = VectorTileElementUtils.getFinalTags(element, getConfig());
                 encoder.addFeature(element.layer(), tags, geometry.get(), element.id());
