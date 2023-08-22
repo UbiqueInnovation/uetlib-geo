@@ -1,9 +1,10 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV03;
-
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
+
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -89,27 +90,27 @@ public final class LV03Coordinate implements Coordinate {
 
     @Override
     public int srid() {
-        return LV03.srid();
+        return CoordinateSystems.LV03.srid();
     }
 
     @Override
     public CoordinateReferenceSystem crs() {
-        return LV03.crs();
+        return CoordinateSystems.LV03.crs();
     }
 
     @Override
     public org.locationtech.jts.geom.Coordinate toJts() {
-        return LV03.toJts(this);
+        return JtsConverter.LV03.toJts(this);
     }
 
     @Override
     public Point toJtsPoint() {
-        return LV03.toJtsPoint(this);
+        return JtsConverter.LV03.toJtsPoint(this);
     }
 
     @Override
     public double distanceTo(final Coordinate other) {
-        if (other instanceof LV03Coordinate otherLv03) {
+        if (other instanceof final LV03Coordinate otherLv03) {
             if (elevation == null || otherLv03.elevation == null) {
                 return flatDistanceTo(otherLv03);
             }
@@ -124,7 +125,7 @@ public final class LV03Coordinate implements Coordinate {
 
     @Override
     public double flatDistanceTo(final Coordinate other) {
-        if (other instanceof LV03Coordinate otherLv03) {
+        if (other instanceof final LV03Coordinate otherLv03) {
             return sqrt(pow(east - otherLv03.east, 2) + pow(north - otherLv03.north, 2));
         }
         throw new IllegalArgumentException(
@@ -140,13 +141,21 @@ public final class LV03Coordinate implements Coordinate {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         final LV03Coordinate that = (LV03Coordinate) o;
 
-        if (Math.abs(that.east - east) > EPSILON) return false;
-        if (Math.abs(that.north - north) > EPSILON) return false;
+        if (Math.abs(that.east - east) > EPSILON) {
+            return false;
+        }
+        if (Math.abs(that.north - north) > EPSILON) {
+            return false;
+        }
         return Objects.equals(elevation, that.elevation);
     }
 

@@ -1,7 +1,7 @@
 package ch.ubique.backend.geo.jackson;
 
 import ch.ubique.backend.core.jackson.ObjectMapperUtils;
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -28,18 +28,18 @@ public final class ObjectMapperJtsUtils {
     }
 
     public static ObjectMapper objectMapperLv95() {
-        return objectMapperWithJts(JtsConverter.LV95.geometryFactory());
+        return objectMapperWithJts(CoordinateSystems.LV95.geometryFactory());
     }
 
     public static ObjectMapper objectMapperLv03() {
-        return objectMapperWithJts(JtsConverter.LV03.geometryFactory());
+        return objectMapperWithJts(CoordinateSystems.LV03.geometryFactory());
     }
 
     public static ObjectMapper objectMapperWgs84() {
-        return objectMapperWithJts(JtsConverter.WGS84.geometryFactory());
+        return objectMapperWithJts(CoordinateSystems.WGS84.geometryFactory());
     }
 
     public static ObjectMapper objectMapperWebMercator() {
-        return objectMapperWithJts(JtsConverter.WEB_MERCATOR.geometryFactory());
+        return objectMapperWithJts(CoordinateSystems.WEB_MERCATOR.geometryFactory());
     }
 }
