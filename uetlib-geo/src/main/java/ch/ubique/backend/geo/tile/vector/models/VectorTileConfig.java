@@ -15,6 +15,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.slf4j.event.Level;
 
 import java.util.*;
 
@@ -26,6 +27,7 @@ public record VectorTileConfig(
         @PositiveOrZero double smoothing,
         int clipBuffer,
         boolean validateElements,
+        @NotNull Level emptyGeometryLogLevel,
         @Positive int extent,
         @NotNull TileOutputFormat outputFormat,
         @Nullable ReferencedEnvelope outputEnvelope,
@@ -83,6 +85,7 @@ public record VectorTileConfig(
         private ReferencedEnvelope outputEnvelope;
         private Set<Integer> zoomLevels;
         private ObjectMapper objectMapper = ObjectMapperUtils.objectMapper();
+        private Level emptyGeometryLogLevel = Level.WARN;
 
         private VectorTileConfigBuilder() {}
 
@@ -182,6 +185,11 @@ public record VectorTileConfig(
             return this;
         }
 
+        public VectorTileConfigBuilder emptyGeometryLogLevel(@NotNull final Level level) {
+            this.emptyGeometryLogLevel = Objects.requireNonNull(level, "level must not be null");
+            return this;
+        }
+
         public VectorTileConfig build() {
             return new VectorTileConfig(
                     yAxisDirection,
@@ -191,6 +199,7 @@ public record VectorTileConfig(
                     smoothing,
                     clipBuffer,
                     validateElements,
+                    emptyGeometryLogLevel,
                     extent,
                     outputFormat,
                     outputEnvelope,

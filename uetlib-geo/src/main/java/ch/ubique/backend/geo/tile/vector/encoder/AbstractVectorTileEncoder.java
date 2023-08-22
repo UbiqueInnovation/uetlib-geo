@@ -93,7 +93,8 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
                 logger.debug("{} geometry is not valid, trying to fix now", context);
                 final var validGeometry = JtsUtil.tryToGetValidGeometry(geometry);
                 if (validGeometry.isEmpty()) {
-                    logger.warn("{} geometry is empty.", context);
+                    logger.atLevel(config.emptyGeometryLogLevel())
+                            .log("{} geometry is empty.", context);
                     return Optional.empty();
                 }
                 return Optional.of(validGeometry);
