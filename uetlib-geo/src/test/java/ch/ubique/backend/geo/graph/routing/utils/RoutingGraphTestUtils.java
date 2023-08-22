@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.geojson.models.jts.Feature;
 import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 import ch.ubique.backend.geo.graph.models.Edge;
@@ -29,7 +29,7 @@ public class RoutingGraphTestUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(RoutingGraphTestUtils.class);
 
-    private static final GeometryFactory geometryFactory = JtsConverter.LV95.geometryFactory();
+    private static final GeometryFactory geometryFactory = CoordinateSystems.LV95.geometryFactory();
     private static final ObjectMapper objectMapper =
             JsonMapper.builder().addModule(new JtsModule(geometryFactory)).build();
 

@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.coordinate.util.distance;
 
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.geometry.jts.JTS;
@@ -22,7 +22,7 @@ public class GenericDistanceCalculator implements DistanceCalculator {
     public GenericDistanceCalculator(final CoordinateReferenceSystem crs) {
         this.geodeticCalculator = new GeodeticCalculator(crs);
         try {
-            this.geographicTransform = CRS.findMathTransform(crs, JtsConverter.WGS84.crs());
+            this.geographicTransform = CRS.findMathTransform(crs, CoordinateSystems.WGS84.crs());
         } catch (final FactoryException e) {
             throw new WrappedException(
                     e); // rethrow as runtime exception. no way for caller to handle this

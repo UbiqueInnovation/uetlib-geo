@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WEB_MERCATOR;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -51,22 +52,22 @@ public final class WebMercatorCoordinate implements Coordinate {
 
     @Override
     public int srid() {
-        return WEB_MERCATOR.srid();
+        return CoordinateSystems.WEB_MERCATOR.srid();
     }
 
     @Override
     public CoordinateReferenceSystem crs() {
-        return WEB_MERCATOR.crs();
+        return CoordinateSystems.WEB_MERCATOR.crs();
     }
 
     @Override
     public org.locationtech.jts.geom.Coordinate toJts() {
-        return WEB_MERCATOR.toJts(this);
+        return JtsConverter.WEB_MERCATOR.toJts(this);
     }
 
     @Override
     public Point toJtsPoint() {
-        return WEB_MERCATOR.toJtsPoint(this);
+        return JtsConverter.WEB_MERCATOR.toJtsPoint(this);
     }
 
     @Override

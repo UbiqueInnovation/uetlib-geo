@@ -1,12 +1,13 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.WGS84;
-
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.toRadians;
+
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -106,22 +107,22 @@ public final class WGS84Coordinate implements Coordinate {
 
     @Override
     public int srid() {
-        return WGS84.srid();
+        return CoordinateSystems.WGS84.srid();
     }
 
     @Override
     public CoordinateReferenceSystem crs() {
-        return WGS84.crs();
+        return CoordinateSystems.WGS84.crs();
     }
 
     @Override
     public org.locationtech.jts.geom.Coordinate toJts() {
-        return WGS84.toJts(this);
+        return JtsConverter.WGS84.toJts(this);
     }
 
     @Override
     public Point toJtsPoint() {
-        return WGS84.toJtsPoint(this);
+        return JtsConverter.WGS84.toJtsPoint(this);
     }
 
     @Override

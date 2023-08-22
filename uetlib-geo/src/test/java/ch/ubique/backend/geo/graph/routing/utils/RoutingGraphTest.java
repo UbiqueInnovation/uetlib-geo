@@ -5,8 +5,8 @@ import static ch.ubique.backend.core.utils.InputStreamUtils.zipStreamForEntry;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ch.ubique.backend.core.utils.DurationUtils;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 import ch.ubique.backend.geo.graph.algorithms.ConnectedComponents;
 import ch.ubique.backend.geo.graph.models.Edge;
@@ -40,7 +40,7 @@ import java.util.Set;
 
 class RoutingGraphTest {
 
-    private static final GeometryFactory geometryFactory = JtsConverter.LV95.geometryFactory();
+    private static final GeometryFactory geometryFactory = CoordinateSystems.LV95.geometryFactory();
     private static final ObjectMapper objectMapper =
             JsonMapper.builder().addModule(new JtsModule(geometryFactory)).build();
 
@@ -169,7 +169,7 @@ class RoutingGraphTest {
     @Test
     @Disabled(
             "Not an actual test. This is just a helper for creating extracts to use in other"
-                + " tests.")
+                    + " tests.")
     void extractTlmRegionToGeoJson() throws IOException {
         final var url =
                 "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.xtf.zip";

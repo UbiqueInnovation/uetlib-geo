@@ -5,7 +5,7 @@ import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.constants.WebMercatorTileDefinitions;
 
@@ -154,7 +154,7 @@ final class TileLevelsDefinitionTest {
     void testOutputBoundingBoxLV95Bounds() throws FactoryException, TransformException {
         final var chEnvelope = SwissConstants.swissTileDefinition().tileInfo(0, 0, 9).envelope();
         final var webMercatorChEnvelope =
-                chEnvelope.transform(JtsConverter.WEB_MERCATOR.crs(), false);
+                chEnvelope.transform(CoordinateSystems.WEB_MERCATOR.crs(), false);
 
         // Test from zoom level 0 (one tile for entire world) to 13 (size of Oerlikon)
         for (final var level : IntStream.rangeClosed(0, 13).toArray()) {

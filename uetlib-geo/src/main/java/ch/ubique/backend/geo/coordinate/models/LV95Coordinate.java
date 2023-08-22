@@ -1,9 +1,10 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV95;
-
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
+
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -89,22 +90,22 @@ public final class LV95Coordinate implements Coordinate {
 
     @Override
     public int srid() {
-        return LV95.srid();
+        return CoordinateSystems.LV95.srid();
     }
 
     @Override
     public CoordinateReferenceSystem crs() {
-        return LV95.crs();
+        return CoordinateSystems.LV95.crs();
     }
 
     @Override
     public org.locationtech.jts.geom.Coordinate toJts() {
-        return LV95.toJts(this);
+        return JtsConverter.LV95.toJts(this);
     }
 
     @Override
     public Point toJtsPoint() {
-        return LV95.toJtsPoint(this);
+        return JtsConverter.LV95.toJtsPoint(this);
     }
 
     @Override
