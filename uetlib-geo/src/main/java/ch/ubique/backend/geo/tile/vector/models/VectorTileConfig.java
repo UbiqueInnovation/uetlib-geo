@@ -186,7 +186,8 @@ public record VectorTileConfig(
         }
 
         public VectorTileConfigBuilder emptyGeometryLogLevel(@NotNull final Level level) {
-            this.emptyGeometryLogLevel = Objects.requireNonNull(level, "level must not be null");
+            this.emptyGeometryLogLevel =
+                    Objects.requireNonNull(level, "emptyGeometryLogLevel must not be null");
             return this;
         }
 
