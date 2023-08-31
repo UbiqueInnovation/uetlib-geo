@@ -65,6 +65,14 @@ public class GenericFeature<P, T extends GenericFeature<P, T>> {
         return (T) this;
     }
 
+    public T withNewGeometry(final Geometry newGeometry) {
+        return new GenericFeature<P, T>()
+                .setId(getId())
+                .setType(getType())
+                .setProperties(getProperties())
+                .setGeometry(newGeometry);
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)

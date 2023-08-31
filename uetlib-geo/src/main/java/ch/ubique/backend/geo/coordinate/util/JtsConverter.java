@@ -5,6 +5,8 @@ import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.models.*;
+import ch.ubique.backend.geo.geojson.models.jts.GenericFeature;
+import ch.ubique.backend.geo.geojson.models.jts.GenericFeatureCollection;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -210,9 +212,23 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
 
             return baseTransform;
         } catch (final FactoryException e) {
-            throw new WrappedException(
-                    e); // rethrow as runtime exception. no way for caller to handle this
+            // rethrow as runtime exception. no way for caller to handle this
+            throw new WrappedException(e);
         }
+    }
+
+    /** Transforms the given feature into the current spatial reference system. */
+    public <F extends GenericFeature<P, F>, P> F transform(final F feature) {
+        final var transformedGeometry = transform(feature.getGeometry());
+        return feature.withNewGeometry(transformedGeometry);
+    }
+
+    /** Transforms the given featureCollection into the current spatial reference system. */
+    public <T extends GenericFeatureCollection<F, P, T>, F extends GenericFeature<P, F>, P>
+            T transform(final T featureCollection) {
+        final var transformedFeatures =
+                featureCollection.getFeatures().stream().map(this::transform).toList();
+        return featureCollection.withNewFeatures(transformedFeatures);
     }
 
     /** Transforms the given geometry into the current spatial reference system. */
@@ -264,8 +280,8 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
             final var withHeight = !Double.isNaN(coordinate.getZ());
             return JTS.transform(coordinate, null, findMathTransform(sourceCRS, withHeight));
         } catch (final TransformException e) {
-            throw new WrappedException(
-                    e); // rethrow as runtime exception. no way for caller to handle this
+            // rethrow as runtime exception. no way for caller to handle this
+            throw new WrappedException(e);
         }
     }
 
