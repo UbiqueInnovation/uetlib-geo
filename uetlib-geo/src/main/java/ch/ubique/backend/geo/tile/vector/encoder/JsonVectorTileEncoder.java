@@ -5,9 +5,6 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pivovarit.function.exception.WrappedException;
 
 import org.locationtech.jts.geom.GeometryFactory;
@@ -24,12 +21,7 @@ public class JsonVectorTileEncoder extends AbstractVectorTileEncoder {
         final var geometryFactory = new GeometryFactory(new PrecisionModel(1), srid);
 
         this.objectMapper =
-                JsonMapper.builder()
-                        .addModule(new JavaTimeModule())
-                        .addModule(new JtsModule(geometryFactory))
-                        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                        .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
-                        .build();
+                config.objectMapper().copy().registerModule(new JtsModule(geometryFactory));
     }
 
     @Override
