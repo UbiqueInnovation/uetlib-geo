@@ -96,13 +96,13 @@ public record VectorTileConfig(
 
         public VectorTileConfigBuilder tileLevelsDefinition(
                 @NotNull final TileLevelsDefinition tileLevelsDefinition) {
-            Objects.requireNonNull(yAxisDirection, "tileLevelsDefinition must be non-null");
+            Objects.requireNonNull(tileLevelsDefinition, "tileLevelsDefinition must be non-null");
             this.tileLevelsDefinition = tileLevelsDefinition;
             return this;
         }
 
         public VectorTileConfigBuilder maxElementsPerTile(final Integer maxElementsPerTile) {
-            Objects.requireNonNull(yAxisDirection, "maxElementsPerTile must be non-null");
+            Objects.requireNonNull(maxElementsPerTile, "maxElementsPerTile must be non-null");
             this.maxElementsPerTile = maxElementsPerTile;
             return this;
         }
@@ -153,13 +153,13 @@ public record VectorTileConfig(
         }
 
         public VectorTileConfigBuilder outputFormat(@NotNull final TileOutputFormat outputFormat) {
-            Objects.requireNonNull(yAxisDirection, "outputFormat must be non-null");
+            Objects.requireNonNull(outputFormat, "outputFormat must be non-null");
             this.outputFormat = outputFormat;
             return this;
         }
 
         public VectorTileConfigBuilder outputEnvelope(final ReferencedEnvelope outputEnvelope) {
-            Objects.requireNonNull(yAxisDirection, "outputEnvelope must be non-null");
+            Objects.requireNonNull(outputEnvelope, "outputEnvelope must be non-null");
             this.outputEnvelope = outputEnvelope;
             return this;
         }
@@ -180,14 +180,14 @@ public record VectorTileConfig(
         }
 
         public VectorTileConfigBuilder objectMapper(@NotNull final ObjectMapper objectMapper) {
-            Objects.requireNonNull(yAxisDirection, "objectMapper must be non-null");
+            Objects.requireNonNull(objectMapper, "objectMapper must be non-null");
             this.objectMapper = objectMapper;
             return this;
         }
 
-        public VectorTileConfigBuilder emptyGeometryLogLevel(@NotNull final Level level) {
+        public VectorTileConfigBuilder emptyGeometryLogLevel(@NotNull final Level emptyGeometryLogLevel) {
             this.emptyGeometryLogLevel =
-                    Objects.requireNonNull(level, "emptyGeometryLogLevel must not be null");
+                    Objects.requireNonNull(emptyGeometryLogLevel, "emptyGeometryLogLevel must not be null");
             return this;
         }
 
