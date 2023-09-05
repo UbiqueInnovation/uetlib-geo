@@ -5,6 +5,7 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.pivovarit.function.exception.WrappedException;
 
 import org.locationtech.jts.geom.GeometryFactory;
@@ -21,7 +22,10 @@ public class JsonVectorTileEncoder extends AbstractVectorTileEncoder {
         final var geometryFactory = new GeometryFactory(new PrecisionModel(1), srid);
 
         this.objectMapper =
-                config.objectMapper().copy().registerModule(new JtsModule(geometryFactory));
+                config.objectMapper()
+                        .copy()
+                        .registerModule(new JtsModule(geometryFactory))
+                        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }
 
     @Override
