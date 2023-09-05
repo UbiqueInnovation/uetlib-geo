@@ -27,8 +27,13 @@ public class VectorTileElementUtils {
 
         if (element instanceof final VectorTileElementWithTags<?> withTags
                 && withTags.tags() != null) {
-            //noinspection unchecked
-            tags.putAll(objectMapper.convertValue(withTags.tags(), Map.class));
+            tags.putAll(
+                    objectMapper.convertValue(
+                            withTags.tags(),
+                            objectMapper
+                                    .getTypeFactory()
+                                    .constructParametricType(
+                                            Map.class, String.class, Object.class)));
         }
 
         if (element instanceof final VectorTileElementWithMetadata<?> withMetadata
