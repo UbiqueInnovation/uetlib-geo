@@ -11,8 +11,10 @@ public final class TileGeneratorFactory {
     private TileGeneratorFactory() {}
 
     public static TileGenerator getGenerator(final TileOutput output) {
-        if (output instanceof VectorTileOutput vectorTileOutput) {
-            return new VectorTileGenerator(vectorTileOutput, 64);
+        if (output instanceof final VectorTileOutput vectorTileOutput) {
+            final var vectorTileGeneratorParallelism =
+                    vectorTileOutput.config().vectorTileGeneratorParallelism();
+            return new VectorTileGenerator(vectorTileOutput, vectorTileGeneratorParallelism);
         }
 
         throw new NotImplementedException(
