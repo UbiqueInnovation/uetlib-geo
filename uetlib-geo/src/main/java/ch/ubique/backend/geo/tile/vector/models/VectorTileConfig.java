@@ -6,6 +6,7 @@ import ch.ubique.backend.geo.tile.common.constants.WebMercatorTileDefinitions;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
+import ch.ubique.backend.geo.tile.vector.utils.VectorTileGenerator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,7 +33,8 @@ public record VectorTileConfig(
         @NotNull TileOutputFormat outputFormat,
         @Nullable ReferencedEnvelope outputEnvelope,
         @NotNull Set<Integer> zoomLevels,
-        @NotNull ObjectMapper objectMapper) {
+        @NotNull ObjectMapper objectMapper,
+        @Positive int vectorTileGeneratorParallelism) {
 
     public static VectorTileConfigBuilder lv95() {
         return new VectorTileConfigBuilder()
@@ -86,6 +88,7 @@ public record VectorTileConfig(
         private Set<Integer> zoomLevels;
         private ObjectMapper objectMapper = ObjectMapperUtils.objectMapper();
         private Level emptyGeometryLogLevel = Level.WARN;
+        private int vectorTileGeneratorParallelism = 64;
 
         private VectorTileConfigBuilder() {}
 
@@ -185,9 +188,26 @@ public record VectorTileConfig(
             return this;
         }
 
-        public VectorTileConfigBuilder emptyGeometryLogLevel(@NotNull final Level emptyGeometryLogLevel) {
+        public VectorTileConfigBuilder emptyGeometryLogLevel(
+                @NotNull final Level emptyGeometryLogLevel) {
             this.emptyGeometryLogLevel =
-                    Objects.requireNonNull(emptyGeometryLogLevel, "emptyGeometryLogLevel must not be null");
+                    Objects.requireNonNull(
+                            emptyGeometryLogLevel, "emptyGeometryLogLevel must not be null");
+            return this;
+        }
+
+        /**
+         * @param vectorTileGeneratorParallelism defaults to 64, decrease if you encounter memory
+         *     issues possibly related to the {@link VectorTileGenerator} using too many threads.
+         */
+        public VectorTileConfigBuilder vectorTileGeneratorParallelism(
+                @Positive final int vectorTileGeneratorParallelism) {
+            //noinspection ConstantValue
+            if (vectorTileGeneratorParallelism < 1) {
+                throw new IllegalArgumentException(
+                        "vectorTileGeneratorParallelism must be positive");
+            }
+            this.vectorTileGeneratorParallelism = vectorTileGeneratorParallelism;
             return this;
         }
 
@@ -205,7 +225,8 @@ public record VectorTileConfig(
                     outputFormat,
                     outputEnvelope,
                     zoomLevels,
-                    objectMapper);
+                    objectMapper,
+                    vectorTileGeneratorParallelism);
         }
     }
 }
