@@ -14,10 +14,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.annotation.Nullable;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -144,11 +145,10 @@ public final class LV03Coordinate implements Coordinate {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+
+        if (!(o instanceof final LV03Coordinate that)) {
             return false;
         }
-
-        final LV03Coordinate that = (LV03Coordinate) o;
 
         if (Math.abs(that.east - east) > EPSILON) {
             return false;
@@ -156,18 +156,16 @@ public final class LV03Coordinate implements Coordinate {
         if (Math.abs(that.north - north) > EPSILON) {
             return false;
         }
-        return Objects.equals(elevation, that.elevation);
+
+        return new EqualsBuilder().append(elevation, that.elevation).isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
-        temp = Double.doubleToLongBits(east);
-        result = (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(north);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (elevation != null ? elevation.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder(17, 37)
+                .append(east)
+                .append(north)
+                .append(elevation)
+                .toHashCode();
     }
 }

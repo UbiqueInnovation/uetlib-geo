@@ -2,6 +2,9 @@ package ch.ubique.backend.geo.graph.models;
 
 import jakarta.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.util.Optional;
 
 /**
@@ -103,17 +106,19 @@ public final class Edge<V, E> {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
+        if (this == o) {
+            return true;
+        }
 
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof final Edge<?, ?> edge)) {
+            return false;
+        }
 
-        final var edge = (Edge<?, ?>) o;
-
-        return id == edge.id;
+        return new EqualsBuilder().append(id, edge.id).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Long.hashCode(id);
+        return new HashCodeBuilder(17, 37).append(id).toHashCode();
     }
 }

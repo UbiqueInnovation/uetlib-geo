@@ -14,10 +14,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.annotation.Nullable;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -110,7 +111,7 @@ public final class LV95Coordinate implements Coordinate {
 
     @Override
     public double distanceTo(final Coordinate other) {
-        if (other instanceof LV95Coordinate otherLv95) {
+        if (other instanceof final LV95Coordinate otherLv95) {
 
             if (elevation == null || otherLv95.elevation == null) {
                 return flatDistanceTo(other);
@@ -126,7 +127,7 @@ public final class LV95Coordinate implements Coordinate {
 
     @Override
     public double flatDistanceTo(final Coordinate other) {
-        if (other instanceof LV95Coordinate otherLv95) {
+        if (other instanceof final LV95Coordinate otherLv95) {
             return sqrt(pow(east - otherLv95.east, 2) + pow(north - otherLv95.north, 2));
         }
         throw new IllegalArgumentException(
@@ -140,36 +141,36 @@ public final class LV95Coordinate implements Coordinate {
                 "LV95(east=%,.2f, north=%,.2f, elevation=%,.1f)", east, north, elevation);
     }
 
-    public boolean equalsExact(final LV95Coordinate o) {
-        if (this == o) return true;
-        if (o == null) return false;
-
-        if (Math.abs(o.east - east) > 0.0) return false;
-        if (Math.abs(o.north - north) > 0.0) return false;
-        return Objects.equals(elevation, o.elevation);
+    public boolean equalsExact(final LV95Coordinate lv95Coordinate) {
+        return equals(lv95Coordinate);
     }
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
 
-        final LV95Coordinate that = (LV95Coordinate) o;
+        if (!(o instanceof final LV95Coordinate that)) {
+            return false;
+        }
 
-        if (Math.abs(that.east - east) > EPSILON) return false;
-        if (Math.abs(that.north - north) > EPSILON) return false;
-        return Objects.equals(elevation, that.elevation);
+        if (Math.abs(that.east - east) > EPSILON) {
+            return false;
+        }
+        if (Math.abs(that.north - north) > EPSILON) {
+            return false;
+        }
+
+        return new EqualsBuilder().append(elevation, that.elevation).isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
-        temp = Double.doubleToLongBits(east);
-        result = (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(north);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (elevation != null ? elevation.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder(17, 37)
+                .append(east)
+                .append(north)
+                .append(elevation)
+                .toHashCode();
     }
 }

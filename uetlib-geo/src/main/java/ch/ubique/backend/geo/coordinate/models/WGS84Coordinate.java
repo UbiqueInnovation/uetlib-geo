@@ -17,10 +17,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.annotation.Nullable;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -132,7 +133,7 @@ public final class WGS84Coordinate implements Coordinate {
 
     @Override
     public double flatDistanceTo(final Coordinate other) {
-        if (other instanceof WGS84Coordinate otherWgs84) {
+        if (other instanceof final WGS84Coordinate otherWgs84) {
             final var r = 6371; // Radius of the earth in km
             final var dLat = toRadians(otherWgs84.latitude - latitude);
             final var dLon = toRadians(otherWgs84.longitude - longitude);
@@ -159,25 +160,30 @@ public final class WGS84Coordinate implements Coordinate {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
 
-        final WGS84Coordinate that = (WGS84Coordinate) o;
+        if (!(o instanceof final WGS84Coordinate that)) {
+            return false;
+        }
 
-        if (Math.abs(that.latitude - latitude) > EPSILON) return false;
-        if (Math.abs(that.longitude - longitude) > EPSILON) return false;
-        return Objects.equals(elevation, that.elevation);
+        if (Math.abs(that.latitude - latitude) > EPSILON) {
+            return false;
+        }
+        if (Math.abs(that.longitude - longitude) > EPSILON) {
+            return false;
+        }
+
+        return new EqualsBuilder().append(elevation, that.elevation).isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
-        temp = Double.doubleToLongBits(latitude);
-        result = (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(longitude);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (elevation != null ? elevation.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder(17, 37)
+                .append(latitude)
+                .append(longitude)
+                .append(elevation)
+                .toHashCode();
     }
 }

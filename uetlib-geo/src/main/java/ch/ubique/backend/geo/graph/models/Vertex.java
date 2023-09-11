@@ -1,5 +1,8 @@
 package ch.ubique.backend.geo.graph.models;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -83,17 +86,19 @@ public final class Vertex<V, E> {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
+        if (this == o) {
+            return true;
+        }
 
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof final Vertex<?, ?> vertex)) {
+            return false;
+        }
 
-        final var vertex = (Vertex<?, ?>) o;
-
-        return id == vertex.id;
+        return new EqualsBuilder().append(id, vertex.id).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Long.hashCode(id);
+        return new HashCodeBuilder(17, 37).append(id).toHashCode();
     }
 }

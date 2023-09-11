@@ -12,10 +12,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /** <a href="https://epsg.io/3857">https://epsg.io/3857</a> Pseudo-Mercator, Web Mercator */
@@ -120,25 +121,26 @@ public final class WebMercatorCoordinate implements Coordinate {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
 
-        final var that = (WebMercatorCoordinate) o;
+        if (!(o instanceof final WebMercatorCoordinate that)) {
+            return false;
+        }
 
-        if (Math.abs(that.x - x) > EPSILON) return false;
-        if (Math.abs(that.y - y) > EPSILON) return false;
-        return Objects.equals(elevation, that.elevation);
+        if (Math.abs(that.x - x) > EPSILON) {
+            return false;
+        }
+        if (Math.abs(that.y - y) > EPSILON) {
+            return false;
+        }
+
+        return new EqualsBuilder().append(elevation, that.elevation).isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
-        temp = Double.doubleToLongBits(x);
-        result = (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(y);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (elevation != null ? elevation.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder(17, 37).append(x).append(y).append(elevation).toHashCode();
     }
 }
