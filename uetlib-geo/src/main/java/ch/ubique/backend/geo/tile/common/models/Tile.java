@@ -1,5 +1,8 @@
 package ch.ubique.backend.geo.tile.common.models;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 public class Tile {
 
     private final TileInfo tileInfo;
@@ -14,14 +17,19 @@ public class Tile {
 
     @Override
     public int hashCode() {
-        return tileInfo.hashCode();
+        return new HashCodeBuilder(17, 37).append(tileInfo).toHashCode();
     }
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final var tile = (Tile) o;
-        return tileInfo.equals(tile.tileInfo);
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof final Tile tile)) {
+            return false;
+        }
+
+        return new EqualsBuilder().append(tileInfo, tile.tileInfo).isEquals();
     }
 }
