@@ -139,8 +139,12 @@ public final class LV03Coordinate implements Coordinate {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         final LV03Coordinate that = (LV03Coordinate) o;
         return new EqualsBuilder()
