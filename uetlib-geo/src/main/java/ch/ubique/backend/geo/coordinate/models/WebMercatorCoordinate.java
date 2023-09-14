@@ -22,9 +22,6 @@ import java.util.Optional;
 /** <a href="https://epsg.io/3857">https://epsg.io/3857</a> Pseudo-Mercator, Web Mercator */
 public final class WebMercatorCoordinate implements Coordinate {
 
-    // For equality testing
-    private static final double EPSILON = 0.0;
-
     @Schema(description = "specifies the north–south position")
     @JsonProperty
     private double x;
@@ -121,22 +118,15 @@ public final class WebMercatorCoordinate implements Coordinate {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        if (!(o instanceof final WebMercatorCoordinate that)) {
-            return false;
-        }
-
-        if (Math.abs(that.x - x) > EPSILON) {
-            return false;
-        }
-        if (Math.abs(that.y - y) > EPSILON) {
-            return false;
-        }
-
-        return new EqualsBuilder().append(elevation, that.elevation).isEquals();
+        final WebMercatorCoordinate that = (WebMercatorCoordinate) o;
+        return new EqualsBuilder()
+                .append(x, that.x)
+                .append(y, that.y)
+                .append(elevation, that.elevation)
+                .isEquals();
     }
 
     @Override

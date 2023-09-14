@@ -27,9 +27,6 @@ import java.util.Optional;
  */
 public final class LV95Coordinate implements Coordinate {
 
-    // For equality testing
-    private static final double EPSILON = 0.0;
-
     @Schema(description = "specifies the north–south position", example = "2 600 000")
     @JsonProperty
     private double east;
@@ -151,22 +148,15 @@ public final class LV95Coordinate implements Coordinate {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        if (!(o instanceof final LV95Coordinate that)) {
-            return false;
-        }
-
-        if (Math.abs(that.east - east) > EPSILON) {
-            return false;
-        }
-        if (Math.abs(that.north - north) > EPSILON) {
-            return false;
-        }
-
-        return new EqualsBuilder().append(elevation, that.elevation).isEquals();
+        final LV95Coordinate that = (LV95Coordinate) o;
+        return new EqualsBuilder()
+                .append(east, that.east)
+                .append(north, that.north)
+                .append(elevation, that.elevation)
+                .isEquals();
     }
 
     @Override
