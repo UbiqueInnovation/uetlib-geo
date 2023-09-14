@@ -28,7 +28,7 @@ import java.util.Optional;
 public final class LV95Coordinate implements Coordinate {
 
     // For equality testing
-    private static final double EPSILON = 0.1; // = 10 cm
+    private static final double EPSILON = 0.0;
 
     @Schema(description = "specifies the north–south position", example = "2 600 000")
     @JsonProperty
@@ -141,6 +141,10 @@ public final class LV95Coordinate implements Coordinate {
                 "LV95(east=%,.2f, north=%,.2f, elevation=%,.1f)", east, north, elevation);
     }
 
+    /**
+     * @deprecated Use {@link #equals(Object)} instead, it compares exact.
+     */
+    @Deprecated(since = "1.5.0", forRemoval = true)
     public boolean equalsExact(final LV95Coordinate lv95Coordinate) {
         return equals(lv95Coordinate);
     }

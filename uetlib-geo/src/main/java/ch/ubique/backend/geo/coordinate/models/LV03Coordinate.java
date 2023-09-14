@@ -28,7 +28,7 @@ import java.util.Optional;
 public final class LV03Coordinate implements Coordinate {
 
     // For equality testing
-    private static final double EPSILON = 0.1; // = 10 cm
+    private static final double EPSILON = 0.0;
 
     @Schema(description = "specifies the north–south position", example = "600 000")
     @JsonProperty

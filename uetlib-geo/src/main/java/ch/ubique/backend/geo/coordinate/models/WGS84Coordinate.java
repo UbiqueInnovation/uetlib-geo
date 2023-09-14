@@ -32,7 +32,7 @@ import java.util.Optional;
 public final class WGS84Coordinate implements Coordinate {
 
     // For equality testing
-    private static final double EPSILON = 0.001;
+    private static final double EPSILON = 0.0;
 
     @Schema(
             minimum = "-90",

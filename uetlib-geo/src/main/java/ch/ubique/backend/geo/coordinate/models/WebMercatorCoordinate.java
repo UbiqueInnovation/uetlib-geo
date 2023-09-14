@@ -23,7 +23,7 @@ import java.util.Optional;
 public final class WebMercatorCoordinate implements Coordinate {
 
     // For equality testing
-    private static final double EPSILON = 0.1;
+    private static final double EPSILON = 0.0;
 
     @Schema(description = "specifies the north–south position")
     @JsonProperty
