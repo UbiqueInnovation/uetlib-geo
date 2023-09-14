@@ -31,9 +31,6 @@ import java.util.Optional;
  */
 public final class WGS84Coordinate implements Coordinate {
 
-    // For equality testing
-    private static final double EPSILON = 0.0;
-
     @Schema(
             minimum = "-90",
             maximum = "90",
@@ -160,22 +157,15 @@ public final class WGS84Coordinate implements Coordinate {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        if (!(o instanceof final WGS84Coordinate that)) {
-            return false;
-        }
-
-        if (Math.abs(that.latitude - latitude) > EPSILON) {
-            return false;
-        }
-        if (Math.abs(that.longitude - longitude) > EPSILON) {
-            return false;
-        }
-
-        return new EqualsBuilder().append(elevation, that.elevation).isEquals();
+        final WGS84Coordinate that = (WGS84Coordinate) o;
+        return new EqualsBuilder()
+                .append(latitude, that.latitude)
+                .append(longitude, that.longitude)
+                .append(elevation, that.elevation)
+                .isEquals();
     }
 
     @Override
