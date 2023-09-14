@@ -148,8 +148,12 @@ public final class LV95Coordinate implements Coordinate {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         final LV95Coordinate that = (LV95Coordinate) o;
         return new EqualsBuilder()

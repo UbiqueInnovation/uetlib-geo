@@ -157,8 +157,12 @@ public final class WGS84Coordinate implements Coordinate {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         final WGS84Coordinate that = (WGS84Coordinate) o;
         return new EqualsBuilder()
