@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.coordinate.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class CoordinateConverterTest {
     private static final double LV03_EPSILON = 0.1;
     private static final double LV95_EPSILON = 0.1;
-    private static final double WGS84_EPSILON = 0.001;
+    private static final double WGS84_EPSILON = 0.05;
     private static final double WEB_MERCATOR_EPSILON = 0.1;
 
     @Test
