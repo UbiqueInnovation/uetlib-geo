@@ -120,7 +120,11 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
 
     private Geometry smoothingIfNeeded(@NotNull final Geometry geometry) {
         if (config.smoothing() > 0) {
-            return SimplifyGeometryUtils.smooth(geometry, config.smoothing());
+            try {
+                return SimplifyGeometryUtils.smooth(geometry, config.simplifyTolerance());
+            } catch (final RuntimeException e) {
+                logger.warn("Smoothing for {} failed.", geometry, e);
+            }
         }
 
         return geometry;

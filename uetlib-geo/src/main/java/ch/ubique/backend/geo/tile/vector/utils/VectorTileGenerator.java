@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
+import ch.ubique.backend.core.utils.CollectionUtils;
 import ch.ubique.backend.core.utils.ProgressLogger;
 import ch.ubique.backend.geo.tile.common.encoder.TileEncoderFactory;
 import ch.ubique.backend.geo.tile.common.models.Tile;
@@ -27,6 +28,7 @@ import org.slf4j.MDC;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -41,11 +43,14 @@ public class VectorTileGenerator implements TileGenerator {
 
     private final Cache<VectorTileElement, Envelope> envelopeCache;
 
+    private final Collection<Double> tileSizes;
+
     public VectorTileGenerator(final VectorTileOutput output, final int parallelism) {
         this.output = output;
         this.forkJoinPool = new ForkJoinPool(parallelism);
         final var cacheBuilder = Caffeine.newBuilder();
         this.envelopeCache = cacheBuilder.build();
+        this.tileSizes = new ConcurrentLinkedQueue<>();
     }
 
     public static void generateTiles(final VectorTileOutput output) {
@@ -59,9 +64,13 @@ public class VectorTileGenerator implements TileGenerator {
 
     @Override
     public void generateTiles() {
+        logger.info("Generating tiles now.");
         output.config().zoomLevels().stream()
                 .map(z -> getTileInfos(z, output.config().outputEnvelope()))
                 .forEach(this::generateTilesForInfos);
+        logger.info("Generated all tiles.");
+
+        computeStats();
 
         envelopeCache.invalidateAll();
         forkJoinPool.shutdown();
@@ -87,9 +96,24 @@ public class VectorTileGenerator implements TileGenerator {
                 .join();
     }
 
+    private void computeStats() {
+        logger.info("Computing stats.");
+        final var nonEmptyTiles = tileSizes.stream().filter(v -> v > 0).toList();
+        final var numTiles = tileSizes.size();
+        final var numNonEmptyTiles = nonEmptyTiles.size();
+        final var nonEmptyPercentage = Math.round(100.0 * numNonEmptyTiles / numTiles);
+        logger.info(
+                "{} tiles in total, of which {} ({} %) are non empty.",
+                numTiles, numNonEmptyTiles, nonEmptyPercentage);
+
+        final var stats = CollectionUtils.stats(nonEmptyTiles);
+        logger.info("Stats for non empty tiles: {}", stats);
+    }
+
     private void createGenerateAndConsumeTile(final TileInfo tileInfo) {
         final var tile = createTile(tileInfo);
         final var binaryTile = generateTile(tile);
+        tileSizes.add((double) binaryTile.bytes().length);
         consumeTile(binaryTile);
     }
 
