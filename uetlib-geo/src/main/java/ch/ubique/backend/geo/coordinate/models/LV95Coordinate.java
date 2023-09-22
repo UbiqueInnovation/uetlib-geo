@@ -141,7 +141,7 @@ public final class LV95Coordinate implements Coordinate {
     /**
      * @deprecated Use {@link #equals(Object)} instead, it compares exact.
      */
-    @Deprecated(since = "1.5.0", forRemoval = true)
+    @Deprecated(since = "2.0.0", forRemoval = true)
     public boolean equalsExact(final LV95Coordinate lv95Coordinate) {
         return equals(lv95Coordinate);
     }

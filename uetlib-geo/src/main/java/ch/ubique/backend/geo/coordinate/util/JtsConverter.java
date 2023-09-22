@@ -74,7 +74,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     /**
      * @deprecated Please use {@link CoordinateSystem#srid()} instead
      */
-    @Deprecated(forRemoval = true, since = "1.5.0")
+    @Deprecated(forRemoval = true, since = "2.0.0")
     public int srid() {
         return coordinateSystem.srid();
     }
@@ -82,7 +82,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     /**
      * @deprecated Please use {@link CoordinateSystem#geometryFactory()} instead
      */
-    @Deprecated(forRemoval = true, since = "1.5.0")
+    @Deprecated(forRemoval = true, since = "2.0.0")
     @NotNull
     public GeometryFactory geometryFactory() {
         return coordinateSystem.geometryFactory();
@@ -91,7 +91,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     /**
      * @deprecated Please use {@link CoordinateSystem#crs()} instead
      */
-    @Deprecated(forRemoval = true, since = "1.5.0")
+    @Deprecated(forRemoval = true, since = "2.0.0")
     @NotNull
     public CoordinateReferenceSystem crs() {
         return coordinateSystem.crs();
@@ -100,7 +100,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     /**
      * @deprecated Please use {@link CoordinateSystem#bounds()} instead
      */
-    @Deprecated(forRemoval = true, since = "1.5.0")
+    @Deprecated(forRemoval = true, since = "2.0.0")
     @NotNull
     public ReferencedEnvelope coordinateSystemBounds() {
         return coordinateSystem.bounds();
@@ -109,7 +109,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     /**
      * @deprecated Please use {@link CoordinateSystem#minCoordinate()} instead
      */
-    @Deprecated(forRemoval = true, since = "1.5.0")
+    @Deprecated(forRemoval = true, since = "2.0.0")
     @NotNull
     public C minCoordinate() {
         return coordinateSystem.minCoordinate();
@@ -118,7 +118,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     /**
      * @deprecated Please use {@link CoordinateSystem#minJtsCoordinate()} instead
      */
-    @Deprecated(forRemoval = true, since = "1.5.0")
+    @Deprecated(forRemoval = true, since = "2.0.0")
     @NotNull
     public Coordinate minCoordinateJts() {
         return coordinateSystem.minJtsCoordinate();
@@ -127,7 +127,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     /**
      * @deprecated Please use {@link CoordinateSystem#maxCoordinate()} instead
      */
-    @Deprecated(forRemoval = true, since = "1.5.0")
+    @Deprecated(forRemoval = true, since = "2.0.0")
     @NotNull
     public C maxCoordinate() {
         return coordinateSystem.maxCoordinate();
@@ -136,7 +136,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     /**
      * @deprecated Please use {@link CoordinateSystem#maxJtsCoordinate()} instead
      */
-    @Deprecated(forRemoval = true, since = "1.5.0")
+    @Deprecated(forRemoval = true, since = "2.0.0")
     @NotNull
     public Coordinate maxCoordinateJts() {
         return coordinateSystem.maxJtsCoordinate();
