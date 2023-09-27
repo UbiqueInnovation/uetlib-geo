@@ -1,7 +1,7 @@
 package ch.ubique.backend.geo.tile.vector.utils;
 
-import ch.ubique.backend.core.utils.CollectionUtils;
 import ch.ubique.backend.core.utils.ProgressLogger;
+import ch.ubique.backend.core.utils.StatisticUtils;
 import ch.ubique.backend.geo.tile.common.encoder.TileEncoderFactory;
 import ch.ubique.backend.geo.tile.common.models.Tile;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
@@ -106,7 +106,7 @@ public class VectorTileGenerator implements TileGenerator {
                 "{} tiles in total, of which {} ({} %) are non empty.",
                 numTiles, numNonEmptyTiles, nonEmptyPercentage);
 
-        final var stats = CollectionUtils.stats(nonEmptyTiles);
+        final var stats = StatisticUtils.stats(nonEmptyTiles);
         logger.info("Stats for non empty tiles: {}", stats);
     }
 
