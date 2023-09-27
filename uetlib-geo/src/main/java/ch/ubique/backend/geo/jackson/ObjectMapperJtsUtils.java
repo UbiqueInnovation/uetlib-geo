@@ -31,15 +31,32 @@ public final class ObjectMapperJtsUtils {
         return objectMapperWithJts(CoordinateSystems.LV95.geometryFactory());
     }
 
+    public static ObjectMapper objectMapperLv95(final Consumer<JsonMapper.Builder> customizer) {
+        return objectMapperWithJts(CoordinateSystems.LV95.geometryFactory(), customizer);
+    }
+
     public static ObjectMapper objectMapperLv03() {
         return objectMapperWithJts(CoordinateSystems.LV03.geometryFactory());
+    }
+
+    public static ObjectMapper objectMapperLv03(final Consumer<JsonMapper.Builder> customizer) {
+        return objectMapperWithJts(CoordinateSystems.LV03.geometryFactory(), customizer);
     }
 
     public static ObjectMapper objectMapperWgs84() {
         return objectMapperWithJts(CoordinateSystems.WGS84.geometryFactory());
     }
 
+    public static ObjectMapper objectMapperWgs84(final Consumer<JsonMapper.Builder> customizer) {
+        return objectMapperWithJts(CoordinateSystems.WGS84.geometryFactory(), customizer);
+    }
+
     public static ObjectMapper objectMapperWebMercator() {
         return objectMapperWithJts(CoordinateSystems.WEB_MERCATOR.geometryFactory());
+    }
+
+    public static ObjectMapper objectMapperWebMercator(
+            final Consumer<JsonMapper.Builder> customizer) {
+        return objectMapperWithJts(CoordinateSystems.WEB_MERCATOR.geometryFactory(), customizer);
     }
 }
