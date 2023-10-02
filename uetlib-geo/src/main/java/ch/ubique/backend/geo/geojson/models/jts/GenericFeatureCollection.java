@@ -3,7 +3,6 @@ package ch.ubique.backend.geo.geojson.models.jts;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * For an example on how to subclass this, check out the definition of {@link FeatureCollection}.
@@ -37,9 +36,5 @@ public class GenericFeatureCollection<
     @Override
     public String toString() {
         return "FeatureCollection(" + features.size() + ')';
-    }
-
-    public T withNewFeatures(final List<F> transformedFeatures) {
-        return new GenericFeatureCollection<F, P, T>().setFeatures(transformedFeatures);
     }
 }

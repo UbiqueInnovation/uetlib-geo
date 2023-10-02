@@ -220,7 +220,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     /** Transforms the given feature into the current spatial reference system. */
     public <F extends GenericFeature<P, F>, P> F transform(final F feature) {
         final var transformedGeometry = transform(feature.getGeometry());
-        return feature.withNewGeometry(transformedGeometry);
+        return feature.setGeometry(transformedGeometry);
     }
 
     /** Transforms the given featureCollection into the current spatial reference system. */
@@ -228,7 +228,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
             T transform(final T featureCollection) {
         final var transformedFeatures =
                 featureCollection.getFeatures().stream().map(this::transform).toList();
-        return featureCollection.withNewFeatures(transformedFeatures);
+        return featureCollection.setFeatures(transformedFeatures);
     }
 
     /** Transforms the given geometry into the current spatial reference system. */
