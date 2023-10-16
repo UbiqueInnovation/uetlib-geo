@@ -7,15 +7,15 @@ import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 
 import org.eclipse.emf.common.util.WrappedException;
+import org.geotools.api.geometry.MismatchedReferenceSystemException;
+import org.geotools.api.referencing.operation.MathTransform;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.referencing.operation.transform.PassThroughTransform;
 import org.geotools.renderer.lite.RendererUtilities;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.geometry.MismatchedReferenceSystemException;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;

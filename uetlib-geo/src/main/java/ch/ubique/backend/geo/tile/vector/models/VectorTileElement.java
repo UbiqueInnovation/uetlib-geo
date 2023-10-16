@@ -3,10 +3,10 @@ package ch.ubique.backend.geo.tile.vector.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.referencing.operation.builder.MissingInfoException;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public interface VectorTileElement {
 

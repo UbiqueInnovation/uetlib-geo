@@ -10,11 +10,11 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.FileUtils;
-import org.geotools.data.DataStoreFinder;
+import org.geotools.api.data.DataStoreFinder;
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.filter.Filter;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.files.ShpFileType;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

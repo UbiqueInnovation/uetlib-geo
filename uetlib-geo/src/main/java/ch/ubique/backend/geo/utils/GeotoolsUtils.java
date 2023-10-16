@@ -6,10 +6,10 @@ import com.pivovarit.function.ThrowingSupplier;
 
 import jakarta.validation.constraints.NotNull;
 
+import org.geotools.api.data.SimpleFeatureReader;
+import org.geotools.api.feature.Property;
+import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.data.simple.SimpleFeatureReader;
-import org.opengis.feature.Property;
-import org.opengis.feature.simple.SimpleFeature;
 
 import java.io.IOException;
 import java.util.Map;

@@ -9,6 +9,9 @@ import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
 import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.emf.common.util.WrappedException;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.cs.AxisDirection;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
@@ -19,9 +22,6 @@ import org.locationtech.jts.noding.SegmentStringUtil;
 import org.locationtech.jts.noding.snap.SnappingNoder;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.valid.IsValidOp;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.cs.AxisDirection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
