@@ -8,9 +8,9 @@ import ch.ubique.backend.geo.utils.GeotoolsUtils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.geopkg.GeoPackage;
 import org.locationtech.jts.geom.LineString;
-import org.opengis.feature.simple.SimpleFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

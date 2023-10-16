@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 
 public sealed interface Coordinate
         permits LV03Coordinate, LV95Coordinate, WebMercatorCoordinate, WGS84Coordinate {

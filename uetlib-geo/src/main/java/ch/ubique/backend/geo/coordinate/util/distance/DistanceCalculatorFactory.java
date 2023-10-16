@@ -2,7 +2,7 @@ package ch.ubique.backend.geo.coordinate.util.distance;
 
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 
 public class DistanceCalculatorFactory {
 

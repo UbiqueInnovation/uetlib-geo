@@ -4,11 +4,11 @@ import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 
 import ch.ubique.backend.geo.coordinate.models.Coordinate;
 
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.util.function.Function;
 
