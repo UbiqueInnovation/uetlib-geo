@@ -117,7 +117,7 @@ public class KmlParser {
                             // last with first.
                             final var first = coordinates.get(0);
                             final var last = coordinates.get(coordinates.size() - 1);
-                            if (!first.equalsExact(last)) {
+                            if (!first.equals(last)) {
                                 coordinates.set(
                                         coordinates.size() - 1,
                                         new LV95Coordinate(
