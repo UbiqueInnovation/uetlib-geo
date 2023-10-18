@@ -138,14 +138,6 @@ public final class LV95Coordinate implements Coordinate {
                 "LV95(east=%,.2f, north=%,.2f, elevation=%,.1f)", east, north, elevation);
     }
 
-    /**
-     * @deprecated Use {@link #equals(Object)} instead, it compares exact.
-     */
-    @Deprecated(since = "2.0.0", forRemoval = true)
-    public boolean equalsExact(final LV95Coordinate lv95Coordinate) {
-        return equals(lv95Coordinate);
-    }
-
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
