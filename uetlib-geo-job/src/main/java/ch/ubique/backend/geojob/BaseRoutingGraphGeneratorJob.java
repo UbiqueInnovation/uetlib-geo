@@ -1,6 +1,6 @@
 package ch.ubique.backend.geojob;
 
-import static ch.ubique.backend.geo.coordinate.util.JtsConverter.LV95;
+import static ch.ubique.backend.geo.coordinate.constants.CoordinateSystems.LV95;
 
 import ch.ubique.backend.core.service.DataAndInput;
 import ch.ubique.backend.core.service.InputDataLoaderService;
