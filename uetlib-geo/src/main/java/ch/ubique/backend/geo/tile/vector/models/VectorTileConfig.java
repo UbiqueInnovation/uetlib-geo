@@ -52,7 +52,7 @@ public record VectorTileConfig(
      *
      * <p>Use this method only if you need backwards compatibility.
      *
-     * @deprecated Will be removed with 2.0.0
+     * @deprecated Will be removed with 3.0.0
      */
     @Deprecated(forRemoval = true, since = "1.2.0")
     public static VectorTileConfigBuilder lv95WrongDirection() {
