@@ -98,9 +98,7 @@ public class JtsUtil {
                 .toList();
     }
 
-    /**
-     * <b>Warning</b>: the name of this function is misleading.
-     *
+    /***
      * @return
      *     <li>For a non-multi geometry, a list with just the input geometry is returned.
      *     <li>For a multi geometry, this returns a list of all child geometries contained in the
@@ -108,8 +106,8 @@ public class JtsUtil {
      *         <p>Note: this method is recursive, i.e., if a child geometry is again a multi
      *         geometry, the child geometries are again extracted.
      */
-    public static List<Geometry> getSimpleGeometries(final Geometry geometry) {
-        return flattenGeometry(geometry).toList();
+    public static List<Geometry> flattenGeometry(final Geometry geometry) {
+        return flatGeometriesStream(geometry).toList();
     }
 
     /**
@@ -119,13 +117,24 @@ public class JtsUtil {
      * @param geometry the geometry to be flattened
      * @return a stream of flattened geometries
      */
-    public static Stream<Geometry> flattenGeometry(final Geometry geometry) {
+    public static Stream<Geometry> flatGeometriesStream(final Geometry geometry) {
         if (!(geometry instanceof GeometryCollection)) {
             return getGeometriesAsStream(geometry);
         }
 
         // Recursively call this function until all child geometries are flattened
-        return getGeometriesAsStream(geometry).flatMap(JtsUtil::flattenGeometry);
+        return getGeometriesAsStream(geometry).flatMap(JtsUtil::flatGeometriesStream);
+    }
+
+    /**
+     * Flattens a geometry by recursively extracting all child geometries and returning them as a
+     * stream.
+     *
+     * @param geometries the geometries to be flattened
+     * @return a stream of flattened geometries
+     */
+    public static Stream<Geometry> flatGeometiesStream(final Collection<Geometry> geometries) {
+        return geometries.stream().flatMap(JtsUtil::flatGeometriesStream);
     }
 
     /**
@@ -135,7 +144,7 @@ public class JtsUtil {
      * @return a stream of flattened geometries
      */
     public static List<Geometry> flattenGeometries(final Collection<Geometry> geometries) {
-        return geometries.stream().flatMap(JtsUtil::flattenGeometry).toList();
+        return flatGeometiesStream(geometries).toList();
     }
 
     /**
@@ -155,8 +164,6 @@ public class JtsUtil {
     }
 
     /**
-     * <b>Warning</b>: the name of this function is misleading.
-     *
      * @return
      *     <li>For a non-multi geometry, an iterator with just the input geometry is returned.
      *     <li>For a multi geometry, this returns an iterator of all child geometries contained in
@@ -164,8 +171,8 @@ public class JtsUtil {
      *         <p>Note: this method is recursive, i.e., if a child geometry is again a multi
      *         geometry, the child geometries are again extracted.
      */
-    public static Iterator<Geometry> getSimpleGeometriesIterator(final Geometry geometry) {
-        return flattenGeometry(geometry).iterator();
+    public static Iterator<Geometry> getFlatGeometriesIterator(final Geometry geometry) {
+        return flatGeometriesStream(geometry).iterator();
     }
 
     @NotNull
@@ -195,7 +202,7 @@ public class JtsUtil {
 
     public static void updateSrid(final Geometry geometry, final int srid) {
         geometry.setSRID(srid);
-        getSimpleGeometriesIterator(geometry).forEachRemaining(g -> g.setSRID(srid));
+        getFlatGeometriesIterator(geometry).forEachRemaining(g -> g.setSRID(srid));
     }
 
     public static void throwIfCoordinateSystemNotEastNorth(final CoordinateReferenceSystem crs) {
@@ -244,7 +251,7 @@ public class JtsUtil {
 
     public static Geometry unwrapIfGeometryCollectionHasOnlyOneGeometry(final Geometry geometry) {
         if (geometry instanceof GeometryCollection && geometry.getNumGeometries() == 1) {
-            return flattenGeometry(geometry).findAny().orElseThrow();
+            return flatGeometriesStream(geometry).findAny().orElseThrow();
         }
         return geometry;
     }
