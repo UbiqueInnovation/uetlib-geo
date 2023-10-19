@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class JtsUtil {
     private static final Logger logger = LoggerFactory.getLogger(JtsUtil.class);
@@ -37,24 +38,32 @@ public class JtsUtil {
     private JtsUtil() {}
 
     @NotNull
-    public static MultiPoint toJtsMultiPoint(final Collection<Point> points) {
+    public static MultiPoint toJtsMultiPoint(@NotNull final Collection<Point> points) {
         return factoryFromGeometryCollection(points).createMultiPoint(points.toArray(Point[]::new));
     }
 
     @NotNull
-    public static MultiLineString toJtsMultiLineString(final Collection<LineString> lineStrings) {
+    public static MultiLineString toJtsMultiLineString(
+            @NotNull final Collection<LineString> lineStrings) {
         return factoryFromGeometryCollection(lineStrings)
                 .createMultiLineString(lineStrings.toArray(LineString[]::new));
     }
 
     @NotNull
-    public static MultiPolygon toJtsMultiPolygon(final Collection<Polygon> polygons) {
+    public static MultiPolygon toJtsMultiPolygon(@NotNull final Collection<Polygon> polygons) {
         return factoryFromGeometryCollection(polygons)
                 .createMultiPolygon(polygons.toArray(Polygon[]::new));
     }
 
+    @NotNull
+    public static GeometryCollection toGeometryCollection(
+            @NotNull final Collection<Geometry> geometries) {
+        return factoryFromGeometryCollection(geometries)
+                .createGeometryCollection(flattenGeometries(geometries).toArray(Geometry[]::new));
+    }
+
     public static GeometryFactory factoryFromGeometryCollection(
-            final Collection<? extends Geometry> geometries) {
+            @NotNull final Collection<? extends Geometry> geometries) {
         final var geometryMaybe = geometries.stream().findAny();
         return geometryMaybe.map(Geometry::getFactory).orElse(new GeometryFactory());
     }
@@ -89,24 +98,74 @@ public class JtsUtil {
                 .toList();
     }
 
-    /** simple geometries are not geometry collections and not multi-geometries */
+    /**
+     * <b>Warning</b>: the name of this function is misleading.
+     *
+     * @return
+     *     <li>For a non-multi geometry, a list with just the input geometry is returned.
+     *     <li>For a multi geometry, this returns a list of all child geometries contained in the
+     *         given geometry.
+     *         <p>Note: this method is recursive, i.e., if a child geometry is again a multi
+     *         geometry, the child geometries are again extracted.
+     */
     public static List<Geometry> getSimpleGeometries(final Geometry geometry) {
-        if (!(geometry instanceof GeometryCollection)) {
-            return IntStream.range(0, geometry.getNumGeometries())
-                    .mapToObj(geometry::getGeometryN)
-                    .toList();
-        }
-
-        // Get geometries of geometry collection and recursively
-        // call this function until all geometries are simple
-        return IntStream.range(0, geometry.getNumGeometries())
-                .mapToObj(geometry::getGeometryN)
-                .flatMap(g -> getSimpleGeometries(g).stream()) // recursive call
-                .toList();
+        return flattenGeometry(geometry).toList();
     }
 
+    /**
+     * Flattens a geometry by recursively extracting all child geometries and returning them as a
+     * stream.
+     *
+     * @param geometry the geometry to be flattened
+     * @return a stream of flattened geometries
+     */
+    public static Stream<Geometry> flattenGeometry(final Geometry geometry) {
+        if (!(geometry instanceof GeometryCollection)) {
+            return getGeometriesAsStream(geometry);
+        }
+
+        // Recursively call this function until all child geometries are flattened
+        return getGeometriesAsStream(geometry).flatMap(JtsUtil::flattenGeometry);
+    }
+
+    /**
+     * Flattens a collection of geometries by recursively extracting all child geometries
+     *
+     * @param geometries a collection of geometries to be flattened
+     * @return a stream of flattened geometries
+     */
+    public static List<Geometry> flattenGeometries(final Collection<Geometry> geometries) {
+        return geometries.stream().flatMap(JtsUtil::flattenGeometry).toList();
+    }
+
+    /**
+     * Retrieves the individual geometries contained within a Geometry object as a stream. *
+     *
+     * @param geometry the Geometry object from which to extract the geometries
+     * @return a stream of the individual geometries within the provided Geometry object
+     */
+    @NotNull
+    public static Stream<Geometry> getGeometriesAsStream(final Geometry geometry) {
+        return IntStream.range(0, geometry.getNumGeometries()).mapToObj(geometry::getGeometryN);
+    }
+
+    @NotNull
+    public static Collection<Geometry> getGeometries(final Geometry geometry) {
+        return getGeometriesAsStream(geometry).toList();
+    }
+
+    /**
+     * <b>Warning</b>: the name of this function is misleading.
+     *
+     * @return
+     *     <li>For a non-multi geometry, an iterator with just the input geometry is returned.
+     *     <li>For a multi geometry, this returns an iterator of all child geometries contained in
+     *         the given geometry.
+     *         <p>Note: this method is recursive, i.e., if a child geometry is again a multi
+     *         geometry, the child geometries are again extracted.
+     */
     public static Iterator<Geometry> getSimpleGeometriesIterator(final Geometry geometry) {
-        return getSimpleGeometries(geometry).iterator();
+        return flattenGeometry(geometry).iterator();
     }
 
     @NotNull
@@ -185,7 +244,7 @@ public class JtsUtil {
 
     public static Geometry unwrapIfGeometryCollectionHasOnlyOneGeometry(final Geometry geometry) {
         if (geometry instanceof GeometryCollection && geometry.getNumGeometries() == 1) {
-            return getSimpleGeometries(geometry).get(0);
+            return flattenGeometry(geometry).findAny().orElseThrow();
         }
         return geometry;
     }
@@ -217,8 +276,14 @@ public class JtsUtil {
         final var geometryCollection =
                 new GeometryCollection(geometriesArray, anyGeometry.getFactory());
 
-        final var envelope = geometryCollection.getEnvelopeInternal();
-        return new ReferencedEnvelope(envelope, getCrs(anyGeometry));
+        return getEnvelope(geometryCollection);
+    }
+
+    public static ReferencedEnvelope getEnvelope(final Geometry geometry) {
+        if (geometry == null || geometry.isEmpty()) {
+            throw new NoSuchElementException("No/empty geometry provided.");
+        }
+        return new ReferencedEnvelope(geometry.getEnvelopeInternal(), getCrs(geometry));
     }
 
     public static Envelope getEnvelope(final LineSegment lineSegment) {
