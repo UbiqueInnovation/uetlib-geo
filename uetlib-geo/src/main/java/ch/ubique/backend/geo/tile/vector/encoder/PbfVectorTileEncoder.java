@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 public final class PbfVectorTileEncoder extends AbstractVectorTileEncoder {
 
-    private final VectorTileEncoder encoder;
+    private static final Logger logger = LoggerFactory.getLogger(PbfVectorTileEncoder.class);
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final VectorTileEncoder encoder;
 
     public PbfVectorTileEncoder(final VectorTileConfig config) {
         super(config);

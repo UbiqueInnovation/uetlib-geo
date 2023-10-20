@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 
 final class TileLevelsDefinitionTest {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger logger = LoggerFactory.getLogger(TileLevelsDefinitionTest.class);
 
     @Test
     void testChildren() {
