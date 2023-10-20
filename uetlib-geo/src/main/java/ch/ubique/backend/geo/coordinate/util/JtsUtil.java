@@ -133,7 +133,7 @@ public class JtsUtil {
      * @param geometries the geometries to be flattened
      * @return a stream of flattened geometries
      */
-    public static Stream<Geometry> flatGeometiesStream(final Collection<Geometry> geometries) {
+    public static Stream<Geometry> flatGeometriesStream(final Collection<Geometry> geometries) {
         return geometries.stream().flatMap(JtsUtil::flatGeometriesStream);
     }
 
@@ -144,7 +144,7 @@ public class JtsUtil {
      * @return a stream of flattened geometries
      */
     public static List<Geometry> flattenGeometries(final Collection<Geometry> geometries) {
-        return flatGeometiesStream(geometries).toList();
+        return flatGeometriesStream(geometries).toList();
     }
 
     /**
