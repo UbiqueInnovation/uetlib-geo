@@ -25,7 +25,7 @@ import java.util.*;
 
 public class LinesToGraphUtil<T> {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger logger = LoggerFactory.getLogger(LinesToGraphUtil.class);
 
     private final Collection<LineWithInfo<T>> lines;
     private final LinesToGraphConfig<T> config;
@@ -54,6 +54,10 @@ public class LinesToGraphUtil<T> {
         builder.createGraph();
         builder.findIntersections();
         return builder.graph;
+    }
+
+    private static boolean isHighway(final Edge<RoutingGraphVertexProperties, ?> edge) {
+        return edge.getU().getProperties().isHighway() && edge.getV().getProperties().isHighway();
     }
 
     private void createGraph() {
@@ -226,10 +230,6 @@ public class LinesToGraphUtil<T> {
     private Envelope envelope(final Edge<RoutingGraphVertexProperties, ?> edge) {
         return new Envelope(
                 edge.getU().getProperties().coordinate(), edge.getV().getProperties().coordinate());
-    }
-
-    private static boolean isHighway(final Edge<RoutingGraphVertexProperties, ?> edge) {
-        return edge.getU().getProperties().isHighway() && edge.getV().getProperties().isHighway();
     }
 
     private float weight(

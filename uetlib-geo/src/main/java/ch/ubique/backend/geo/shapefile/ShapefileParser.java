@@ -35,10 +35,14 @@ import java.util.stream.Collectors;
 
 public class ShapefileParser implements InputCollectionLoaderService<SimpleFeature> {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger logger = LoggerFactory.getLogger(ShapefileParser.class);
+
+    private static final Collection<String> relevantFileExtensions =
+            Arrays.stream(ShpFileType.values())
+                    .map(type -> type.extension)
+                    .collect(Collectors.toUnmodifiableSet());
 
     private final ZipArchiveInputStream zipArchiveInputStream;
-
     private final Predicate<ArchiveEntry> includeEntry;
 
     public ShapefileParser(@NotNull final ZipArchiveInputStream zipArchiveInputStream) {
@@ -132,11 +136,6 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
                 .setBytes(bytes)
                 .setContentType("x-gis/x-shapefile");
     }
-
-    private static final Collection<String> relevantFileExtensions =
-            Arrays.stream(ShpFileType.values())
-                    .map(type -> type.extension)
-                    .collect(Collectors.toUnmodifiableSet());
 
     private boolean includeEntry(final ArchiveEntry archiveEntry) {
         final var fileName = archiveEntry.getName();

@@ -11,10 +11,10 @@ import java.util.*;
 
 public class LinesToRoutingGraphUtil<T> {
 
+    private static final Logger logger = LoggerFactory.getLogger(LinesToRoutingGraphUtil.class);
+
     private final Collection<LineWithInfo<T>> lines;
     private final LinesToGraphConfig<T> config;
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private LinesToRoutingGraphUtil(
             final LinesToGraphConfig<T> config, final Collection<LineWithInfo<T>> lines) {
