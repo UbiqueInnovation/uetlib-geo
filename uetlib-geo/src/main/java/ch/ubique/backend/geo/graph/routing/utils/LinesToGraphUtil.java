@@ -36,7 +36,7 @@ public class LinesToGraphUtil<T> {
 
     private final LineIntersector lineIntersector;
 
-    public LinesToGraphUtil(
+    private LinesToGraphUtil(
             @NotNull final Collection<LineWithInfo<T>> lines,
             @NotNull final LinesToGraphConfig<T> config) {
         this.config = config;
@@ -241,7 +241,7 @@ public class LinesToGraphUtil<T> {
         return config.weightingFunction().computeWeight(cU, cV, info);
     }
 
-    public Coordinate intersection(
+    private Coordinate intersection(
             final Edge<RoutingGraphVertexProperties, Weight> a,
             final Edge<RoutingGraphVertexProperties, Weight> b) {
         lineIntersector.computeIntersection(

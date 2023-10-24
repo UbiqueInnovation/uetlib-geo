@@ -110,12 +110,11 @@ class RoutingGraphTest {
     private static RoutingGraphs createGraphsFromGeoJson(final String path) throws IOException {
         final var featureCollection = readFile(path);
 
-        return new LinesToRoutingGraphUtil<>(
-                        featureCollection.getFeatures().stream()
-                                .map(feature -> (LineString) feature.getGeometry())
-                                .toList(),
-                        LinesToGraphConfig.defaults())
-                .buildGraph();
+        return LinesToRoutingGraphUtil.buildGraph(
+                featureCollection.getFeatures().stream()
+                        .map(feature -> (LineString) feature.getGeometry())
+                        .toList(),
+                LinesToGraphConfig.defaults());
     }
 
     @Test
