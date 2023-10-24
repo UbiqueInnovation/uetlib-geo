@@ -29,11 +29,10 @@ public final class TlmToGraphUtil {
                         .map(path -> new LineWithInfo<>(path.line(), path.info()))
                         .toList();
 
-        return LinesToRoutingGraphUtil.withInfo(
-                        relevantPaths,
-                        LinesToGraphConfig.<TlmPathInfo>builder()
-                                .weightingFunction(weightingFunction)
-                                .build())
-                .buildGraph();
+        return LinesToRoutingGraphUtil.buildGraphWithInfo(
+                relevantPaths,
+                LinesToGraphConfig.<TlmPathInfo>builder()
+                        .weightingFunction(weightingFunction)
+                        .build());
     }
 }
