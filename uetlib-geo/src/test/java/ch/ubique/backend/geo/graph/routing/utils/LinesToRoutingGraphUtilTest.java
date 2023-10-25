@@ -40,7 +40,7 @@ class LinesToRoutingGraphUtilTest {
                         .map(line -> new LineWithInfo<>(line, testInfo))
                         .toList();
 
-        final var graphs = LinesToRoutingGraphUtil.withInfo(lines, config).buildGraph();
+        final var graphs = LinesToRoutingGraphUtil.buildGraphWithInfo(lines, config);
         final var completeGraph = graphs.completeGraph();
 
         Assertions.assertNotNull(completeGraph);
@@ -71,7 +71,7 @@ class LinesToRoutingGraphUtilTest {
                         .map(line -> new LineWithInfo<>(line, testInfo))
                         .toList();
 
-        final var graphs = LinesToRoutingGraphUtil.withInfo(lines, config).buildGraph();
+        final var graphs = LinesToRoutingGraphUtil.buildGraphWithInfo(lines, config);
         final var completeGraph = graphs.completeGraph();
         final var routingGraph = graphs.routingGraph();
 
@@ -110,7 +110,7 @@ class LinesToRoutingGraphUtilTest {
                         .map(line -> new LineWithInfo<>(line, testInfo))
                         .toList();
 
-        final var graphs = LinesToRoutingGraphUtil.withInfo(lines, config).buildGraph();
+        final var graphs = LinesToRoutingGraphUtil.buildGraphWithInfo(lines, config);
         final var completeGraph = graphs.completeGraph();
         final var routingGraph = graphs.routingGraph();
 
@@ -157,8 +157,7 @@ class LinesToRoutingGraphUtilTest {
                                         + " 100, 50 0.8 100)");
         line2.setUserData("TLM");
 
-        final var graphs =
-                new LinesToRoutingGraphUtil<>(List.of(line1, line2), config).buildGraph();
+        final var graphs = LinesToRoutingGraphUtil.buildGraph(List.of(line1, line2), config);
         final var completeGraph = graphs.completeGraph();
 
         Assertions.assertNotNull(completeGraph);
@@ -212,8 +211,7 @@ class LinesToRoutingGraphUtilTest {
         final var line2 = (LineString) wktReader.read("LINESTRING (0 0, 50 0)");
         line2.setUserData("SAC");
 
-        final var graphs =
-                new LinesToRoutingGraphUtil<>(List.of(line1, line2), config).buildGraph();
+        final var graphs = LinesToRoutingGraphUtil.buildGraph(List.of(line1, line2), config);
         final var completeGraph = graphs.completeGraph();
 
         Assertions.assertNotNull(completeGraph);
@@ -256,20 +254,19 @@ class LinesToRoutingGraphUtilTest {
                 (LineString)
                         wktReader.read(
                                 "LINESTRING(896.0 2941.0 , 902.0 2926.0 , 916.0 2901.0 , 932.0"
-                                    + " 2869.0 , 942.0 2835.0 , 941.0 2815.0 , 933.0 2797.0 , 918.0"
-                                    + " 2779.0 , 891.0 2760.0 , 862.0 2748.0 , 826.0 2740.0 , 802.0"
-                                    + " 2740.0 , 784.0 2734.0)");
+                                        + " 2869.0 , 942.0 2835.0 , 941.0 2815.0 , 933.0 2797.0 , 918.0"
+                                        + " 2779.0 , 891.0 2760.0 , 862.0 2748.0 , 826.0 2740.0 , 802.0"
+                                        + " 2740.0 , 784.0 2734.0)");
         lineTlm.setUserData("TLM");
 
         final var graphs =
-                new LinesToRoutingGraphUtil<>(
-                                List.of(lineTlm, lineSac),
-                                LinesToGraphConfig.builder()
-                                        .snapTolerance(6.4)
-                                        .hasSnappingPriority("TLM"::equals)
-                                        .hasEdgePriority("SAC"::equals)
-                                        .build())
-                        .buildGraph();
+                LinesToRoutingGraphUtil.buildGraph(
+                        List.of(lineTlm, lineSac),
+                        LinesToGraphConfig.builder()
+                                .snapTolerance(6.4)
+                                .hasSnappingPriority("TLM"::equals)
+                                .hasEdgePriority("SAC"::equals)
+                                .build());
 
         final var completeGraph = graphs.completeGraph();
 
