@@ -22,22 +22,22 @@ public class LinesToRoutingGraphUtil<T> {
         this.config = config;
     }
 
-    public LinesToRoutingGraphUtil(
-            final Collection<LineString> lines, final LinesToGraphConfig<T> config) {
+    public static <S> RoutingGraphs buildGraph(
+            final Collection<LineString> lines, final LinesToGraphConfig<S> config) {
         //noinspection unchecked
-        this.lines =
+        final var linesWithInfo =
                 lines.stream()
-                        .map(line -> new LineWithInfo<>(line, (T) line.getUserData()))
+                        .map(line -> new LineWithInfo<>(line, (S) line.getUserData()))
                         .toList();
-        this.config = config;
+        return buildGraphWithInfo(linesWithInfo, config);
     }
 
-    public static <S> LinesToRoutingGraphUtil<S> withInfo(
+    public static <S> RoutingGraphs buildGraphWithInfo(
             final Collection<LineWithInfo<S>> lines, final LinesToGraphConfig<S> config) {
-        return new LinesToRoutingGraphUtil<>(config, lines);
+        return new LinesToRoutingGraphUtil<>(config, lines).buildGraph();
     }
 
-    public RoutingGraphs buildGraph() {
+    private RoutingGraphs buildGraph() {
 
         if (lines.isEmpty()) {
             logger.info("No paths provided, returning empty graph.");
