@@ -1,5 +1,8 @@
 package ch.ubique.backend.geo.kml.models;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 public class ItemStyle {
 
     private String color;
@@ -45,16 +48,11 @@ public class ItemStyle {
 
     @Override
     public String toString() {
-        return "ItemStyle{"
-                + "color='"
-                + color
-                + '\''
-                + ", scale="
-                + scale
-                + ", tileWidth="
-                + width
-                + ", icon="
-                + icon
-                + '}';
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("color", color)
+                .append("scale", scale)
+                .append("width", width)
+                .append("icon", icon)
+                .toString();
     }
 }

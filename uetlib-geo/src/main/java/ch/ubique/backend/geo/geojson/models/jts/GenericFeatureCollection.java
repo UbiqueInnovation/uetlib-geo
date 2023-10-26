@@ -1,6 +1,8 @@
 package ch.ubique.backend.geo.geojson.models.jts;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Collection;
 
@@ -35,6 +37,8 @@ public class GenericFeatureCollection<
 
     @Override
     public String toString() {
-        return "FeatureCollection(" + features.size() + ')';
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("#features", features.size())
+                .toString();
     }
 }
