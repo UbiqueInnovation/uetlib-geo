@@ -113,7 +113,7 @@ public final class WebMercatorCoordinate implements Coordinate {
 
     @Override
     public String toString() {
-        return String.format("WebMercator(x=%,.2f, y=%,.2f, elevation=%,.1f)", x, y, elevation);
+        return String.format("WebMercator[x=%,.2f, y=%,.2f, elevation=%,.1f]", x, y, elevation);
     }
 
     @Override

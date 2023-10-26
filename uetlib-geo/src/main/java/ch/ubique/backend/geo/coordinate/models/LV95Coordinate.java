@@ -135,7 +135,7 @@ public final class LV95Coordinate implements Coordinate {
     @Override
     public String toString() {
         return String.format(
-                "LV95(east=%,.2f, north=%,.2f, elevation=%,.1f)", east, north, elevation);
+                "LV95[east=%,.2f, north=%,.2f, elevation=%,.1f]", east, north, elevation);
     }
 
     @Override
