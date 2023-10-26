@@ -177,7 +177,7 @@ public class Graph<V, E> {
 
     @Override
     public String toString() {
-        return String.format("Graph(n = %,d, m = %,d)", vertices.size(), directedEdges.size());
+        return String.format("Graph[n=%,d, m=%,d]", vertices.size(), directedEdges.size());
     }
 
     public Set<List<Vertex<V, E>>> findCycles() {

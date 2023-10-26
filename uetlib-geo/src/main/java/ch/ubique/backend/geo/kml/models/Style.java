@@ -1,5 +1,8 @@
 package ch.ubique.backend.geo.kml.models;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 public class Style {
 
     private ItemStyle iconStyle;
@@ -35,13 +38,10 @@ public class Style {
 
     @Override
     public String toString() {
-        return "Style{"
-                + "iconStyle="
-                + iconStyle
-                + ", labelStyle="
-                + labelStyle
-                + ", lineStyle="
-                + lineStyle
-                + '}';
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("iconStyle", iconStyle)
+                .append("labelStyle", labelStyle)
+                .append("lineStyle", lineStyle)
+                .toString();
     }
 }

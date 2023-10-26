@@ -1,5 +1,8 @@
 package ch.ubique.backend.geo.kml.models;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 public class Icon {
     private String href;
 
@@ -14,6 +17,8 @@ public class Icon {
 
     @Override
     public String toString() {
-        return "Icon{" + "href='" + href + '\'' + '}';
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("href", href)
+                .toString();
     }
 }

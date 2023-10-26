@@ -152,7 +152,7 @@ public final class WGS84Coordinate implements Coordinate {
     @Override
     public String toString() {
         return String.format(
-                "WGS84(lat=%,.2f, lon=%,.2f, elevation=%,.1f)", latitude, longitude, elevation);
+                "WGS84[lat=%,.2f, lon=%,.2f, elevation=%,.1f]", latitude, longitude, elevation);
     }
 
     @Override
