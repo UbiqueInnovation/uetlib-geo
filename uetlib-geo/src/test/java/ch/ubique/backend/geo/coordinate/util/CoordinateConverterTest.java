@@ -3,10 +3,7 @@ package ch.ubique.backend.geo.coordinate.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
-import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
-import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
-import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
+import ch.ubique.backend.geo.coordinate.models.*;
 
 import org.junit.jupiter.api.Test;
 
@@ -40,5 +37,13 @@ class CoordinateConverterTest {
         final var wgs84 = new WGS84Coordinate(46.4146005, 8.60772, 500.0);
 
         assertTrue(wgs84.distanceTo(JtsConverter.WGS84.transform(webMercator)) < WGS84_EPSILON);
+    }
+
+    @Test
+    void testUtm32WGS84() {
+        final var utm32 = new UTM32Coordinate(0, 0, 500.0);
+        final var wgs84 = new WGS84Coordinate(0.0, 4.5112562, 500.0);
+
+        assertTrue(wgs84.distanceTo(JtsConverter.WGS84.transform(utm32)) < WGS84_EPSILON);
     }
 }
