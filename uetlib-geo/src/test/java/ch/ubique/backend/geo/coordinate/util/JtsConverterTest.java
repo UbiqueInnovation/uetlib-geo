@@ -1,9 +1,6 @@
 package ch.ubique.backend.geo.coordinate.util;
 
-import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
-import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
-import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
-import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
+import ch.ubique.backend.geo.coordinate.models.*;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,6 +26,11 @@ class JtsConverterTest {
     @Test
     void createPointLv95() {
         assertPoint(JtsConverter.LV95.toJts(new LV95Coordinate(1.2, 5.3)));
+    }
+
+    @Test
+    void createPointUtm32() {
+        assertPoint(JtsConverter.UTM32.toJts(new UTM32Coordinate(465596, 5228847)));
     }
 
     private void assertPoint(final Coordinate point) {
