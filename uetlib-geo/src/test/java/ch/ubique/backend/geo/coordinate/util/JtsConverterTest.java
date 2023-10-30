@@ -30,7 +30,7 @@ class JtsConverterTest {
 
     @Test
     void createPointUtm32() {
-        assertPoint(JtsConverter.UTM32.toJts(new UTM32Coordinate(465596, 5228847)));
+        assertPoint(JtsConverter.UTM32.toJts(new UTM32Coordinate(1.2, 5.3)));
     }
 
     private void assertPoint(final Coordinate point) {
@@ -60,6 +60,12 @@ class JtsConverterTest {
     void lv95toJts() {
         assertPoint(new LV95Coordinate(1.2, 5.3).toJts());
         assertPoint(new LV95Coordinate(1.2, 5.3, 17.2).toJts());
+    }
+
+    @Test
+    void utm32toJts() {
+        assertPoint(new UTM32Coordinate(1.2, 5.3).toJts());
+        assertPoint(new UTM32Coordinate(1.2, 5.3, 17.2).toJts());
     }
 
     @Test
@@ -100,5 +106,15 @@ class JtsConverterTest {
         Assertions.assertEquals(2.8, lv95Coordinate.getEast());
         Assertions.assertEquals(4.2, lv95Coordinate.getNorth());
         Assertions.assertTrue(lv95Coordinate.getOptionalElevation().isEmpty());
+    }
+
+    @Test
+    void toUtm32() {
+        final var utm32Coordinate =
+                JtsConverter.UTM32.toBackendLib(
+                        JtsConverter.UTM32.toJts(new UTM32Coordinate(465596, 5228847)));
+        Assertions.assertEquals(465596, utm32Coordinate.getEast());
+        Assertions.assertEquals(5228847, utm32Coordinate.getNorth());
+        Assertions.assertTrue(utm32Coordinate.getOptionalElevation().isEmpty());
     }
 }
