@@ -10,7 +10,7 @@ import ch.ubique.backend.geo.kml.models.Placemark;
 import ch.ubique.backend.geo.kml.models.Style;
 import ch.ubique.backend.geo.kml.models.StyleMap;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.FileInputStream;
 import java.io.IOException;
