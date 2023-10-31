@@ -18,8 +18,8 @@ public class GenericDistanceCalculator<C extends Coordinate> implements Distance
     public double getDistance(final C c1, final C c2) {
         final var start = JtsConverter.WGS84.transform(c1);
         final var end = JtsConverter.WGS84.transform(c2);
-        geodeticCalculator.setStartingGeographicPoint(start.getLongitude(), start.getLatitude());
-        geodeticCalculator.setDestinationGeographicPoint(end.getLongitude(), end.getLatitude());
+        geodeticCalculator.setStartingGeographicPoint(start.longitude(), start.latitude());
+        geodeticCalculator.setDestinationGeographicPoint(end.longitude(), end.latitude());
         return geodeticCalculator.getOrthodromicDistance();
     }
 }

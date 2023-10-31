@@ -7,8 +7,6 @@ public class LV03DistanceCalculator implements DistanceCalculator<LV03Coordinate
 
     @Override
     public double getDistance(final LV03Coordinate c1, final LV03Coordinate c2) {
-        return Math.sqrt(
-                Math.pow(c1.getEast() - c2.getEast(), 2)
-                        + Math.pow(c1.getNorth() - c2.getNorth(), 2));
+        return Math.sqrt(Math.pow(c1.east() - c2.east(), 2) + Math.pow(c1.north() - c2.north(), 2));
     }
 }
