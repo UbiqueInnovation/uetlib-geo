@@ -1,17 +1,26 @@
 package ch.ubique.backend.geo.coordinate.util.distance;
 
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
-
-import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import ch.ubique.backend.geo.coordinate.models.Coordinate;
+import ch.ubique.backend.geo.coordinate.util.distance.impl.GenericDistanceCalculator;
+import ch.ubique.backend.geo.coordinate.util.distance.impl.LV03DistanceCalculator;
+import ch.ubique.backend.geo.coordinate.util.distance.impl.LV95DistanceCalculator;
 
 public class DistanceCalculatorFactory {
 
     private DistanceCalculatorFactory() {}
 
-    public static DistanceCalculator create(final CoordinateReferenceSystem crs) {
-        if (crs.equals(CoordinateSystems.LV95.crs()) || crs.equals(CoordinateSystems.LV03.crs())) {
-            return new SwissDistanceCalculator();
+    public static <C extends Coordinate> DistanceCalculator<C> create(
+            final CoordinateSystem<C> coordinateSystem) {
+        if (coordinateSystem.equals(CoordinateSystems.LV03)) {
+            //noinspection unchecked
+            return (DistanceCalculator<C>) new LV03DistanceCalculator();
         }
-        return new GenericDistanceCalculator(crs);
+        if (coordinateSystem.equals(CoordinateSystems.LV95)) {
+            //noinspection unchecked
+            return (DistanceCalculator<C>) new LV95DistanceCalculator();
+        }
+        return new GenericDistanceCalculator<>(coordinateSystem);
     }
 }
