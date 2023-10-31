@@ -28,9 +28,9 @@ public class WGS84CoordinateEmbeddable {
 
     public static WGS84CoordinateEmbeddable from(final WGS84Coordinate wgs84Coordinate) {
         return new WGS84CoordinateEmbeddable(
-                wgs84Coordinate.getLatitude(),
-                wgs84Coordinate.getLongitude(),
-                wgs84Coordinate.getElevation());
+                wgs84Coordinate.latitude(),
+                wgs84Coordinate.longitude(),
+                wgs84Coordinate.elevation());
     }
 
     public WGS84Coordinate toCoordinate() {

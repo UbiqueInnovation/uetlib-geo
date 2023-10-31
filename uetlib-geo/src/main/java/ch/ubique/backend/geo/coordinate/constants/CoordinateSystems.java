@@ -21,9 +21,9 @@ public class CoordinateSystems {
                     4326,
                     c ->
                             new org.locationtech.jts.geom.Coordinate(
-                                    c.getLongitude(),
-                                    c.getLatitude(),
-                                    c.getOptionalElevation().orElse(NULL_ORDINATE)),
+                                    c.longitude(),
+                                    c.latitude(),
+                                    c.optionalElevation().orElse(NULL_ORDINATE)),
                     c -> new WGS84Coordinate(c.y, c.x, nullIfNaN(c.getZ())),
                     new WGS84Coordinate(-90, -180),
                     new WGS84Coordinate(90, 180));
@@ -37,9 +37,9 @@ public class CoordinateSystems {
                     2056,
                     c ->
                             new org.locationtech.jts.geom.Coordinate(
-                                    c.getEast(),
-                                    c.getNorth(),
-                                    c.getOptionalElevation().orElse(NULL_ORDINATE)),
+                                    c.east(),
+                                    c.north(),
+                                    c.optionalElevation().orElse(NULL_ORDINATE)),
                     c -> new LV95Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new LV95Coordinate(2_420_000.0, 1_000_000.0),
                     new LV95Coordinate(2_900_000.0, 1_350_000.0));
@@ -53,9 +53,9 @@ public class CoordinateSystems {
                     21781,
                     c ->
                             new org.locationtech.jts.geom.Coordinate(
-                                    c.getEast(),
-                                    c.getNorth(),
-                                    c.getOptionalElevation().orElse(NULL_ORDINATE)),
+                                    c.east(),
+                                    c.north(),
+                                    c.optionalElevation().orElse(NULL_ORDINATE)),
                     c -> new LV03Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new LV03Coordinate(420_000.0, 0.0),
                     new LV03Coordinate(900_000.0, 350_000.0));
@@ -65,11 +65,7 @@ public class CoordinateSystems {
     public static final CoordinateSystem<WebMercatorCoordinate> WEB_MERCATOR =
             new CoordinateSystem<>(
                     3857,
-                    c ->
-                            new Coordinate(
-                                    c.getX(),
-                                    c.getY(),
-                                    c.getOptionalElevation().orElse(NULL_ORDINATE)),
+                    c -> new Coordinate(c.x(), c.y(), c.optionalElevation().orElse(NULL_ORDINATE)),
                     c -> new WebMercatorCoordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new WebMercatorCoordinate(-WEB_MERCATOR_MAX_EXTENT, -WEB_MERCATOR_MAX_EXTENT),
                     new WebMercatorCoordinate(WEB_MERCATOR_MAX_EXTENT, WEB_MERCATOR_MAX_EXTENT));
@@ -81,12 +77,12 @@ public class CoordinateSystems {
                             new org.locationtech.jts.geom.Coordinate(
                                     c.east(),
                                     c.north(),
-                                    c.getOptionalElevation().orElse(NULL_ORDINATE)),
+                                    c.optionalElevation().orElse(NULL_ORDINATE)),
                     c -> new UTM32Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new UTM32Coordinate(-1877994.66, 3638086.74),
                     new UTM32Coordinate(3473041.38, 9494203.2));
 
-    public static final Collection<CoordinateSystem<?>> ALL =
+    private static final Collection<CoordinateSystem<?>> ALL =
             Set.of(LV95, LV03, WGS84, WEB_MERCATOR, UTM32);
 
     @SuppressWarnings("java:S1452") // No way of knowing the generic type here

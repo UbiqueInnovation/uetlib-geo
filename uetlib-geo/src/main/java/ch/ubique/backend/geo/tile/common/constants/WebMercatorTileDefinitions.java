@@ -17,7 +17,7 @@ public class WebMercatorTileDefinitions {
     public static TileLevelsDefinition tileDefinitions() {
         final var origin =
                 new WebMercatorCoordinate(
-                        WEB_MERCATOR.minCoordinate().getX(), WEB_MERCATOR.maxCoordinate().getY());
+                        WEB_MERCATOR.minCoordinate().x(), WEB_MERCATOR.maxCoordinate().y());
         final var maxLevel = 22;
         final var zoomLevels =
                 IntStream.range(0, maxLevel + 1)

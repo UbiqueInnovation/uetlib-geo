@@ -1,22 +1,16 @@
 package ch.ubique.backend.geo.coordinate.models;
 
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import jakarta.annotation.Nullable;
-
-import org.apache.commons.lang3.NotImplementedException;
-import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
-import org.locationtech.jts.geom.Point;
-
 import java.util.Optional;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record UTM32Coordinate(
         @Schema(
                         minimum = "-1877994.66",
@@ -45,62 +39,17 @@ public record UTM32Coordinate(
         this(east, north, null);
     }
 
-    @JsonCreator
-    public UTM32Coordinate(
-            @JsonProperty("east") final double east,
-            @JsonProperty("north") final double north,
-            @JsonProperty("elevation") final Double elevation) {
-        this.east = east;
-        this.north = north;
-        this.elevation = elevation;
-    }
-
-    public UTM32Coordinate withNorth(final double north) {
-        return new UTM32Coordinate(east, north, elevation);
-    }
-
-    public UTM32Coordinate withEast(final double east) {
-        return new UTM32Coordinate(east, north, elevation);
-    }
-
     public UTM32Coordinate withElevation(final Double elevation) {
         return new UTM32Coordinate(east, north, elevation);
     }
 
     @JsonIgnore
-    public Optional<Double> getOptionalElevation() {
+    public Optional<Double> optionalElevation() {
         return Optional.ofNullable(elevation);
-    }
-
-    @Override
-    public int srid() {
-        return CoordinateSystems.UTM32.srid();
-    }
-
-    @Override
-    public CoordinateReferenceSystem crs() {
-        return CoordinateSystems.UTM32.crs();
     }
 
     @Override
     public org.locationtech.jts.geom.Coordinate toJts() {
         return CoordinateSystems.UTM32.toJts(this);
-    }
-
-    @Override
-    public Point toJtsPoint() {
-        return JtsConverter.UTM32.toJtsPoint(this);
-    }
-
-    @Override
-    public String toString() {
-        return "UTM32Coordinate{"
-                + "east="
-                + east
-                + ", north="
-                + north
-                + ", elevation="
-                + elevation
-                + '}';
     }
 }
