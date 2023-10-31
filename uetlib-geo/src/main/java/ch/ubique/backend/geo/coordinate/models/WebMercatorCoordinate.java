@@ -68,16 +68,6 @@ public final class WebMercatorCoordinate implements Coordinate {
         return JtsConverter.WEB_MERCATOR.toJtsPoint(this);
     }
 
-    @Override
-    public double distanceTo(final Coordinate other) {
-        throw new NotImplementedException("distanceTo not implemented");
-    }
-
-    @Override
-    public double flatDistanceTo(final Coordinate other) {
-        throw new NotImplementedException("flatDistanceTo not implemented");
-    }
-
     public double getX() {
         return x;
     }

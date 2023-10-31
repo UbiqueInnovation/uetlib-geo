@@ -109,26 +109,6 @@ public final class UTM32Coordinate implements Coordinate {
     }
 
     @Override
-    public double distanceTo(final Coordinate other) {
-        return flatDistanceTo(other);
-    }
-
-    /**
-     * Calculates the distance between two coordinates in meters.
-     *
-     * @throws NotImplementedException Not implemented yet
-     */
-    @Override
-    public double flatDistanceTo(final Coordinate other) {
-        if (!(other instanceof final UTM32Coordinate otherUtm2)) {
-            throw new IllegalArgumentException(
-                    "Calculating the distance between different coordinate systems is not possible.");
-        }
-
-        throw new NotImplementedException("flatDistanceTo not implemented");
-    }
-
-    @Override
     public String toString() {
         return "UTM32Coordinate{"
                 + "east="

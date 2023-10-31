@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.ubique.backend.geo.coordinate.models.*;
 
+import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculatorFactory;
+import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.junit.jupiter.api.Test;
 
 class CoordinateConverterTest {
@@ -18,8 +20,18 @@ class CoordinateConverterTest {
         final var bernLv03 = new LV03Coordinate(600000, 200000, 500.0);
         final var bernLv95 = new LV95Coordinate(2600000, 1200000, 500.0);
 
-        assertTrue(bernLv03.distanceTo(JtsConverter.LV03.transform(bernLv95)) < LV03_EPSILON);
-        assertTrue(bernLv95.distanceTo(JtsConverter.LV95.transform(bernLv03)) < LV95_EPSILON);
+        assertTrue(
+                DistanceCalculatorFactory.create(bernLv03.crs())
+                                .getDistance(
+                                        bernLv03.toJts(),
+                                        JtsConverter.LV03.transform(bernLv95).toJts())
+                        < LV03_EPSILON);
+        assertTrue(
+                DistanceCalculatorFactory.create(bernLv95.crs())
+                                .getDistance(
+                                        bernLv95.toJts(),
+                                        JtsConverter.LV95.transform(bernLv03).toJts())
+                        < LV95_EPSILON);
     }
 
     @Test
@@ -27,8 +39,18 @@ class CoordinateConverterTest {
         final var bernLv95 = new LV95Coordinate(2600000, 1200000, 500.0);
         final var bernWgs84 = new WGS84Coordinate(46.9510827861504654, 7.4386324175389165, 500.0);
 
-        assertTrue(bernWgs84.distanceTo(JtsConverter.WGS84.transform(bernLv95)) < WGS84_EPSILON);
-        assertTrue(bernLv95.distanceTo(JtsConverter.LV95.transform(bernWgs84)) < LV95_EPSILON);
+        assertTrue(
+                DistanceCalculatorFactory.create(bernWgs84.crs())
+                                .getDistance(
+                                        bernWgs84.toJts(),
+                                        JtsConverter.WGS84.transform(bernLv95).toJts())
+                        < WGS84_EPSILON);
+        assertTrue(
+                DistanceCalculatorFactory.create(bernWgs84.crs())
+                                .getDistance(
+                                        JtsConverter.WGS84.transform(bernLv95).toJts(),
+                                        bernWgs84.toJts())
+                        < WGS84_EPSILON);
     }
 
     @Test
@@ -36,7 +58,12 @@ class CoordinateConverterTest {
         final var webMercator = new WebMercatorCoordinate(958207.0, 5847040.0, 500.0);
         final var wgs84 = new WGS84Coordinate(46.4146005, 8.60772, 500.0);
 
-        assertTrue(wgs84.distanceTo(JtsConverter.WGS84.transform(webMercator)) < WGS84_EPSILON);
+        assertTrue(
+                DistanceCalculatorFactory.create(wgs84.crs())
+                                .getDistance(
+                                        wgs84.toJts(),
+                                        JtsConverter.WGS84.transform(webMercator).toJts())
+                        < WGS84_EPSILON);
     }
 
     @Test
@@ -44,6 +71,10 @@ class CoordinateConverterTest {
         final var utm32 = new UTM32Coordinate(0, 0, 500.0);
         final var wgs84 = new WGS84Coordinate(0.0, 4.5112562, 500.0);
 
-        assertTrue(wgs84.distanceTo(JtsConverter.WGS84.transform(utm32)) < WGS84_EPSILON);
+        assertTrue(
+                DistanceCalculatorFactory.create(wgs84.crs())
+                                .getDistance(
+                                        wgs84.toJts(), JtsConverter.WGS84.transform(utm32).toJts())
+                        < WGS84_EPSILON);
     }
 }

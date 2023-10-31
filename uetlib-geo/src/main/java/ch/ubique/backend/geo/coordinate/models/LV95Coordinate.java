@@ -107,32 +107,6 @@ public final class LV95Coordinate implements Coordinate {
     }
 
     @Override
-    public double distanceTo(final Coordinate other) {
-        if (other instanceof final LV95Coordinate otherLv95) {
-
-            if (elevation == null || otherLv95.elevation == null) {
-                return flatDistanceTo(other);
-            }
-            return sqrt(
-                    pow(east - otherLv95.east, 2)
-                            + pow(north - otherLv95.north, 2)
-                            + pow(elevation - otherLv95.elevation, 2));
-        }
-        throw new IllegalArgumentException(
-                "Calculating the distance between different coordinate systems is not possible.");
-    }
-
-    @Override
-    public double flatDistanceTo(final Coordinate other) {
-        if (other instanceof final LV95Coordinate otherLv95) {
-            return sqrt(pow(east - otherLv95.east, 2) + pow(north - otherLv95.north, 2));
-        }
-        throw new IllegalArgumentException(
-                "Calculating the flat distance between different coordinate systems is not"
-                        + " possible.");
-    }
-
-    @Override
     public String toString() {
         return String.format(
                 "LV95(east=%,.2f, north=%,.2f, elevation=%,.1f)", east, north, elevation);

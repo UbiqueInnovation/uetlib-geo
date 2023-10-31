@@ -124,32 +124,6 @@ public final class WGS84Coordinate implements Coordinate {
     }
 
     @Override
-    public double distanceTo(final Coordinate other) {
-        return flatDistanceTo(other);
-    }
-
-    @Override
-    public double flatDistanceTo(final Coordinate other) {
-        if (other instanceof final WGS84Coordinate otherWgs84) {
-            final var r = 6371; // Radius of the earth in km
-            final var dLat = toRadians(otherWgs84.latitude - latitude);
-            final var dLon = toRadians(otherWgs84.longitude - longitude);
-            final var a =
-                    sin(dLat / 2) * sin(dLat / 2)
-                            + cos(toRadians(latitude))
-                                    * cos(toRadians(otherWgs84.latitude))
-                                    * sin(dLon / 2)
-                                    * sin(dLon / 2);
-            final var c = 2 * atan2(sqrt(a), sqrt(1 - a));
-            final var d = r * c; // Distance in [km]
-            return d * 1000; // Distance in [m]
-        }
-
-        throw new IllegalArgumentException(
-                "Calculating the distance between different coordinate systems is not possible.");
-    }
-
-    @Override
     public String toString() {
         return String.format(
                 "WGS84(lat=%,.2f, lon=%,.2f, elevation=%,.1f)", latitude, longitude, elevation);
