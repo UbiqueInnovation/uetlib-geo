@@ -3,6 +3,8 @@ package ch.ubique.backend.geo.coordinate.constants;
 import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 
 import ch.ubique.backend.geo.coordinate.models.Coordinate;
+import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculator;
+import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculatorFactory;
 
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -27,6 +29,7 @@ public final class CoordinateSystem<C extends Coordinate> {
     private final ReferencedEnvelope bounds;
     private final GeometryFactory geometryFactory;
     private final CoordinateReferenceSystem crs;
+    private final DistanceCalculator<C> distanceCalculator;
 
     CoordinateSystem(
             final int srid,
@@ -46,6 +49,7 @@ public final class CoordinateSystem<C extends Coordinate> {
         this.minJtsCoordinate = toJtsMapper.apply(minCoordinate);
         this.maxJtsCoordinate = toJtsMapper.apply(maxCoordinate);
         this.bounds = new ReferencedEnvelope(new Envelope(minJtsCoordinate, maxJtsCoordinate), crs);
+        this.distanceCalculator = DistanceCalculatorFactory.create(this);
     }
 
     public int srid() {
@@ -90,5 +94,9 @@ public final class CoordinateSystem<C extends Coordinate> {
 
     public Class<C> coordinateClass() {
         return coordinateClass;
+    }
+
+    public DistanceCalculator<C> distanceCalculator() {
+        return distanceCalculator;
     }
 }

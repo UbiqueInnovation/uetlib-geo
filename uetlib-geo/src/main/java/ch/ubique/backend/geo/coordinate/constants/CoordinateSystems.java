@@ -9,7 +9,8 @@ import ch.ubique.backend.geo.coordinate.models.*;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.locationtech.jts.geom.Coordinate;
 
-import java.util.stream.Stream;
+import java.util.Collection;
+import java.util.Set;
 
 public class CoordinateSystems {
 
@@ -76,17 +77,30 @@ public class CoordinateSystems {
     public static final CoordinateSystem<UTM32Coordinate> UTM32 =
             new CoordinateSystem<>(
                     25832,
-                    c -> new org.locationtech.jts.geom.Coordinate(c.east(), c.north(), c.getOptionalElevation().orElse(NULL_ORDINATE)),
+                    c ->
+                            new org.locationtech.jts.geom.Coordinate(
+                                    c.east(),
+                                    c.north(),
+                                    c.getOptionalElevation().orElse(NULL_ORDINATE)),
                     c -> new UTM32Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new UTM32Coordinate(-1877994.66, 3638086.74),
-                    new UTM32Coordinate(3473041.38, 9494203.2
-            ));
+                    new UTM32Coordinate(3473041.38, 9494203.2));
+
+    public static final Collection<CoordinateSystem<?>> ALL =
+            Set.of(LV95, LV03, WGS84, WEB_MERCATOR, UTM32);
 
     @SuppressWarnings("java:S1452") // No way of knowing the generic type here
     public static CoordinateSystem<?> forCrs(final CoordinateReferenceSystem crs) {
-        return Stream.of(LV95, LV03, WGS84, WEB_MERCATOR)
+        return ALL.stream()
                 .filter(coordinateSystem -> coordinateSystem.crs().equals(crs))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    public static <C extends ch.ubique.backend.geo.coordinate.models.Coordinate>
+            CoordinateSystem<C> forClass(final Class<C> cls) {
+        //noinspection unchecked
+        return (CoordinateSystem<C>)
+                ALL.stream().filter(c -> c.coordinateClass().equals(cls)).findFirst().orElseThrow();
     }
 }
