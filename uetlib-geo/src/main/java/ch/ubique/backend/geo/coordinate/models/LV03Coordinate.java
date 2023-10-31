@@ -107,31 +107,6 @@ public final class LV03Coordinate implements Coordinate {
     }
 
     @Override
-    public double distanceTo(final Coordinate other) {
-        if (other instanceof final LV03Coordinate otherLv03) {
-            if (elevation == null || otherLv03.elevation == null) {
-                return flatDistanceTo(otherLv03);
-            }
-            return sqrt(
-                    pow(east - otherLv03.east, 2)
-                            + pow(north - otherLv03.north, 2)
-                            + pow(elevation - otherLv03.elevation, 2));
-        }
-        throw new IllegalArgumentException(
-                "Calculating the distance between different coordinate systems is not possible.");
-    }
-
-    @Override
-    public double flatDistanceTo(final Coordinate other) {
-        if (other instanceof final LV03Coordinate otherLv03) {
-            return sqrt(pow(east - otherLv03.east, 2) + pow(north - otherLv03.north, 2));
-        }
-        throw new IllegalArgumentException(
-                "Calculating the flat distance between different coordinate systems is not"
-                        + " possible.");
-    }
-
-    @Override
     public String toString() {
         return String.format(
                 "LV03(east=%,.2f, north=%,.2f, elevation=%,.1f)", east, north, elevation);
