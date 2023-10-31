@@ -113,8 +113,8 @@ class JtsConverterTest {
         final var utm32Coordinate =
                 JtsConverter.UTM32.toBackendLib(
                         JtsConverter.UTM32.toJts(new UTM32Coordinate(465596, 5228847)));
-        Assertions.assertEquals(465596, utm32Coordinate.getEast());
-        Assertions.assertEquals(5228847, utm32Coordinate.getNorth());
+        Assertions.assertEquals(465596, utm32Coordinate.east());
+        Assertions.assertEquals(5228847, utm32Coordinate.north());
         Assertions.assertTrue(utm32Coordinate.getOptionalElevation().isEmpty());
     }
 }

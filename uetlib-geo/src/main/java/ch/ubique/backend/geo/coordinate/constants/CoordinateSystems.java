@@ -76,7 +76,7 @@ public class CoordinateSystems {
     public static final CoordinateSystem<UTM32Coordinate> UTM32 =
             new CoordinateSystem<>(
                     25832,
-                    c -> new org.locationtech.jts.geom.Coordinate(c.getEast(), c.getNorth(), c.getOptionalElevation().orElse(NULL_ORDINATE)),
+                    c -> new org.locationtech.jts.geom.Coordinate(c.east(), c.north(), c.getOptionalElevation().orElse(NULL_ORDINATE)),
                     c -> new UTM32Coordinate(c.x, c.y, nullIfNaN(c.getZ())),
                     new UTM32Coordinate(-1877994.66, 3638086.74),
                     new UTM32Coordinate(3473041.38, 9494203.2

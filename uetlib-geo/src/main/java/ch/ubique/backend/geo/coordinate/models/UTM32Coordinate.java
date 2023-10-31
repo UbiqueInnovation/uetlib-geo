@@ -17,33 +17,30 @@ import org.locationtech.jts.geom.Point;
 
 import java.util.Optional;
 
-public final class UTM32Coordinate implements Coordinate {
-
-    @Schema(
-            minimum = "-1877994.66",
-            maximum = "3473041.38",
-            example = "465596",
-            description = "specifies the east position")
-    @JsonProperty
-    private double east;
-
-    @Schema(
-            minimum = "3638086.74",
-            maximum = "9494203.2",
-            example = "5228847",
-            description = "specifies the north position")
-    @JsonProperty
-    private double north;
-
-    @Schema(
-            minimum = "-413",
-            maximum = "8849",
-            example = "574",
-            description = "meters above sea level",
-            nullable = true)
-    @JsonProperty
-    private Double elevation;
-
+public record UTM32Coordinate(
+        @Schema(
+                        minimum = "-1877994.66",
+                        maximum = "3473041.38",
+                        example = "465596",
+                        description = "specifies the east position")
+                @JsonProperty
+                double east,
+        @Schema(
+                        minimum = "3638086.74",
+                        maximum = "9494203.2",
+                        example = "5228847",
+                        description = "specifies the north position")
+                @JsonProperty
+                double north,
+        @Schema(
+                        minimum = "-413",
+                        maximum = "8849",
+                        example = "574",
+                        description = "meters above sea level",
+                        nullable = true)
+                @JsonProperty
+                Double elevation)
+        implements Coordinate {
     public UTM32Coordinate(final double east, final double north) {
         this(east, north, null);
     }
@@ -58,29 +55,16 @@ public final class UTM32Coordinate implements Coordinate {
         this.elevation = elevation;
     }
 
-    public double getEast() {
-        return east;
+    public UTM32Coordinate withNorth(final double north) {
+        return new UTM32Coordinate(east, north, elevation);
     }
 
-    public void setEast(final double east) {
-        this.east = east;
+    public UTM32Coordinate withEast(final double east) {
+        return new UTM32Coordinate(east, north, elevation);
     }
 
-    public double getNorth() {
-        return north;
-    }
-
-    public void setNorth(final double north) {
-        this.north = north;
-    }
-
-    @Nullable
-    public Double getElevation() {
-        return elevation;
-    }
-
-    public void setElevation(final Double elevation) {
-        this.elevation = elevation;
+    public UTM32Coordinate withElevation(final Double elevation) {
+        return new UTM32Coordinate(east, north, elevation);
     }
 
     @JsonIgnore
