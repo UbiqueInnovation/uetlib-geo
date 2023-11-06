@@ -16,6 +16,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 
 import jakarta.validation.constraints.NotNull;
 
+import org.apache.commons.io.FileUtils;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
@@ -27,7 +28,6 @@ import org.slf4j.MDC;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -42,7 +42,7 @@ public class VectorTileGenerator implements TileGenerator {
 
     private final Cache<VectorTileElement, Envelope> envelopeCache;
 
-    private final Map<Integer, Collection<Double>> tileSizes;
+    private final Map<TileInfo, Double> tileSizes;
 
     public VectorTileGenerator(final VectorTileOutput output, final int parallelism) {
         this.output = output;
@@ -96,13 +96,31 @@ public class VectorTileGenerator implements TileGenerator {
     }
 
     private void logStats() {
+        output.config().zoomLevels().forEach(this::logStatsForLevel);
+        logStatsForCollection("All levels", tileSizes.values());
+        logInfosForLargestTiles();
+    }
+
+    private void logInfosForLargestTiles() {
+        logger.info("Finding largest tiles.");
         tileSizes.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
+                .sorted(Comparator.comparing(entry -> -entry.getValue()))
+                .limit(10)
                 .forEach(
                         entry ->
-                                logStatsForCollection("Level " + entry.getKey(), entry.getValue()));
-        final var allSizes = tileSizes.values().stream().flatMap(Collection::stream).toList();
-        logStatsForCollection("All levels", allSizes);
+                                logger.info(
+                                        "{}: {}",
+                                        entry.getKey().path(),
+                                        FileUtils.byteCountToDisplaySize(entry.getValue())));
+    }
+
+    private void logStatsForLevel(Integer level) {
+        final var sizesForLevel =
+                tileSizes.entrySet().stream()
+                        .filter(entry -> entry.getKey().level() == level)
+                        .map(Map.Entry::getValue)
+                        .toList();
+        logStatsForCollection("Level " + level, sizesForLevel);
     }
 
     private void logStatsForCollection(final String prefix, final Collection<Double> sizes) {
@@ -123,10 +141,7 @@ public class VectorTileGenerator implements TileGenerator {
     private void createGenerateAndConsumeTile(final TileInfo tileInfo) {
         final var tile = createTile(tileInfo);
         final var binaryTile = generateTile(tile);
-        final var level = binaryTile.info().level();
-        tileSizes
-                .computeIfAbsent(level, ignored -> new ConcurrentLinkedQueue<>())
-                .add((double) binaryTile.bytes().length);
+        tileSizes.put(binaryTile.info(), (double) binaryTile.bytes().length);
         consumeTile(binaryTile);
     }
 
