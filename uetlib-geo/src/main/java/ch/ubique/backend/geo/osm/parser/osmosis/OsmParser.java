@@ -1,13 +1,12 @@
 package ch.ubique.backend.geo.osm.parser.osmosis;
 
-import crosby.binary.osmosis.OsmosisReader;
-
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.domain.v0_6.Bound;
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.Relation;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
+import org.openstreetmap.osmosis.pbf2.v0_6.PbfReader;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -71,20 +70,24 @@ public class OsmParser {
     }
 
     public void parse() {
-        final var reader = new OsmosisReader(inputStream);
+        parse(1);
+    }
+
+    public void parse(final int workers) {
+        final var reader = new PbfReader(() -> inputStream, workers);
         reader.setSink(
                 new Sink() {
                     @Override
                     public void process(final EntityContainer entityContainer) {
                         final var entity = entityContainer.getEntity();
 
-                        if (entity instanceof Way way) {
+                        if (entity instanceof final Way way) {
                             invoke(onWay, way);
-                        } else if (entity instanceof Node node) {
+                        } else if (entity instanceof final Node node) {
                             invoke(onNode, node);
-                        } else if (entity instanceof Relation relation) {
+                        } else if (entity instanceof final Relation relation) {
                             invoke(onRelation, relation);
-                        } else if (entity instanceof Bound bound) {
+                        } else if (entity instanceof final Bound bound) {
                             invoke(onBound, bound);
                         }
                     }
