@@ -25,9 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Predicate;
@@ -43,14 +42,14 @@ public class VectorTileGenerator implements TileGenerator {
 
     private final Cache<VectorTileElement, Envelope> envelopeCache;
 
-    private final Collection<Double> tileSizes;
+    private final Map<Integer, Collection<Double>> tileSizes;
 
     public VectorTileGenerator(final VectorTileOutput output, final int parallelism) {
         this.output = output;
         this.forkJoinPool = new ForkJoinPool(parallelism);
         final var cacheBuilder = Caffeine.newBuilder();
         this.envelopeCache = cacheBuilder.build();
-        this.tileSizes = new ConcurrentLinkedQueue<>();
+        this.tileSizes = new ConcurrentHashMap<>();
     }
 
     public static void generateTiles(final VectorTileOutput output) {
@@ -70,7 +69,7 @@ public class VectorTileGenerator implements TileGenerator {
                 .forEach(this::generateTilesForInfos);
         logger.info("Generated all tiles.");
 
-        computeStats();
+        logStats();
 
         envelopeCache.invalidateAll();
         forkJoinPool.shutdown();
@@ -96,24 +95,38 @@ public class VectorTileGenerator implements TileGenerator {
                 .join();
     }
 
-    private void computeStats() {
-        logger.info("Computing stats.");
-        final var nonEmptyTiles = tileSizes.stream().filter(v -> v > 0).toList();
-        final var numTiles = tileSizes.size();
+    private void logStats() {
+        tileSizes.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(
+                        entry ->
+                                logStatsForCollection("Level " + entry.getKey(), entry.getValue()));
+        final var allSizes = tileSizes.values().stream().flatMap(Collection::stream).toList();
+        logStatsForCollection("All levels", allSizes);
+    }
+
+    private void logStatsForCollection(final String prefix, final Collection<Double> sizes) {
+        final var nonEmptyTiles = sizes.stream().filter(size -> size > 0).toList();
+        final var numTiles = sizes.size();
         final var numNonEmptyTiles = nonEmptyTiles.size();
         final var nonEmptyPercentage = Math.round(100.0 * numNonEmptyTiles / numTiles);
         logger.info(
-                "{} tiles in total, of which {} ({} %) are non empty.",
-                numTiles, numNonEmptyTiles, nonEmptyPercentage);
+                "{}: {} tiles in total, of which {} ({} %) are non empty.",
+                prefix, numTiles, numNonEmptyTiles, nonEmptyPercentage);
 
-        final var stats = StatisticUtils.stats(nonEmptyTiles);
-        logger.info("Stats for non empty tiles: {}", stats);
+        if (!nonEmptyTiles.isEmpty()) {
+            final var stats = StatisticUtils.formatByteStats(StatisticUtils.stats(nonEmptyTiles));
+            logger.info("{}: stats for non empty tiles: {}", prefix, stats);
+        }
     }
 
     private void createGenerateAndConsumeTile(final TileInfo tileInfo) {
         final var tile = createTile(tileInfo);
         final var binaryTile = generateTile(tile);
-        tileSizes.add((double) binaryTile.bytes().length);
+        final var level = binaryTile.info().level();
+        tileSizes
+                .computeIfAbsent(level, ignored -> new ConcurrentLinkedQueue<>())
+                .add((double) binaryTile.bytes().length);
         consumeTile(binaryTile);
     }
 
