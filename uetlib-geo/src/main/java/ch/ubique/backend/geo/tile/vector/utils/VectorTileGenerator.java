@@ -96,7 +96,7 @@ public class VectorTileGenerator implements TileGenerator {
     }
 
     private void logStats() {
-        output.config().zoomLevels().forEach(this::logStatsForLevel);
+        output.config().zoomLevels().stream().sorted().forEach(this::logStatsForLevel);
         logStatsForCollection("All levels", tileSizes.values());
         logInfosForLargestTiles();
     }
