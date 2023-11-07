@@ -27,6 +27,7 @@ public class RoutingGraphVectorTileEncoder implements TileEncoder {
 
     public static boolean isRoutingGraphTile(final Tile tile) {
         return tile instanceof final VectorTile vectorTile
+                && !vectorTile.elements().isEmpty()
                 && vectorTile.elements().stream().allMatch(Vertex.class::isInstance);
     }
 
