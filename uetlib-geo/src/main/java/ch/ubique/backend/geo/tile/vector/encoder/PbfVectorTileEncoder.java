@@ -22,6 +22,9 @@ public final class PbfVectorTileEncoder extends AbstractVectorTileEncoder {
 
     @Override
     public byte[] encodeVectorTile(final VectorTile tile) {
+        if (tile.elements().isEmpty()) {
+            return new byte[0];
+        }
         for (final var element : tile.elements()) {
             final var geometry = getTileGeometry(element, tile.tileInfo().envelope());
             if (geometry.isEmpty()) {
