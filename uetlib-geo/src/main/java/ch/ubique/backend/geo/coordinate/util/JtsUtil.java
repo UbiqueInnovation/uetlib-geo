@@ -316,7 +316,7 @@ public class JtsUtil {
 
     public static Geometry unwrapIfGeometryCollectionHasOnlyOneGeometry(final Geometry geometry) {
         if (geometry instanceof GeometryCollection && geometry.getNumGeometries() == 1) {
-            return flatGeometriesStream(geometry).findAny().orElseThrow();
+            return unwrapIfGeometryCollectionHasOnlyOneGeometry(geometry.getGeometryN(0));
         }
         return geometry;
     }
