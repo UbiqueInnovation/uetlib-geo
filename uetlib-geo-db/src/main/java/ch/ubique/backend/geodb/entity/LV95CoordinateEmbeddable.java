@@ -27,7 +27,7 @@ public class LV95CoordinateEmbeddable {
 
     public static LV95CoordinateEmbeddable from(final LV95Coordinate lv95Coordinate) {
         return new LV95CoordinateEmbeddable(
-                lv95Coordinate.getEast(), lv95Coordinate.getNorth(), lv95Coordinate.getElevation());
+                lv95Coordinate.east(), lv95Coordinate.north(), lv95Coordinate.elevation());
     }
 
     public LV95Coordinate toCoordinate() {

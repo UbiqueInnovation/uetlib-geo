@@ -41,7 +41,7 @@ class TileGeometryUtilsTest {
                                 config);
                 Assertions.assertFalse(actual.isEmpty());
                 Assertions.assertEquals(
-                        testCoordinate.getOptionalElevation().orElse(null),
+                        testCoordinate.optionalElevation().orElse(null),
                         actual.getCoordinate().getZ());
             }
         }

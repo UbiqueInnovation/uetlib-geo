@@ -37,9 +37,11 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
             new JtsConverter<>(CoordinateSystems.LV03);
     public static final JtsConverter<WebMercatorCoordinate> WEB_MERCATOR =
             new JtsConverter<>(CoordinateSystems.WEB_MERCATOR);
+    public static final JtsConverter<UTM32Coordinate> UTM32 =
+            new JtsConverter<>(CoordinateSystems.UTM32);
 
     private static final Collection<JtsConverter<?>> ALL_CONVERTERS =
-            Set.of(LV95, LV03, WGS84, WEB_MERCATOR);
+            Set.of(LV95, LV03, WGS84, WEB_MERCATOR, UTM32);
 
     private final CoordinateSystem<C> coordinateSystem;
 

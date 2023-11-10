@@ -10,6 +10,8 @@ import ch.ubique.backend.geo.kml.models.Placemark;
 import ch.ubique.backend.geo.kml.models.Style;
 import ch.ubique.backend.geo.kml.models.StyleMap;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -121,9 +123,7 @@ public class KmlParser {
                                 coordinates.set(
                                         coordinates.size() - 1,
                                         new LV95Coordinate(
-                                                first.getEast(),
-                                                first.getNorth(),
-                                                first.getOptionalElevation().orElse(null)));
+                                                first.east(), first.north(), first.elevation()));
                             }
                         }
                         placemark.addCoordinates(coordinates);
@@ -274,6 +274,11 @@ public class KmlParser {
     }
 
     private static LV95Coordinate toSwissCoordinate(final String value) {
+        return JtsConverter.LV95.transform(toWgs84Coordinate(value));
+    }
+
+    @NotNull
+    private static WGS84Coordinate toWgs84Coordinate(final String value) {
         final var split = value.split(",");
         final var lon = Double.parseDouble(split[0]);
         final var lat = Double.parseDouble(split[1]);
@@ -281,9 +286,8 @@ public class KmlParser {
 
         if (split.length > 2) {
             final var elevation = Double.parseDouble(split[2]);
-            wgs84Coordinate.setElevation(elevation);
+            return wgs84Coordinate.withElevation(elevation);
         }
-
-        return JtsConverter.LV95.transform(wgs84Coordinate);
+        return wgs84Coordinate;
     }
 }
