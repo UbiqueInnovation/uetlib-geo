@@ -27,7 +27,7 @@ public class LV03CoordinateEmbeddable {
 
     public static LV03CoordinateEmbeddable from(final LV03Coordinate lv03Coordinate) {
         return new LV03CoordinateEmbeddable(
-                lv03Coordinate.getEast(), lv03Coordinate.getNorth(), lv03Coordinate.getElevation());
+                lv03Coordinate.east(), lv03Coordinate.north(), lv03Coordinate.elevation());
     }
 
     public LV03Coordinate toCoordinate() {

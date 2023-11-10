@@ -2,7 +2,6 @@ package ch.ubique.backend.geo.mbtile.utils;
 
 import ch.ubique.backend.db.sqlite.SQLiteDB;
 import ch.ubique.backend.db.sqlite.SQLiteHelper;
-import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.mbtile.data.impl.JdbcMbtileDataServiceImpl;
 import ch.ubique.backend.geo.mbtile.metadata.constants.MbtileFormat;
 import ch.ubique.backend.geo.mbtile.metadata.constants.MetadataKey;
@@ -13,9 +12,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 
-import javax.sql.DataSource;
-
 public class MbtileHelper {
+
+    private MbtileHelper() {}
+
     private static final String MBTILE_DB_SCHEMA_PATH =
             "ch/ubique/backend/geo/mbtile/data/schema.sql";
     private static final String MBTILES_EXTENSION = ".mbtiles";
@@ -35,25 +35,23 @@ public class MbtileHelper {
             final String name,
             final int version,
             final MbtileFormat mbtileFormat,
-            int minZoom,
-            int maxZoom)
+            final int minZoom,
+            final int maxZoom)
             throws SQLException, IOException, ClassNotFoundException {
-        final SQLiteDB sqliteDb = getUninitializedDb(name, version);
-        final DataSource dataSource = sqliteDb.getDataSource();
-        final JdbcMbtileDataServiceImpl dataService = new JdbcMbtileDataServiceImpl(dataSource);
+        final var sqliteDb = getUninitializedDb(name, version);
+        final var dataSource = sqliteDb.getDataSource();
+        final var dataService = new JdbcMbtileDataServiceImpl(dataSource);
 
         dataService.insertReplaceMetadataName(name);
         dataService.insertReplaceMetadataFormat(mbtileFormat);
 
-        final WGS84Coordinate centerOfCh = SwissConstants.getCenterOfCh();
-        final int zoomLevelOfDefaultView = 10;
+        final var centerOfCh = SwissConstants.getCenterOfCh();
+        final var zoomLevelOfDefaultView = 10;
         dataService.insertReplaceMetadata(
                 MetadataKey.CENTER,
                 String.format(
                         "%f,%f,%d",
-                        centerOfCh.getLongitude(),
-                        centerOfCh.getLatitude(),
-                        zoomLevelOfDefaultView));
+                        centerOfCh.latitude(), centerOfCh.longitude(), zoomLevelOfDefaultView));
 
         dataService.insertReplaceMetadata(MetadataKey.VERSION, version);
 
@@ -64,7 +62,7 @@ public class MbtileHelper {
         return sqliteDb;
     }
 
-    public static SQLiteDB getUninitializedDb(String name, int version)
+    public static SQLiteDB getUninitializedDb(final String name, final int version)
             throws SQLException, IOException, ClassNotFoundException {
         return SQLiteHelper.createSQLiteDbInTempDir(
                 name + MBTILES_EXTENSION, MBTILE_DB_SCHEMA_PATH, version);

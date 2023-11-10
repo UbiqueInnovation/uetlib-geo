@@ -28,9 +28,9 @@ public class WebMercatorCoordinateEmbeddable {
     public static WebMercatorCoordinateEmbeddable from(
             final WebMercatorCoordinate webMercatorCoordinate) {
         return new WebMercatorCoordinateEmbeddable(
-                webMercatorCoordinate.getX(),
-                webMercatorCoordinate.getY(),
-                webMercatorCoordinate.getElevation());
+                webMercatorCoordinate.x(),
+                webMercatorCoordinate.y(),
+                webMercatorCoordinate.elevation());
     }
 
     public WebMercatorCoordinate toCoordinate() {
