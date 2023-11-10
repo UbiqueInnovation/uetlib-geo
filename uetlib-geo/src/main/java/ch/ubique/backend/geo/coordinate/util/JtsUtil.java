@@ -78,13 +78,13 @@ public class JtsUtil {
     public static GeometryCollection toGeometryCollection(
             @NotNull final Collection<Geometry> geometries) {
         return factoryFromGeometryCollection(geometries)
-                .createGeometryCollection(flattenGeometries(geometries).toArray(Geometry[]::new));
+                .createGeometryCollection(geometries.toArray(Geometry[]::new));
     }
 
     @NotNull
     public static GeometryCollection toGeometryCollection(
             @NotNull final Stream<Geometry> geometries) {
-        final var array = flattenGeometries(geometries).toArray(Geometry[]::new);
+        final var array = geometries.toArray(Geometry[]::new);
         return factoryFromGeometryCollection(array).createGeometryCollection(array);
     }
 
