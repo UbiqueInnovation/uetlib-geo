@@ -43,10 +43,23 @@ public class JtsUtil {
     }
 
     @NotNull
+    public static MultiPoint toJtsMultiPoint(@NotNull final Stream<Point> points) {
+        final var array = points.toArray(Point[]::new);
+        return factoryFromGeometryCollection(array).createMultiPoint(array);
+    }
+
+    @NotNull
     public static MultiLineString toJtsMultiLineString(
             @NotNull final Collection<LineString> lineStrings) {
         return factoryFromGeometryCollection(lineStrings)
                 .createMultiLineString(lineStrings.toArray(LineString[]::new));
+    }
+
+    @NotNull
+    public static MultiLineString toJtsMultiLineString(
+            @NotNull final Stream<LineString> lineStrings) {
+        final var array = lineStrings.toArray(LineString[]::new);
+        return factoryFromGeometryCollection(array).createMultiLineString(array);
     }
 
     @NotNull
@@ -56,16 +69,37 @@ public class JtsUtil {
     }
 
     @NotNull
+    public static MultiPolygon toJtsMultiPolygon(@NotNull final Stream<Polygon> polygons) {
+        final var array = polygons.toArray(Polygon[]::new);
+        return factoryFromGeometryCollection(array).createMultiPolygon(array);
+    }
+
+    @NotNull
     public static GeometryCollection toGeometryCollection(
             @NotNull final Collection<Geometry> geometries) {
         return factoryFromGeometryCollection(geometries)
-                .createGeometryCollection(flattenGeometries(geometries).toArray(Geometry[]::new));
+                .createGeometryCollection(geometries.toArray(Geometry[]::new));
+    }
+
+    @NotNull
+    public static GeometryCollection toGeometryCollection(
+            @NotNull final Stream<Geometry> geometries) {
+        final var array = geometries.toArray(Geometry[]::new);
+        return factoryFromGeometryCollection(array).createGeometryCollection(array);
     }
 
     public static GeometryFactory factoryFromGeometryCollection(
             @NotNull final Collection<? extends Geometry> geometries) {
         final var geometryMaybe = geometries.stream().findAny();
         return geometryMaybe.map(Geometry::getFactory).orElse(new GeometryFactory());
+    }
+
+    public static GeometryFactory factoryFromGeometryCollection(
+            @NotNull final Geometry[] geometries) {
+        if (geometries.length > 0) {
+            return geometries[0].getFactory();
+        }
+        return new GeometryFactory();
     }
 
     public static CoordinateReferenceSystem getCrs(final Geometry geometry) {
@@ -134,16 +168,37 @@ public class JtsUtil {
      * @return a stream of flattened geometries
      */
     public static Stream<Geometry> flatGeometriesStream(final Collection<Geometry> geometries) {
-        return geometries.stream().flatMap(JtsUtil::flatGeometriesStream);
+        return flatGeometriesStream(geometries.stream());
+    }
+
+    /**
+     * Flattens a geometry by recursively extracting all child geometries and returning them as a
+     * stream.
+     *
+     * @param geometries the geometries to be flattened
+     * @return a stream of flattened geometries
+     */
+    public static Stream<Geometry> flatGeometriesStream(final Stream<Geometry> geometries) {
+        return geometries.flatMap(JtsUtil::flatGeometriesStream);
     }
 
     /**
      * Flattens a collection of geometries by recursively extracting all child geometries
      *
      * @param geometries a collection of geometries to be flattened
-     * @return a stream of flattened geometries
+     * @return a collection of flattened geometries
      */
     public static List<Geometry> flattenGeometries(final Collection<Geometry> geometries) {
+        return flatGeometriesStream(geometries).toList();
+    }
+
+    /**
+     * Flattens a stream of geometries by recursively extracting all child geometries
+     *
+     * @param geometries a stream of geometries to be flattened
+     * @return a collection of flattened geometries
+     */
+    public static List<Geometry> flattenGeometries(final Stream<Geometry> geometries) {
         return flatGeometriesStream(geometries).toList();
     }
 
@@ -240,18 +295,28 @@ public class JtsUtil {
     }
 
     public static Geometry mergeLines(final Geometry geometry) {
-        final var lineMerger = new LineMerger();
-        lineMerger.add(geometry);
-        final var mergedLineStrings = lineMerger.getMergedLineStrings();
+        return mergeLines(Stream.of(geometry));
+    }
 
-        //noinspection unchecked
-        final var merged = toJtsMultiLineString(mergedLineStrings);
+    public static Geometry mergeLines(final Collection<Geometry> geometries) {
+        return mergeLines(geometries.stream());
+    }
+
+    public static Geometry mergeLines(final Stream<Geometry> geometryStream) {
+        final var merged = toJtsMultiLineString(mergeLinesStream(geometryStream));
         return unwrapIfGeometryCollectionHasOnlyOneGeometry(merged);
+    }
+
+    public static Stream<LineString> mergeLinesStream(final Stream<Geometry> geometryStream) {
+        final var lineMerger = new LineMerger();
+        geometryStream.forEach(lineMerger::add);
+        //noinspection unchecked
+        return lineMerger.getMergedLineStrings().stream();
     }
 
     public static Geometry unwrapIfGeometryCollectionHasOnlyOneGeometry(final Geometry geometry) {
         if (geometry instanceof GeometryCollection && geometry.getNumGeometries() == 1) {
-            return flatGeometriesStream(geometry).findAny().orElseThrow();
+            return unwrapIfGeometryCollectionHasOnlyOneGeometry(geometry.getGeometryN(0));
         }
         return geometry;
     }
