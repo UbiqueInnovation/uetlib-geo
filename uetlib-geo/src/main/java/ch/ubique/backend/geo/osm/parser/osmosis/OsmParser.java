@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.osm.parser.osmosis;
 
+import ch.ubique.backend.core.utils.IndeterminateProgressLogger;
+
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.domain.v0_6.Bound;
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
@@ -7,6 +9,7 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Relation;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 import org.openstreetmap.osmosis.pbf2.v0_6.PbfReader;
+import org.slf4j.MDC;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -26,8 +29,22 @@ public class OsmParser {
     private Runnable onComplete;
     private Runnable onClose;
 
+    private final IndeterminateProgressLogger nodeProgressLogger;
+    private final IndeterminateProgressLogger wayProgressLogger;
+    private final IndeterminateProgressLogger relationProgressLogger;
+
     private OsmParser(final InputStream inputStream) {
         this.inputStream = inputStream;
+
+        final var simpleName = getClass().getSimpleName();
+        final var contextMap = MDC.getCopyOfContextMap();
+
+        nodeProgressLogger =
+                new IndeterminateProgressLogger(simpleName + " - Nodes: ", 1_000_000, contextMap);
+        wayProgressLogger =
+                new IndeterminateProgressLogger(simpleName + " - Ways: ", 100_000, contextMap);
+        relationProgressLogger =
+                new IndeterminateProgressLogger(simpleName + " - Relations: ", 10_000, contextMap);
     }
 
     public static OsmParser from(final InputStream inputStream) {
@@ -83,10 +100,13 @@ public class OsmParser {
 
                         if (entity instanceof final Way way) {
                             invoke(onWay, way);
+                            wayProgressLogger.step();
                         } else if (entity instanceof final Node node) {
                             invoke(onNode, node);
+                            nodeProgressLogger.step();
                         } else if (entity instanceof final Relation relation) {
                             invoke(onRelation, relation);
+                            relationProgressLogger.step();
                         } else if (entity instanceof final Bound bound) {
                             invoke(onBound, bound);
                         }
