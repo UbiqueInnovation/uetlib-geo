@@ -256,8 +256,12 @@ public class JtsUtil {
     }
 
     public static void updateSrid(final Geometry geometry, final int srid) {
-        geometry.setSRID(srid);
-        getFlatGeometriesIterator(geometry).forEachRemaining(g -> g.setSRID(srid));
+        // We need to recreate the geometry, otherwise it has the wrong geometry factory
+        geometryFactoryForSrid(srid).createGeometry(geometry);
+    }
+
+    public static GeometryFactory geometryFactoryForSrid(final int srid) {
+        return new GeometryFactory(new PrecisionModel(), srid);
     }
 
     public static void throwIfCoordinateSystemNotEastNorth(final CoordinateReferenceSystem crs) {

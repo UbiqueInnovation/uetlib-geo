@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.coordinate.constants;
 import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 
 import ch.ubique.backend.geo.coordinate.models.Coordinate;
+import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculator;
 import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculatorFactory;
 
@@ -10,7 +11,6 @@ import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.PrecisionModel;
 
 import java.util.function.Function;
 
@@ -44,7 +44,7 @@ public final class CoordinateSystem<C extends Coordinate> {
         this.fromJtsMapper = fromJtsMapper;
         //noinspection unchecked
         this.coordinateClass = (Class<C>) minCoordinate.getClass();
-        this.geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        this.geometryFactory = JtsUtil.geometryFactoryForSrid(srid);
         this.crs = getCrs(srid);
         this.minJtsCoordinate = toJtsMapper.apply(minCoordinate);
         this.maxJtsCoordinate = toJtsMapper.apply(maxCoordinate);
