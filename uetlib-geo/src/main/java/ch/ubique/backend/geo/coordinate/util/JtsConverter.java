@@ -182,10 +182,8 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                             geometryWithinBounds,
                             findMathTransform(geometry.getSRID(), withHeight));
 
-            // JTS.transform doesnt update srid
-            JtsUtil.updateSrid(transformedGeometry, coordinateSystem.srid());
-
-            return transformedGeometry;
+            // We need to recreate the geometry, otherwise it has the wrong geometry factory
+            return coordinateSystem.geometryFactory().createGeometry(transformedGeometry);
         } catch (final TransformException | FactoryException e) {
             // rethrow as runtime exception. no way for caller to handle this
             throw new WrappedException(e);
