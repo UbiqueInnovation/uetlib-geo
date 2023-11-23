@@ -1,12 +1,12 @@
-package ch.ubique.backend.geo.mbtile.utils;
+package ch.ubique.backend.geodb.mbtile.utils;
 
 import ch.ubique.backend.db.sqlite.SQLiteDB;
 import ch.ubique.backend.db.sqlite.SQLiteHelper;
-import ch.ubique.backend.geo.mbtile.data.impl.JdbcMbtileDataServiceImpl;
 import ch.ubique.backend.geo.mbtile.metadata.constants.MbtileFormat;
 import ch.ubique.backend.geo.mbtile.metadata.constants.MetadataKey;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
+import ch.ubique.backend.geodb.mbtile.data.impl.JdbcMbtileDataServiceImpl;
 
 import java.io.IOException;
 import java.sql.SQLException;
