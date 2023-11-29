@@ -28,6 +28,7 @@ public record VectorTileConfig(
         @PositiveOrZero double smoothing,
         int clipBuffer,
         boolean validateElements,
+        boolean validateGeometryAtEveryStep,
         @NotNull Level emptyGeometryLogLevel,
         @Positive int extent,
         @NotNull TileOutputFormat outputFormat,
@@ -82,6 +83,7 @@ public record VectorTileConfig(
         private double smoothing;
         private int clipBuffer;
         private boolean validateElements = true;
+        private boolean validateGeometryAtEveryStep = true;
         private int extent = 4096;
         private TileOutputFormat outputFormat = TileOutputFormat.PBF;
         private ReferencedEnvelope outputEnvelope;
@@ -143,6 +145,12 @@ public record VectorTileConfig(
 
         public VectorTileConfigBuilder validateElements(final boolean validateElements) {
             this.validateElements = validateElements;
+            return this;
+        }
+
+        public VectorTileConfigBuilder validateGeometryAtEveryStep(
+                final boolean validateGeometryAtEveryStep) {
+            this.validateGeometryAtEveryStep = validateGeometryAtEveryStep;
             return this;
         }
 
@@ -220,6 +228,7 @@ public record VectorTileConfig(
                     smoothing,
                     clipBuffer,
                     validateElements,
+                    validateGeometryAtEveryStep,
                     emptyGeometryLogLevel,
                     extent,
                     outputFormat,
