@@ -68,74 +68,96 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
 
     protected Optional<Geometry> getTileGeometry(
             @Nullable final VectorTileElement element, @NotNull final ReferencedEnvelope bounds) {
-        return Optional.ofNullable(element)
-                .map(VectorTileElement::geometry)
-                .flatMap(validateGeometry("Source"))
-                .map(convertToTileCoordinates(bounds))
-                .flatMap(validateGeometry("Tile"))
-                .map(this::simplifyIfNeeded)
-                .flatMap(validateGeometry("Simplified"))
-                .map(this::smoothingIfNeeded)
-                .flatMap(validateGeometry("Smoothed"))
-                .map(this::clip)
-                .flatMap(validateGeometry("Clipped"))
-                .map(this::toIntegerGrid)
-                .flatMap(validateGeometry("Integer"))
+        if (element == null) {
+            return Optional.empty();
+        }
+
+        return getSourceGeometry(element)
+                .flatMap(convertToTileCoordinates(bounds))
+                .flatMap(this::simplifyIfNeeded)
+                .flatMap(this::clip)
+                .flatMap(this::smoothingIfNeeded)
+                .flatMap(this::toIntegerGrid)
+                .flatMap(this::finalCheck)
                 .flatMap(includeForOutput(element));
     }
 
-    private Function<Geometry, Optional<Geometry>> validateGeometry(@NotNull final String context) {
-        return geometry -> {
-            if (!geometry.isEmpty() && geometry.isValid()) {
-                return Optional.of(geometry);
-            }
-            try {
-                logger.debug("{} geometry is not valid, trying to fix now", context);
-                final var validGeometry = JtsUtil.tryToGetValidGeometry(geometry);
-                if (validGeometry.isEmpty()) {
-                    logger.atLevel(config.emptyGeometryLogLevel())
-                            .log("{} geometry is empty.", context);
-                    return Optional.empty();
-                }
-                return Optional.of(validGeometry);
-            } catch (final UnfixableGeometryException e) {
-                logger.warn("{} geometry is not valid and could not be fixed", context, e);
+    private Optional<Geometry> getSourceGeometry(final @NotNull VectorTileElement element) {
+        return checkGeometry("Source", element.geometry(), config.validateGeometryAtEveryStep());
+    }
+
+    private Optional<Geometry> checkGeometry(
+            @NotNull final String context,
+            @NotNull final Geometry geometry,
+            final boolean validate) {
+
+        if (geometry.isEmpty()) {
+            logger.atLevel(config.emptyGeometryLogLevel()).log("{} geometry is empty.", context);
+            return Optional.empty();
+        }
+
+        if (!validate || geometry.isValid()) {
+            return Optional.of(geometry);
+        }
+
+        try {
+            logger.debug("{} geometry is not valid, trying to fix now", context);
+            final var validGeometry = JtsUtil.tryToGetValidGeometry(geometry);
+            if (validGeometry.isEmpty()) {
+                logger.atLevel(config.emptyGeometryLogLevel())
+                        .log("{} geometry is empty after fixing.", context);
                 return Optional.empty();
             }
+            return Optional.of(validGeometry);
+        } catch (final UnfixableGeometryException e) {
+            logger.warn("{} geometry is not valid and could not be fixed", context, e);
+            return Optional.empty();
+        }
+    }
+
+    private Function<Geometry, Optional<Geometry>> convertToTileCoordinates(
+            @NotNull final ReferencedEnvelope bounds) {
+        return geometry -> {
+            final var tileGeometry = TileGeometryUtils.getTileGeometry(geometry, bounds, config);
+            return checkGeometry("Tile", tileGeometry, config.validateGeometryAtEveryStep());
         };
     }
 
-    private Function<Geometry, Geometry> convertToTileCoordinates(
-            @NotNull final ReferencedEnvelope bounds) {
-        return geometry -> TileGeometryUtils.getTileGeometry(geometry, bounds, config);
-    }
-
-    private Geometry simplifyIfNeeded(@NotNull final Geometry geometry) {
-        if (config.simplifyTolerance() > 0) {
-            return SimplifyGeometryUtils.simplify(geometry, config.simplifyTolerance());
+    private Optional<Geometry> simplifyIfNeeded(@NotNull final Geometry geometry) {
+        final var tolerance = config.simplifyTolerance();
+        if (tolerance > 0) {
+            final var simplified = SimplifyGeometryUtils.simplify(geometry, tolerance);
+            return checkGeometry("Simplified", simplified, config.validateGeometryAtEveryStep());
         }
 
-        return geometry;
+        return Optional.of(geometry);
     }
 
-    private Geometry smoothingIfNeeded(@NotNull final Geometry geometry) {
+    private Optional<Geometry> smoothingIfNeeded(@NotNull final Geometry geometry) {
         if (config.smoothing() > 0) {
             try {
-                return SimplifyGeometryUtils.smooth(geometry, config.simplifyTolerance());
+                final var smooth = SimplifyGeometryUtils.smooth(geometry, config.smoothing());
+                return checkGeometry("Smoothed", smooth, config.validateGeometryAtEveryStep());
             } catch (final RuntimeException e) {
                 logger.warn("Smoothing for {} failed.", geometry, e);
             }
         }
 
-        return geometry;
+        return Optional.of(geometry);
     }
 
-    private Geometry clip(final Geometry geometry) {
-        return tileBoundsPlusClipBuffer.intersection(geometry);
+    private Optional<Geometry> clip(@NotNull final Geometry geometry) {
+        final var clipped = tileBoundsPlusClipBuffer.intersection(geometry);
+        return checkGeometry("Clipped", clipped, config.validateGeometryAtEveryStep());
     }
 
-    private Geometry toIntegerGrid(@NotNull final Geometry geometry) {
-        return GeometryPrecisionReducer.reduce(geometry, new PrecisionModel(1));
+    private Optional<Geometry> toIntegerGrid(@NotNull final Geometry geometry) {
+        final var intGeometry = GeometryPrecisionReducer.reduce(geometry, new PrecisionModel(1));
+        return checkGeometry("Integer", intGeometry, config.validateGeometryAtEveryStep());
+    }
+
+    private Optional<Geometry> finalCheck(@NotNull final Geometry geometry) {
+        return checkGeometry("Final check", geometry, true);
     }
 
     public VectorTileConfig getConfig() {
