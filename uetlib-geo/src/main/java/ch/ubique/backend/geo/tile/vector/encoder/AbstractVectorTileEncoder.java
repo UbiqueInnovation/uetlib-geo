@@ -17,10 +17,7 @@ import jakarta.validation.constraints.NotNull;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,11 +70,11 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
         }
 
         return getSourceGeometry(element)
-                .flatMap(convertToTileCoordinates(bounds))
-                .flatMap(this::simplifyIfNeeded)
-                .flatMap(this::clip)
-                .flatMap(this::smoothingIfNeeded)
-                .flatMap(this::toIntegerGrid)
+                .flatMap(retryWithValidateOnException(convertToTileCoordinates(bounds)))
+                .flatMap(retryWithValidateOnException(this::simplifyIfNeeded))
+                .flatMap(retryWithValidateOnException(this::clip))
+                .flatMap(retryWithValidateOnException(this::smoothingIfNeeded))
+                .flatMap(retryWithValidateOnException(this::toIntegerGrid))
                 .flatMap(this::finalCheck)
                 .flatMap(includeForOutput(element));
     }
@@ -162,5 +159,16 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
 
     public VectorTileConfig getConfig() {
         return config;
+    }
+
+    public Function<Geometry, Optional<Geometry>> retryWithValidateOnException(
+            final Function<Geometry, Optional<Geometry>> function) {
+        return geometry -> {
+            try {
+                return function.apply(geometry);
+            } catch (final Exception e) {
+                return checkGeometry("Retry", geometry, true).flatMap(function);
+            }
+        };
     }
 }
