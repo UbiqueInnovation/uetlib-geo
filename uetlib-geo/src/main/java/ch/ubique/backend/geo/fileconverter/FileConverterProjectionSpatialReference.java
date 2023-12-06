@@ -11,16 +11,16 @@ public record FileConverterProjectionSpatialReference(
     public String toProj4String() {
         return String.format(
                 "+proj=%s +lat_0=%f +lon_0=%f +lat_ts=%f +a=%d +b=%d +units=%s",
-                projection, lat0, lon0, lat_ts, a, b, units);
+                projection, lat0, lon0, lat_ts, a, b, units.shortName);
     }
 
     public enum ProjectionUnit {
         METERS("m");
 
-        private final String unit;
+        private final String shortName;
 
         ProjectionUnit(final String unit) {
-            this.unit = unit;
+            this.shortName = unit;
         }
     }
 
