@@ -1,15 +1,15 @@
-package ch.ubique.backend.geo.fileconverter;
+package ch.ubique.backend.geo.gdal;
 
 import java.nio.file.Path;
 import java.util.Collection;
 
-public record FileConverterOptions(
+public record GdalWarpOptions(
         Collection<String> noDataValues,
         Collection<String> destinationNoDataValues,
         int width,
         int height,
         FileConverterResamplingMethod resamplingMethod,
-        FileConverterProjectionSpatialReference targetSpatialReference,
+        Proj4Declaration targetSpatialReference,
         FileConverterOutputFormat outputFormat,
         Path sourceFile,
         Path targetFile) {
@@ -184,7 +184,7 @@ public record FileConverterOptions(
         private int width;
         private int height;
         private FileConverterResamplingMethod resamplingMethod;
-        private FileConverterProjectionSpatialReference targetSpatialReference;
+        private Proj4Declaration targetSpatialReference;
         private FileConverterOutputFormat outputFormat;
         private Path sourceFile;
         private Path targetFile;
@@ -220,7 +220,7 @@ public record FileConverterOptions(
         }
 
         public FileConverterOptionsBuilder targetSpatialReference(
-                final FileConverterProjectionSpatialReference targetSpatialReference) {
+                final Proj4Declaration targetSpatialReference) {
             this.targetSpatialReference = targetSpatialReference;
             return this;
         }
@@ -241,14 +241,14 @@ public record FileConverterOptions(
             return this;
         }
 
-        public FileConverterOptions build() {
+        public GdalWarpOptions build() {
             if (sourceFile == null) {
                 throw new NullPointerException("The property \"sourceFile\" is null. ");
             }
             if (targetFile == null) {
                 throw new NullPointerException("The property \"targetFile\" is null. ");
             }
-            return new FileConverterOptions(
+            return new GdalWarpOptions(
                     srcNoDataValues,
                     destinationNoDataValues,
                     width,

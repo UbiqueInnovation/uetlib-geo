@@ -1,6 +1,6 @@
-package ch.ubique.backend.geo.fileconverter;
+package ch.ubique.backend.geo.gdal;
 
-public record FileConverterProjectionSpatialReference(
+public record Proj4Declaration(
         FileConverterProjection projection,
         float lat0,
         float lon0,
