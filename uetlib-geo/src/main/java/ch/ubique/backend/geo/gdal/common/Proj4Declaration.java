@@ -1,4 +1,4 @@
-package ch.ubique.backend.geo.gdal;
+package ch.ubique.backend.geo.gdal.common;
 
 public record Proj4Declaration(
         FileConverterProjection projection,
