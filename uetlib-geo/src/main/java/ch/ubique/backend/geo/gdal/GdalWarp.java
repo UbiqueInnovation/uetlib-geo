@@ -1,4 +1,4 @@
-package ch.ubique.backend.geo.fileconverter;
+package ch.ubique.backend.geo.gdal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,14 +9,14 @@ import java.time.Duration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class FileConverter {
+public class GdalWarp {
     public static final Path gdalwarpTempDir =
             Path.of(System.getProperty("java.io.tmpdir"), "/gdalwarp");
-    private static final Logger logger = LoggerFactory.getLogger(FileConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(GdalWarp.class);
 
-    private FileConverter() {}
+    private GdalWarp() {}
 
-    public static Path convert(final FileConverterOptions options, final Duration timeout)
+    public static Path convert(final GdalWarpOptions options, final Duration timeout)
             throws IOException, InterruptedException {
         final var builder = new ProcessBuilder();
         final var command = options.buildCommand();
