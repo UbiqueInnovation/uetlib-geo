@@ -22,6 +22,20 @@ public class Gdal {
         executeProcess(processBuilder, options.timeout());
     }
 
+    public static boolean isGdalWarpAvailable() {
+        return isLibAvailable("gdalwarp");
+    }
+
+    public static boolean isLibAvailable(final String binPath) {
+        try {
+            Runtime.getRuntime().exec(binPath + " -version");
+            return true;
+        } catch (final IOException e) {
+            logger.error("Failed to execute {}", binPath, e);
+            return false;
+        }
+    }
+
     private static void executeProcess(final ProcessBuilder builder, final Duration timeout)
             throws IOException, InterruptedException {
 
