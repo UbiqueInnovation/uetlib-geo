@@ -1,7 +1,7 @@
 package ch.ubique.backend.geo.gdal.warp;
 
+import ch.ubique.backend.geo.gdal.common.GdalCRS;
 import ch.ubique.backend.geo.gdal.common.GdalDataSetFormat;
-import ch.ubique.backend.geo.gdal.common.Proj4Declaration;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -14,7 +14,7 @@ public record GdalWarpOptions(
         int width,
         int height,
         GdalResamplingMethod resamplingMethod,
-        Proj4Declaration targetSpatialReference,
+        GdalCRS targetSpatialReference,
         GdalDataSetFormat outputFormat,
         Path sourceFile,
         Path targetFile,
@@ -36,7 +36,7 @@ public record GdalWarpOptions(
             "-r",
             resamplingMethod.value(),
             "-t_srs",
-            targetSpatialReference.toProj4String(),
+            targetSpatialReference.getCRSString(),
             "-of",
             outputFormat.shortName(),
             sourceFile.toString(),
@@ -47,10 +47,10 @@ public record GdalWarpOptions(
     public static class GdalWarpOptionsBuilder {
         private Collection<String> srcNoDataValues;
         private Collection<String> destinationNoDataValues;
-        private int width;
-        private int height;
+        private Integer width;
+        private Integer height;
         private GdalResamplingMethod resamplingMethod;
-        private Proj4Declaration targetSpatialReference;
+        private GdalCRS targetSpatialReference;
         private GdalDataSetFormat outputFormat;
         private Path sourcePath;
         private Path targetPath;
@@ -85,8 +85,7 @@ public record GdalWarpOptions(
             return this;
         }
 
-        public GdalWarpOptionsBuilder targetSpatialReference(
-                final Proj4Declaration targetSpatialReference) {
+        public GdalWarpOptionsBuilder targetSpatialReference(final GdalCRS targetSpatialReference) {
             this.targetSpatialReference = targetSpatialReference;
             return this;
         }
