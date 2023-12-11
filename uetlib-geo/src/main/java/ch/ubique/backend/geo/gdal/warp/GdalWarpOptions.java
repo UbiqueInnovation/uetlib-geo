@@ -24,7 +24,7 @@ public record GdalWarpOptions(
         return new GdalWarpOptionsBuilder();
     }
 
-    public List<String> buildCommand() {
+    public List<String> toBuildCommand() {
         final var args = new ArrayList<String>();
         args.add("gdalwarp");
 
