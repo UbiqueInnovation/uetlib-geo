@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -18,27 +19,28 @@ public class Gdal {
     public static void warp(final GdalWarpOptions options)
             throws IOException, InterruptedException {
 
-        final var processBuilder = new ProcessBuilder(options.buildCommand());
-        executeProcess(processBuilder, options.timeout());
+        executeProcess(options.buildCommand(), options.timeout());
     }
 
-    public static boolean isGdalWarpAvailable() {
+    public static boolean isWarpAvailable() {
         return isLibAvailable("gdalwarp");
     }
 
     public static boolean isLibAvailable(final String binPath) {
         try {
-            Runtime.getRuntime().exec(binPath + " -version");
+            executeProcess(List.of(binPath, " -version"), Duration.ofSeconds(1));
             return true;
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             logger.error("Failed to execute {}", binPath, e);
             return false;
         }
     }
 
-    private static void executeProcess(final ProcessBuilder builder, final Duration timeout)
+    private static void executeProcess(final List<String> command, final Duration timeout)
             throws IOException, InterruptedException {
 
+        logger.info("Running command: {}", command);
+        final var builder = new ProcessBuilder(command);
         final var process = builder.start();
 
         Executors.newSingleThreadExecutor().submit(() -> logProcessOutputsAndErrors(process));
