@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.gdal.warp;
 
+import ch.ubique.backend.geo.common.models.WidthAndHeight;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.gdal.common.GdalDataSetFormat;
 
@@ -12,8 +13,7 @@ import java.util.*;
 public record GdalWarpOptions(
         Collection<String> noDataValues,
         Collection<String> destinationNoDataValues,
-        Integer width,
-        Integer height,
+        WidthAndHeight<Integer> targetSize,
         GdalResamplingMethod resamplingMethod,
         CoordinateSystem<?> targetCoordinateSystem,
         GdalDataSetFormat outputFormat,
@@ -38,10 +38,10 @@ public record GdalWarpOptions(
             args.addAll(destinationNoDataValues);
         }
 
-        if (width != null && height != null) {
+        if (targetSize != null) {
             args.add("-ts");
-            args.add(String.valueOf(width));
-            args.add(String.valueOf(height));
+            args.add(String.valueOf(targetSize.width()));
+            args.add(String.valueOf(targetSize.height()));
         }
 
         if (resamplingMethod != null) {
@@ -68,10 +68,9 @@ public record GdalWarpOptions(
     public static class GdalWarpOptionsBuilder {
         private Collection<String> srcNoDataValues;
         private Collection<String> destinationNoDataValues;
-        private Integer width;
-        private Integer height;
+        private WidthAndHeight<Integer> targetSize;
         private GdalResamplingMethod resamplingMethod;
-        private CoordinateSystem<?> targetSpatialReference;
+        private CoordinateSystem<?> targetCoordinateSystem;
         private GdalDataSetFormat outputFormat;
         private Path sourcePath;
         private Path targetPath;
@@ -90,13 +89,8 @@ public record GdalWarpOptions(
             return this;
         }
 
-        public GdalWarpOptionsBuilder width(final int width) {
-            this.width = width;
-            return this;
-        }
-
-        public GdalWarpOptionsBuilder height(final int height) {
-            this.height = height;
+        public GdalWarpOptionsBuilder targetSize(final WidthAndHeight<Integer> targetSize) {
+            this.targetSize = targetSize;
             return this;
         }
 
@@ -106,9 +100,9 @@ public record GdalWarpOptions(
             return this;
         }
 
-        public GdalWarpOptionsBuilder targetSpatialReference(
-                final CoordinateSystem<?> targetSpatialReference) {
-            this.targetSpatialReference = targetSpatialReference;
+        public GdalWarpOptionsBuilder targetCoordinateSystem(
+                final CoordinateSystem<?> targetCoordinateSystem) {
+            this.targetCoordinateSystem = targetCoordinateSystem;
             return this;
         }
 
@@ -136,14 +130,13 @@ public record GdalWarpOptions(
             return new GdalWarpOptions(
                     srcNoDataValues,
                     destinationNoDataValues,
-                    width,
-                    height,
+                    targetSize,
                     resamplingMethod,
-                    targetSpatialReference,
+                    targetCoordinateSystem,
                     outputFormat,
                     Objects.requireNonNull(sourcePath, "Source path is required"),
                     Objects.requireNonNull(targetPath, "Target path is required"),
-                    timeout);
+                    Objects.requireNonNull(timeout, "Timeout is required"));
         }
     }
 }

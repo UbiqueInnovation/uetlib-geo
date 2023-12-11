@@ -28,7 +28,7 @@ public class Gdal {
 
     public static boolean isLibAvailable(final String binPath) {
         try {
-            executeProcess(List.of(binPath, " -version"), Duration.ofSeconds(1));
+            executeProcess(List.of(binPath, "--version"), Duration.ofSeconds(1));
             return true;
         } catch (final Exception e) {
             logger.error("Failed to execute {}", binPath, e);

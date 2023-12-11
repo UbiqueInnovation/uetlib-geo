@@ -19,7 +19,7 @@ public class GdalTest {
                 GdalWarpOptions.builder()
                         .sourceFile(Path.of("src/test/resources/gdal/gdal_ww_test.grib2"))
                         .targetFile(Path.of("src/test/resources/gdal/gdal_ww_test_output.tif"))
-                        .targetSpatialReference(CoordinateSystems.WEB_MERCATOR)
+                        .targetCoordinateSystem(CoordinateSystems.WEB_MERCATOR)
                         .resamplingMethod(GdalResamplingMethod.NEAREST)
                         .build();
         Gdal.warp(options);
