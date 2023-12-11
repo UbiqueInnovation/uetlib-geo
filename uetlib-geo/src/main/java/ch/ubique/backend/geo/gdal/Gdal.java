@@ -12,7 +12,7 @@ public class Gdal {
     private Gdal() {}
 
     public static void warp(final GdalWarpOptions options) throws IOException {
-        ProcessUtils.executeProcess(options.buildCommand(), options.timeout());
+        ProcessUtils.executeProcess(options.toBuildCommand(), options.timeout());
     }
 
     public static boolean isWarpAvailable() {
