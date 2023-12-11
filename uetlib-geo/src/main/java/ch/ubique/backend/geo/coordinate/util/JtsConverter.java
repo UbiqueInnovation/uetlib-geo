@@ -164,8 +164,16 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
 
     /** Transforms the given geometry into the current spatial reference system. */
     public Geometry transform(final Geometry geometry) {
+        return transform(geometry, false);
+    }
+
+    /** Transforms the given geometry into the current spatial reference system. */
+    public Geometry transform(final Geometry geometry, final boolean ignoreCoordinateSystemBounds) {
         if (geometry.getSRID() == coordinateSystem.srid()) {
             return geometry; // No transform need, already in correct spatial reference system
+        }
+        if (geometry.isEmpty()) {
+            return coordinateSystem.geometryFactory().createEmpty(geometry.getDimension());
         }
 
         try {
@@ -175,7 +183,9 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                     JTS.toGeometry(coordinateSystem.bounds().transform(getCrs(geometry), false));
 
             final var geometryWithinBounds =
-                    bounds.covers(geometry) ? geometry : geometry.intersection(bounds);
+                    (ignoreCoordinateSystemBounds || bounds.covers(geometry))
+                            ? geometry
+                            : geometry.intersection(bounds);
 
             final var transformedGeometry =
                     JTS.transform(
