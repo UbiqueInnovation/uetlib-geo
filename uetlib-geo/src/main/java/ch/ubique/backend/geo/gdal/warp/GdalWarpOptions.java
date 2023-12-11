@@ -1,20 +1,21 @@
 package ch.ubique.backend.geo.gdal.warp;
 
-import ch.ubique.backend.geo.gdal.common.GdalCRS;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.gdal.common.GdalDataSetFormat;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 
 public record GdalWarpOptions(
         Collection<String> noDataValues,
         Collection<String> destinationNoDataValues,
-        int width,
-        int height,
+        Integer width,
+        Integer height,
         GdalResamplingMethod resamplingMethod,
-        GdalCRS targetSpatialReference,
+        CoordinateSystem<?> targetCoordinateSystem,
         GdalDataSetFormat outputFormat,
         Path sourceFile,
         Path targetFile,
@@ -23,25 +24,45 @@ public record GdalWarpOptions(
         return new GdalWarpOptionsBuilder();
     }
 
-    public String[] buildCommand() {
-        return new String[] {
-            "gdalwarp",
-            "-srcnodata",
-            String.join(" ", noDataValues),
-            "-dstnodata",
-            String.join(" ", destinationNoDataValues),
-            "-ts",
-            String.valueOf(width),
-            String.valueOf(height),
-            "-r",
-            resamplingMethod.value(),
-            "-t_srs",
-            targetSpatialReference.getCRSString(),
-            "-of",
-            outputFormat.shortName(),
-            sourceFile.toString(),
-            targetFile.toString()
-        };
+    public List<String> buildCommand() {
+        final var args = new ArrayList<String>();
+        args.add("gdalwarp");
+
+        if (CollectionUtils.isNotEmpty(noDataValues)) {
+            args.add("-srcnodata");
+            args.addAll(noDataValues);
+        }
+
+        if (CollectionUtils.isNotEmpty(destinationNoDataValues)) {
+            args.add("-dstnodata");
+            args.addAll(destinationNoDataValues);
+        }
+
+        if (width != null && height != null) {
+            args.add("-ts");
+            args.add(String.valueOf(width));
+            args.add(String.valueOf(height));
+        }
+
+        if (resamplingMethod != null) {
+            args.add("-r");
+            args.add(resamplingMethod.value());
+        }
+
+        if (targetCoordinateSystem != null) {
+            args.add("-t_srs");
+            args.add("EPSG:" + targetCoordinateSystem.srid());
+        }
+
+        if (outputFormat != null) {
+            args.add("-of");
+            args.add(outputFormat.shortName());
+        }
+
+        args.add(Objects.requireNonNull(sourceFile).toString());
+        args.add(Objects.requireNonNull(targetFile).toString());
+
+        return Collections.unmodifiableList(args);
     }
 
     public static class GdalWarpOptionsBuilder {
@@ -50,7 +71,7 @@ public record GdalWarpOptions(
         private Integer width;
         private Integer height;
         private GdalResamplingMethod resamplingMethod;
-        private GdalCRS targetSpatialReference;
+        private CoordinateSystem<?> targetSpatialReference;
         private GdalDataSetFormat outputFormat;
         private Path sourcePath;
         private Path targetPath;
@@ -85,7 +106,8 @@ public record GdalWarpOptions(
             return this;
         }
 
-        public GdalWarpOptionsBuilder targetSpatialReference(final GdalCRS targetSpatialReference) {
+        public GdalWarpOptionsBuilder targetSpatialReference(
+                final CoordinateSystem<?> targetSpatialReference) {
             this.targetSpatialReference = targetSpatialReference;
             return this;
         }

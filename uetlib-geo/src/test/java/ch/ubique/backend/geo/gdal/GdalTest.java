@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.gdal;
 
-import ch.ubique.backend.geo.gdal.common.GdalCRS;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.gdal.warp.GdalResamplingMethod;
 import ch.ubique.backend.geo.gdal.warp.GdalWarpOptions;
 
@@ -19,13 +19,13 @@ public class GdalTest {
                 GdalWarpOptions.builder()
                         .sourceFile(Path.of("src/test/resources/gdal/gdal_ww_test.grib2"))
                         .targetFile(Path.of("src/test/resources/gdal/gdal_ww_test_output.tif"))
-                        .targetSpatialReference(GdalCRS.EPSG_3857)
+                        .targetSpatialReference(CoordinateSystems.WEB_MERCATOR)
                         .resamplingMethod(GdalResamplingMethod.NEAREST)
                         .build();
         Gdal.warp(options);
     }
 
     public boolean isGdalWarpAvailable() {
-        return Gdal.isGdalWarpAvailable();
+        return Gdal.isWarpAvailable();
     }
 }
