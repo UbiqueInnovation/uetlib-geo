@@ -27,7 +27,8 @@ public class Gdal {
     public static boolean isLibAvailable(final String binPath) {
         final var command = List.of(binPath, "--version");
         try {
-            return ProcessUtils.executeProcessAndLog(command, Duration.ofSeconds(1)) == 0;
+            final var result = ProcessUtils.executeProcessAndLog(command, Duration.ofSeconds(1));
+            return result.getLeft() && result.getRight() == 0;
         } catch (final IOException e) {
             return false;
         }
