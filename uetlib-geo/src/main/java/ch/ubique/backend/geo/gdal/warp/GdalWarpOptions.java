@@ -26,10 +26,6 @@ public final class GdalWarpOptions {
         return new GdalWarpOptions();
     }
 
-    public List<String> additionalArguments() {
-        return additionalArguments;
-    }
-
     public GdalWarpOptions additionalArguments(final List<String> additionalArguments) {
         this.additionalArguments = additionalArguments;
         return this;
@@ -70,7 +66,9 @@ public final class GdalWarpOptions {
             args.add(outputFormat.shortName());
         }
 
-        args.addAll(additionalArguments);
+        if (additionalArguments != null && !additionalArguments.isEmpty()) {
+            args.addAll(additionalArguments);
+        }
 
         args.add(Objects.requireNonNull(sourcePath).toString());
         args.add(Objects.requireNonNull(targetPath).toString());
