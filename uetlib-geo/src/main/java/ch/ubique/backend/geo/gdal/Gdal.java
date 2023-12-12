@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.gdal;
 
 import ch.ubique.backend.core.process.ProcessConfig;
+import ch.ubique.backend.core.process.ProcessResult;
 import ch.ubique.backend.core.utils.ProcessUtils;
 import ch.ubique.backend.geo.gdal.warp.GdalWarpOptions;
 
@@ -10,17 +11,18 @@ import java.util.List;
 
 public class Gdal {
 
-    private Gdal() {}
-
-    public static void warp(final GdalWarpOptions options) throws IOException {
-        warp(options, Duration.ofSeconds(10));
+    private Gdal() {
     }
 
-    public static void warp(final GdalWarpOptions options, final Duration timeout)
+    public static ProcessResult warp(final GdalWarpOptions options) throws IOException {
+        return warp(options, Duration.ofSeconds(10));
+    }
+
+    public static ProcessResult warp(final GdalWarpOptions options, final Duration timeout)
             throws IOException {
         final var config =
                 ProcessConfig.builder().command(options.toCommand()).timeout(timeout).build();
-        ProcessUtils.executeProcess(config);
+        return ProcessUtils.executeProcess(config);
     }
 
     public static boolean isWarpAvailable() {
