@@ -12,11 +12,12 @@ public class Gdal {
     private Gdal() {}
 
     public static void warp(final GdalWarpOptions options) throws IOException {
-        ProcessUtils.executeProcess(options.toCommand(), Duration.ofSeconds(10));
+        ProcessUtils.executeProcessAndLog(options.toCommand(), Duration.ofSeconds(10));
     }
 
-    public static void warp(final GdalWarpOptions options, final Duration timeout) throws IOException {
-        ProcessUtils.executeProcess(options.toCommand(), timeout);
+    public static void warp(final GdalWarpOptions options, final Duration timeout)
+            throws IOException {
+        ProcessUtils.executeProcessAndLog(options.toCommand(), timeout);
     }
 
     public static boolean isWarpAvailable() {
@@ -26,7 +27,7 @@ public class Gdal {
     public static boolean isLibAvailable(final String binPath) {
         final var command = List.of(binPath, "--version");
         try {
-            return ProcessUtils.executeProcess(command, Duration.ofSeconds(1)) == 0;
+            return ProcessUtils.executeProcessAndLog(command, Duration.ofSeconds(1)) == 0;
         } catch (final IOException e) {
             return false;
         }
