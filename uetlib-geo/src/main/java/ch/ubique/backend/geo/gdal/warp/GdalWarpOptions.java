@@ -14,7 +14,7 @@ public final class GdalWarpOptions {
     private Collection<String> targetNoDataValues;
     private WidthAndHeight<Integer> targetSize;
     private GdalResamplingMethod resamplingMethod;
-    private CoordinateSystem<?> targetCoordinateSystem;
+    private String targetSpatialReferenceSystem;
     private GdalDataSetFormat outputFormat;
     private Path sourcePath;
     private Path targetPath;
@@ -56,9 +56,9 @@ public final class GdalWarpOptions {
             args.add(resamplingMethod.value());
         }
 
-        if (targetCoordinateSystem != null) {
+        if (targetSpatialReferenceSystem != null) {
             args.add("-t_srs");
-            args.add("EPSG:" + targetCoordinateSystem.srid());
+            args.add(targetSpatialReferenceSystem);
         }
 
         if (outputFormat != null) {
@@ -96,9 +96,27 @@ public final class GdalWarpOptions {
         return this;
     }
 
+    /**
+     * Sets the target SRS by EPSG code.
+     *
+     * @see #targetSRSString(String) to set the target SRS by WKT string, PROJ.4 declaration, or
+     *     name of a .prj file containing a WKT CRS definition.
+     */
     public GdalWarpOptions targetCoordinateSystem(
             final CoordinateSystem<?> targetCoordinateSystem) {
-        this.targetCoordinateSystem = targetCoordinateSystem;
+        this.targetSpatialReferenceSystem = "EPSG:" + targetCoordinateSystem.srid();
+        return this;
+    }
+
+    /**
+     * @param targetSRS Can be a WKT string, PROJ.4 declaration, or name of a .prj file containing a
+     *     WKT CRS definition.
+     * @see <a href="https://gdal.org/programs/gdalwarp.html#cmdoption-gdalwarp-t_srs">Gdalwarp
+     *     docs</a> for more information.
+     * @see #targetCoordinateSystem(CoordinateSystem) to set the target SRS by EPSG code.
+     */
+    public GdalWarpOptions targetSRSString(final String targetSRS) {
+        this.targetSpatialReferenceSystem = targetSRS;
         return this;
     }
 
