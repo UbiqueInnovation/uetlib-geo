@@ -9,19 +9,18 @@ import org.junit.jupiter.api.condition.EnabledIf;
 
 import java.nio.file.Path;
 
-public class GdalTest {
+class GdalTest {
     @Test
     @EnabledIf(
             value = "isGdalWarpAvailable",
             disabledReason = "Disabled because it requires GDAL to be installed")
     void testWarp() throws Exception {
         final var options =
-                GdalWarpOptions.builder()
+                GdalWarpOptions.defaults()
                         .sourceFile(Path.of("src/test/resources/gdal/gdal_ww_test.grib2"))
                         .targetFile(Path.of("src/test/resources/gdal/gdal_ww_test_output.tif"))
                         .targetCoordinateSystem(CoordinateSystems.WEB_MERCATOR)
-                        .resamplingMethod(GdalResamplingMethod.NEAREST)
-                        .build();
+                        .resamplingMethod(GdalResamplingMethod.NEAREST);
         Gdal.warp(options);
     }
 

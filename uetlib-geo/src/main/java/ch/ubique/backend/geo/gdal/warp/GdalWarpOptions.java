@@ -7,35 +7,36 @@ import ch.ubique.backend.geo.gdal.common.GdalDataSetFormat;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.*;
 
-public record GdalWarpOptions(
-        Collection<String> noDataValues,
-        Collection<String> destinationNoDataValues,
-        WidthAndHeight<Integer> targetSize,
-        GdalResamplingMethod resamplingMethod,
-        CoordinateSystem<?> targetCoordinateSystem,
-        GdalDataSetFormat outputFormat,
-        Path sourceFile,
-        Path targetFile,
-        Duration timeout) {
-    public static GdalWarpOptionsBuilder builder() {
-        return new GdalWarpOptionsBuilder();
+public final class GdalWarpOptions {
+    private Collection<String> sourceNoDataValues;
+    private Collection<String> targetNoDataValues;
+    private WidthAndHeight<Integer> targetSize;
+    private GdalResamplingMethod resamplingMethod;
+    private CoordinateSystem<?> targetCoordinateSystem;
+    private GdalDataSetFormat outputFormat;
+    private Path sourcePath;
+    private Path targetPath;
+
+    private GdalWarpOptions() {}
+
+    public static GdalWarpOptions defaults() {
+        return new GdalWarpOptions();
     }
 
-    public List<String> toBuildCommand() {
+    public List<String> toCommand() {
         final var args = new ArrayList<String>();
         args.add("gdalwarp");
 
-        if (CollectionUtils.isNotEmpty(noDataValues)) {
+        if (CollectionUtils.isNotEmpty(sourceNoDataValues)) {
             args.add("-srcnodata");
-            args.addAll(noDataValues);
+            args.addAll(sourceNoDataValues);
         }
 
-        if (CollectionUtils.isNotEmpty(destinationNoDataValues)) {
+        if (CollectionUtils.isNotEmpty(targetNoDataValues)) {
             args.add("-dstnodata");
-            args.addAll(destinationNoDataValues);
+            args.addAll(targetNoDataValues);
         }
 
         if (targetSize != null) {
@@ -59,84 +60,50 @@ public record GdalWarpOptions(
             args.add(outputFormat.shortName());
         }
 
-        args.add(Objects.requireNonNull(sourceFile).toString());
-        args.add(Objects.requireNonNull(targetFile).toString());
+        args.add(Objects.requireNonNull(sourcePath).toString());
+        args.add(Objects.requireNonNull(targetPath).toString());
 
         return Collections.unmodifiableList(args);
     }
 
-    public static class GdalWarpOptionsBuilder {
-        private Collection<String> srcNoDataValues;
-        private Collection<String> destinationNoDataValues;
-        private WidthAndHeight<Integer> targetSize;
-        private GdalResamplingMethod resamplingMethod;
-        private CoordinateSystem<?> targetCoordinateSystem;
-        private GdalDataSetFormat outputFormat;
-        private Path sourcePath;
-        private Path targetPath;
-        private Duration timeout = Duration.ofMinutes(1);
+    public GdalWarpOptions sourceNoDataValues(final Collection<String> sourceNoDataValues) {
+        this.sourceNoDataValues = sourceNoDataValues;
+        return this;
+    }
 
-        private GdalWarpOptionsBuilder() {}
+    public GdalWarpOptions targetNoDataValues(final Collection<String> targetNoDataValues) {
+        this.targetNoDataValues = targetNoDataValues;
+        return this;
+    }
 
-        public GdalWarpOptionsBuilder srcNoDataValues(final Collection<String> srcNoDataValues) {
-            this.srcNoDataValues = srcNoDataValues;
-            return this;
-        }
+    public GdalWarpOptions targetSize(final WidthAndHeight<Integer> targetSize) {
+        this.targetSize = targetSize;
+        return this;
+    }
 
-        public GdalWarpOptionsBuilder destinationNoDataValues(
-                final Collection<String> destinationNoDataValues) {
-            this.destinationNoDataValues = destinationNoDataValues;
-            return this;
-        }
+    public GdalWarpOptions resamplingMethod(final GdalResamplingMethod resamplingMethod) {
+        this.resamplingMethod = resamplingMethod;
+        return this;
+    }
 
-        public GdalWarpOptionsBuilder targetSize(final WidthAndHeight<Integer> targetSize) {
-            this.targetSize = targetSize;
-            return this;
-        }
+    public GdalWarpOptions targetCoordinateSystem(
+            final CoordinateSystem<?> targetCoordinateSystem) {
+        this.targetCoordinateSystem = targetCoordinateSystem;
+        return this;
+    }
 
-        public GdalWarpOptionsBuilder resamplingMethod(
-                final GdalResamplingMethod resamplingMethod) {
-            this.resamplingMethod = resamplingMethod;
-            return this;
-        }
+    public GdalWarpOptions outputFormat(final GdalDataSetFormat outputFormat) {
+        this.outputFormat = outputFormat;
+        return this;
+    }
 
-        public GdalWarpOptionsBuilder targetCoordinateSystem(
-                final CoordinateSystem<?> targetCoordinateSystem) {
-            this.targetCoordinateSystem = targetCoordinateSystem;
-            return this;
-        }
+    public GdalWarpOptions sourceFile(final Path sourceFile) {
+        this.sourcePath = sourceFile;
+        return this;
+    }
 
-        public GdalWarpOptionsBuilder outputFormat(final GdalDataSetFormat outputFormat) {
-            this.outputFormat = outputFormat;
-            return this;
-        }
-
-        public GdalWarpOptionsBuilder sourceFile(final Path sourceFile) {
-            this.sourcePath = sourceFile;
-            return this;
-        }
-
-        public GdalWarpOptionsBuilder targetFile(final Path targetFile) {
-            this.targetPath = targetFile;
-            return this;
-        }
-
-        public GdalWarpOptionsBuilder timeout(final Duration timeout) {
-            this.timeout = timeout;
-            return this;
-        }
-
-        public GdalWarpOptions build() {
-            return new GdalWarpOptions(
-                    srcNoDataValues,
-                    destinationNoDataValues,
-                    targetSize,
-                    resamplingMethod,
-                    targetCoordinateSystem,
-                    outputFormat,
-                    Objects.requireNonNull(sourcePath, "Source path is required"),
-                    Objects.requireNonNull(targetPath, "Target path is required"),
-                    Objects.requireNonNull(timeout, "Timeout is required"));
-        }
+    public GdalWarpOptions targetFile(final Path targetFile) {
+        this.targetPath = targetFile;
+        return this;
     }
 }
