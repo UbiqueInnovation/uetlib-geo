@@ -3,7 +3,6 @@ package ch.ubique.backend.geo.gdal.warp;
 import ch.ubique.backend.geo.common.models.WidthAndHeight;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.gdal.common.GdalDataSetFormat;
-
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.nio.file.Path;
@@ -20,7 +19,8 @@ public final class GdalWarpOptions {
     private Path targetPath;
     private List<String> additionalArguments;
 
-    private GdalWarpOptions() {}
+    private GdalWarpOptions() {
+    }
 
     public static GdalWarpOptions defaults() {
         return new GdalWarpOptions();
@@ -66,7 +66,7 @@ public final class GdalWarpOptions {
             args.add(outputFormat.shortName());
         }
 
-        if (additionalArguments != null && !additionalArguments.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(additionalArguments)) {
             args.addAll(additionalArguments);
         }
 
@@ -100,7 +100,8 @@ public final class GdalWarpOptions {
      * Sets the target SRS by EPSG code.
      *
      * @see #targetSRSString(String) to set the target SRS by WKT string, PROJ.4 declaration, or
-     *     name of a .prj file containing a WKT CRS definition.
+     * name of a .prj file containing a WKT CRS definition. Calling one after the other will make
+     * the last call take precedence.
      */
     public GdalWarpOptions targetCoordinateSystem(
             final CoordinateSystem<?> targetCoordinateSystem) {
@@ -110,10 +111,11 @@ public final class GdalWarpOptions {
 
     /**
      * @param targetSRS Can be a WKT string, PROJ.4 declaration, or name of a .prj file containing a
-     *     WKT CRS definition.
+     *                  WKT CRS definition.
      * @see <a href="https://gdal.org/programs/gdalwarp.html#cmdoption-gdalwarp-t_srs">Gdalwarp
-     *     docs</a> for more information.
+     * docs</a> for more information.
      * @see #targetCoordinateSystem(CoordinateSystem) to set the target SRS by EPSG code.
+     * Calling one after the other will make the last call take precedence.
      */
     public GdalWarpOptions targetSRSString(final String targetSRS) {
         this.targetSpatialReferenceSystem = targetSRS;
