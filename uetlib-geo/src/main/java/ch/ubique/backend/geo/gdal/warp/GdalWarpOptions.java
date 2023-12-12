@@ -18,11 +18,21 @@ public final class GdalWarpOptions {
     private GdalDataSetFormat outputFormat;
     private Path sourcePath;
     private Path targetPath;
+    private List<String> additionalArguments;
 
     private GdalWarpOptions() {}
 
     public static GdalWarpOptions defaults() {
         return new GdalWarpOptions();
+    }
+
+    public List<String> additionalArguments() {
+        return additionalArguments;
+    }
+
+    public GdalWarpOptions additionalArguments(final List<String> additionalArguments) {
+        this.additionalArguments = additionalArguments;
+        return this;
     }
 
     public List<String> toCommand() {
@@ -59,6 +69,8 @@ public final class GdalWarpOptions {
             args.add("-of");
             args.add(outputFormat.shortName());
         }
+
+        args.addAll(additionalArguments);
 
         args.add(Objects.requireNonNull(sourcePath).toString());
         args.add(Objects.requireNonNull(targetPath).toString());
