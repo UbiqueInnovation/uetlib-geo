@@ -1,4 +1,4 @@
-package ch.ubique.backend.geo.mbtile.data.impl;
+package ch.ubique.backend.geodb.mbtile.data.impl;
 
 import ch.ubique.backend.geo.mbtile.TmsTile;
 import ch.ubique.backend.geo.mbtile.data.MbtileDataService;
