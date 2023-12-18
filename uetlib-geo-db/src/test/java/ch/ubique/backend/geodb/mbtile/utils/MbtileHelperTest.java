@@ -1,4 +1,4 @@
-package ch.ubique.backend.geo.mbtile.utils;
+package ch.ubique.backend.geodb.mbtile.utils;
 
 import ch.ubique.backend.db.sqlite.SQLiteDB;
 import ch.ubique.backend.geo.mbtile.metadata.constants.MbtileFormat;
