@@ -11,17 +11,27 @@ import java.util.List;
 
 public class Gdal {
 
-    private Gdal() {
+    private Gdal() {}
+
+    public static ProcessResult warp(final GdalWarpOptions gdalWarpOptions) throws IOException {
+        return warp(gdalWarpOptions, Duration.ofSeconds(10));
     }
 
-    public static ProcessResult warp(final GdalWarpOptions options) throws IOException {
-        return warp(options, Duration.ofSeconds(10));
-    }
-
-    public static ProcessResult warp(final GdalWarpOptions options, final Duration timeout)
+    public static ProcessResult warp(final GdalWarpOptions gdalWarpOptions, final Duration timeout)
             throws IOException {
         final var config =
-                ProcessConfig.builder().command(options.toCommand()).timeout(timeout).build();
+                ProcessConfig.builder()
+                        .command(gdalWarpOptions.toCommand())
+                        .timeout(timeout)
+                        .build();
+        return ProcessUtils.executeProcess(config);
+    }
+
+    public static ProcessResult warp(
+            final GdalWarpOptions gdalWarpOptions,
+            final ProcessConfig.ProcessConfigBuilder processConfigBuilder)
+            throws IOException {
+        final var config = processConfigBuilder.command(gdalWarpOptions.toCommand()).build();
         return ProcessUtils.executeProcess(config);
     }
 
