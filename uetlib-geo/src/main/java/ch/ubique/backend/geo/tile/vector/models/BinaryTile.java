@@ -10,8 +10,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public record BinaryTile(TileInfo info, TileOutputFormat format, byte[] bytes) {
 
-    public static final String contentType = "application/protobuf";
-
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

@@ -6,6 +6,7 @@ import ch.ubique.backend.geo.tile.raster.models.RasterTile;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -59,7 +60,7 @@ class RasterTileGeneratorTest {
         Assertions.assertEquals(tileLevelsDefinition.numberOfTiles(), generatedTiles.size());
     }
 
-    //    @Test
+    @Test
     @Disabled("Only for visualizing locally. ")
     void testImages() {
         final var tileLevelsDefinition = SwissConstants.swissTileDefinition().onlyWithLevels(12);
