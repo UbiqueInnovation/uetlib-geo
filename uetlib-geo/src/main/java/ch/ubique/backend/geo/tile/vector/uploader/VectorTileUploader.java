@@ -22,6 +22,8 @@ public class VectorTileUploader {
     private static final Logger logger = LoggerFactory.getLogger(VectorTileUploader.class);
     private final StorageClient storageClient;
 
+    private final ForkJoinPool forkJoinPool = new ForkJoinPool(12);
+
     public VectorTileUploader(final StorageClient storageClient) {
         this.storageClient = storageClient;
     }
@@ -34,7 +36,7 @@ public class VectorTileUploader {
                 progressLogger.watch((Consumer<BinaryTile>) tile -> uploadBinaryTile(path, tile));
 
         logger.info("Starting upload. {} tiles in total", binaryTiles.size());
-        try (final var forkJoinPool = new ForkJoinPool(12)) {
+        try {
             forkJoinPool
                     .submit(() -> binaryTiles.parallelStream().forEach(watchAndUploadBinaryTile))
                     .get();
