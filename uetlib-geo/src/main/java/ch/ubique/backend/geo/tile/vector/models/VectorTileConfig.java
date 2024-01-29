@@ -29,6 +29,7 @@ public record VectorTileConfig(
         int clipBuffer,
         boolean validateElements,
         boolean validateGeometryAtEveryStep,
+        boolean checkCoordinateSystemBounds,
         @NotNull Level emptyGeometryLogLevel,
         @Positive int extent,
         @NotNull TileOutputFormat outputFormat,
@@ -84,6 +85,7 @@ public record VectorTileConfig(
         private int clipBuffer;
         private boolean validateElements = true;
         private boolean validateGeometryAtEveryStep = true;
+        private boolean checkCoordinateSystemBounds = true;
         private int extent = 4096;
         private TileOutputFormat outputFormat = TileOutputFormat.PBF;
         private ReferencedEnvelope outputEnvelope;
@@ -151,6 +153,12 @@ public record VectorTileConfig(
         public VectorTileConfigBuilder validateGeometryAtEveryStep(
                 final boolean validateGeometryAtEveryStep) {
             this.validateGeometryAtEveryStep = validateGeometryAtEveryStep;
+            return this;
+        }
+
+        public VectorTileConfigBuilder checkCoordinateSystemBounds(
+                final boolean checkCoordinateSystemBounds) {
+            this.checkCoordinateSystemBounds = checkCoordinateSystemBounds;
             return this;
         }
 
@@ -229,6 +237,7 @@ public record VectorTileConfig(
                     clipBuffer,
                     validateElements,
                     validateGeometryAtEveryStep,
+                    checkCoordinateSystemBounds,
                     emptyGeometryLogLevel,
                     extent,
                     outputFormat,

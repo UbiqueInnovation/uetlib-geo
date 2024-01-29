@@ -31,7 +31,10 @@ public class TileGeometryUtils {
             final VectorTileConfig config) {
 
         ensureCrsMatch(geometry, tileEnvelope);
-        ensureCoordinatesAreWellDefined(geometry);
+
+        if (config.checkCoordinateSystemBounds()) {
+            ensureCoordinatesAreWellDefined(geometry);
+        }
 
         try {
             final var withHeight = !Double.isNaN(geometry.getCoordinate().getZ());
