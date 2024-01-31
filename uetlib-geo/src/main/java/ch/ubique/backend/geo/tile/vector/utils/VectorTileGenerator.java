@@ -38,18 +38,13 @@ public class VectorTileGenerator implements TileGenerator {
     private final VectorTileOutput output;
 
     private final ExecutorService executorService;
-    private final CompletionService<Object> completionService;
-
     private final Cache<VectorTileElement, Envelope> envelopeCache;
 
     private final Map<TileInfo, Double> tileSizes;
 
     public VectorTileGenerator(final VectorTileOutput output, final int parallelism) {
         this.output = output;
-        this.executorService =
-                new ThreadPoolExecutor(
-                        parallelism, parallelism, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-        this.completionService = new ExecutorCompletionService<>(executorService);
+        this.executorService = Executors.newFixedThreadPool(parallelism);
         final var cacheBuilder = Caffeine.newBuilder();
         this.envelopeCache = cacheBuilder.build();
         this.tileSizes = new ConcurrentHashMap<>();
@@ -78,7 +73,6 @@ public class VectorTileGenerator implements TileGenerator {
         logStats();
 
         envelopeCache.invalidateAll();
-        executorService.shutdown();
     }
 
     @NotNull
@@ -95,7 +89,7 @@ public class VectorTileGenerator implements TileGenerator {
         final var progressLogger = new ProgressLogger(prefix, tileInfos.size(), mdcContextMap);
 
         for (final var tileInfo : tileInfos) {
-            completionService.submit(
+            executorService.submit(
                     Executors.callable(
                             () -> {
                                 createGenerateAndConsumeTile(tileInfo);
@@ -215,14 +209,13 @@ public class VectorTileGenerator implements TileGenerator {
 
     private void waitForCompletion() {
         try {
-            Future<?> future;
-            while ((future = completionService.take()) != null) {
-                future.get();
+            executorService.shutdown();
+            final var terminatedInTime = executorService.awaitTermination(14, TimeUnit.DAYS);
+            if (!terminatedInTime) {
+                throw new IllegalStateException("Timout elapsed before termination.");
             }
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-        } catch (final ExecutionException e) {
-            throw new RuntimeException(e);
         }
     }
 }
