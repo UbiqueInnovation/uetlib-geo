@@ -27,8 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -38,7 +37,8 @@ public class VectorTileGenerator implements TileGenerator {
 
     private final VectorTileOutput output;
 
-    private final ForkJoinPool forkJoinPool;
+    private final ExecutorService executorService;
+    private final CompletionService<Object> completionService;
 
     private final Cache<VectorTileElement, Envelope> envelopeCache;
 
@@ -46,7 +46,10 @@ public class VectorTileGenerator implements TileGenerator {
 
     public VectorTileGenerator(final VectorTileOutput output, final int parallelism) {
         this.output = output;
-        this.forkJoinPool = new ForkJoinPool(parallelism);
+        this.executorService =
+                new ThreadPoolExecutor(
+                        parallelism, parallelism, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+        this.completionService = new ExecutorCompletionService<>(executorService);
         final var cacheBuilder = Caffeine.newBuilder();
         this.envelopeCache = cacheBuilder.build();
         this.tileSizes = new ConcurrentHashMap<>();
@@ -65,34 +68,40 @@ public class VectorTileGenerator implements TileGenerator {
     public void generateTiles() {
         logger.info("Generating tiles now.");
         output.config().zoomLevels().stream()
+                .sorted()
                 .map(z -> getTileInfos(z, output.config().outputEnvelope()))
                 .forEach(this::generateTilesForInfos);
         logger.info("Generated all tiles.");
 
+        waitForCompletion();
+
         logStats();
 
         envelopeCache.invalidateAll();
-        forkJoinPool.shutdown();
+        executorService.shutdown();
     }
 
     @NotNull
     private Collection<TileInfo> getTileInfos(
             final int level, final ReferencedEnvelope outputEnvelope) {
-        logger.info("Getting tile infos for zoom level {}", level);
         return output.config().tileLevelsDefinition().tileInfos(level, outputEnvelope).toList();
     }
 
     private void generateTilesForInfos(final Collection<TileInfo> tileInfos) {
         final var currentLevel = tileInfos.stream().findFirst().orElseThrow().level();
+        logger.info("Submitting tasks for {} tiles of level {}.", tileInfos.size(), currentLevel);
         final var prefix = String.format("Level %d: ", currentLevel);
         final var mdcContextMap = MDC.getCopyOfContextMap();
         final var progressLogger = new ProgressLogger(prefix, tileInfos.size(), mdcContextMap);
-        final var watchCreateGenerateAndConsumeTile =
-                progressLogger.watch(this::createGenerateAndConsumeTile);
 
-        forkJoinPool
-                .submit(() -> tileInfos.parallelStream().forEach(watchCreateGenerateAndConsumeTile))
-                .join();
+        for (final var tileInfo : tileInfos) {
+            completionService.submit(
+                    Executors.callable(
+                            () -> {
+                                createGenerateAndConsumeTile(tileInfo);
+                                progressLogger.step();
+                            }));
+        }
     }
 
     private void logStats() {
@@ -114,7 +123,7 @@ public class VectorTileGenerator implements TileGenerator {
                                         FileUtils.byteCountToDisplaySize(entry.getValue())));
     }
 
-    private void logStatsForLevel(Integer level) {
+    private void logStatsForLevel(final Integer level) {
         final var sizesForLevel =
                 tileSizes.entrySet().stream()
                         .filter(entry -> entry.getKey().level() == level)
@@ -202,5 +211,18 @@ public class VectorTileGenerator implements TileGenerator {
             return tileEnvelope.intersects(elementEnvelope)
                     && envelopeGeometry.intersects(element.geometry());
         };
+    }
+
+    private void waitForCompletion() {
+        try {
+            Future<?> future;
+            while ((future = completionService.take()) != null) {
+                future.get();
+            }
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (final ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
