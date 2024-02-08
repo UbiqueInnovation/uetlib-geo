@@ -28,7 +28,6 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
@@ -147,11 +146,11 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         logger.info("Creating outputs for regular graphs");
         return Stream.of(
                 new VectorTileOutput(
-                        baseConfig().zoomLevels(20, 21).outputFormat(format).build(),
+                        baseConfig().zoomLevels(21).outputFormat(format).build(),
                         vertexSupplier,
                         saveGraph(layer, GraphType.COMPLETE, format)),
                 new VectorTileOutput(
-                        baseConfig().zoomLevels(19, 20).outputFormat(format).build(),
+                        baseConfig().zoomLevels(20).outputFormat(format).build(),
                         vertexSupplier.withFilter(this::isRoutingVertex),
                         saveGraph(layer, GraphType.ROUTING, format)));
     }
@@ -169,17 +168,11 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         logger.info("Creating outputs for highway graphs");
         return Stream.of(
                 new VectorTileOutput(
-                        baseConfig()
-                                .zoomLevels(IntStream.rangeClosed(8, 18).boxed().toList())
-                                .outputFormat(format)
-                                .build(),
+                        baseConfig().zoomLevels(18).outputFormat(format).build(),
                         vertexSupplier.withFilter(Vertex::isHighway),
                         saveGraph(layer, GraphType.HIGHWAY_COMPLETE, format)),
                 new VectorTileOutput(
-                        baseConfig()
-                                .zoomLevels(IntStream.rangeClosed(8, 18).boxed().toList())
-                                .outputFormat(format)
-                                .build(),
+                        baseConfig().zoomLevels(18).outputFormat(format).build(),
                         vertexSupplier.withFilter(v -> v.isHighway() && isRoutingVertex(v)),
                         saveGraph(layer, GraphType.HIGHWAY_ROUTING, format)));
     }
