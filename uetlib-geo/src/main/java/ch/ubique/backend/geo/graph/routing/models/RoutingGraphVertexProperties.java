@@ -8,4 +8,8 @@ public record RoutingGraphVertexProperties(@NotNull Coordinate coordinate, boole
     public RoutingGraphVertexProperties copy() {
         return new RoutingGraphVertexProperties(coordinate, isHighway);
     }
+
+    public RoutingGraphVertexProperties update(final boolean isHighway) {
+        return new RoutingGraphVertexProperties(coordinate, this.isHighway || isHighway);
+    }
 }

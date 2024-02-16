@@ -213,9 +213,15 @@ public class LinesToGraphUtil<T> {
     private Vertex<RoutingGraphVertexProperties, Weight> getOrCreateVertex(
             final Coordinate coordinate, final boolean isHighway) {
 
-        return coordinatesToVertex.computeIfAbsent(
-                snapping3dPointIndex.snap(coordinate),
-                c -> graph.createVertex(new RoutingGraphVertexProperties(c, isHighway)));
+        final var vertex =
+                coordinatesToVertex.computeIfAbsent(
+                        snapping3dPointIndex.snap(coordinate),
+                        c -> graph.createVertex(new RoutingGraphVertexProperties(c, isHighway)));
+
+        // Make sure isHighway is set, if vertex already existed but with !isHighway
+        vertex.setProperties(vertex.getProperties().update(isHighway));
+
+        return vertex;
     }
 
     private List<LineWithInfo<T>> sortedLines() {
