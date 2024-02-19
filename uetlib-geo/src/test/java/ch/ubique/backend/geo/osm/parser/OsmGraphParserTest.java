@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 class OsmGraphParserTest {
 
@@ -26,7 +26,8 @@ class OsmGraphParserTest {
                         .build();
 
         try (final var inputStream =
-                new URL("https://download.geofabrik.de/europe/liechtenstein-latest.osm.pbf")
+                URI.create("https://download.geofabrik.de/europe/liechtenstein-latest.osm.pbf")
+                        .toURL()
                         .openStream()) {
             final var graph =
                     OsmGraphParser.parse(inputStream, config)

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.Objects;
 import java.util.Set;
 
@@ -22,8 +22,9 @@ class SwisstopoTlmParserTest {
     void testSwisstopoTlmParser() throws IOException {
         final var inputStream =
                 new ZipArchiveInputStream(
-                        new URL(
+                        URI.create(
                                         "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.gpkg.zip")
+                                .toURL()
                                 .openStream());
         inputStream.getNextEntry();
 

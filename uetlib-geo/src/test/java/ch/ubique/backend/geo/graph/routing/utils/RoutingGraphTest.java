@@ -35,7 +35,7 @@ import org.n52.jackson.datatype.jts.JtsModule;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.Set;
 
 class RoutingGraphTest {
@@ -153,7 +153,8 @@ class RoutingGraphTest {
         final var url =
                 "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.gpkg.zip";
 
-        try (final var inputStream = new ZipArchiveInputStream(new URL(url).openStream())) {
+        try (final var inputStream =
+                new ZipArchiveInputStream(URI.create(url).toURL().openStream())) {
             inputStream.getNextEntry();
 
             final var paths = SwisstopoTlmParser.parsePaths(inputStream);
@@ -174,7 +175,7 @@ class RoutingGraphTest {
                 "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2023-03/swisstlm3d_2023-03_2056_5728.xtf.zip";
 
         try (final var inputStream =
-                zipStreamForEntry(new URL(url).openStream(), "TLM_STRASSEN.xtf")) {
+                zipStreamForEntry(URI.create(url).toURL().openStream(), "TLM_STRASSEN.xtf")) {
 
             final var excludedTypes =
                     Set.of(
