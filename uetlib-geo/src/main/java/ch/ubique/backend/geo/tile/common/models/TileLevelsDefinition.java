@@ -37,12 +37,19 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
                         .toList();
     }
 
+    private static boolean isDefined(final ZoomLevel zoomLevel, final TileInfo tileInfo) {
+        return tileInfo.x() >= 0
+                && tileInfo.y() >= 0
+                && tileInfo.x() < zoomLevel.tilesX()
+                && tileInfo.y() < zoomLevel.tilesY();
+    }
+
     public ZoomLevel minZoomLevel() {
-        return zoomLevels.get(0);
+        return zoomLevels.getFirst();
     }
 
     public ZoomLevel maxZoomLevel() {
-        return zoomLevels.get(zoomLevels.size() - 1);
+        return zoomLevels.getLast();
     }
 
     public int minLevel() {
@@ -219,13 +226,6 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
         final var maxY = (origin.toJts().y - envelope.getMinY()) / zoomLevel.tileHeight();
 
         return IntervalUtils.intervalToIntRange(minY, maxY);
-    }
-
-    private static boolean isDefined(final ZoomLevel zoomLevel, final TileInfo tileInfo) {
-        return tileInfo.x() >= 0
-                && tileInfo.y() >= 0
-                && tileInfo.x() < zoomLevel.tilesX()
-                && tileInfo.y() < zoomLevel.tilesY();
     }
 
     public TileInfo tileInfo(final int x, final int y, final int level) {

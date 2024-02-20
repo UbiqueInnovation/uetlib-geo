@@ -104,8 +104,8 @@ public class KmlParser {
                         }
                     }
                     case "description" -> placemark.setDescription(reader.getElementText());
-                    case "styleUrl" -> placemark.setStyleId(
-                            reader.getElementText().replace("#", ""));
+                    case "styleUrl" ->
+                            placemark.setStyleId(reader.getElementText().replace("#", ""));
                     case "coordinates" -> {
                         final var coordinateList = reader.getElementText();
                         final var coordinates =
@@ -117,8 +117,8 @@ public class KmlParser {
                         if (isPolygon && !coordinates.isEmpty()) {
                             // make sure first and last coordinate are the same. If not, replace
                             // last with first.
-                            final var first = coordinates.get(0);
-                            final var last = coordinates.get(coordinates.size() - 1);
+                            final var first = coordinates.getFirst();
+                            final var last = coordinates.getLast();
                             if (!first.equals(last)) {
                                 coordinates.set(
                                         coordinates.size() - 1,

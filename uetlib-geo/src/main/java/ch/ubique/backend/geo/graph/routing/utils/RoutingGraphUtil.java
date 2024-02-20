@@ -41,7 +41,7 @@ public final class RoutingGraphUtil {
         final var cycles = inputGraph.findCycles();
         logger.info("Found {} cycles", cycles.size());
         for (final var cycle : cycles) {
-            final var vertexOnCycle = cycle.get(0);
+            final var vertexOnCycle = cycle.getFirst();
             additionalRoutingVertices.add(vertexOnCycle);
         }
 

@@ -57,6 +57,20 @@ public abstract class RasterTileGenerator {
         this.levelsDefinition = levelsDefinition.addLevel(sourceZoomLevel);
     }
 
+    private static void cleanFinishedTiles(
+            final Map<TileInfo, RasterTile> ready,
+            final Map<TileInfo, Set<TileInfo>> pendingParents,
+            final TileInfo current,
+            final Set<TileInfo> children) {
+        for (final var child : children) {
+            pendingParents.get(child).remove(current);
+            if (pendingParents.get(child).isEmpty()) {
+                pendingParents.remove(child);
+                ready.remove(child);
+            }
+        }
+    }
+
     /**
      * This method generates {@link RasterTile}s for all specified zoom levels. The highest zoom
      * level is computed based on the source tiles, all other zoom levels are generated based on the
@@ -184,7 +198,7 @@ public abstract class RasterTileGenerator {
             return RasterTile.empty(currentInfo);
         }
 
-        final var anyChild = nonEmptyChildren.get(0);
+        final var anyChild = nonEmptyChildren.getFirst();
         final var colorModel = anyChild.data().getColorModel();
         final var raster =
                 colorModel.createCompatibleWritableRaster(outputResolution, outputResolution);
@@ -275,18 +289,4 @@ public abstract class RasterTileGenerator {
      * @param rasterTile the generated raster tile
      */
     protected abstract void onTileGenerated(RasterTile rasterTile);
-
-    private static void cleanFinishedTiles(
-            final Map<TileInfo, RasterTile> ready,
-            final Map<TileInfo, Set<TileInfo>> pendingParents,
-            final TileInfo current,
-            final Set<TileInfo> children) {
-        for (final var child : children) {
-            pendingParents.get(child).remove(current);
-            if (pendingParents.get(child).isEmpty()) {
-                pendingParents.remove(child);
-                ready.remove(child);
-            }
-        }
-    }
 }
