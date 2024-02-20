@@ -1,7 +1,5 @@
 package ch.ubique.backend.geo.tile.raster.utils;
 
-import ch.ubique.backend.core.utils.MathUtils;
-
 import com.pivovarit.function.exception.WrappedException;
 
 import java.awt.geom.AffineTransform;
@@ -55,10 +53,10 @@ public class RasterTransform {
         final var xSample = sample.getX();
         final var ySample = sample.getY();
 
-        final var x1 = MathUtils.clamp((int) Math.floor(xSample), 0, src.getWidth() - 1);
-        final var x2 = MathUtils.clamp((int) Math.ceil(xSample), 0, src.getWidth() - 1);
-        final var y1 = MathUtils.clamp((int) Math.floor(ySample), 0, src.getHeight() - 1);
-        final var y2 = MathUtils.clamp((int) Math.ceil(ySample), 0, src.getHeight() - 1);
+        final var x1 = Math.clamp((int) Math.floor(xSample), 0, src.getWidth() - 1);
+        final var x2 = Math.clamp((int) Math.ceil(xSample), 0, src.getWidth() - 1);
+        final var y1 = Math.clamp((int) Math.floor(ySample), 0, src.getHeight() - 1);
+        final var y2 = Math.clamp((int) Math.ceil(ySample), 0, src.getHeight() - 1);
 
         final var tx = xSample - x1;
         final var ty = ySample - y1;
