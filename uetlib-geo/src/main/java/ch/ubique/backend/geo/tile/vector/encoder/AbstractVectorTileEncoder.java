@@ -167,7 +167,12 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
             try {
                 return function.apply(geometry);
             } catch (final Exception e) {
-                return checkGeometry("Retry", geometry, true).flatMap(function);
+                try {
+                    return checkGeometry("Retry", geometry, true).flatMap(function);
+                } catch (final Exception e2) {
+                    logger.warn("Could not encode geometry", e2);
+                    return Optional.empty();
+                }
             }
         };
     }
