@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.tile.vector.models;
 import ch.ubique.backend.core.jackson.ObjectMapperUtils;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.constants.WebMercatorTileDefinitions;
+import ch.ubique.backend.geo.tile.common.constants.Wgs84TileDefinitions;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
@@ -19,6 +20,8 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.slf4j.event.Level;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public record VectorTileConfig(
         @NotNull YAxisDirection yAxisDirection,
@@ -46,6 +49,11 @@ public record VectorTileConfig(
     public static VectorTileConfigBuilder webMercator() {
         return new VectorTileConfigBuilder()
                 .tileLevelsDefinition(WebMercatorTileDefinitions.tileDefinitions());
+    }
+
+    public static VectorTileConfigBuilder wgs84() {
+        return new VectorTileConfigBuilder()
+                .tileLevelsDefinition(Wgs84TileDefinitions.tileDefinitions());
     }
 
     /**
@@ -185,6 +193,11 @@ public record VectorTileConfig(
 
         public VectorTileConfigBuilder zoomLevels(final Set<Integer> zoomLevels) {
             this.zoomLevels = zoomLevels;
+            return this;
+        }
+
+        public VectorTileConfigBuilder zoomLevels(final IntStream zoomLevels) {
+            this.zoomLevels = zoomLevels.boxed().collect(Collectors.toUnmodifiableSet());
             return this;
         }
 

@@ -6,8 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
+import ch.ubique.backend.geo.coordinate.models.BoundingBox;
+import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.constants.WebMercatorTileDefinitions;
+import ch.ubique.backend.geo.tile.common.constants.Wgs84TileDefinitions;
 
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
@@ -222,5 +225,30 @@ final class TileLevelsDefinitionTest {
 
             assertEquals(expected, actual);
         }
+    }
+
+    @Test
+    void testSomeWgs84TileInfos() {
+        final var tileDefinitions = Wgs84TileDefinitions.tileDefinitions();
+
+        assertEquals(
+                CoordinateSystems.WGS84.bounds(), tileDefinitions.tileInfo(0, 0, 0).envelope());
+
+        assertEquals(
+                new BoundingBox<>(new WGS84Coordinate(0, -180), new WGS84Coordinate(90, 0)).toJts(),
+                tileDefinitions.tileInfo(0, 0, 1).envelope());
+
+        assertEquals(
+                new BoundingBox<>(new WGS84Coordinate(-90, -180), new WGS84Coordinate(0, 0))
+                        .toJts(),
+                tileDefinitions.tileInfo(0, 1, 1).envelope());
+
+        assertEquals(
+                new BoundingBox<>(new WGS84Coordinate(0, 0), new WGS84Coordinate(90, 180)).toJts(),
+                tileDefinitions.tileInfo(1, 0, 1).envelope());
+
+        assertEquals(
+                new BoundingBox<>(new WGS84Coordinate(-90, 0), new WGS84Coordinate(0, 180)).toJts(),
+                tileDefinitions.tileInfo(1, 1, 1).envelope());
     }
 }
