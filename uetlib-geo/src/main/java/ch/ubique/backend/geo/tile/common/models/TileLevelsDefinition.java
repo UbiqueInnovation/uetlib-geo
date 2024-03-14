@@ -184,6 +184,24 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
                 .collect(Collectors.toUnmodifiableSet());
     }
 
+    public Stream<TileInfo> tileInfos(final Collection<Integer> levels) {
+        return tileInfos(levels.stream().mapToInt(i -> i));
+    }
+
+    public Stream<TileInfo> tileInfos(final IntStream levels) {
+        return levels.boxed().flatMap(this::tileInfos);
+    }
+
+    public Stream<TileInfo> tileInfos(
+            final Collection<Integer> levels, final ReferencedEnvelope outputEnvelope) {
+        return tileInfos(levels.stream().mapToInt(i -> i), outputEnvelope);
+    }
+
+    public Stream<TileInfo> tileInfos(
+            final IntStream levels, final ReferencedEnvelope outputEnvelope) {
+        return levels.boxed().flatMap(level -> tileInfos(level, outputEnvelope));
+    }
+
     public Stream<TileInfo> tileInfos(final int level) {
         final var zoomLevel = getZoomLevel(level);
         return IntStream.range(0, zoomLevel.tilesX())
