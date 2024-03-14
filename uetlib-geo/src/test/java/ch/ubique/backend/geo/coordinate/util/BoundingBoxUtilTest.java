@@ -67,15 +67,18 @@ class BoundingBoxUtilTest {
     @Test
     void findBoundingBoxWebMercator() {
         final var c1 = Stream.of(new WebMercatorCoordinate(1, 2), new WebMercatorCoordinate(3, 4));
-        final var b1 = new BoundingBox<>(new WebMercatorCoordinate(1, 2), new WebMercatorCoordinate(3, 4));
+        final var b1 =
+                new BoundingBox<>(new WebMercatorCoordinate(1, 2), new WebMercatorCoordinate(3, 4));
         assertEquals(b1, BoundingBoxUtil.findBoundingBox(c1).orElseThrow());
 
         final var c2 = Stream.of(new WebMercatorCoordinate(1, 2), new WebMercatorCoordinate(1, 4));
-        final var b2 = new BoundingBox<>(new WebMercatorCoordinate(1, 2), new WebMercatorCoordinate(1, 4));
+        final var b2 =
+                new BoundingBox<>(new WebMercatorCoordinate(1, 2), new WebMercatorCoordinate(1, 4));
         assertEquals(b2, BoundingBoxUtil.findBoundingBox(c2).orElseThrow());
 
         final var c3 = Stream.of(new WebMercatorCoordinate(1, 2), new WebMercatorCoordinate(1, 1));
-        final var b3 = new BoundingBox<>(new WebMercatorCoordinate(1, 1), new WebMercatorCoordinate(1, 2));
+        final var b3 =
+                new BoundingBox<>(new WebMercatorCoordinate(1, 1), new WebMercatorCoordinate(1, 2));
         assertEquals(b3, BoundingBoxUtil.findBoundingBox(c3).orElseThrow());
 
         final var c4 = Stream.<WebMercatorCoordinate>of();

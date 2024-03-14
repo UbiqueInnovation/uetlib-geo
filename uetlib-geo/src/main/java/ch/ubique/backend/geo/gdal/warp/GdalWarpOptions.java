@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.gdal.warp;
 import ch.ubique.backend.geo.common.models.WidthAndHeight;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.gdal.common.GdalDataSetFormat;
+
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.nio.file.Path;

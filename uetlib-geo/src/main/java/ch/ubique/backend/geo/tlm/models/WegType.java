@@ -50,8 +50,12 @@ public enum WegType {
             case "6M_STRASSE" -> STRASSE_6M;
             case "8M_STRASSE" -> STRASSE_8M;
             case "10M_STRASSE" -> STRASSE_10M;
-            default -> throw new NoSuchElementException(
-                    "No enum constant " + WegType.class.getCanonicalName() + '.' + uppercaseValue);
+            default ->
+                    throw new NoSuchElementException(
+                            "No enum constant "
+                                    + WegType.class.getCanonicalName()
+                                    + '.'
+                                    + uppercaseValue);
         };
     }
 }
