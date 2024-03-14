@@ -116,9 +116,7 @@ public class JdbcMbtileDataServiceImpl implements MbtileDataService {
     public void insertTiles(final List<TmsTile> tiles) {
         // only store non-empty tiles
         final var nonEmptyTiles =
-                tiles.stream()
-                        .filter(t -> t.data() != null && t.data().length > 0)
-                        .toList();
+                tiles.stream().filter(t -> t.data() != null && t.data().length > 0).toList();
         if (!nonEmptyTiles.isEmpty()) {
             tileInsert.executeBatch(createTileParams(nonEmptyTiles));
         }

@@ -91,8 +91,9 @@ public class SwisstopoTlmParser {
         return switch (value.toLowerCase()) {
             case "wahr" -> true;
             case "falsch" -> false;
-            default -> throw new IllegalStateException(
-                    "Unexpected boolean value: " + value.toLowerCase());
+            default ->
+                    throw new IllegalStateException(
+                            "Unexpected boolean value: " + value.toLowerCase());
         };
     }
 
