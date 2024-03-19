@@ -91,7 +91,7 @@ public class JtsUtil {
     public static GeometryFactory factoryFromGeometryCollection(
             @NotNull final Collection<? extends Geometry> geometries) {
         final var geometryMaybe = geometries.stream().findAny();
-        return geometryMaybe.map(Geometry::getFactory).orElse(new GeometryFactory());
+        return geometryMaybe.map(Geometry::getFactory).orElseGet(GeometryFactory::new);
     }
 
     public static GeometryFactory factoryFromGeometryCollection(
