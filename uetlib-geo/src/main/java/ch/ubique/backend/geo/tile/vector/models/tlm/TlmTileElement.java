@@ -19,7 +19,7 @@ public record TlmTileElement(long id, Geometry geometry, TlmTags tags)
     public String layer() {
         return Optional.ofNullable(tags.trailType())
                 .map(Objects::toString)
-                .orElse(tags.type().toString())
+                .orElseGet(() -> tags.type().toString())
                 .toLowerCase();
     }
 }
