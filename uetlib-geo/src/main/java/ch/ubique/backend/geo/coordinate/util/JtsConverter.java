@@ -25,6 +25,7 @@ import org.locationtech.jts.geom.Coordinate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coordinate> {
 
@@ -222,6 +223,25 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
             // rethrow as runtime exception. no way for caller to handle this
             throw new WrappedException(e);
         }
+    }
+
+    /**
+     * Transforms the given coordinates into the current reference system. All coordinates are
+     * expected to have the same CRS.
+     */
+    public Stream<Coordinate> transform(
+            final Stream<Coordinate> input,
+            final CoordinateSystem<?> sourceCoordinateSystem,
+            final boolean withHeight) {
+        final var mathTransform = findMathTransform(sourceCoordinateSystem.crs(), withHeight);
+        return input.map(
+                c -> {
+                    try {
+                        return JTS.transform(c, null, mathTransform);
+                    } catch (final TransformException e) {
+                        throw new WrappedException(e);
+                    }
+                });
     }
 
     public ReferencedEnvelope transform(final ReferencedEnvelope envelope) {
