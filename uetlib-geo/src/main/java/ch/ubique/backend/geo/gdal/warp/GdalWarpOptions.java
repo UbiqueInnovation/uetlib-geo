@@ -14,6 +14,7 @@ public final class GdalWarpOptions {
     private Collection<String> targetNoDataValues;
     private WidthAndHeight<Integer> targetSize;
     private GdalResamplingMethod resamplingMethod;
+    private String sourceSpatialReferenceSystem;
     private String targetSpatialReferenceSystem;
     private GdalDataSetFormat outputFormat;
     private Path sourcePath;
@@ -54,6 +55,11 @@ public final class GdalWarpOptions {
         if (resamplingMethod != null) {
             args.add("-r");
             args.add(resamplingMethod.value());
+        }
+
+        if (sourceSpatialReferenceSystem != null) {
+            args.add("-s_srs");
+            args.add(sourceSpatialReferenceSystem);
         }
 
         if (targetSpatialReferenceSystem != null) {
@@ -101,6 +107,32 @@ public final class GdalWarpOptions {
 
     public GdalWarpOptions resamplingMethod(final GdalResamplingMethod resamplingMethod) {
         this.resamplingMethod = resamplingMethod;
+        return this;
+    }
+
+    /**
+     * Sets the source SRS by EPSG code.
+     *
+     * @see #sourceSRSString(String) to set the source SRS by WKT string, PROJ.4 declaration, or
+     *     name of a .prj file containing a WKT CRS definition. Calling one after the other will
+     *     make the last call take precedence.
+     */
+    public GdalWarpOptions sourceCoordinateSystem(
+            final CoordinateSystem<?> sourceCoordinateSystem) {
+        this.sourceSpatialReferenceSystem = "EPSG:" + sourceCoordinateSystem.srid();
+        return this;
+    }
+
+    /**
+     * @param sourceSRS Can be a WKT string, PROJ.4 declaration, or name of a .prj file containing a
+     *     WKT CRS definition.
+     * @see <a href="https://gdal.org/programs/gdalwarp.html#cmdoption-gdalwarp-s_srs">Gdalwarp
+     *     docs</a> for more information.
+     * @see #sourceCoordinateSystem(CoordinateSystem) to set the source SRS by EPSG code. Calling
+     *     one after the other will make the last call take precedence.
+     */
+    public GdalWarpOptions sourceSRSString(final String sourceSRS) {
+        this.sourceSpatialReferenceSystem = sourceSRS;
         return this;
     }
 
