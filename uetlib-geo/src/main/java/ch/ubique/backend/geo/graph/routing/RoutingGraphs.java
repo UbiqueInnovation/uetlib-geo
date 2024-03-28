@@ -12,7 +12,7 @@ public record RoutingGraphs(
         @NotNull
                 Graph<
                                 RoutingGraphVertexProperties,
-                                WeightAndDirection<RoutingGraphVertexProperties>>
+                                WeightAndDirection<RoutingGraphVertexProperties, Weight>>
                         routingGraph) {
 
     public static RoutingGraphs empty() {

@@ -62,7 +62,7 @@ public class RoutingGraphsToTileElementsUtil {
     private static RoutingGraphTile.RoutingNeighbor mapToRoutingNeighbor(
             final Edge<
                             RoutingGraphVertexProperties,
-                            WeightAndDirection<RoutingGraphVertexProperties>>
+                            WeightAndDirection<RoutingGraphVertexProperties, Weight>>
                     edge) {
         return new RoutingNeighbor(
                 edge.getTo().getId(),

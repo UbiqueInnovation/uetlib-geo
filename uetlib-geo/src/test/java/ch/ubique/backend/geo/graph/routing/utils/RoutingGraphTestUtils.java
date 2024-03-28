@@ -7,6 +7,7 @@ import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
 import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
+import ch.ubique.backend.geo.graph.routing.models.Weight;
 import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,7 +68,7 @@ public class RoutingGraphTestUtils {
     private static Geometry toGeometry(
             final Vertex<
                             RoutingGraphVertexProperties,
-                            WeightAndDirection<RoutingGraphVertexProperties>>
+                            WeightAndDirection<RoutingGraphVertexProperties, Weight>>
                     vertex) {
         return geometryFactory.createPoint(vertex.getProperties().coordinate());
     }
@@ -75,7 +76,7 @@ public class RoutingGraphTestUtils {
     private static Geometry toGeometry(
             final Edge<
                             RoutingGraphVertexProperties,
-                            WeightAndDirection<RoutingGraphVertexProperties>>
+                            WeightAndDirection<RoutingGraphVertexProperties, Weight>>
                     edge) {
         return geometryFactory.createLineString(
                 new Coordinate[] {

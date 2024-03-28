@@ -5,9 +5,9 @@ import ch.ubique.backend.geo.graph.models.Vertex;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public record WeightAndDirection<V>(float weight, Vertex<V, Weight> direction) {
+public record WeightAndDirection<V, E>(float weight, Vertex<V, E> direction) {
 
-    public WeightAndDirection<V> withDirection(final Vertex<V, Weight> direction) {
+    public WeightAndDirection<V, E> withDirection(final Vertex<V, E> direction) {
         return new WeightAndDirection<>(weight, direction);
     }
 

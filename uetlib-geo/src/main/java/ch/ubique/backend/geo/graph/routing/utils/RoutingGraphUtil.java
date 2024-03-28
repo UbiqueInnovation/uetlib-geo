@@ -12,28 +12,37 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
-public final class RoutingGraphUtil<V> {
+public final class RoutingGraphUtil<V, E> {
 
     private static final Logger logger = LoggerFactory.getLogger(RoutingGraphUtil.class);
 
-    private final Graph<V, Weight> inputGraph;
-    private final Graph<V, WeightAndDirection<V>> routingGraph;
-    private final Set<Vertex<V, Weight>> additionalRoutingVertices;
+    private final Graph<V, E> inputGraph;
+    private final Graph<V, WeightAndDirection<V, E>> routingGraph;
+    private final Set<Vertex<V, E>> additionalRoutingVertices;
+    private final Function<Edge<V, E>, Float> weightingFunction;
 
-    private RoutingGraphUtil(final Graph<V, Weight> inputGraph) {
+    private RoutingGraphUtil(
+            final Graph<V, E> inputGraph, final Function<Edge<V, E>, Float> weightingFunction) {
         this.inputGraph = inputGraph;
+        this.weightingFunction = weightingFunction;
         routingGraph = new Graph<>();
         additionalRoutingVertices = new HashSet<>();
     }
 
-    public static <S> Graph<S, WeightAndDirection<S>> createRoutingGraph(
-            final Graph<S, Weight> graph) {
-        final var routingGraphUtil = new RoutingGraphUtil<>(graph);
+    public static <S, T> Graph<S, WeightAndDirection<S, T>> createRoutingGraph(
+            final Graph<S, T> graph, final Function<Edge<S, T>, Float> weightingFunction) {
+        final var routingGraphUtil = new RoutingGraphUtil<>(graph, weightingFunction);
         return routingGraphUtil.createRoutingGraph();
     }
 
-    private Graph<V, WeightAndDirection<V>> createRoutingGraph() {
+    public static <S> Graph<S, WeightAndDirection<S, Weight>> createRoutingGraph(
+            final Graph<S, Weight> graph) {
+        return createRoutingGraph(graph, e -> e.getProperties().weight());
+    }
+
+    private Graph<V, WeightAndDirection<V, E>> createRoutingGraph() {
         logger.info("Creating routing graphs");
 
         logger.info("Finding cycles");
@@ -57,26 +66,25 @@ public final class RoutingGraphUtil<V> {
         return routingGraph;
     }
 
-    private boolean isRoutingVertex(final Vertex<V, Weight> vertex) {
+    private boolean isRoutingVertex(final Vertex<V, E> vertex) {
         return vertex.degree() == 1
                 || vertex.degree() > 2
                 || additionalRoutingVertices.contains(vertex);
     }
 
-    private void addToRoutingGraph(final Vertex<V, Weight> vertex) {
+    private void addToRoutingGraph(final Vertex<V, E> vertex) {
         routingGraph.getOrAddVertex(new Vertex<>(vertex.getId(), vertex.getProperties()));
     }
 
-    private void linkRoutingNode(final Vertex<V, Weight> vertex) {
+    private void linkRoutingNode(final Vertex<V, E> vertex) {
         for (final var direction : vertex.getEdges()) {
             linkRoutingNodeForNeighbor(vertex, direction);
         }
     }
 
-    private void linkRoutingNodeForNeighbor(
-            final Vertex<V, Weight> start, final Edge<V, Weight> direction) {
+    private void linkRoutingNodeForNeighbor(final Vertex<V, E> start, final Edge<V, E> direction) {
 
-        final var visitedEdges = new HashSet<Edge<V, Weight>>();
+        final var visitedEdges = new HashSet<Edge<V, E>>();
 
         var weight = 0.0f;
 
@@ -87,7 +95,7 @@ public final class RoutingGraphUtil<V> {
             current.getTwin().ifPresent(visitedEdges::add);
 
             final var to = current.getOther(from);
-            weight += Optional.ofNullable(current.getProperties()).map(Weight::weight).orElse(0.0f);
+            weight += Optional.of(current).map(weightingFunction).orElse(0.0f);
 
             // Link routing vertex and return
             if (isRoutingVertex(to)) {
@@ -109,7 +117,7 @@ public final class RoutingGraphUtil<V> {
     private void upsertRoutingEdge(
             final long vertexId,
             final long routingNeighborId,
-            final Vertex<V, Weight> direction,
+            final Vertex<V, E> direction,
             final float weight) {
 
         // Try to get existing routing edge
