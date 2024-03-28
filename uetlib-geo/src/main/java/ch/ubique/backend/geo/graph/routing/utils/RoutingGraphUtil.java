@@ -39,7 +39,9 @@ public final class RoutingGraphUtil<V, E> {
 
     public static <S> Graph<S, WeightAndDirection<S, Weight>> createRoutingGraph(
             final Graph<S, Weight> graph) {
-        return createRoutingGraph(graph, e -> e.getProperties().weight());
+        return createRoutingGraph(
+                graph,
+                e -> Optional.ofNullable(e.getProperties()).map(Weight::weight).orElse(null));
     }
 
     private Graph<V, WeightAndDirection<V, E>> createRoutingGraph() {
