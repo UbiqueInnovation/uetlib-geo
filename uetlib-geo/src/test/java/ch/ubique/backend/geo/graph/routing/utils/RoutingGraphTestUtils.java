@@ -65,12 +65,18 @@ public class RoutingGraphTestUtils {
     }
 
     private static Geometry toGeometry(
-            final Vertex<RoutingGraphVertexProperties, WeightAndDirection> vertex) {
+            final Vertex<
+                            RoutingGraphVertexProperties,
+                            WeightAndDirection<RoutingGraphVertexProperties>>
+                    vertex) {
         return geometryFactory.createPoint(vertex.getProperties().coordinate());
     }
 
     private static Geometry toGeometry(
-            final Edge<RoutingGraphVertexProperties, WeightAndDirection> edge) {
+            final Edge<
+                            RoutingGraphVertexProperties,
+                            WeightAndDirection<RoutingGraphVertexProperties>>
+                    edge) {
         return geometryFactory.createLineString(
                 new Coordinate[] {
                     edge.getU().getProperties().coordinate(),

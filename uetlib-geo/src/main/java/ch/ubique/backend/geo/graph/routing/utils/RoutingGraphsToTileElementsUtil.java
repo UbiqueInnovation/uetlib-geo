@@ -60,7 +60,10 @@ public class RoutingGraphsToTileElementsUtil {
 
     @NotNull
     private static RoutingGraphTile.RoutingNeighbor mapToRoutingNeighbor(
-            final Edge<RoutingGraphVertexProperties, WeightAndDirection> edge) {
+            final Edge<
+                            RoutingGraphVertexProperties,
+                            WeightAndDirection<RoutingGraphVertexProperties>>
+                    edge) {
         return new RoutingNeighbor(
                 edge.getTo().getId(),
                 edge.getTo().getProperties().isHighway(),

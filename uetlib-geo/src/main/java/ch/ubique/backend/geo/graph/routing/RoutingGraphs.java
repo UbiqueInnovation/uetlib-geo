@@ -9,7 +9,11 @@ import jakarta.validation.constraints.NotNull;
 
 public record RoutingGraphs(
         @NotNull Graph<RoutingGraphVertexProperties, Weight> completeGraph,
-        @NotNull Graph<RoutingGraphVertexProperties, WeightAndDirection> routingGraph) {
+        @NotNull
+                Graph<
+                                RoutingGraphVertexProperties,
+                                WeightAndDirection<RoutingGraphVertexProperties>>
+                        routingGraph) {
 
     public static RoutingGraphs empty() {
         return new RoutingGraphs(new Graph<>(), new Graph<>());
