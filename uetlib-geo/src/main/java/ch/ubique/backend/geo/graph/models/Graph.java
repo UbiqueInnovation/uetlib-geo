@@ -244,33 +244,39 @@ public class Graph<V, E> {
     }
 
     /**
-     * @param vertexFilter vertices where this predicate evaluates to true are kept. If null, no
-     *     filter is applied.
+     * @param nullableVertexFilter vertices where this predicate evaluates to true are kept. If
+     *     null, no filter is applied.
      * @param vertexPropertyMapper specifies how vertex properties are transformed.
-     * @param edgeFilter edges where this predicate evaluates to true are kept. If null, no filter
-     *     is applied.
+     * @param nullableEdgeFilter edges where this predicate evaluates to true are kept. If null, no
+     *     filter is applied.
      * @param edgePropertyMapper specifies how edge properties are transformed.
      * @return the filtered and mapped graph
      * @param <S> the vertex property type of the mapped graph
      * @param <T> the edge property type of the mapped graph
      */
     public <S, T> Graph<S, T> filterAndMap(
-            @Nullable final Predicate<Vertex<V, E>> vertexFilter,
+            @Nullable final Predicate<Vertex<V, E>> nullableVertexFilter,
             @NotNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
-            @Nullable final Predicate<Edge<V, E>> edgeFilter,
+            @Nullable final Predicate<Edge<V, E>> nullableEdgeFilter,
             @NotNull final Function<Edge<V, E>, T> edgePropertyMapper) {
 
         final var graph = new Graph<S, T>();
 
+        final var vertexFilter = Objects.requireNonNullElse(nullableVertexFilter, v -> true);
+        final var edgeFilter =
+                Objects.requireNonNullElse(nullableEdgeFilter, e -> true)
+                        .and(e -> vertexFilter.test(e.getU()))
+                        .and(e -> vertexFilter.test(e.getV()));
+
         getVertices().stream()
-                .filter(Objects.requireNonNullElse(vertexFilter, v -> true))
+                .filter(vertexFilter)
                 .forEach(
                         vertex ->
                                 graph.addVertex(
                                         vertex.getId(), vertexPropertyMapper.apply(vertex)));
 
         getDirectedEdges().stream()
-                .filter(Objects.requireNonNullElse(edgeFilter, e -> true))
+                .filter(edgeFilter)
                 .forEach(
                         edge ->
                                 graph.getOrAddDirectedEdge(
