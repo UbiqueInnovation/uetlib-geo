@@ -187,14 +187,14 @@ public class Graph<V, E> {
 
         for (final var start : getVertices()) {
 
-            if (visited.contains(start) || start.degree() != 2) {
+            if (visited.contains(start) || start.getNeighborsCount() != 2) {
                 continue;
             }
 
             Vertex<V, E> previous = null;
             var current = start;
             final var potentialCycle = new LinkedList<Vertex<V, E>>();
-            while (current.degree() == 2) {
+            while (current.getNeighborsCount() == 2) {
 
                 if (current.equals(start) && !potentialCycle.isEmpty()) {
                     cycles.add(potentialCycle);
@@ -208,10 +208,8 @@ public class Graph<V, E> {
                 final var next =
                         current.getNeighborsStream().filter(v -> !v.equals(prev)).findAny();
 
-                assert next.isPresent();
-
                 previous = current;
-                current = next.get();
+                current = next.orElseThrow();
             }
         }
         return cycles;
@@ -279,9 +277,9 @@ public class Graph<V, E> {
                 .filter(edgeFilter)
                 .forEach(
                         edge ->
-                                graph.getOrAddDirectedEdge(
-                                        edge.getU().getId(),
-                                        edge.getV().getId(),
+                                graph.addDirectedEdge(
+                                        graph.getVertex(edge.getU().getId()).orElseThrow(),
+                                        graph.getVertex(edge.getV().getId()).orElseThrow(),
                                         edgePropertyMapper.apply(edge)));
         return graph;
     }

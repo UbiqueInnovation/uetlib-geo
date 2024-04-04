@@ -63,6 +63,10 @@ public final class Vertex<V, E> {
         return edges.stream().map(e -> id == e.getU().id ? e.getV() : e.getU());
     }
 
+    public int getNeighborsCount() {
+        return (int) getNeighborsStream().distinct().count();
+    }
+
     public V getProperties() {
         return properties;
     }
