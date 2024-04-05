@@ -18,4 +18,26 @@ public record TlmPathInfo(
         @Nullable String streetName,
         boolean directionsSeparated,
         boolean isRoundabout,
-        @Nullable Boolean passable) {}
+        @Nullable Boolean passable)
+        implements TlmInfo {
+
+    public TlmPathInfo(final UnstructuredTlmInfo unstructured) {
+        this(
+                unstructured.getString("uuid").orElseThrow(),
+                unstructured.getString("objektart").map(WegType::parse).orElseThrow(),
+                unstructured.getEnum(WanderwegType.class, "wanderwege").orElse(null),
+                unstructured.getInt("stufe").orElse(null),
+                unstructured.getEnum(BelagType.class, "belagsart").orElse(null),
+                unstructured.getEnum(Verkehrsbedeutung.class, "verkehrsbedeutung").orElse(null),
+                unstructured
+                        .getString("verkehrsbeschraenkung")
+                        .map(TrafficRestriction::parse)
+                        .orElse(TrafficRestriction.NONE),
+                unstructured.getString("kunstbaute").map(Structure::parse).orElse(null),
+                unstructured.getString("name").orElse(null),
+                unstructured.getString("strassenname").orElse(null),
+                unstructured.getBoolean("richtungsgetrennt").orElse(false),
+                unstructured.getBoolean("kreisel").orElse(false),
+                unstructured.getBoolean("befahrbarkeit").orElse(null));
+    }
+}
