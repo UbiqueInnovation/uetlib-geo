@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 
 public record RailwayInfo(
-        @NotNull int id,
+        @NotNull String id,
         @NotNull String uuid,
         @NotNull Gauge gauge,
         @NotNull RailServiceType railServiceType,
@@ -38,7 +38,7 @@ public record RailwayInfo(
 
     public RailwayInfo(final UnstructuredTlmInfo unstructured) {
         this(
-                unstructured.getInt("id").orElseThrow(),
+                unstructured.getString("id").orElseThrow(),
                 unstructured.getString("uuid").orElseThrow(),
                 unstructured.getString("objektart").map(Gauge::parse).orElseThrow(),
                 unstructured.getString("verkehrsmittel").map(RailServiceType::parse).orElseThrow(),
