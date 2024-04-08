@@ -9,6 +9,7 @@ import ch.ubique.backend.geo.tile.vector.models.tlm.UnstructuredTlmInfo;
 import ch.ubique.backend.geo.tlm.models.*;
 import ch.ubique.backend.geo.utils.GeotoolsUtils;
 
+import org.geotools.api.data.SimpleFeatureReader;
 import org.geotools.api.feature.Property;
 import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.geopkg.Entry;
@@ -41,25 +42,42 @@ public class SwisstopoTlmParser implements AutoCloseable {
     }
 
     public static Collection<TlmPath> parsePaths(final File file) throws IOException {
-        try (final var parser = new SwisstopoTlmParser(file)) {
-            return parser.parseLayer("tlm_strassen_strasse")
+        try (final var parser = new SwisstopoTlmParser(file);
+                final var reader = parser.getReader("tlm_strassen_strasse")) {
+            return parser.parseLayer(reader)
                     .map(f -> new TlmPath((LineString) f.geometry(), f.info().asPathInfo()))
                     .toList();
         }
     }
 
     public Collection<TlmFeature<LineString, TlmPathInfo>> parsePaths() throws IOException {
-        return parseLayer("tlm_strassen_strasse").map(SwisstopoTlmParser::toTlmPath).toList();
+        try (final var reader = getReader("tlm_strassen_strasse")) {
+            return parseLayer(reader).map(SwisstopoTlmParser::toTlmPath).toList();
+        }
     }
 
     public Collection<TlmFeature<LineString, RailwayInfo>> parseRailways() throws IOException {
-        return parseLayer("tlm_oev_eisenbahn").map(SwisstopoTlmParser::toRailway).toList();
+        try (final var reader = getReader("tlm_oev_eisenbahn")) {
+            return parseLayer(reader).map(SwisstopoTlmParser::toRailway).toList();
+        }
     }
 
-    public Stream<TlmFeature<Geometry, UnstructuredTlmInfo>> parseLayer(final String layerName)
+    public Collection<TlmFeature<Geometry, UnstructuredTlmInfo>> parseLayer(final String layerName)
             throws IOException {
         logger.info("Parsing layer {}.", layerName);
-        final var reader = geoPackage.reader(geoPackage.feature(layerName), null, null);
+        try (final var reader = getReader(layerName)) {
+            return parseLayer(reader).toList();
+        }
+    }
+
+    /** Make sure to close the reader! E.g., use try-with-resource */
+    public SimpleFeatureReader getReader(final String layerName) throws IOException {
+        return geoPackage.reader(geoPackage.feature(layerName), null, null);
+    }
+
+    public Stream<TlmFeature<Geometry, UnstructuredTlmInfo>> parseLayer(
+            final SimpleFeatureReader reader) {
+
         return GeotoolsUtils.stream(reader).map(this::parseFeature);
     }
 

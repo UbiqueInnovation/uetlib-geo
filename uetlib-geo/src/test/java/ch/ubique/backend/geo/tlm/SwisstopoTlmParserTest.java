@@ -9,6 +9,7 @@ import ch.ubique.backend.geo.tile.vector.models.tlm.UnstructuredTlmInfo;
 import ch.ubique.backend.geo.tlm.models.TlmFeature;
 import ch.ubique.backend.geo.tlm.models.TlmPath;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -17,9 +18,9 @@ import org.locationtech.jts.geom.Geometry;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
 
 class SwisstopoTlmParserTest {
 
@@ -118,9 +119,9 @@ class SwisstopoTlmParserTest {
 
     private void verifyResults(
             final String layerName,
-            final Stream<TlmFeature<Geometry, UnstructuredTlmInfo>> features) {
+            final Collection<TlmFeature<Geometry, UnstructuredTlmInfo>> features) {
         assertNotNull(layerName);
         assertNotNull(features);
-        assertTrue(features.findAny().isPresent());
+        assertTrue(CollectionUtils.isNotEmpty(features));
     }
 }
