@@ -25,6 +25,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ * @deprecated Please use Geotools for parsing geo packages
+ */
+@Deprecated(since = "2.3.0", forRemoval = true)
 public class GeoPackageParser implements AutoCloseable {
 
     private final GeoPackage geoPackage;

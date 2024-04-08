@@ -10,7 +10,6 @@ import ch.ubique.backend.geo.tlm.models.*;
 import ch.ubique.backend.geo.utils.GeotoolsUtils;
 
 import org.geotools.api.data.SimpleFeatureReader;
-import org.geotools.api.feature.Property;
 import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.geopkg.Entry;
 import org.geotools.geopkg.GeoPackage;
@@ -92,9 +91,12 @@ public class SwisstopoTlmParser implements AutoCloseable {
     }
 
     private static Map<String, Object> parseProperties(final SimpleFeature feature) {
-        return feature.getProperties().stream()
-                .filter(p -> p.getName() != null && p.getValue() != null)
-                .collect(toUnmodifiableMap(p -> p.getName().toString(), Property::getValue));
+        return Stream.concat(
+                        Stream.of(Map.entry("id", feature.getID())),
+                        feature.getProperties().stream()
+                                .filter(p -> p.getName() != null && p.getValue() != null)
+                                .map(p -> Map.entry(p.getName().toString(), p.getValue())))
+                .collect(toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public static TlmFeature<LineString, TlmPathInfo> toTlmPath(
