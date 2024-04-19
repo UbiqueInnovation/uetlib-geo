@@ -55,8 +55,9 @@ public class LinesGraphBuilder<E> {
         this.lineIntersector = new RobustLineIntersector();
 
         final var mdc = MDC.getCopyOfContextMap();
-        vertexProgressLogger = new IndeterminateProgressLogger("Inserting vertices: ", 10_000, mdc);
-        edgeProgressLogger = new IndeterminateProgressLogger("Inserting edges: ", 10_000, mdc);
+        vertexProgressLogger =
+                new IndeterminateProgressLogger("Inserting vertices: ", 1_000_000, mdc);
+        edgeProgressLogger = new IndeterminateProgressLogger("Inserting edges: ", 1_000_000, mdc);
     }
 
     public Graph<Coordinate, E> build() {
