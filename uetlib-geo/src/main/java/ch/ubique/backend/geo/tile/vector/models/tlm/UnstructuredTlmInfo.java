@@ -9,16 +9,14 @@ import java.util.*;
 
 public record UnstructuredTlmInfo(Map<String, Object> properties) implements TlmInfo {
 
-    public TlmPathInfo asPathInfo() {
-        return new TlmPathInfo(this);
-    }
-
-    public RailwayInfo asRailwayInfo() {
-        return new RailwayInfo(this);
+    @Override
+    public UnstructuredTlmInfo unstructured() {
+        return this;
     }
 
     private static final Collection<String> NULL_VALUES = List.of("k_W", "ub");
     private static final ZoneId ZONE = ZoneId.of("Europe/Zurich");
+
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZONE);
 
