@@ -13,6 +13,10 @@ public record UnstructuredTlmInfo(Map<String, Object> properties) implements Tlm
         return new TlmPathInfo(this);
     }
 
+    public RailwayInfo asRailwayInfo() {
+        return new RailwayInfo(this);
+    }
+
     private static final Collection<String> NULL_VALUES = List.of("k_W", "ub");
     private static final ZoneId ZONE = ZoneId.of("Europe/Zurich");
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
