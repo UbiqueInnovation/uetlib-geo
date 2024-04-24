@@ -6,6 +6,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
 public record TlmPathInfo(
+        @NotNull UnstructuredTlmInfo unstructured,
         @NotNull String uuid,
         @NotNull WegType type,
         @Nullable WanderwegType trailType,
@@ -23,6 +24,7 @@ public record TlmPathInfo(
 
     public TlmPathInfo(final UnstructuredTlmInfo unstructured) {
         this(
+                unstructured,
                 unstructured.getString("uuid").orElseThrow(),
                 unstructured.getString("objektart").map(WegType::parse).orElseThrow(),
                 unstructured.getEnum(WanderwegType.class, "wanderwege").orElse(null),

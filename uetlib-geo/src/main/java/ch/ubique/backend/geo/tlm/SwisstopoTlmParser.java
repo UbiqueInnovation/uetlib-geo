@@ -1,8 +1,7 @@
 package ch.ubique.backend.geo.tlm;
 
-import static java.util.stream.Collectors.toUnmodifiableMap;
-
 import ch.ubique.backend.core.io.AutoClosableTempFileProvider;
+import ch.ubique.backend.core.utils.MapCollectors;
 import ch.ubique.backend.geo.tile.vector.models.tlm.RailwayInfo;
 import ch.ubique.backend.geo.tile.vector.models.tlm.TlmPathInfo;
 import ch.ubique.backend.geo.tile.vector.models.tlm.UnstructuredTlmInfo;
@@ -96,7 +95,7 @@ public class SwisstopoTlmParser implements AutoCloseable {
                         feature.getProperties().stream()
                                 .filter(p -> p.getName() != null && p.getValue() != null)
                                 .map(p -> Map.entry(p.getName().toString(), p.getValue())))
-                .collect(toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(MapCollectors.entriesToMapDropDuplicates());
     }
 
     public static TlmFeature<LineString, TlmPathInfo> toTlmPath(
