@@ -214,6 +214,26 @@ public class JtsUtil {
     }
 
     @NotNull
+    public static Stream<Point> getPointsStream(final MultiPoint multiPoint) {
+        return getGeometriesAsStream(multiPoint).map(Point.class::cast);
+    }
+
+    @NotNull
+    public static Stream<LineString> getLinesStream(final MultiLineString multiLineString) {
+        return getGeometriesAsStream(multiLineString).map(LineString.class::cast);
+    }
+
+    @NotNull
+    public static Stream<Polygon> getPolygonsStream(final MultiPolygon multiPolygon) {
+        return getGeometriesAsStream(multiPolygon).map(Polygon.class::cast);
+    }
+
+    @NotNull
+    public static Stream<LinearRing> getInteriorRingsStream(final Polygon polygon) {
+        return IntStream.range(0, polygon.getNumInteriorRing()).mapToObj(polygon::getInteriorRingN);
+    }
+
+    @NotNull
     public static Collection<Geometry> getGeometries(final Geometry geometry) {
         return getGeometriesAsStream(geometry).toList();
     }
