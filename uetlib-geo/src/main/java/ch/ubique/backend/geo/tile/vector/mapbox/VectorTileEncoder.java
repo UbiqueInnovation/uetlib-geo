@@ -114,7 +114,7 @@ public class VectorTileEncoder {
         }
 
         private Integer indexOfValue(final Object value) {
-            return valueMap.computeIfAbsent(value, ignored -> valueMap.size() - 1);
+            return valueMap.computeIfAbsent(value, ignored -> valueMap.size());
         }
 
         private Collection<String> keys() {
