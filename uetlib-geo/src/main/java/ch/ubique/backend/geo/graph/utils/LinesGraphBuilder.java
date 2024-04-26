@@ -32,6 +32,7 @@ import org.slf4j.MDC;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
 public class LinesGraphBuilder<E> {
@@ -40,15 +41,21 @@ public class LinesGraphBuilder<E> {
 
     private final Graph<Coordinate, E> graph;
     private final Snapping3dPointIndex snapping3dPointIndex;
-    private final Map<XYZ, Vertex<Coordinate, E>> coordinatesToVertex;
+    private final Map<VertexKey, Vertex<Coordinate, E>> coordinatesToVertex;
     private final IndeterminateProgressLogger vertexProgressLogger;
     private final IndeterminateProgressLogger edgeProgressLogger;
     private final LineIntersector lineIntersector;
     private final double snapTolerance;
+    private final ToIntFunction<E> levelExtractor;
     private CoordinateReferenceSystem crs;
 
     public LinesGraphBuilder(final double snapTolerance) {
+        this(snapTolerance, null);
+    }
+
+    public LinesGraphBuilder(final double snapTolerance, final ToIntFunction<E> levelExtractor) {
         this.snapTolerance = snapTolerance;
+        this.levelExtractor = requireNonNullElse(levelExtractor, ignored -> 0);
         this.graph = new Graph<>();
         this.snapping3dPointIndex = new Snapping3dPointIndex(snapTolerance);
         this.coordinatesToVertex = new HashMap<>();
@@ -89,9 +96,11 @@ public class LinesGraphBuilder<E> {
                     "Building graph for " + crs + " but got line with " + lineCrs);
         }
 
+        final var level = levelExtractor.applyAsInt(info);
+
         for (final var segment : JtsUtil.segments(lineString)) {
-            final var v0 = getOrCreateVertex(segment.p0);
-            final var v1 = getOrCreateVertex(segment.p1);
+            final var v0 = getOrCreateVertex(segment.p0, level);
+            final var v1 = getOrCreateVertex(segment.p1, level);
 
             upsertDirectedEdge(v0, v1, info);
             upsertDirectedEdge(v1, v0, info);
@@ -155,7 +164,8 @@ public class LinesGraphBuilder<E> {
 
     private void splitEdge(final Edge<Coordinate, E> edge, final Coordinate coordinate) {
         logger.debug("Splitting edge {} at coordinate {}", edge, coordinate);
-        final var intersectionVertex = getOrCreateVertex(coordinate);
+        final var level = levelExtractor.applyAsInt(edge.getProperties());
+        final var intersectionVertex = getOrCreateVertex(coordinate, level);
         graph.removeEdge(edge);
         upsertDirectedEdge(edge.getFrom(), intersectionVertex, edge.getProperties());
         upsertDirectedEdge(intersectionVertex, edge.getTo(), edge.getProperties());
@@ -245,9 +255,9 @@ public class LinesGraphBuilder<E> {
         edgeProgressLogger.step();
     }
 
-    private Vertex<Coordinate, E> getOrCreateVertex(final Coordinate coordinate) {
+    private Vertex<Coordinate, E> getOrCreateVertex(final Coordinate coordinate, final int level) {
         return coordinatesToVertex.computeIfAbsent(
-                new XYZ(snapping3dPointIndex.snap(coordinate)),
+                new VertexKey(snapping3dPointIndex.snap(coordinate), level),
                 ignored -> createVertex(coordinate));
     }
 
@@ -273,9 +283,9 @@ public class LinesGraphBuilder<E> {
         return null;
     }
 
-    private record XYZ(double x, double y, Double z) {
-        public XYZ(final Coordinate coordinate) {
-            this(coordinate.x, coordinate.y, coordinate.getZ());
+    private record VertexKey(double x, double y, Double z, int level) {
+        public VertexKey(final Coordinate coordinate, final int level) {
+            this(coordinate.x, coordinate.y, coordinate.getZ(), level);
         }
     }
 }
