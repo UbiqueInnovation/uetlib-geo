@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.graph.utils;
 
 import static ch.ubique.backend.geo.coordinate.constants.CoordinateSystems.WGS84;
 
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNullElse;
 
 import ch.ubique.backend.core.utils.IndeterminateProgressLogger;
@@ -33,6 +34,7 @@ import org.slf4j.MDC;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class LinesGraphBuilder<E> {
@@ -68,6 +70,7 @@ public class LinesGraphBuilder<E> {
     }
 
     public Graph<Coordinate, E> build() {
+        mergeVerticesAtLevelSwitch();
         return graph;
     }
 
@@ -283,7 +286,39 @@ public class LinesGraphBuilder<E> {
         return null;
     }
 
+    private void mergeVerticesAtLevelSwitch() {
+        logger.info("Merging vertices at level switch (e.g. at the end of a bridge)");
+        final var candidates =
+                graph.getVertices().stream()
+                        .collect(Collectors.groupingBy(Vertex::getProperties))
+                        .values()
+                        .stream()
+                        .filter(list -> list.size() > 1)
+                        .toList();
+
+        logger.info("Found {} candidates. Going to merge now.", candidates.size());
+        final var counter = new AtomicInteger(0);
+        for (final var mergeCandidate : candidates) {
+            final var main = mergeCandidate.stream().max(comparing(Vertex::degree)).orElseThrow();
+            final var verticesToMerge =
+                    mergeCandidate.stream()
+                            .filter(v -> v != main)
+                            .filter(v -> v.degree() <= 1) // Only merge at endpoints
+                            .toList();
+            for (final var vertexToMerge : verticesToMerge) {
+                graph.outgoingEdges(vertexToMerge)
+                        .forEach(e -> graph.addDirectedEdge(main, e.getTo(), e.getProperties()));
+                graph.incomingEdges(vertexToMerge)
+                        .forEach(e -> graph.addDirectedEdge(e.getFrom(), main, e.getProperties()));
+                graph.removeVertex(vertexToMerge);
+                counter.incrementAndGet();
+            }
+        }
+        logger.info("Merged {} vertices.", counter.get());
+    }
+
     private record VertexKey(double x, double y, Double z, int level) {
+
         public VertexKey(final Coordinate coordinate, final int level) {
             this(coordinate.x, coordinate.y, coordinate.getZ(), level);
         }
