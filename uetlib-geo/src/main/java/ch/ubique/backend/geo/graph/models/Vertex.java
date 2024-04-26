@@ -48,11 +48,11 @@ public final class Vertex<V, E> {
     }
 
     public Optional<Edge<V, E>> getEdgeTo(final long neighborId) {
-        return edges.stream().filter(e -> e.connects(id, neighborId)).findFirst();
+        return edges.stream().filter(e -> e.getTo().id == neighborId).findFirst();
     }
 
     public Optional<Edge<V, E>> getEdgeTo(final Vertex<V, E> neighbor) {
-        return edges.stream().filter(e -> e.connects(this, neighbor)).findFirst();
+        return edges.stream().filter(e -> e.getTo().equals(neighbor)).findFirst();
     }
 
     public List<Vertex<V, E>> getNeighbors() {
@@ -60,7 +60,7 @@ public final class Vertex<V, E> {
     }
 
     public Stream<Vertex<V, E>> getNeighborsStream() {
-        return edges.stream().map(e -> id == e.getU().id ? e.getV() : e.getU());
+        return edges.stream().map(Edge::getTo);
     }
 
     public int getNeighborsCount() {

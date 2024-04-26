@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * @param <V> type of the vertex properties
@@ -162,17 +163,23 @@ public class Graph<V, E> {
     }
 
     public void removeVertex(final Vertex<V, E> vertex) {
-        outgoingEdgesIndex.getOrDefault(vertex.getId(), Set.of()).stream()
-                .toList()
-                .forEach(this::removeEdge);
-        incomingEdgesIndex.getOrDefault(vertex.getId(), Set.of()).stream()
-                .toList()
-                .forEach(this::removeEdge);
+        outgoingEdges(vertex).toList().forEach(this::removeEdge);
+        incomingEdges(vertex).toList().forEach(this::removeEdge);
         vertices.remove(vertex.getId());
     }
 
     public void removeVertex(final long vertexId) {
         getVertex(vertexId).ifPresent(this::removeVertex);
+    }
+
+    public Stream<Edge<V, E>> incomingEdges(final Vertex<V, E> vertex) {
+        return incomingEdgesIndex.getOrDefault(vertex.getId(), Set.of()).stream()
+                .map(this::getEdge);
+    }
+
+    public Stream<Edge<V, E>> outgoingEdges(final Vertex<V, E> vertex) {
+        return outgoingEdgesIndex.getOrDefault(vertex.getId(), Set.of()).stream()
+                .map(this::getEdge);
     }
 
     @Override
