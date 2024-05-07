@@ -14,7 +14,7 @@ public class ConnectedComponents {
     public static <V, E> Collection<Collection<Vertex<V, E>>> computeComponents(
             final Graph<V, E> graph) {
 
-        final var visited = new HashSet<Long>();
+        final var visited = new HashSet<Integer>();
         final var connectedComponents = new ArrayList<Collection<Vertex<V, E>>>();
 
         for (final var vertex : graph.getVertices()) {

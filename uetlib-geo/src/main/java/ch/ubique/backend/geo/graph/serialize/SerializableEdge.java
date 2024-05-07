@@ -2,4 +2,4 @@ package ch.ubique.backend.geo.graph.serialize;
 
 import org.jetbrains.annotations.Nullable;
 
-record SerializableEdge<T>(long u, long v, @Nullable T properties) {}
+record SerializableEdge(int u, int v, @Nullable Integer propertyKey) {}

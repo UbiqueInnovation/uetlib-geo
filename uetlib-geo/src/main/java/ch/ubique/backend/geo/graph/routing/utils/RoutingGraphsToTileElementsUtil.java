@@ -38,11 +38,11 @@ public class RoutingGraphsToTileElementsUtil {
                 vertex.getId(),
                 vertex.getProperties().isHighway(),
                 geometryFactory.createPoint(vertex.getProperties().coordinate()),
-                vertex.getEdges().stream()
+                vertex.outgoingEdges().stream()
                         .map(RoutingGraphsToTileElementsUtil::mapToNeighbor)
                         .toList(),
                 routingVertex.stream()
-                        .flatMap(v -> v.getEdges().stream())
+                        .flatMap(v -> v.outgoingEdges().stream())
                         .map(RoutingGraphsToTileElementsUtil::mapToRoutingNeighbor)
                         .toList());
     }

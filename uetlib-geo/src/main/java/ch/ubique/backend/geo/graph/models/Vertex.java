@@ -1,12 +1,14 @@
 package ch.ubique.backend.geo.graph.models;
 
+import static ch.ubique.backend.core.utils.SmallCollectionUtil.combine;
+import static ch.ubique.backend.core.utils.SmallCollectionUtil.compress;
+
+import static java.util.function.Predicate.not;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -14,23 +16,25 @@ import java.util.stream.Stream;
  * @param <E> type of the edge properties
  */
 public final class Vertex<V, E> {
-    private final long id;
+    private final int id;
 
-    private Set<Edge<V, E>> edges;
+    private Collection<Edge<V, E>> outgoingEdges;
+    private Collection<Edge<V, E>> incomingEdges;
 
     private V properties;
 
-    public Vertex(final long id) {
+    public Vertex(final int id) {
         this(id, null);
     }
 
-    public Vertex(final long id, final V properties) {
+    public Vertex(final int id, final V properties) {
         this.id = id;
         this.properties = properties;
-        this.edges = Set.of();
+        this.outgoingEdges = List.of();
+        this.incomingEdges = List.of();
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
@@ -39,20 +43,36 @@ public final class Vertex<V, E> {
      * {@linkplain Graph#getOrAddUndirectedEdge} respectively {@linkplain
      * Graph#getOrAddDirectedEdge} should be used.
      */
-    public Set<Edge<V, E>> getEdges() {
-        return edges;
+    public Collection<Edge<V, E>> outgoingEdges() {
+        return outgoingEdges;
     }
 
-    void setEdges(final Set<Edge<V, E>> edges) {
-        this.edges = Collections.unmodifiableSet(edges);
+    public Collection<Edge<V, E>> incomingEdges() {
+        return incomingEdges;
+    }
+
+    public void addOutgoingEdge(final Edge<V, E> edge) {
+        this.outgoingEdges = combine(outgoingEdges, edge);
+    }
+
+    public void addIncomingEdge(final Edge<V, E> edge) {
+        this.incomingEdges = combine(incomingEdges, edge);
+    }
+
+    public void removeOutgoingEdge(final Edge<V, E> edge) {
+        this.outgoingEdges = compress(outgoingEdges.stream().filter(not(edge::equals)));
+    }
+
+    public void removeIncomingEdge(final Edge<V, E> edge) {
+        this.incomingEdges = compress(incomingEdges.stream().filter(not(edge::equals)));
     }
 
     public Optional<Edge<V, E>> getEdgeTo(final long neighborId) {
-        return edges.stream().filter(e -> e.getTo().id == neighborId).findFirst();
+        return outgoingEdges.stream().filter(e -> e.getTo().id == neighborId).findFirst();
     }
 
     public Optional<Edge<V, E>> getEdgeTo(final Vertex<V, E> neighbor) {
-        return edges.stream().filter(e -> e.getTo().equals(neighbor)).findFirst();
+        return outgoingEdges.stream().filter(e -> e.getTo().equals(neighbor)).findFirst();
     }
 
     public List<Vertex<V, E>> getNeighbors() {
@@ -60,7 +80,7 @@ public final class Vertex<V, E> {
     }
 
     public Stream<Vertex<V, E>> getNeighborsStream() {
-        return edges.stream().map(Edge::getTo);
+        return outgoingEdges.stream().map(Edge::getTo);
     }
 
     public int getNeighborsCount() {
@@ -76,7 +96,7 @@ public final class Vertex<V, E> {
     }
 
     public int degree() {
-        return edges.size();
+        return outgoingEdges.size();
     }
 
     public Vertex<V, E> copyWithoutEdges() {

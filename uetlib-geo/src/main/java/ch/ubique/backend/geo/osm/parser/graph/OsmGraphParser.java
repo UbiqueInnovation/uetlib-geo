@@ -21,8 +21,8 @@ public class OsmGraphParser {
     private final OsmGraphParserConfig config;
 
     private final OsmGraph graph;
-    private final Map<Long, Long> nodeIdToVertexId;
-    private long nodeCount;
+    private final Map<Long, Integer> nodeIdToVertexId;
+    private int nodeCount;
     private long nodeStartMillis;
     private long wayCount;
     private long wayStartMillis;
@@ -54,7 +54,7 @@ public class OsmGraphParser {
 
     private void processNodes(final Node node) {
         // Get or create vertex
-        final var id = config.useSourceIds() ? node.getId() : nodeCount;
+        final var id = config.useSourceIds() ? (int) node.getId() : nodeCount;
         nodeIdToVertexId.put(node.getId(), id);
 
         // Get coordinate

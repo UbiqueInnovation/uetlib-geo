@@ -75,11 +75,11 @@ public final class RoutingGraphUtil<V, E> {
     }
 
     private void addToRoutingGraph(final Vertex<V, E> vertex) {
-        routingGraph.getOrAddVertex(new Vertex<>(vertex.getId(), vertex.getProperties()));
+        routingGraph.getOrAddVertex(vertex.getId(), vertex.getProperties());
     }
 
     private void linkRoutingNode(final Vertex<V, E> vertex) {
-        for (final var direction : vertex.getEdges()) {
+        for (final var direction : vertex.outgoingEdges()) {
             linkRoutingNodeForNeighbor(vertex, direction);
         }
     }
@@ -107,7 +107,9 @@ public final class RoutingGraphUtil<V, E> {
 
             // Continue walking on path
             final var next =
-                    to.getEdges().stream().filter(edge -> !visitedEdges.contains(edge)).findAny();
+                    to.outgoingEdges().stream()
+                            .filter(edge -> !visitedEdges.contains(edge))
+                            .findAny();
 
             assert next.isPresent();
 
@@ -117,8 +119,8 @@ public final class RoutingGraphUtil<V, E> {
     }
 
     private void upsertRoutingEdge(
-            final long vertexId,
-            final long routingNeighborId,
+            final int vertexId,
+            final int routingNeighborId,
             final Vertex<V, E> direction,
             final float weight) {
 
