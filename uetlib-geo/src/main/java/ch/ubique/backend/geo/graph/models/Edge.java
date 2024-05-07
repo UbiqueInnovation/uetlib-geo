@@ -13,23 +13,16 @@ import java.util.Optional;
  */
 public final class Edge<V, E> {
 
-    private final long id;
-
     private final Vertex<V, E> u;
     private final Vertex<V, E> v;
 
     private E properties;
 
-    public Edge(final long id, @NotNull final Vertex<V, E> u, @NotNull final Vertex<V, E> v) {
-        this(id, u, v, null);
+    public Edge(@NotNull final Vertex<V, E> u, @NotNull final Vertex<V, E> v) {
+        this(u, v, null);
     }
 
-    public Edge(
-            final long id,
-            @NotNull final Vertex<V, E> u,
-            @NotNull final Vertex<V, E> v,
-            final E properties) {
-        this.id = id;
+    public Edge(@NotNull final Vertex<V, E> u, @NotNull final Vertex<V, E> v, final E properties) {
         this.u = u;
         this.v = v;
         this.properties = properties;
@@ -47,15 +40,11 @@ public final class Edge<V, E> {
         return v;
     }
 
-    public Vertex<V, E> getOther(final long firstVertexId) {
+    public Vertex<V, E> getOther(final int firstVertexId) {
         if (u.getId() == firstVertexId) {
             return v;
         }
         return u;
-    }
-
-    public long getId() {
-        return id;
     }
 
     public Vertex<V, E> getOther(final Vertex<V, E> firstVertex) {
@@ -66,14 +55,16 @@ public final class Edge<V, E> {
     }
 
     public Optional<Edge<V, E>> getTwin() {
-        return getTo().getEdges().stream().filter(e -> u.equals(e.v) && v.equals(e.u)).findFirst();
+        return getTo().outgoingEdges().stream()
+                .filter(e -> u.equals(e.v) && v.equals(e.u))
+                .findFirst();
     }
 
     public Vertex<V, E> getTo() {
         return v;
     }
 
-    public boolean connects(final long vertexId1, final long vertexId2) {
+    public boolean connects(final int vertexId1, final int vertexId2) {
         return (vertexId1 == u.getId() && vertexId2 == v.getId())
                 || (vertexId1 == v.getId() && vertexId2 == u.getId());
     }
@@ -114,11 +105,11 @@ public final class Edge<V, E> {
             return false;
         }
 
-        return new EqualsBuilder().append(id, edge.id).isEquals();
+        return new EqualsBuilder().append(u, edge.u).append(v, edge.v).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(id).toHashCode();
+        return new HashCodeBuilder(17, 37).append(u.getId()).append(v.getId()).toHashCode();
     }
 }

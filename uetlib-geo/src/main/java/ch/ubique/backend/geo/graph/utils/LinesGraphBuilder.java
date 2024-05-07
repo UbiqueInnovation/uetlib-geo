@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class LinesGraphBuilder<E> {
@@ -100,14 +101,19 @@ public class LinesGraphBuilder<E> {
         }
 
         final var level = levelExtractor.applyAsInt(info);
+        final var coordinates = lineString.getCoordinateSequence();
+        IntStream.range(1, coordinates.size())
+                .forEach(
+                        i -> {
+                            final var c0 = coordinates.getCoordinate(i - 1);
+                            final var c1 = coordinates.getCoordinate(i);
 
-        for (final var segment : JtsUtil.segments(lineString)) {
-            final var v0 = getOrCreateVertex(segment.p0, level);
-            final var v1 = getOrCreateVertex(segment.p1, level);
+                            final var v0 = getOrCreateVertex(c0, level);
+                            final var v1 = getOrCreateVertex(c1, level);
 
-            upsertDirectedEdge(v0, v1, info);
-            upsertDirectedEdge(v1, v0, info);
-        }
+                            upsertDirectedEdge(v0, v1, info);
+                            upsertDirectedEdge(v1, v0, info);
+                        });
         return this;
     }
 
@@ -306,9 +312,11 @@ public class LinesGraphBuilder<E> {
                             .filter(v -> v.degree() <= 1) // Only merge at endpoints
                             .toList();
             for (final var vertexToMerge : verticesToMerge) {
-                graph.outgoingEdges(vertexToMerge)
+                vertexToMerge
+                        .outgoingEdges()
                         .forEach(e -> graph.addDirectedEdge(main, e.getTo(), e.getProperties()));
-                graph.incomingEdges(vertexToMerge)
+                vertexToMerge
+                        .incomingEdges()
                         .forEach(e -> graph.addDirectedEdge(e.getFrom(), main, e.getProperties()));
                 graph.removeVertex(vertexToMerge);
                 counter.incrementAndGet();

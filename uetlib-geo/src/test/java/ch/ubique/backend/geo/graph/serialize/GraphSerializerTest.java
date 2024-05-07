@@ -66,8 +66,8 @@ class GraphSerializerTest {
                 || !Objects.equals(vertex.getProperties(), other.getProperties())) {
             return false;
         }
-        return vertex.getEdges().size() == other.getEdges().size()
-                && vertex.getEdges().stream().allMatch(edge -> equalEdgeExists(edge, other));
+        return vertex.outgoingEdges().size() == other.outgoingEdges().size()
+                && vertex.outgoingEdges().stream().allMatch(edge -> equalEdgeExists(edge, other));
     }
 
     private static <V, E> boolean equalEdgeExists(
