@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.tlm;
 
-import ch.ubique.backend.core.io.AutoClosableTempFileProvider;
+import ch.ubique.backend.core.io.FileProvider;
 import ch.ubique.backend.core.utils.MapCollectors;
 import ch.ubique.backend.geo.tile.vector.models.tlm.RailwayInfo;
 import ch.ubique.backend.geo.tile.vector.models.tlm.TlmPathInfo;
@@ -27,20 +27,33 @@ public class SwisstopoTlmParser implements AutoCloseable {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private final FileProvider fileProvider;
     private final GeoPackage geoPackage;
 
     public SwisstopoTlmParser(final File file) throws IOException {
-        this.geoPackage = new GeoPackage(file);
+        this(FileProvider.of(file));
+    }
+
+    public SwisstopoTlmParser(final InputStream inputStream) throws IOException {
+        this(FileProvider.of(inputStream));
+    }
+
+    public SwisstopoTlmParser(final FileProvider fileProvider) throws IOException {
+        this.fileProvider = fileProvider;
+        this.geoPackage = new GeoPackage(fileProvider.file());
     }
 
     public static Collection<TlmPath> parsePaths(final InputStream inputStream) throws IOException {
-        try (final var fileProvider = new AutoClosableTempFileProvider(inputStream)) {
-            return parsePaths(fileProvider.getFile());
-        }
+        return parsePaths(FileProvider.of(inputStream));
     }
 
     public static Collection<TlmPath> parsePaths(final File file) throws IOException {
-        try (final var parser = new SwisstopoTlmParser(file);
+        return parsePaths(FileProvider.of(file));
+    }
+
+    public static Collection<TlmPath> parsePaths(final FileProvider fileProvider)
+            throws IOException {
+        try (final var parser = new SwisstopoTlmParser(fileProvider);
                 final var reader = parser.getReader("tlm_strassen_strasse")) {
             return parser.parseLayer(reader)
                     .map(f -> new TlmPath((LineString) f.geometry(), f.info().asPathInfo()))
@@ -109,7 +122,8 @@ public class SwisstopoTlmParser implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
         geoPackage.close();
+        fileProvider.close();
     }
 }
