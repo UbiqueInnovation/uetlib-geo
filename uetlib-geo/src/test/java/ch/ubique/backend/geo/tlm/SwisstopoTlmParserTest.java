@@ -2,7 +2,6 @@ package ch.ubique.backend.geo.tlm;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import ch.ubique.backend.core.io.AutoClosableTempFileProvider;
 import ch.ubique.backend.core.utils.ValidationUtils;
 import ch.ubique.backend.geo.tile.vector.models.tlm.TlmPathInfo;
 import ch.ubique.backend.geo.tile.vector.models.tlm.UnstructuredTlmInfo;
@@ -108,8 +107,7 @@ class SwisstopoTlmParserTest {
                                 .openStream());
 
         inputStream.getNextEntry();
-        try (final var fileProvider = new AutoClosableTempFileProvider(inputStream);
-                final var parser = new SwisstopoTlmParser(fileProvider.getFile())) {
+        try (final var parser = new SwisstopoTlmParser(inputStream)) {
             for (final var layer : parser.getLayers()) {
                 final var features = parser.parseLayer(layer);
                 verifyResults(layer, features);
