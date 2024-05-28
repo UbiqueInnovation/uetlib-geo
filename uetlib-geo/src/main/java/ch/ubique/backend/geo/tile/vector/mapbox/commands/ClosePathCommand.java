@@ -13,4 +13,9 @@ public record ClosePathCommand() implements Command {
     public List<Delta> deltas() {
         return List.of();
     }
+
+    @Override
+    public int count() {
+        return 1;
+    }
 }
