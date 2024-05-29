@@ -13,8 +13,8 @@
     <packaging>jar</packaging>
 
     <properties>
-        <org.geotools.version>31.0</org.geotools.version>
-        <com.google.protobuf.version>4.26.1</com.google.protobuf.version>
+        <org.geotools.version>31.1</org.geotools.version>
+        <com.google.protobuf.version>4.27.0</com.google.protobuf.version>
     </properties>
 
     <dependencies>
