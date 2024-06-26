@@ -48,6 +48,12 @@ public class TypedKdTree<T> {
         return kdTree.query(searchEnv).stream().map(node -> ((KdNode) node).getData()).toList();
     }
 
+    public Collection<T> query(final Coordinate coordinate, final double maxDistance) {
+        final var queryEnvelope = new Envelope(coordinate);
+        queryEnvelope.expandBy(maxDistance);
+        return query(queryEnvelope);
+    }
+
     public void query(final Envelope searchEnv, final KdNodeVisitor visitor) {
         kdTree.query(searchEnv, visitor);
     }
