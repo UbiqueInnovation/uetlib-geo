@@ -26,7 +26,7 @@ public interface DistanceCalculator<C extends Coordinate> {
     }
 
     /** A comparator that compares coordinates to the given reference coordinate */
-    default Comparator<C> comparator(final C reference) {
+    default Comparator<C> compareByDistanceToCoordinate(final C reference) {
         return Comparator.comparingDouble(c -> getDistance(c, reference));
     }
 }
