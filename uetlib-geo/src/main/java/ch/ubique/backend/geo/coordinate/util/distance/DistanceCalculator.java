@@ -5,6 +5,8 @@ import ch.ubique.backend.geo.coordinate.models.Coordinate;
 
 import org.springframework.core.GenericTypeResolver;
 
+import java.util.Comparator;
+
 public interface DistanceCalculator<C extends Coordinate> {
 
     double getDistance(C c1, C c2);
@@ -21,5 +23,10 @@ public interface DistanceCalculator<C extends Coordinate> {
 
         final var coordinateSystem = CoordinateSystems.forClass(coordinateClass);
         return getDistance(coordinateSystem.fromJts(c1), coordinateSystem.fromJts(c2));
+    }
+
+    /** A comparator that compares coordinates to the given reference coordinate */
+    default Comparator<C> comparator(final C reference) {
+        return Comparator.comparingDouble(c -> getDistance(c, reference));
     }
 }
