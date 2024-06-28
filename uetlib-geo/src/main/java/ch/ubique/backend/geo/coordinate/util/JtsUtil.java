@@ -8,6 +8,7 @@ import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
 
 import jakarta.validation.constraints.NotNull;
 
+import org.checkerframework.checker.units.qual.C;
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -25,10 +26,7 @@ import org.locationtech.jts.operation.valid.IsValidOp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -373,6 +371,14 @@ public class JtsUtil {
                 new GeometryCollection(geometriesArray, anyGeometry.getFactory());
 
         return getEnvelope(geometryCollection);
+    }
+
+    public static <C extends ch.ubique.backend.geo.coordinate.models.Coordinate>
+            ReferencedEnvelope getEnvelope(@NotNull final C coordinate) {
+        Objects.requireNonNull(coordinate);
+        return new ReferencedEnvelope(
+                new Envelope(coordinate.toJts()),
+                CoordinateSystems.forClass(coordinate.getClass()).crs());
     }
 
     public static ReferencedEnvelope getEnvelope(final Geometry geometry) {
