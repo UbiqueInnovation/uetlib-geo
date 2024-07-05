@@ -36,7 +36,7 @@ public record VectorTileConfig(
         @NotNull Level emptyGeometryLogLevel,
         @Positive int extent,
         @NotNull TileOutputFormat outputFormat,
-        @Nullable ReferencedEnvelope outputEnvelope,
+        @Nullable Collection<ReferencedEnvelope> outputEnvelopes,
         @NotNull Set<Integer> zoomLevels,
         @NotNull ObjectMapper objectMapper,
         @Positive int vectorTileGeneratorParallelism) {
@@ -96,7 +96,7 @@ public record VectorTileConfig(
         private boolean checkCoordinateSystemBounds = true;
         private int extent = 4096;
         private TileOutputFormat outputFormat = TileOutputFormat.PBF;
-        private ReferencedEnvelope outputEnvelope;
+        private Collection<ReferencedEnvelope> outputEnvelopes;
         private Set<Integer> zoomLevels;
         private ObjectMapper objectMapper = ObjectMapperUtils.objectMapper();
         private Level emptyGeometryLogLevel = Level.WARN;
@@ -187,7 +187,13 @@ public record VectorTileConfig(
 
         public VectorTileConfigBuilder outputEnvelope(final ReferencedEnvelope outputEnvelope) {
             Objects.requireNonNull(outputEnvelope, "outputEnvelope must be non-null");
-            this.outputEnvelope = outputEnvelope;
+            this.outputEnvelopes = List.of(outputEnvelope);
+            return this;
+        }
+
+        public VectorTileConfigBuilder outputEnvelopes(
+                final Collection<ReferencedEnvelope> outputEnvelopes) {
+            this.outputEnvelopes = outputEnvelopes;
             return this;
         }
 
@@ -254,7 +260,7 @@ public record VectorTileConfig(
                     emptyGeometryLogLevel,
                     extent,
                     outputFormat,
-                    outputEnvelope,
+                    outputEnvelopes,
                     zoomLevels,
                     objectMapper,
                     vectorTileGeneratorParallelism);
