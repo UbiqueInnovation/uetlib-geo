@@ -64,9 +64,9 @@ public class VectorTileGenerator implements TileGenerator {
         logger.info("Generating tiles now.");
         output.config().zoomLevels().stream()
                 .sorted()
-                .map(z -> getTileInfos(z, output.config().outputEnvelope()))
-                .forEach(this::generateTilesForInfos);
-        logger.info("Generated all tiles.");
+                .map(z -> getTileInfos(z, output.config().outputEnvelopes()))
+                .forEach(this::submitTasksToGenerateTilesForInfos);
+        logger.info("Submitted tasks for all levels.");
 
         waitForCompletion();
 
@@ -77,11 +77,11 @@ public class VectorTileGenerator implements TileGenerator {
 
     @NotNull
     private Collection<TileInfo> getTileInfos(
-            final int level, final ReferencedEnvelope outputEnvelope) {
-        return output.config().tileLevelsDefinition().tileInfos(level, outputEnvelope).toList();
+            final int level, final Collection<ReferencedEnvelope> outputEnvelopes) {
+        return output.config().tileLevelsDefinition().tileInfos(level, outputEnvelopes).toList();
     }
 
-    private void generateTilesForInfos(final Collection<TileInfo> tileInfos) {
+    private void submitTasksToGenerateTilesForInfos(final Collection<TileInfo> tileInfos) {
         final var currentLevel = tileInfos.stream().findFirst().orElseThrow().level();
         logger.info("Submitting tasks for {} tiles of level {}.", tileInfos.size(), currentLevel);
         final var prefix = String.format("Level %d: ", currentLevel);
@@ -142,10 +142,14 @@ public class VectorTileGenerator implements TileGenerator {
     }
 
     private void createGenerateAndConsumeTile(final TileInfo tileInfo) {
-        final var tile = createTile(tileInfo);
-        final var binaryTile = generateTile(tile);
-        tileSizes.put(binaryTile.info(), (double) binaryTile.bytes().length);
-        consumeTile(binaryTile);
+        try {
+            final var tile = createTile(tileInfo);
+            final var binaryTile = generateTile(tile);
+            tileSizes.put(binaryTile.info(), (double) binaryTile.bytes().length);
+            consumeTile(binaryTile);
+        } catch (final Exception e) {
+            logger.warn("Could not create tile {}.", tileInfo, e);
+        }
     }
 
     @NotNull
@@ -214,6 +218,7 @@ public class VectorTileGenerator implements TileGenerator {
             if (!terminatedInTime) {
                 throw new IllegalStateException("Timout elapsed before termination.");
             }
+            logger.info("Generated all tiles.");
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
         }

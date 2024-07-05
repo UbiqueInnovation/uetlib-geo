@@ -6,6 +6,7 @@ import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 
 import jakarta.validation.constraints.NotNull;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Envelope;
 
@@ -198,8 +199,19 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
     }
 
     public Stream<TileInfo> tileInfos(
+            final Collection<Integer> levels,
+            final Collection<ReferencedEnvelope> outputEnvelopes) {
+        return tileInfos(levels.stream().mapToInt(i -> i), outputEnvelopes);
+    }
+
+    public Stream<TileInfo> tileInfos(
             final IntStream levels, final ReferencedEnvelope outputEnvelope) {
         return levels.boxed().flatMap(level -> tileInfos(level, outputEnvelope));
+    }
+
+    public Stream<TileInfo> tileInfos(
+            final IntStream levels, final Collection<ReferencedEnvelope> outputEnvelopes) {
+        return levels.boxed().flatMap(level -> tileInfos(level, outputEnvelopes));
     }
 
     public Stream<TileInfo> tileInfos(final int level) {
@@ -210,6 +222,15 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
                         x ->
                                 IntStream.range(0, zoomLevel.tilesY())
                                         .mapToObj(y -> tileInfo(x, y, level)));
+    }
+
+    public Stream<TileInfo> tileInfos(
+            final int level, final Collection<ReferencedEnvelope> outputEnvelopes) {
+        if (CollectionUtils.isEmpty(outputEnvelopes)) {
+            return tileInfos(level);
+        }
+
+        return outputEnvelopes.stream().flatMap(envelope -> tileInfos(level, envelope)).distinct();
     }
 
     public Stream<TileInfo> tileInfos(final int level, final ReferencedEnvelope outputEnvelope) {
