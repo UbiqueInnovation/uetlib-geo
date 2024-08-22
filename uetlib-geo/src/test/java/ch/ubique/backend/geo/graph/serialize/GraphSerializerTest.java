@@ -39,7 +39,7 @@ class GraphSerializerTest {
                         .map(LineString.class::cast);
 
         final var graph =
-                new LinesGraphBuilder<>(2)
+                new LinesGraphBuilder<>(2, 5)
                         .addLinesWithoutInfo(lines)
                         .createVerticesForIntersections()
                         .build(CoordinateSystems.WGS84);
@@ -52,7 +52,8 @@ class GraphSerializerTest {
 
     private <V, E> boolean graphsEqual(final Graph<V, E> a, final Graph<V, E> b) {
         return a.getVertices().size() == b.getVertices().size()
-                && a.getVertices().stream().allMatch(vertex -> equalVertexExists(vertex, b));
+                && a.getVertices().stream().allMatch(vertex -> equalVertexExists(vertex, b))
+                && a.getGraphId() == b.getGraphId();
     }
 
     private static <V, E> boolean equalVertexExists(

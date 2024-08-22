@@ -53,13 +53,22 @@ public class LinesGraphBuilder<E> {
     private CoordinateReferenceSystem crs;
 
     public LinesGraphBuilder(final double snapTolerance) {
-        this(snapTolerance, null);
+        this(snapTolerance, Graph.DEFAULT_GRAPH_ID);
+    }
+
+    public LinesGraphBuilder(final double snapTolerance, final long graphId) {
+        this(snapTolerance, graphId, null);
     }
 
     public LinesGraphBuilder(final double snapTolerance, final ToIntFunction<E> levelExtractor) {
+        this(snapTolerance, Graph.DEFAULT_GRAPH_ID, levelExtractor);
+    }
+
+    public LinesGraphBuilder(
+            final double snapTolerance, final long graphId, final ToIntFunction<E> levelExtractor) {
         this.snapTolerance = snapTolerance;
         this.levelExtractor = requireNonNullElse(levelExtractor, ignored -> 0);
-        this.graph = new Graph<>();
+        this.graph = new Graph<>(graphId);
         this.snapping3dPointIndex = new Snapping3dPointIndex(snapTolerance);
         this.coordinatesToVertex = new HashMap<>();
         this.lineIntersector = new RobustLineIntersector();

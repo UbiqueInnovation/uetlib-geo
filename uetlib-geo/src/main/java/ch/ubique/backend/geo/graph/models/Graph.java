@@ -14,12 +14,24 @@ import java.util.stream.Stream;
  * @param <E> type of the edge properties
  */
 public class Graph<V, E> {
+    public static final long DEFAULT_GRAPH_ID = 0;
+
+    private final long graphId;
     private final Map<Integer, Vertex<V, E>> vertices;
     private final AtomicInteger maxVertexId;
 
     public Graph() {
+        this(DEFAULT_GRAPH_ID);
+    }
+
+    public Graph(final long graphId) {
+        this.graphId = graphId;
         vertices = new HashMap<>();
         maxVertexId = new AtomicInteger();
+    }
+
+    public long getGraphId() {
+        return graphId;
     }
 
     public Vertex<V, E> getOrAddVertex(final Vertex<V, E> vertex) {
