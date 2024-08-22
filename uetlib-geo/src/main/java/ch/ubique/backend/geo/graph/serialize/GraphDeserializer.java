@@ -50,7 +50,7 @@ public final class GraphDeserializer<V, E> {
     public Graph<V, E> read(final InputStream inputStream) throws IOException {
         final var serializableGraph =
                 objectMapper.readValue(new GzipCompressorInputStream(inputStream), typeReference());
-        final var graph = new Graph<V, E>();
+        final var graph = new Graph<V, E>(serializableGraph.graphId());
         serializableGraph
                 .vertices()
                 .forEach(vertex -> addVertex(graph, vertex, serializableGraph.vertexProperties()));

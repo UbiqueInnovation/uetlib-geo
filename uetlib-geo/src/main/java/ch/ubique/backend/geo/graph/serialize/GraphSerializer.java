@@ -74,6 +74,7 @@ public final class GraphSerializer<V, E> {
         final var vertexPropertiesMap = indexMap(vertexProperties);
         final var edgePropertiesMap = indexMap(edgeProperties);
         return new SerializableGraph<>(
+                graph.getGraphId(),
                 graph.getVertices().stream()
                         .map(v -> toSerializable(v, vertexPropertiesMap))
                         .toList(),
