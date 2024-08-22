@@ -68,11 +68,21 @@ public final class Vertex<V, E> {
     }
 
     public Optional<Edge<V, E>> getEdgeTo(final long neighborId) {
-        return outgoingEdges.stream().filter(e -> e.getTo().id == neighborId).findFirst();
+        for (final var e : outgoingEdges) {
+            if (e.getTo().id == neighborId) {
+                return Optional.of(e);
+            }
+        }
+        return Optional.empty();
     }
 
     public Optional<Edge<V, E>> getEdgeTo(final Vertex<V, E> neighbor) {
-        return outgoingEdges.stream().filter(e -> e.getTo().equals(neighbor)).findFirst();
+        for (final var e : outgoingEdges) {
+            if (e.getTo().equals(neighbor)) {
+                return Optional.of(e);
+            }
+        }
+        return Optional.empty();
     }
 
     public List<Vertex<V, E>> getNeighbors() {
