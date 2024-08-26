@@ -237,9 +237,9 @@ public class Graph<V, E> {
      * @param nullableEdgeFilter edges where this predicate evaluates to true are kept. If null, no
      *     filter is applied.
      * @param edgePropertyMapper specifies how edge properties are transformed.
-     * @return the filtered and mapped graph
      * @param <S> the vertex property type of the mapped graph
      * @param <T> the edge property type of the mapped graph
+     * @return A new Graph (filtered and mapped) with the same {@link #graphId} as the old graph
      */
     public <S, T> Graph<S, T> filterAndMap(
             @Nullable final Predicate<Vertex<V, E>> nullableVertexFilter,
@@ -247,7 +247,7 @@ public class Graph<V, E> {
             @Nullable final Predicate<Edge<V, E>> nullableEdgeFilter,
             @NotNull final Function<Edge<V, E>, T> edgePropertyMapper) {
 
-        final var graph = new Graph<S, T>();
+        final var graph = new Graph<S, T>(graphId);
 
         final var vertexFilter = Objects.requireNonNullElse(nullableVertexFilter, v -> true);
         final var edgeFilter =
