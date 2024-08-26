@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.LongUnaryOperator;
 
 public final class RoutingGraphUtil<V, E> {
 
@@ -24,24 +25,36 @@ public final class RoutingGraphUtil<V, E> {
     private final Function<Edge<V, E>, Float> weightingFunction;
 
     private RoutingGraphUtil(
-            final Graph<V, E> inputGraph, final Function<Edge<V, E>, Float> weightingFunction) {
+            final Graph<V, E> inputGraph,
+            final Function<Edge<V, E>, Float> weightingFunction,
+            final long graphId) {
         this.inputGraph = inputGraph;
         this.weightingFunction = weightingFunction;
-        routingGraph = new Graph<>();
+        routingGraph = new Graph<>(graphId);
         additionalRoutingVertices = new HashSet<>();
     }
 
     public static <S, T> Graph<S, WeightAndDirection<S, T>> createRoutingGraph(
             final Graph<S, T> graph, final Function<Edge<S, T>, Float> weightingFunction) {
-        final var routingGraphUtil = new RoutingGraphUtil<>(graph, weightingFunction);
-        return routingGraphUtil.createRoutingGraph();
+        return createRoutingGraph(graph, weightingFunction, LongUnaryOperator.identity());
     }
 
     public static <S> Graph<S, WeightAndDirection<S, Weight>> createRoutingGraph(
             final Graph<S, Weight> graph) {
         return createRoutingGraph(
                 graph,
-                e -> Optional.ofNullable(e.getProperties()).map(Weight::weight).orElse(null));
+                e -> Optional.ofNullable(e.getProperties()).map(Weight::weight).orElse(null),
+                LongUnaryOperator.identity());
+    }
+
+    public static <S, T> Graph<S, WeightAndDirection<S, T>> createRoutingGraph(
+            final Graph<S, T> graph,
+            final Function<Edge<S, T>, Float> weightingFunction,
+            final LongUnaryOperator graphIdMapper) {
+        final var routingGraphUtil =
+                new RoutingGraphUtil<>(
+                        graph, weightingFunction, graphIdMapper.applyAsLong(graph.getGraphId()));
+        return routingGraphUtil.createRoutingGraph();
     }
 
     private Graph<V, WeightAndDirection<V, E>> createRoutingGraph() {
