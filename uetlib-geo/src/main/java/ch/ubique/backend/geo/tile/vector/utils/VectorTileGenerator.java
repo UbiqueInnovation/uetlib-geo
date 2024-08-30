@@ -13,6 +13,7 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -44,7 +45,9 @@ public class VectorTileGenerator implements TileGenerator {
 
     public VectorTileGenerator(final VectorTileOutput output, final int parallelism) {
         this.output = output;
-        this.executorService = Executors.newFixedThreadPool(parallelism);
+        final var threadFactory =
+                new ThreadFactoryBuilder().setNameFormat("vector-tile-%d").build();
+        this.executorService = Executors.newFixedThreadPool(parallelism, threadFactory);
         final var cacheBuilder = Caffeine.newBuilder();
         this.envelopeCache = cacheBuilder.build();
         this.tileSizes = new ConcurrentHashMap<>();
