@@ -14,7 +14,7 @@
 
     <properties>
         <org.geotools.version>31.3</org.geotools.version>
-        <com.google.protobuf.version>4.27.4</com.google.protobuf.version>
+        <com.google.protobuf.version>4.28.0</com.google.protobuf.version>
     </properties>
 
     <dependencies>
@@ -26,7 +26,7 @@
         <dependency>
             <artifactId>jts-core</artifactId>
             <groupId>org.locationtech.jts</groupId>
-            <version>1.19.0</version>
+            <version>1.20.0</version>
         </dependency>
 
         <dependency>
