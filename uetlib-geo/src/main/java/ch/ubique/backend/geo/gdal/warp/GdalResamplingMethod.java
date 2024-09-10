@@ -1,7 +1,7 @@
 package ch.ubique.backend.geo.gdal.warp;
 
 public enum GdalResamplingMethod {
-    NEAREST("nearest"),
+    NEAREST("near"),
     BILINEAR("bilinear"),
     CUBIC("cubic"),
     CUBIC_SPLINE("cubicspline"),
