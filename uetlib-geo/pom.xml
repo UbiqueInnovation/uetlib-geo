@@ -14,7 +14,7 @@
 
     <properties>
         <org.geotools.version>31.3</org.geotools.version>
-        <com.google.protobuf.version>4.28.0</com.google.protobuf.version>
+        <com.google.protobuf.version>4.28.2</com.google.protobuf.version>
     </properties>
 
     <dependencies>
