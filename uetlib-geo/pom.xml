@@ -13,7 +13,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <org.geotools.version>31.3</org.geotools.version>
+        <org.geotools.version>32.0</org.geotools.version>
     </properties>
 
     <dependencies>
