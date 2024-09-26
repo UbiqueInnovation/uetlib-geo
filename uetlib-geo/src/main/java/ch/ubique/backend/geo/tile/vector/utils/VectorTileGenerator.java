@@ -94,10 +94,8 @@ public class VectorTileGenerator implements TileGenerator {
         for (final var tileInfo : tileInfos) {
             executorService.submit(
                     Executors.callable(
-                            () -> {
-                                createGenerateAndConsumeTile(tileInfo);
-                                progressLogger.step();
-                            }));
+                            progressLogger.watchRunnable(
+                                    () -> createGenerateAndConsumeTile(tileInfo))));
         }
     }
 
