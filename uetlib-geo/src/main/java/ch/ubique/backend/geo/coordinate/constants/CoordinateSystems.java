@@ -12,7 +12,7 @@ import org.locationtech.jts.geom.Coordinate;
 import java.util.Collection;
 import java.util.Set;
 
-public class CoordinateSystems {
+public final class CoordinateSystems {
 
     private CoordinateSystems() {}
 

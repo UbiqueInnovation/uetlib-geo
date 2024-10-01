@@ -4,7 +4,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.shape.CubicBezierCurve;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 
-public class SimplifyGeometryUtils {
+public final class SimplifyGeometryUtils {
 
     private SimplifyGeometryUtils() {}
 

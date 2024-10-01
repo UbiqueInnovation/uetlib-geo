@@ -21,7 +21,7 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.util.Arrays;
 
-public class TileGeometryUtils {
+public final class TileGeometryUtils {
 
     private TileGeometryUtils() {}
 

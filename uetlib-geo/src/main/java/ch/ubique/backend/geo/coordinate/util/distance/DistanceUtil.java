@@ -3,7 +3,7 @@ package ch.ubique.backend.geo.coordinate.util.distance;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.models.Coordinate;
 
-public class DistanceUtil {
+public final class DistanceUtil {
 
     private DistanceUtil() {}
 

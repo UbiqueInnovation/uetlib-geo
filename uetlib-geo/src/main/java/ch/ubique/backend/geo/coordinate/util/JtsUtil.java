@@ -30,7 +30,8 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class JtsUtil {
+public final class JtsUtil {
+
     private static final Logger logger = LoggerFactory.getLogger(JtsUtil.class);
 
     private JtsUtil() {}
