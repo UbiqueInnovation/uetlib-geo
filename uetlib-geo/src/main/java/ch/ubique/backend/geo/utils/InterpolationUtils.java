@@ -3,7 +3,7 @@ package ch.ubique.backend.geo.utils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineSegment;
 
-public class InterpolationUtils {
+public final class InterpolationUtils {
 
     private InterpolationUtils() {}
 

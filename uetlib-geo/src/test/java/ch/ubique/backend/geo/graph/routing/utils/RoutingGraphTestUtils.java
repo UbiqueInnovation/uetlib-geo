@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class RoutingGraphTestUtils {
+public final class RoutingGraphTestUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(RoutingGraphTestUtils.class);
 

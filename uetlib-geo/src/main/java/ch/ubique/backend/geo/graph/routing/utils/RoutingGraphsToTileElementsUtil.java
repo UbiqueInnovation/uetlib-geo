@@ -15,7 +15,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 
 import java.util.Collection;
 
-public class RoutingGraphsToTileElementsUtil {
+public final class RoutingGraphsToTileElementsUtil {
 
     private RoutingGraphsToTileElementsUtil() {}
 
