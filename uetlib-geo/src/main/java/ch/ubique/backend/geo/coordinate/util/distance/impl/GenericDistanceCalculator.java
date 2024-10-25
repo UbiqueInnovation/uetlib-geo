@@ -8,9 +8,12 @@ import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculator;
 import org.geotools.referencing.GeodeticCalculator;
 
 public class GenericDistanceCalculator<C extends Coordinate> implements DistanceCalculator<C> {
+
+    private final CoordinateSystem<C> coordinateSystem;
     private final GeodeticCalculator geodeticCalculator;
 
     public GenericDistanceCalculator(final CoordinateSystem<C> coordinateSystem) {
+        this.coordinateSystem = coordinateSystem;
         this.geodeticCalculator = new GeodeticCalculator(coordinateSystem.crs());
     }
 
@@ -21,5 +24,10 @@ public class GenericDistanceCalculator<C extends Coordinate> implements Distance
         geodeticCalculator.setStartingGeographicPoint(start.longitude(), start.latitude());
         geodeticCalculator.setDestinationGeographicPoint(end.longitude(), end.latitude());
         return geodeticCalculator.getOrthodromicDistance();
+    }
+
+    @Override
+    public CoordinateSystem<C> coordinateSystem() {
+        return coordinateSystem;
     }
 }

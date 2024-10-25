@@ -10,7 +10,6 @@ import ch.ubique.backend.geo.jackson.ObjectMapperJtsUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.locationtech.jts.geom.LineString;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 
@@ -19,11 +18,11 @@ class LinesGraphBuilderTest {
     @ParameterizedTest
     @ValueSource(
             strings = {
-                "furka.geojson",
-                "alp_la_schera.geojson",
-                "large_example.geojson",
-                "mountain_tunnel.geojson",
-                "mountain_tunnel_larger_area.geojson"
+                "/furka.geojson",
+                "/alp_la_schera.geojson",
+                "/large_example.geojson",
+                "/mountain_tunnel.geojson",
+                "/mountain_tunnel_larger_area.geojson"
             })
     void test(final String path) throws IOException {
         final var featureCollection = readFile(path);
@@ -56,9 +55,8 @@ class LinesGraphBuilderTest {
                 graphWithDuplicateAddedLines.getDirectedEdges().size());
     }
 
-    private static FeatureCollection readFile(final String path) throws IOException {
-
-        try (final var inputStream = new ClassPathResource(path).getInputStream()) {
+    private FeatureCollection readFile(final String path) throws IOException {
+        try (final var inputStream = getClass().getResourceAsStream(path)) {
             return ObjectMapperJtsUtils.objectMapperLv95()
                     .readValue(inputStream, FeatureCollection.class);
         }

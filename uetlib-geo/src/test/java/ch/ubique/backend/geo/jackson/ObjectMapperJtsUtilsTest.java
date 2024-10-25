@@ -11,7 +11,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.locationtech.jts.geom.Coordinate;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -25,9 +24,9 @@ class ObjectMapperJtsUtilsTest {
         return Resources.toString(url, StandardCharsets.UTF_8);
     }
 
-    private static FeatureCollection readResourceFile(
-            final String path, final ObjectMapper objectMapper) throws IOException {
-        try (final var inputStream = new ClassPathResource(path).getInputStream()) {
+    private FeatureCollection readResourceFile(final String path, final ObjectMapper objectMapper)
+            throws IOException {
+        try (final var inputStream = getClass().getResourceAsStream(path)) {
             return objectMapper.readValue(inputStream, FeatureCollection.class);
         }
     }
