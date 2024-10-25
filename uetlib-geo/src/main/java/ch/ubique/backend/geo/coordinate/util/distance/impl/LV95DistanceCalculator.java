@@ -2,7 +2,6 @@ package ch.ubique.backend.geo.coordinate.util.distance.impl;
 
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
-import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculator;
 
