@@ -14,11 +14,10 @@
     <artifactId>uetlib-geo-db</artifactId>
 
     <dependencies>
-        <!-- TODO: replace with uetlib db -->
         <dependency>
             <groupId>ch.ubique</groupId>
-            <artifactId>backend-jvm-lib-db</artifactId>
-            <version>2.4.12</version>
+            <artifactId>uetlib-db</artifactId>
+            <version>1.0.0-alpha.1</version>
         </dependency>
 
         <dependency>
