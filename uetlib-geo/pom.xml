@@ -4,27 +4,14 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>ch.ubique</groupId>
+        <artifactId>uetlib-bom</artifactId>
+        <version>1.0.0-alpha.5</version>
+    </parent>
+
     <artifactId>uetlib-geo</artifactId>
-    <groupId>ch.ubique</groupId>
     <version>2.0.0-SNAPSHOT</version>
-
-    <properties>
-        <!-- Versions -->
-        <java.version>21</java.version>
-        <org.locationtech.jts>1.20.0</org.locationtech.jts>
-        <org.geotools.version>32.0</org.geotools.version>
-        <com.google.protobuf.version>4.28.2</com.google.protobuf.version>
-        <org.openstreetmap.osmosis>0.49.2</org.openstreetmap.osmosis>
-
-        <!-- Project settings -->
-        <maven.compiler.release>${java.version}</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <!-- Sonar-->
-        <sonar.projectKey>UbiqueInnovation_uetlib-geo</sonar.projectKey>
-        <sonar.organization>ubiqueinnovation</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-    </properties>
 
     <packaging>jar</packaging>
 
@@ -103,133 +90,17 @@
         </dependency>
     </dependencies>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <artifactId>jts-core</artifactId>
-                <groupId>org.locationtech.jts</groupId>
-                <version>${org.locationtech.jts}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.n52.jackson</groupId>
-                <artifactId>jackson-datatype-jts</artifactId>
-                <version>1.2.10</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.protobuf</groupId>
-                <artifactId>protobuf-java</artifactId>
-                <version>${com.google.protobuf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.protobuf</groupId>
-                <artifactId>protobuf-java-util</artifactId>
-                <version>${com.google.protobuf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.openstreetmap.osmosis</groupId>
-                <artifactId>osmosis-core</artifactId>
-                <version>${org.openstreetmap.osmosis}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.openstreetmap.osmosis</groupId>
-                <artifactId>osmosis-pbf2</artifactId>
-                <version>${org.openstreetmap.osmosis}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-geojson</artifactId>
-                <version>${org.geotools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-geotiff</artifactId>
-                <version>${org.geotools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-render</artifactId>
-                <version>${org.geotools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-referencing</artifactId>
-                <version>${org.geotools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-epsg-hsql</artifactId>
-                <version>${org.geotools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-api</artifactId>
-                <version>${org.geotools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-shapefile</artifactId>
-                <version>${org.geotools.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-geopkg</artifactId>
-                <version>${org.geotools.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <repositories>
-        <repository>
-            <id>osgeo</id>
-            <name>Open Source Geospatial Foundation Repository</name>
-            <url>https://repo.osgeo.org/repository/release/</url>
-        </repository>
-    </repositories>
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
-                <configuration>
-                    <release>${java.version}</release>
-                </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>test-compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <protocArtifact>
-                        com.google.protobuf:protoc:${com.google.protobuf.version}:exe:${os.detected.classifier}
-                    </protocArtifact>
-                </configuration>
             </plugin>
         </plugins>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>1.7.1</version>
-            </extension>
-        </extensions>
     </build>
-
-    <distributionManagement>
-        <repository>
-            <id>ubique-artifactory</id>
-            <name>backend</name>
-            <url>https://artifactory.ubique.ch/artifactory/backend</url>
-        </repository>
-    </distributionManagement>
 </project>
