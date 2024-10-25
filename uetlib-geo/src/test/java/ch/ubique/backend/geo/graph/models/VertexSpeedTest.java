@@ -13,7 +13,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.locationtech.jts.geom.LineString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 
@@ -24,11 +23,11 @@ class VertexSpeedTest {
     @ParameterizedTest
     @ValueSource(
             strings = {
-                "furka.geojson",
-                "alp_la_schera.geojson",
-                "large_example.geojson",
-                "mountain_tunnel.geojson",
-                "mountain_tunnel_larger_area.geojson"
+                "/furka.geojson",
+                "/alp_la_schera.geojson",
+                "/large_example.geojson",
+                "/mountain_tunnel.geojson",
+                "/mountain_tunnel_larger_area.geojson"
             })
     void testSpeedEdgeTo(final String path) throws IOException {
         final var featureCollection = readFile(path);
@@ -73,8 +72,8 @@ class VertexSpeedTest {
         stopWatch.reset();
     }
 
-    private static FeatureCollection readFile(final String path) throws IOException {
-        try (final var inputStream = new ClassPathResource(path).getInputStream()) {
+    private FeatureCollection readFile(final String path) throws IOException {
+        try (final var inputStream = getClass().getResourceAsStream(path)) {
             return ObjectMapperJtsUtils.objectMapperLv95()
                     .readValue(inputStream, FeatureCollection.class);
         }

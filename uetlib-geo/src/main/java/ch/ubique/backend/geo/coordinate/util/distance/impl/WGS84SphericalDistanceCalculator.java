@@ -2,6 +2,8 @@ package ch.ubique.backend.geo.coordinate.util.distance.impl;
 
 import static java.lang.Math.*;
 
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculator;
 
@@ -17,6 +19,11 @@ public class WGS84SphericalDistanceCalculator implements DistanceCalculator<WGS8
     @Override
     public double getDistance(final WGS84Coordinate c1, final WGS84Coordinate c2) {
         return distanceInMeters(c1, c2);
+    }
+
+    @Override
+    public CoordinateSystem<WGS84Coordinate> coordinateSystem() {
+        return CoordinateSystems.WGS84;
     }
 
     public static double distanceInMeters(final WGS84Coordinate c1, final WGS84Coordinate c2) {

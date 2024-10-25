@@ -32,7 +32,6 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.n52.jackson.datatype.jts.JtsModule;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.net.URI;
@@ -44,9 +43,8 @@ class RoutingGraphTest {
     private static final ObjectMapper objectMapper =
             JsonMapper.builder().addModule(new JtsModule(geometryFactory)).build();
 
-    private static FeatureCollection readFile(final String path) throws IOException {
-
-        try (final var inputStream = new ClassPathResource(path).getInputStream()) {
+    private FeatureCollection readFile(final String path) throws IOException {
+        try (final var inputStream = getClass().getResourceAsStream(path)) {
             return objectMapper.readValue(inputStream, FeatureCollection.class);
         }
     }
@@ -107,7 +105,7 @@ class RoutingGraphTest {
         return (float) DurationUtils.toFractionalSeconds(duration);
     }
 
-    private static RoutingGraphs createGraphsFromGeoJson(final String path) throws IOException {
+    private RoutingGraphs createGraphsFromGeoJson(final String path) throws IOException {
         final var featureCollection = readFile(path);
 
         return LinesToRoutingGraphUtil.buildGraph(
@@ -119,7 +117,7 @@ class RoutingGraphTest {
 
     @Test
     void testMountainTunnel() throws IOException {
-        final var graphs = createGraphsFromGeoJson("mountain_tunnel.geojson");
+        final var graphs = createGraphsFromGeoJson("/mountain_tunnel.geojson");
 
         checkRoutingGraphsValid(graphs);
         assertEquals(4, graphs.routingGraph().getVertices().size());
@@ -130,7 +128,7 @@ class RoutingGraphTest {
 
     @Test
     void testMountainTunnelLargerArea() throws IOException {
-        final var graphs = createGraphsFromGeoJson("mountain_tunnel_larger_area.geojson");
+        final var graphs = createGraphsFromGeoJson("/mountain_tunnel_larger_area.geojson");
 
         checkRoutingGraphsValid(graphs);
         assertEquals(39, graphs.routingGraph().getVertices().size());
@@ -140,7 +138,7 @@ class RoutingGraphTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"furka", "alp_la_schera", "large_example"})
+    @ValueSource(strings = {"/furka", "/alp_la_schera", "/large_example"})
     void testFurka(final String test) throws IOException {
         final var graphs = createGraphsFromGeoJson(test + ".geojson");
         checkRoutingGraphsValid(graphs);
