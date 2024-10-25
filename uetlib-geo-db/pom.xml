@@ -16,6 +16,11 @@
         <!-- Project settings -->
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Sonar-->
+        <sonar.projectKey>UbiqueInnovation_uetlib-geo</sonar.projectKey>
+        <sonar.organization>ubiqueinnovation</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>
@@ -23,13 +28,34 @@
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>backend-jvm-lib-db</artifactId>
-            <version>2.5.0-alpha.22</version>
+            <version>2.4.12</version>
         </dependency>
 
         <dependency>
             <groupId>ch.ubique</groupId>
-            <artifactId>backend-jvm-lib-geo</artifactId>
+            <artifactId>uetlib-geo</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>${java.version}</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>ubique-artifactory</id>
+            <name>backend</name>
+            <url>https://artifactory.ubique.ch/artifactory/backend</url>
+        </repository>
+    </distributionManagement>
 </project>
