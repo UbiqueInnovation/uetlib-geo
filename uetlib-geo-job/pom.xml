@@ -13,20 +13,6 @@
 
     <artifactId>uetlib-geo-job</artifactId>
 
-    <properties>
-        <!-- Versions -->
-        <java.version>21</java.version>
-
-        <!-- Project settings -->
-        <maven.compiler.release>${java.version}</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <!-- Sonar-->
-        <sonar.projectKey>UbiqueInnovation_uetlib-geo</sonar.projectKey>
-        <sonar.organization>ubiqueinnovation</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-    </properties>
-
     <dependencies>
         <!-- TODO: replace with uetlib job -->
         <dependency>
