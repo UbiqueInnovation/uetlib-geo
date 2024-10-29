@@ -14,4 +14,8 @@ public record VectorTileFeature(
         Objects.requireNonNull(geometry);
         tags = Objects.requireNonNullElseGet(tags, Map::of);
     }
+
+    public VectorTileFeature withTags(final Map<String, Object> tags) {
+        return new VectorTileFeature(id, geometry, tags);
+    }
 }

@@ -24,4 +24,8 @@ public record VectorTileLayer(
         }
         features = Objects.requireNonNullElseGet(features, List::of);
     }
+
+    public VectorTileLayer withFeatures(final Collection<VectorTileFeature> features) {
+        return new VectorTileLayer(extent, name, features);
+    }
 }

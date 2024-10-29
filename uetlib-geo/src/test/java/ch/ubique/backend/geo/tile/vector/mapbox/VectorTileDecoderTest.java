@@ -31,6 +31,7 @@ class VectorTileDecoderTest {
                 "/vector-tiles/ubique/post/poi/7/66/45.pbf",
                 "/vector-tiles/ubique/post/poi/7/67/44.pbf",
                 "/vector-tiles/ubique/post/poi/7/67/45.pbf",
+                "/vector-tiles/swisstopo/base/6/33/22.pbf",
                 "/vector-tiles/swisstopo/base/13/4290/2868.pbf",
                 "/vector-tiles/swisstopo/relief/13/4290/2868.pbf",
             })
