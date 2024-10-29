@@ -1,21 +1,16 @@
-package ch.ubique.backend.geo.tile.vector.mapbox;
+package ch.ubique.backend.geo.tile.vector.mapbox.decoding;
 
 import ch.ubique.backend.geo.tile.vector.mapbox.commands.*;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class CommandsEncoder {
+public class CommandsDecoder {
 
-    private CommandsEncoder() {}
-
-    public static List<Integer> encode(final List<? extends Command> commands) {
-        return commands.stream().map(CommandsEncoder::encode).flatMap(Collection::stream).toList();
-    }
+    private CommandsDecoder() {}
 
     public static List<Command> decode(final List<Integer> commands) {
         final List<Command> decodedCommands = new ArrayList<>();
@@ -36,16 +31,6 @@ public class CommandsEncoder {
         return decodedCommands;
     }
 
-    private static List<Integer> encode(final Command command) {
-        final var integers = new ArrayList<Integer>();
-        integers.add(encodeCommandInstruction(command));
-        for (final var delta : command.deltas()) {
-            integers.add(encodeParameterInteger(delta.dx()));
-            integers.add(encodeParameterInteger(delta.dy()));
-        }
-        return integers;
-    }
-
     private static List<Delta> parseDeltas(final Iterator<Integer> iterator, final int count) {
         final List<Delta> deltas = new ArrayList<>();
         for (var i = 0; i < count; ++i) {
@@ -54,11 +39,6 @@ public class CommandsEncoder {
             deltas.add(new Delta(dx, dy));
         }
         return deltas;
-    }
-
-    private static int encodeCommandInstruction(final Command command) {
-        final var commandId = command.key().value();
-        return command.count() << 3 | commandId;
     }
 
     private static Pair<CommandKey, Integer> decodeCommandInstruction(final int commandInteger) {
@@ -70,9 +50,5 @@ public class CommandsEncoder {
 
     private static int decodeParameterInteger(final int encoded) {
         return ((encoded >> 1) ^ (-(encoded & 1)));
-    }
-
-    private static int encodeParameterInteger(final int value) {
-        return (value << 1) ^ (value >> 31);
     }
 }

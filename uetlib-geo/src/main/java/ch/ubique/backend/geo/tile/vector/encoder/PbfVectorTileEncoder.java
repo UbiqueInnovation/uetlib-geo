@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.tile.vector.encoder;
 
-import ch.ubique.backend.geo.tile.vector.mapbox.VectorTileEncoder;
+import ch.ubique.backend.geo.tile.vector.mapbox.encoding.VectorTileEncoder;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileElementUtils;

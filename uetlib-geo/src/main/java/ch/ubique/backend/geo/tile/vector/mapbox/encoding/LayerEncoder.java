@@ -1,4 +1,4 @@
-package ch.ubique.backend.geo.tile.vector.mapbox;
+package ch.ubique.backend.geo.tile.vector.mapbox.encoding;
 
 import ch.ubique.backend.geo.vectortile.protobuf.Tile;
 
@@ -8,18 +8,12 @@ import org.locationtech.jts.geom.GeometryCollection;
 import java.util.*;
 import java.util.stream.Stream;
 
-/**
- * Encodes vector tiles according to <a href="https://github.com/mapbox/vector-tile-spec">Mapbox
- * Vector Tile Specification</a>
- */
-public class VectorTileEncoder {
+class LayerEncoder {
 
-    private final Map<String, Layer> layers = new LinkedHashMap<>();
+    private final Layer layer;
 
-    private final int extent;
-
-    public VectorTileEncoder(final int extent) {
-        this.extent = extent;
+    public LayerEncoder(final String name, final int extent) {
+        this.layer = new Layer(name, extent);
     }
 
     /**
@@ -27,10 +21,7 @@ public class VectorTileEncoder {
      * right.
      */
     public void addFeature(
-            final String layerName,
-            final Map<String, ?> attributes,
-            final Geometry geometry,
-            final long id) {
+            final long id, final Geometry geometry, final Map<String, ?> attributes) {
 
         // no need to add empty geometry
         if (geometry == null || geometry.isEmpty()) {
@@ -40,12 +31,10 @@ public class VectorTileEncoder {
         // Unwrap geometry collection
         if (geometry.getClass().equals(GeometryCollection.class)) {
             for (var i = 0; i < geometry.getNumGeometries(); i++) {
-                addFeature(layerName, attributes, geometry.getGeometryN(i), id);
+                addFeature(id, geometry.getGeometryN(i), attributes);
             }
             return;
         }
-
-        final var layer = layers.computeIfAbsent(layerName, ignored -> new Layer());
 
         final var tags =
                 attributes.entrySet().stream()
@@ -60,17 +49,11 @@ public class VectorTileEncoder {
         return Stream.of(layer.indexOfKey(entry.getKey()), layer.indexOfValue(entry.getValue()));
     }
 
-    public byte[] encode() {
-        final var encodedLayers =
-                layers.entrySet().stream().map(e -> encodeLayer(e.getKey(), e.getValue())).toList();
-        return Tile.newBuilder().addAllLayers(encodedLayers).build().toByteArray();
-    }
-
-    private Tile.Layer encodeLayer(final String layerName, final Layer layer) {
+    Tile.Layer encode() {
         return Tile.Layer.newBuilder()
                 .setVersion(2)
-                .setName(layerName)
-                .setExtent(extent)
+                .setName(layer.name)
+                .setExtent(layer.extent)
                 .addAllKeys(layer.keys())
                 .addAllValues(layer.values().stream().map(this::encodeValue).toList())
                 .addAllFeatures(layer.features().stream().map(this::encodeFeature).toList())
@@ -79,9 +62,11 @@ public class VectorTileEncoder {
 
     private Tile.Feature encodeFeature(final Feature feature) {
         final var geometryEncoder = new GeometryEncoder(feature.geometry);
-        return Tile.Feature.newBuilder()
-                .setId(feature.id)
-                .setType(geometryEncoder.getGeomType())
+        final var builder = Tile.Feature.newBuilder();
+        if (feature.id != 0) {
+            builder.setId(feature.id);
+        }
+        return builder.setType(geometryEncoder.getGeomType())
                 .addAllGeometry(CommandsEncoder.encode(geometryEncoder.encode()))
                 .addAllTags(feature.tags)
                 .build();
@@ -91,7 +76,9 @@ public class VectorTileEncoder {
         final var tileValue = Tile.Value.newBuilder();
         switch (value) {
             case final String string -> tileValue.setStringValue(string);
+            case final Integer intValue when intValue >= 0 -> tileValue.setUintValue(intValue);
             case final Integer intValue -> tileValue.setSintValue(intValue);
+            case final Long longValue when longValue >= 0 -> tileValue.setUintValue(longValue);
             case final Long longValue -> tileValue.setSintValue(longValue);
             case final Float floatValue -> tileValue.setFloatValue(floatValue);
             case final Double doubleValue -> tileValue.setDoubleValue(doubleValue);
@@ -103,10 +90,14 @@ public class VectorTileEncoder {
     }
 
     private record Layer(
-            List<Feature> features, Map<String, Integer> keyMap, Map<Object, Integer> valueMap) {
+            String name,
+            int extent,
+            List<LayerEncoder.Feature> features,
+            Map<String, Integer> keyMap,
+            Map<Object, Integer> valueMap) {
 
-        private Layer() {
-            this(new ArrayList<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
+        private Layer(final String name, final int extent) {
+            this(name, extent, new ArrayList<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
         }
 
         private Integer indexOfKey(final String key) {
