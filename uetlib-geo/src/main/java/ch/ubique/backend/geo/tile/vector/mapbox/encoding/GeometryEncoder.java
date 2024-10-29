@@ -1,4 +1,4 @@
-package ch.ubique.backend.geo.tile.vector.mapbox;
+package ch.ubique.backend.geo.tile.vector.mapbox.encoding;
 
 import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 import ch.ubique.backend.geo.tile.vector.mapbox.commands.*;

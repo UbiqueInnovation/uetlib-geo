@@ -7,6 +7,8 @@ import ch.ubique.backend.geo.tile.vector.mapbox.commands.Delta;
 import ch.ubique.backend.geo.tile.vector.mapbox.commands.LineToCommand;
 import ch.ubique.backend.geo.tile.vector.mapbox.commands.MoveToCommand;
 
+import ch.ubique.backend.geo.tile.vector.mapbox.decoding.CommandsDecoder;
+import ch.ubique.backend.geo.tile.vector.mapbox.encoding.CommandsEncoder;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -24,6 +26,6 @@ class CommandsEncoderTest {
                         new LineToCommand(List.of(new Delta(-1, -2))),
                         new LineToCommand(List.of(new Delta(Short.MAX_VALUE, Short.MIN_VALUE))),
                         new ClosePathCommand());
-        assertEquals(commands, CommandsEncoder.decode(CommandsEncoder.encode(commands)));
+        assertEquals(commands, CommandsDecoder.decode(CommandsEncoder.encode(commands)));
     }
 }
