@@ -1,0 +1,41 @@
+package ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.builder;
+
+import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterRule;
+import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterRuleType;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+public class ExcludeRuleBuilder implements FilterRuleBuilder {
+
+    protected Collection<String> layers;
+    protected Map<String, Object> tags;
+
+    public ExcludeRuleBuilder layer(final String layer) {
+        return layers(layer);
+    }
+
+    public ExcludeRuleBuilder layers(final String... layer) {
+        return layers(List.of(layer));
+    }
+
+    public ExcludeRuleBuilder layers(final Collection<String> layers) {
+        this.layers = layers;
+        return this;
+    }
+
+    public ExcludeRuleBuilder tags(final Map<String, Object> tags) {
+        this.tags = tags;
+        return this;
+    }
+
+    public ExcludeRuleBuilder tag(final String key, final Object value) {
+        return tags(Map.of(key, value));
+    }
+
+    @Override
+    public FilterRule build() {
+        return new FilterRule(FilterRuleType.EXCLUDE, layers, tags, null);
+    }
+}
