@@ -4,7 +4,6 @@ import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTileFeature;
 import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTileLayer;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
@@ -12,8 +11,10 @@ import org.locationtech.jts.geom.Polygon;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class VectorTileOptimizer {
@@ -29,18 +30,44 @@ public class VectorTileOptimizer {
     }
 
     private static VectorTileLayer mergeFeatures(final VectorTileLayer layer) {
-        final var groupedFeatures =
-                layer.features().stream()
-                        .collect(Collectors.groupingBy(f -> Pair.of(f.id(), f.tags())));
+
+        record Key(long id, Map<String, Object> tags) {
+            public static Key of(final VectorTileFeature feature) {
+                return new Key(feature.id(), feature.tags());
+            }
+        }
+
+        final var groups = new HashMap<Key, Collection<VectorTileFeature>>();
+        final var positions = new HashMap<Key, Collection<Integer>>();
+
+        var index = 0;
+        for (final var feature : layer.features()) {
+            final var key = Key.of(feature);
+            groups.computeIfAbsent(key, ignored -> new ArrayList<>()).add(feature);
+            positions.computeIfAbsent(key, ignored -> new ArrayList<>()).add(index);
+            index++;
+        }
+
         final var combinedFeatures =
-                groupedFeatures.values().stream()
+                positions.keySet().stream()
+                        .sorted(Comparator.comparing(key -> average(positions.get(key))))
+                        .map(groups::get)
                         .flatMap(VectorTileOptimizer::combineGeometries)
                         .toList();
+
         return layer.withFeatures(combinedFeatures);
     }
 
     private static Stream<VectorTileFeature> combineGeometries(
             final Collection<VectorTileFeature> vectorTileFeatures) {
+
+        if (vectorTileFeatures.isEmpty()) {
+            return Stream.empty();
+        }
+        if (vectorTileFeatures.size() == 1) {
+            return Stream.of(vectorTileFeatures.iterator().next());
+        }
+
         final var anyFeature = vectorTileFeatures.iterator().next();
 
         final var points = new ArrayList<Point>(0);
@@ -73,5 +100,9 @@ public class VectorTileOptimizer {
         return Stream.of(pointGeometry, lineGeometry, polygonGeometry)
                 .filter(Predicate.not(Geometry::isEmpty))
                 .map(g -> new VectorTileFeature(anyFeature.id(), g, anyFeature.tags()));
+    }
+
+    private static double average(final Collection<Integer> integers) {
+        return integers.stream().mapToInt(i -> i).average().orElseThrow();
     }
 }
