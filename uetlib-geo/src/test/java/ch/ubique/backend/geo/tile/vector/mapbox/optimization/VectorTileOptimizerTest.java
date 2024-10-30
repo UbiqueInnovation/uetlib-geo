@@ -27,6 +27,7 @@ class VectorTileOptimizerTest {
                 "ubique/post/poi/7/67/44.pbf",
                 "ubique/post/poi/7/67/45.pbf",
                 "swisstopo/base/6/33/22.pbf",
+                "swisstopo/base/10/536/358.pbf",
                 "swisstopo/base/13/4290/2868.pbf",
                 "swisstopo/relief/13/4290/2868.pbf",
             })
