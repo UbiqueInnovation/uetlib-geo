@@ -39,7 +39,8 @@ public class TileSetProcessor implements AutoCloseable {
                         .toArray(CompletableFuture[]::new);
 
         logger.info("Created all tasks, waiting for completion.");
-        CompletableFuture.allOf(futures).thenRun(taskRunHelper::onCompletion).join();
+        CompletableFuture.allOf(futures).join();
+        taskRunHelper.onCompletion();
         taskRunHelper.raiseExceptionIfPresent();
         logger.info("All tasks completed.");
     }
