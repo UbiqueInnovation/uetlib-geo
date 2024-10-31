@@ -56,4 +56,11 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>ubique-artifactory</id>
+            <url>https://artifactory.ubique.ch/artifactory/backend</url>
+        </repository>
+    </distributionManagement>
 </project>
