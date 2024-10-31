@@ -30,5 +30,5 @@ public abstract class CreateTileSetTask implements TileSetTask<IOException> {
 
     protected abstract BinaryTile createTile(TileInfo tile) throws IOException;
 
-    protected abstract void saveTile(BinaryTile tile);
+    protected abstract void saveTile(BinaryTile tile) throws IOException;
 }
