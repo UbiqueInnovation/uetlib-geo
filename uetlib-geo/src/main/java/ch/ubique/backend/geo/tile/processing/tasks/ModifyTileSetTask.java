@@ -22,7 +22,7 @@ public abstract class ModifyTileSetTask extends CreateTileSetTask {
     }
 
     @Override
-    public final void onCompletion() {
+    public void onCompletion() throws IOException {
         logger.info("Stats for input");
         inputTileSizeUtil.logStats();
 

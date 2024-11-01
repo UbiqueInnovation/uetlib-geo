@@ -23,7 +23,7 @@ public abstract class CreateTileSetTask implements TileSetTask<IOException> {
     }
 
     @Override
-    public void onCompletion() {
+    public void onCompletion() throws IOException {
         logger.info("Stats for output");
         tileSizeStatsUtil.logStats();
     }
