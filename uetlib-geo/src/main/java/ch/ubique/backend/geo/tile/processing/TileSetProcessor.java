@@ -86,7 +86,7 @@ public class TileSetProcessor implements AutoCloseable {
             }
         }
 
-        private void onCompletion() {
+        private void onCompletion() throws E {
             task.onCompletion();
         }
 

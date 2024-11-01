@@ -2,11 +2,14 @@ package ch.ubique.backend.geo.tile.vector.mapbox.tilejson;
 
 import ch.ubique.backend.geo.coordinate.models.BoundingBox;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.builder.TileJsonBuilder;
 import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.jackson.TileJsonBoundsDeserializer;
 import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.jackson.TileJsonBoundsSerializer;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -19,6 +22,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
+@JsonInclude(Include.NON_NULL)
 public record TileJson(
         @JsonProperty("tilejson") @NotBlank String tileJsonVersion,
         @JsonProperty("tiles") @NotEmpty List<String> tiles,
@@ -41,4 +45,9 @@ public record TileJson(
         @JsonProperty("scheme") @Nullable String scheme,
         @JsonProperty("template") @Nullable String template,
         @JsonProperty("version") @Nullable String version,
-        @JsonAnySetter @JsonAnyGetter Map<String, Object> additionalData) {}
+        @JsonAnySetter @JsonAnyGetter Map<String, Object> additionalData) {
+
+    public static TileJsonBuilder builder() {
+        return new TileJsonBuilder();
+    }
+}
