@@ -28,10 +28,13 @@ public class TileLoader {
     }
 
     public static TileLoader fromTileJsonUrl(final URL tileJsonUrl) throws IOException {
+        return fromTileJson(loadTileJson(tileJsonUrl));
+    }
+
+    public static TileJson loadTileJson(final URL tileJsonUrl) throws IOException {
         final var objectMapper = ObjectMapperUtils.objectMapper();
         try (final var inputStream = getInputStream(tileJsonUrl)) {
-            final var tileJson = objectMapper.readValue(inputStream, TileJson.class);
-            return fromTileJson(tileJson);
+            return objectMapper.readValue(inputStream, TileJson.class);
         }
     }
 
