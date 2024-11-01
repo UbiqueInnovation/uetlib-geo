@@ -13,7 +13,7 @@ public record TagFilterRule(boolean keep, Collection<String> tags) {
     }
 
     public static TagFilterRule delete(final Collection<String> tags) {
-        return new TagFilterRule(true, tags);
+        return new TagFilterRule(false, tags);
     }
 
     public static TagFilterRule keepAll() {
