@@ -19,6 +19,7 @@ import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import com.pivovarit.function.ThrowingRunnable;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -30,9 +31,14 @@ import java.util.stream.IntStream;
 
 class TileSetProcessorTest {
 
-    static TileLoader swisstopoTileLoader =
-            new TileLoader(
-                    "https://vectortiles0.geo.admin.ch/tiles/ch.swisstopo.base.vt/v1.0.0/", "gzip");
+    static TileLoader swisstopoTileLoader;
+
+    @BeforeAll
+    static void setup() throws IOException {
+        swisstopoTileLoader =
+                TileLoader.fromTileJsonUrl(
+                        "https://vectortiles.geo.admin.ch/tiles/ch.swisstopo.base.vt/v1.0.0/tiles.json");
+    }
 
     @Test
     void testThrows() {
