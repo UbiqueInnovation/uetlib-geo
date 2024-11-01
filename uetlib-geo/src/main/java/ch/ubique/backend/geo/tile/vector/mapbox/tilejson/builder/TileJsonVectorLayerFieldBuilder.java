@@ -33,7 +33,7 @@ public class TileJsonVectorLayerFieldBuilder {
                             .collect(Collectors.joining(", "));
         }
         if (values.stream().allMatch(String.class::isInstance)) {
-            return "Number";
+            return "String";
         }
         if (values.stream().allMatch(Number.class::isInstance)) {
             return "Number";
