@@ -23,14 +23,16 @@ public class TileSetProcessor implements AutoCloseable {
     private final ExecutorService executorService;
 
     public TileSetProcessor(final int parallelism) {
-        final var threadFactory =
-                new ThreadFactoryBuilder().setNameFormat("modify-tile-%d").build();
+        final var threadFactory = new ThreadFactoryBuilder().setNameFormat("tiles-%d").build();
         this.executorService = Executors.newFixedThreadPool(parallelism, threadFactory);
     }
 
     public <E extends Exception> void executeTask(final TileSetTask<E> task) throws E {
         logger.info("Submitting task.");
         final var taskRunHelper = new TaskRunHelper<>(task);
+
+        logger.info("Preprocessing task.");
+        task.preprocess();
 
         final var futures =
                 task.selectedTiles().stream()

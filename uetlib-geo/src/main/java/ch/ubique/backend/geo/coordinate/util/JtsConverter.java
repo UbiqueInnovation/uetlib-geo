@@ -10,6 +10,7 @@ import ch.ubique.backend.geo.geojson.models.jts.GenericFeatureCollection;
 
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Objects;
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -87,6 +88,16 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
     @NotNull
     public C toBackendLib(final Point point) {
         return toBackendLib(point.getCoordinate());
+    }
+
+    @NotNull
+    public BoundingBox<C> toBackendLib(final ReferencedEnvelope envelope) {
+        if (!Objects.equals(coordinateSystem.crs(), envelope.getCoordinateReferenceSystem())) {
+            throw new IllegalArgumentException("Coordinate system mismatch.");
+        }
+        return new BoundingBox<>(
+                toBackendLib(JtsUtil.minCoordinate(envelope)),
+                toBackendLib(JtsUtil.maxCoordinate(envelope)));
     }
 
     @NotNull

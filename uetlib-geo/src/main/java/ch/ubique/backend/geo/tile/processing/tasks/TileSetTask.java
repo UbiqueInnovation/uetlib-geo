@@ -10,6 +10,10 @@ public interface TileSetTask<E extends Exception> {
 
     void execute(TileInfo tileInfo) throws E;
 
+    default void preprocess() throws E {
+        // nothing here
+    }
+
     default void onCompletion() throws E {
         // nothing here
     }

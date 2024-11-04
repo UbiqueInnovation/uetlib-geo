@@ -8,11 +8,11 @@ import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.TileJsonCenter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 
+import java.util.Comparator;
 import org.apache.commons.collections4.CollectionUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,14 +28,13 @@ public class TileJsonBuilder {
     private Integer fillZoom;
     private List<String> grids;
     private String legend;
-    private Integer maxZoom;
-    private Integer minZoom;
     private String name;
     private String scheme;
     private String template;
     private String version;
 
-    private final Map<String, Object> additionalData = new HashMap<>();
+    private final Collection<Integer> zoomLevels = ConcurrentHashMap.newKeySet();
+    private final Map<String, Object> additionalData = new ConcurrentHashMap<>();
     private final Map<String, TileJsonVectorLayerBuilder> vectorLayerBuilders =
             new ConcurrentHashMap<>();
 
@@ -94,12 +93,12 @@ public class TileJsonBuilder {
     }
 
     public TileJsonBuilder maxZoom(@Nullable final Integer maxZoom) {
-        this.maxZoom = maxZoom;
+        zoomLevels.add(maxZoom);
         return this;
     }
 
     public TileJsonBuilder minZoom(@Nullable final Integer minZoom) {
-        this.minZoom = minZoom;
+        zoomLevels.add(minZoom);
         return this;
     }
 
@@ -128,6 +127,11 @@ public class TileJsonBuilder {
         return this;
     }
 
+    public TileJsonBuilder addLevel(final int level) {
+        zoomLevels.add(level);
+        return this;
+    }
+
     public TileJsonBuilder additionalData(final Map<String, Object> additionalData) {
         this.additionalData.putAll(additionalData);
         return this;
@@ -153,8 +157,8 @@ public class TileJsonBuilder {
                 fillZoom,
                 grids,
                 legend,
-                maxZoom,
-                minZoom,
+                zoomLevels.stream().max(Comparator.naturalOrder()).orElse(null),
+                zoomLevels.stream().min(Comparator.naturalOrder()).orElse(null),
                 name,
                 scheme,
                 template,
