@@ -8,7 +8,7 @@ import ch.ubique.backend.geo.tile.vector.mapbox.encoding.VectorTileEncoder;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterDefinition;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterRule;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.TagFilterRule;
-import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTileLayer;
+import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTile;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,7 +17,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Map;
 
 class VectorTileFilterTest {
@@ -79,15 +78,15 @@ class VectorTileFilterTest {
         }
     }
 
-    private Collection<VectorTileLayer> decodeTile(final String resourcePath) throws IOException {
+    private VectorTile decodeTile(final String resourcePath) throws IOException {
         try (final var inputStream =
                 getClass().getResourceAsStream("/vector-tiles/" + resourcePath)) {
             return VectorTileDecoder.decode(inputStream);
         }
     }
 
-    private static void encodeTile(
-            final Path vectorTilePath, final Collection<VectorTileLayer> tile) throws IOException {
+    private static void encodeTile(final Path vectorTilePath, final VectorTile tile)
+            throws IOException {
         final var outputPath = TEST_OUTPUT_DIR.resolve(vectorTilePath);
         FileUtils.createParentDirectories(outputPath.toFile());
         try (final var outputStream = Files.newOutputStream(outputPath)) {

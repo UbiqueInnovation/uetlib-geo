@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.tile.vector.mapbox.encoding;
 
+import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTileLayer;
 import ch.ubique.backend.geo.vectortile.protobuf.Tile;
 
@@ -44,8 +45,9 @@ public class VectorTileEncoder {
         return Tile.newBuilder().addAllLayers(encodedLayers).build().toByteArray();
     }
 
-    public static Tile encode(final Collection<VectorTileLayer> layers) {
-        final var encodedLayers = layers.stream().map(VectorTileEncoder::encodeLayer).toList();
+    public static Tile encode(final VectorTile vectorTile) {
+        final var encodedLayers =
+                vectorTile.layers().stream().map(VectorTileEncoder::encodeLayer).toList();
         return Tile.newBuilder().addAllLayers(encodedLayers).build();
     }
 
