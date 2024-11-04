@@ -2,12 +2,14 @@ package ch.ubique.backend.geo.coordinate.util;
 
 import static ch.ubique.backend.geo.coordinate.util.JtsUtil.getCrs;
 
+import ch.ubique.backend.geo.common.exceptions.UncheckedTransformException;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.models.*;
 import ch.ubique.backend.geo.geojson.models.jts.GenericFeature;
 import ch.ubique.backend.geo.geojson.models.jts.GenericFeatureCollection;
 
+import ch.ubique.backend.geo.utils.transform.JtsTransform;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Objects;
@@ -200,13 +202,14 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                             : geometry.intersection(bounds);
 
             final var transformedGeometry =
-                    JTS.transform(
-                            geometryWithinBounds,
-                            findMathTransform(geometry.getSRID(), withHeight));
+                    new JtsTransform(findMathTransform(geometry.getSRID(), withHeight))
+                            .transform(geometryWithinBounds);
 
             // We need to recreate the geometry, otherwise it has the wrong geometry factory
             return coordinateSystem.geometryFactory().createGeometry(transformedGeometry);
-        } catch (final TransformException | FactoryException e) {
+        } catch (final TransformException e) {
+            throw new UncheckedTransformException(e);
+        } catch (final FactoryException e) {
             // rethrow as runtime exception. no way for caller to handle this
             throw new WrappedException(e);
         }
@@ -227,13 +230,8 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
         if (sourceCRS.equals(coordinateSystem.crs())) {
             return coordinate; // No transform need, already in correct spatial reference system
         }
-        try {
-            final var withHeight = !Double.isNaN(coordinate.getZ());
-            return JTS.transform(coordinate, null, findMathTransform(sourceCRS, withHeight));
-        } catch (final TransformException e) {
-            // rethrow as runtime exception. no way for caller to handle this
-            throw new WrappedException(e);
-        }
+        final var withHeight = !Double.isNaN(coordinate.getZ());
+        return new JtsTransform(findMathTransform(sourceCRS, withHeight)).transform(coordinate);
     }
 
     /**
@@ -245,14 +243,8 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
             final CoordinateSystem<?> sourceCoordinateSystem,
             final boolean withHeight) {
         final var mathTransform = findMathTransform(sourceCoordinateSystem.crs(), withHeight);
-        return input.map(
-                c -> {
-                    try {
-                        return JTS.transform(c, null, mathTransform);
-                    } catch (final TransformException e) {
-                        throw new WrappedException(e);
-                    }
-                });
+        final var jtsTransform = new JtsTransform(mathTransform);
+        return input.map(jtsTransform::transform);
     }
 
     public ReferencedEnvelope transform(final ReferencedEnvelope envelope) {
