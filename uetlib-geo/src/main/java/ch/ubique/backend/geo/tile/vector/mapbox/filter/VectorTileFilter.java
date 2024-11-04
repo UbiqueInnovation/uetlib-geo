@@ -5,12 +5,12 @@ import static java.util.Objects.requireNonNullElseGet;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterDefinition;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterRule;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.TagFilterRule;
+import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTileFeature;
 import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTileLayer;
 
 import jakarta.annotation.Nullable;
 
-import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Objects;
 
@@ -22,8 +22,9 @@ public class VectorTileFilter {
         this.filterDefinition = filterDefinition;
     }
 
-    public Collection<VectorTileLayer> filter(final Collection<VectorTileLayer> layers) {
-        return layers.stream().map(this::filter).filter(Objects::nonNull).toList();
+    public VectorTile filter(final VectorTile vectorTile) {
+        return new VectorTile(
+                vectorTile.layers().stream().map(this::filter).filter(Objects::nonNull).toList());
     }
 
     @Nullable

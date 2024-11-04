@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.tile.vector.mapbox.optimization;
 
 import ch.ubique.backend.geo.coordinate.util.JtsUtil;
+import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTileFeature;
 import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTileLayer;
 
@@ -21,8 +22,9 @@ public class VectorTileOptimizer {
 
     private VectorTileOptimizer() {}
 
-    public static Collection<VectorTileLayer> optimize(final Collection<VectorTileLayer> layers) {
-        return layers.stream().map(VectorTileOptimizer::optimize).toList();
+    public static VectorTile optimize(final VectorTile vectorTile) {
+        return new VectorTile(
+                vectorTile.layers().stream().map(VectorTileOptimizer::optimize).toList());
     }
 
     public static VectorTileLayer optimize(final VectorTileLayer layer) {
