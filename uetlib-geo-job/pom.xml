@@ -14,11 +14,10 @@
     <artifactId>uetlib-geo-job</artifactId>
 
     <dependencies>
-        <!-- TODO: replace with uetlib job -->
         <dependency>
             <groupId>ch.ubique</groupId>
-            <artifactId>backend-jvm-lib-job</artifactId>
-            <version>2.4.12</version>
+            <artifactId>uetlib-job</artifactId>
+            <version>1.0.0-alpha.2</version>
         </dependency>
 
         <dependency>
