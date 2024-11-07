@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 
-public class MbtileHelper {
+public final class MbtileHelper {
 
     private MbtileHelper() {}
 

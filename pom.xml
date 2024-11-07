@@ -1,30 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>ch.ubique</groupId>
         <artifactId>uetlib-bom</artifactId>
-        <version>1.0.0-alpha.9</version>
+        <version>1.0.0-alpha.15</version>
     </parent>
 
     <artifactId>uetlib-geo-parent</artifactId>
     <version>2.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <properties>
+        <java.version>21</java.version>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Sonar-->
         <sonar.projectName>uetlib-geo</sonar.projectName>
         <sonar.coverage.module>uetlib-geo-coverage</sonar.coverage.module>
     </properties>
 
-    <packaging>pom</packaging>
     <modules>
         <module>uetlib-geo</module>
         <module>uetlib-geo-db</module>
         <module>uetlib-geo-job</module>
         <module>uetlib-geo-coverage</module>
     </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>ch.ubique</groupId>
+            <artifactId>uetlib-test</artifactId>
+            <version>1.0.0-alpha.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -40,11 +54,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -57,9 +71,18 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>ubique-artifactory</id>
+            <name>backend</name>
+            <url>https://artifactory.ubique.ch/artifactory/backend</url>
+        </repository>
+    </repositories>
+
     <distributionManagement>
         <repository>
             <id>ubique-artifactory</id>
+            <name>backend</name>
             <url>https://artifactory.ubique.ch/artifactory/backend</url>
         </repository>
     </distributionManagement>
