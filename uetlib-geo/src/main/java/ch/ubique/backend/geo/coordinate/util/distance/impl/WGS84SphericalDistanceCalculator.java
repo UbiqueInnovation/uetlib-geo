@@ -5,7 +5,9 @@ import static java.lang.Math.*;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculator;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 
 /**
  * This calculator assumes a spherical earth. This implies an error of up to 0.5% compared to
@@ -43,5 +45,33 @@ public class WGS84SphericalDistanceCalculator implements DistanceCalculator<WGS8
                                 * cos(toRadians(c2.latitude()))
                                 * pow(sin(lonDistance / 2), 2);
         return 2 * asin(sqrt(a));
+    }
+
+    public static double metersToDegreeLat(final double distance) {
+        return toDegrees(distance / MEAN_EARTH_RADIUS);
+    }
+
+    public static double metersToDegreeLon(final WGS84Coordinate center, final double distance) {
+        return metersToDegreeLon(center.latitude(), distance);
+    }
+
+    /**
+     * @param referenceLatitude reference latitude for the calculation in degrees
+     */
+    public static double metersToDegreeLon(final double referenceLatitude, final double distance) {
+        return toDegrees(distance / MEAN_EARTH_RADIUS) / cos(toRadians(referenceLatitude));
+    }
+
+    public static double metersToDegreeUpperBound(final double distance) {
+        return metersToDegreeLat(distance);
+    }
+
+    public static ReferencedEnvelope envelopeWithBufferInMeters(
+            final WGS84Coordinate center, final double distance) {
+        final var envelope = JtsUtil.getEnvelope(center);
+        final var deltaX = min(180, metersToDegreeLon(center, distance));
+        final var deltaY = metersToDegreeLat(distance);
+        envelope.expandBy(deltaX, deltaY);
+        return envelope;
     }
 }
