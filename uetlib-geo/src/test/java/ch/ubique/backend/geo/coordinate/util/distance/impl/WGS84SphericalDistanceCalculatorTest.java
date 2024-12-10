@@ -109,4 +109,62 @@ class WGS84SphericalDistanceCalculatorTest {
         assertEquals(width, envelope.getWidth(), 1.0e-6);
         assertEquals(height, envelope.getHeight(), 1.0e-6);
     }
+
+    @Test
+    void bearingAngle() {
+        assertEquals(
+                Math.toRadians(0),
+                WGS84SphericalDistanceCalculator.bearingAngle(
+                        new WGS84Coordinate(0, 0), new WGS84Coordinate(90, 0)),
+                1.0e-6);
+        assertEquals(
+                Math.toRadians(90),
+                WGS84SphericalDistanceCalculator.bearingAngle(
+                        new WGS84Coordinate(0, 0), new WGS84Coordinate(0, -90)),
+                1.0e-6);
+        assertEquals(
+                Math.toRadians(180),
+                WGS84SphericalDistanceCalculator.bearingAngle(
+                        new WGS84Coordinate(90, 0), new WGS84Coordinate(0, 0)),
+                1.0e-6);
+        assertEquals(
+                Math.toRadians(270),
+                WGS84SphericalDistanceCalculator.bearingAngle(
+                        new WGS84Coordinate(0, 0), new WGS84Coordinate(0, 90)),
+                1.0e-6);
+        assertEquals(
+                Math.toRadians(45),
+                WGS84SphericalDistanceCalculator.bearingAngle(
+                        new WGS84Coordinate(0, 0), new WGS84Coordinate(0.01, -0.01)),
+                1.0e-4);
+        final var c1 = new WGS84Coordinate(35, 45);
+        final var c2 = new WGS84Coordinate(35, 135);
+        assertEquals(
+                Math.toRadians(360 - 60),
+                WGS84SphericalDistanceCalculator.bearingAngle(c1, c2),
+                0.01);
+        assertEquals(
+                Math.toRadians(60), WGS84SphericalDistanceCalculator.bearingAngle(c2, c1), 0.01);
+
+        assertEquals(
+                Math.toRadians(340),
+                WGS84SphericalDistanceCalculator.bearingAngle(
+                        new WGS84Coordinate(47.375597998969575, 8.54359878165179),
+                        new WGS84Coordinate(47.37567973526378, 8.543643038100736)),
+                Math.toRadians(10));
+
+        assertEquals(
+                Math.toRadians(90),
+                WGS84SphericalDistanceCalculator.bearingAngle(
+                        new WGS84Coordinate(47.375597998969575, 8.54359878165179),
+                        new WGS84Coordinate(47.375591187606005, 8.543311114733646)),
+                Math.toRadians(10));
+
+        assertEquals(
+                Math.toRadians(45),
+                WGS84SphericalDistanceCalculator.bearingAngle(
+                        new WGS84Coordinate(47.375597998969575, 8.54359878165179),
+                        new WGS84Coordinate(47.37567519436189, 8.543494175499738)),
+                Math.toRadians(10));
+    }
 }

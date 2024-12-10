@@ -47,6 +47,21 @@ public class WGS84SphericalDistanceCalculator implements DistanceCalculator<WGS8
         return 2 * asin(sqrt(a));
     }
 
+    /**
+     * @return Initial bearing angle (forward azimuth) from c1 to c2 in radians, counterclockwise, 0
+     *     is up.
+     */
+    public static double bearingAngle(final WGS84Coordinate c1, final WGS84Coordinate c2) {
+        final var lon1 = toRadians(c1.longitude());
+        final var lon2 = toRadians(c2.longitude());
+        final var lat1 = toRadians(c1.latitude());
+        final var lat2 = toRadians(c2.latitude());
+        final var y = sin(lon2 - lon1) * cos(lat2);
+        final var x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(lon2 - lon1);
+        final var bearingClockwise = atan2(y, x);
+        return (2 * PI - bearingClockwise) % (2 * PI); // Make it counterclockwise
+    }
+
     public static double metersToDegreeLat(final double distance) {
         return toDegrees(distance / MEAN_EARTH_RADIUS);
     }
