@@ -39,8 +39,8 @@ public class TypedKdTree<T> {
         return kdTree.size();
     }
 
-    public void insert(final Coordinate itemEnv, final T item) {
-        kdTree.insert(itemEnv, item);
+    public KdNode insert(final Coordinate itemEnv, final T item) {
+        return kdTree.insert(itemEnv, item);
     }
 
     public Collection<T> query(final Envelope searchEnv) {
@@ -63,7 +63,11 @@ public class TypedKdTree<T> {
     }
 
     public T getRootValue() {
+        return getData(kdTree.getRoot());
+    }
+
+    public T getData(final KdNode node) {
         //noinspection unchecked
-        return (T) kdTree.getRoot().getData();
+        return (T) node.getData();
     }
 }
