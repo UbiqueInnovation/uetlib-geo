@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineSegment;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 
@@ -119,11 +120,31 @@ class JtsUtilTest {
         assertEquals(c(10, 10), JtsUtil.midPoint(l(c(0, 0), c(10, 0), c(10, 20), c(20, 20))));
     }
 
+    @Test
+    void closestSegment() {
+        assertNull(JtsUtil.closestSegment(l(), c(0, 0)));
+        assertEquals(s(c(0, 0), c(10, 10)), JtsUtil.midPointSegment(l(c(0, 0), c(10, 10))));
+        assertEquals(c(10, 0), JtsUtil.midPoint(l(c(0, 0), c(10, 0), c(20, 0))));
+
+        final var testLine = l(c(0, 0), c(1, 0), c(2, 0), c(3, 0), c(4, 0), c(20, 0));
+        assertEquals(s(c(0, 0), c(1, 0)), JtsUtil.closestSegment(testLine, c(0.1, 0)));
+        assertEquals(s(c(1, 0), c(2, 0)), JtsUtil.closestSegment(testLine, c(1.4, 100)));
+        assertEquals(s(c(2, 0), c(3, 0)), JtsUtil.closestSegment(testLine, c(2.1, 0)));
+        assertEquals(s(c(3, 0), c(4, 0)), JtsUtil.closestSegment(testLine, c(3.1, 0)));
+        assertEquals(s(c(4, 0), c(20, 0)), JtsUtil.closestSegment(testLine, c(4.1, -40)));
+        assertEquals(s(c(4, 0), c(20, 0)), JtsUtil.closestSegment(testLine, c(29, 0)));
+        assertEquals(s(c(4, 0), c(20, 0)), JtsUtil.midPointSegment(testLine));
+    }
+
     private Coordinate c(final double x, final double y) {
         return new Coordinate(x, y);
     }
 
-    private final LineString l(final Coordinate... coordinates) {
+    private LineString l(final Coordinate... coordinates) {
         return new GeometryFactory().createLineString(coordinates);
+    }
+
+    private LineSegment s(final Coordinate a, final Coordinate b) {
+        return new LineSegment(a, b);
     }
 }

@@ -6,9 +6,9 @@ import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
-import org.checkerframework.checker.units.qual.C;
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -125,12 +125,16 @@ public final class JtsUtil {
     }
 
     public static List<LineSegment> segments(final LineString lineString) {
-        final var coordinates = lineString.getCoordinates();
-        return IntStream.range(0, coordinates.length - 1)
-                .mapToObj(i -> new LineSegment(coordinates[i], coordinates[i + 1]))
-                .toList();
+        return segmentsStream(lineString).toList();
     }
 
+    public static Stream<LineSegment> segmentsStream(final LineString lineString) {
+        final var coordinates = lineString.getCoordinates();
+        return IntStream.range(0, coordinates.length - 1)
+                .mapToObj(i -> new LineSegment(coordinates[i], coordinates[i + 1]));
+    }
+
+    @Nullable
     public static Coordinate midPoint(final @NotNull LineString lineString) {
         final var length = lineString.getLength();
         if (length <= 0) {
@@ -147,6 +151,19 @@ public final class JtsUtil {
             currentDistance += segmentLength;
         }
         throw new IllegalStateException("Unreachable.");
+    }
+
+    @Nullable
+    public static LineSegment closestSegment(
+            final @NotNull LineString lineString, final @NotNull Coordinate coordinate) {
+        return segmentsStream(lineString)
+                .min(Comparator.comparingDouble(segment -> segment.distance(coordinate)))
+                .orElse(null);
+    }
+
+    @Nullable
+    public static LineSegment midPointSegment(final @NotNull LineString lineString) {
+        return closestSegment(lineString, midPoint(lineString));
     }
 
     /***
