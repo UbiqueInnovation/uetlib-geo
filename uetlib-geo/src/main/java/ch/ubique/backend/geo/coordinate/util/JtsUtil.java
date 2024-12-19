@@ -131,6 +131,24 @@ public final class JtsUtil {
                 .toList();
     }
 
+    public static Coordinate midPoint(final @NotNull LineString lineString) {
+        final var length = lineString.getLength();
+        if (length <= 0) {
+            return lineString.getCoordinate();
+        }
+        final var midpointDistance = length / 2;
+        var currentDistance = 0.0;
+        for (final var segment : segments(lineString)) {
+            final var segmentLength = segment.getLength();
+            if (currentDistance + segmentLength >= midpointDistance) {
+                final var fraction = (midpointDistance - currentDistance) / segmentLength;
+                return segment.pointAlong(fraction);
+            }
+            currentDistance += segmentLength;
+        }
+        throw new IllegalStateException("Unreachable.");
+    }
+
     /***
      * @return
      *     <li>For a non-multi geometry, a list with just the input geometry is returned.
