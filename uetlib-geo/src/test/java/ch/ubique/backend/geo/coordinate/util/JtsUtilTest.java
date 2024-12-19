@@ -7,7 +7,10 @@ import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 
 import java.util.List;
@@ -101,5 +104,26 @@ class JtsUtilTest {
                 JtsUtil.unwrapIfGeometryCollectionHasOnlyOneGeometry(nestedEmpty);
         assertEquals(empty, unwrappedNestedEmpty);
         assertEquals(srid, unwrappedNestedEmpty.getSRID());
+    }
+
+    @Test
+    void midPoint() {
+        assertNull(JtsUtil.midPoint(l()));
+        assertEquals(c(10, 0), JtsUtil.midPoint(l(c(0, 0), c(20, 0))));
+        assertEquals(c(10, 0), JtsUtil.midPoint(l(c(0, 0), c(10, 0), c(20, 0))));
+        assertEquals(
+                c(10, 0),
+                JtsUtil.midPoint(l(c(0, 0), c(1, 0), c(2, 0), c(3, 0), c(4, 0), c(20, 0))));
+        assertEquals(c(10, 10), JtsUtil.midPoint(l(c(0, 0), c(20, 20))));
+        assertEquals(c(10, 10), JtsUtil.midPoint(l(c(0, 0), c(20, 20))));
+        assertEquals(c(10, 10), JtsUtil.midPoint(l(c(0, 0), c(10, 0), c(10, 20), c(20, 20))));
+    }
+
+    private Coordinate c(final double x, final double y) {
+        return new Coordinate(x, y);
+    }
+
+    private final LineString l(final Coordinate... coordinates) {
+        return new GeometryFactory().createLineString(coordinates);
     }
 }
