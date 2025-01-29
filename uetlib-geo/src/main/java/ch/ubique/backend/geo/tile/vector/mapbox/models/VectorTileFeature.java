@@ -10,6 +10,11 @@ import java.util.Objects;
 public record VectorTileFeature(
         long id, @NotNull Geometry geometry, @NotNull Map<String, Object> tags) {
 
+    public VectorTileFeature(
+            @NotNull final Geometry geometry, @NotNull final Map<String, Object> tags) {
+        this(0, geometry, tags);
+    }
+
     public VectorTileFeature {
         Objects.requireNonNull(geometry);
         tags = Objects.requireNonNullElseGet(tags, Map::of);
