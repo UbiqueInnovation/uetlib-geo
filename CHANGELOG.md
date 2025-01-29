@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.5
+
+- Vector Tile Features do not require and `id` to be set. That's why a default implementation and a
+  new constructor are now provided.
+
 ## 1.0.4
 
 - Added new methods to `JtsUtil`: `midPoint(LineString)`, `midPointSegment(LineString)` and

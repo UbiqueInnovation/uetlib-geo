@@ -10,8 +10,11 @@ import org.locationtech.jts.geom.Geometry;
 
 public interface VectorTileElement {
 
+    /** Optionally, set an id for the tile element. Zero is considered null. */
     @JsonProperty
-    long id();
+    default long id() {
+        return 0;
+    }
 
     /** The layer this feature is exported to on the vector tile. */
     @JsonProperty
