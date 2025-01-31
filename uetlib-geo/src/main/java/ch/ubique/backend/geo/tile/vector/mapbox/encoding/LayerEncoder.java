@@ -55,7 +55,7 @@ class LayerEncoder {
                 .setName(layer.name)
                 .setExtent(layer.extent)
                 .addAllKeys(layer.keys())
-                .addAllValues(layer.values().stream().map(this::encodeValue).toList())
+                .addAllValues(layer.values().stream().map(ValueEncoder::encodeValue).toList())
                 .addAllFeatures(layer.features().stream().map(this::encodeFeature).toList())
                 .build();
     }
@@ -70,23 +70,6 @@ class LayerEncoder {
                 .addAllGeometry(CommandsEncoder.encode(geometryEncoder.encode()))
                 .addAllTags(feature.tags)
                 .build();
-    }
-
-    private Tile.Value encodeValue(final Object value) {
-        final var tileValue = Tile.Value.newBuilder();
-        switch (value) {
-            case final String string -> tileValue.setStringValue(string);
-            case final Integer intValue when intValue >= 0 -> tileValue.setUintValue(intValue);
-            case final Integer intValue -> tileValue.setSintValue(intValue);
-            case final Long longValue when longValue >= 0 -> tileValue.setUintValue(longValue);
-            case final Long longValue -> tileValue.setSintValue(longValue);
-            case final Float floatValue -> tileValue.setFloatValue(floatValue);
-            case final Double doubleValue -> tileValue.setDoubleValue(doubleValue);
-            case final Number number -> tileValue.setStringValue(number.toString());
-            case final Boolean booleanValue -> tileValue.setBoolValue(booleanValue);
-            default -> tileValue.setStringValue(value.toString());
-        }
-        return tileValue.build();
     }
 
     private record Layer(
