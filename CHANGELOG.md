@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.6
+
+- `LinesGraphBuilder` now supports both adding directed and undirected edges.
+
 ## 1.0.5
 
 - Vector Tile Features do not require and `id` to be set. That's why a default implementation and a
