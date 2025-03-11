@@ -1,8 +1,12 @@
 # CHANGELOG
 
-## 1.0.6
+## 1.0.7
 
 - `LinesGraphBuilder` now supports both adding directed and undirected edges.
+
+## 1.0.6
+
+- Vector Tiles: Allow encoding values as signed integers based on a config property
 
 ## 1.0.5
 
