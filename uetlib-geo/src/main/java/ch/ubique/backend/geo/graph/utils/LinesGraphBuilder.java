@@ -42,6 +42,7 @@ public class LinesGraphBuilder<E> {
 
     private static final Logger logger = LoggerFactory.getLogger(LinesGraphBuilder.class);
 
+    private final boolean isDirected;
     private final Graph<Coordinate, E> graph;
     private final Snapping3dPointIndex snapping3dPointIndex;
     private final Map<VertexKey, Vertex<Coordinate, E>> coordinatesToVertex;
@@ -66,6 +67,15 @@ public class LinesGraphBuilder<E> {
 
     public LinesGraphBuilder(
             final double snapTolerance, final long graphId, final ToIntFunction<E> levelExtractor) {
+        this(false, snapTolerance, graphId, levelExtractor);
+    }
+
+    public LinesGraphBuilder(
+            final boolean isDirected,
+            final double snapTolerance,
+            final long graphId,
+            final ToIntFunction<E> levelExtractor) {
+        this.isDirected = isDirected;
         this.snapTolerance = snapTolerance;
         this.levelExtractor = requireNonNullElse(levelExtractor, ignored -> 0);
         this.graph = new Graph<>(graphId);
@@ -121,7 +131,9 @@ public class LinesGraphBuilder<E> {
                             final var v1 = getOrCreateVertex(c1, level);
 
                             upsertDirectedEdge(v0, v1, info);
-                            upsertDirectedEdge(v1, v0, info);
+                            if (!isDirected) {
+                                upsertDirectedEdge(v1, v0, info);
+                            }
                         });
         return this;
     }
