@@ -286,9 +286,15 @@ public class LinesGraphBuilder<E> {
     }
 
     private Vertex<Coordinate, E> getOrCreateVertex(final Coordinate coordinate, final int level) {
-        return coordinatesToVertex.computeIfAbsent(
-                new VertexKey(snapping3dPointIndex.snap(coordinate), level),
-                ignored -> createVertex(coordinate));
+        final var key = snappedVertexKey(coordinate, level);
+        return coordinatesToVertex.computeIfAbsent(key, ignored -> createVertex(coordinate));
+    }
+
+    private VertexKey snappedVertexKey(final Coordinate coordinate, final int level) {
+        if (snapTolerance == 0) {
+            return new VertexKey(coordinate, level);
+        }
+        return new VertexKey(snapping3dPointIndex.snap(coordinate), level);
     }
 
     private Vertex<Coordinate, E> createVertex(final Coordinate coordinate) {
