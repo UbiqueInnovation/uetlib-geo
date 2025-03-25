@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.8
+
+- `LinesGraphBuilder` optimized performance when snapping tolerance is 0.
+
 ## 1.0.7
 
 - `LinesGraphBuilder` now supports both adding directed and undirected edges.
