@@ -79,6 +79,30 @@ class FeatureCollectionUtilsTest {
                         f ->
                                 f.setProperties(Map.of("Time", "After"))
                                         .setGeometry(polygons.get(f.getId())));
-        assertEquals(expected.getFeatures(), actual.getFeatures());
+        assertEquals(2, actual.getFeatures().size());
+        assertEquals(
+                ((List<Feature>) expected.getFeatures()).getFirst().getId(),
+                ((List<Feature>) actual.getFeatures()).getFirst().getId());
+        assertEquals(
+                ((List<Feature>) expected.getFeatures()).getFirst().getType(),
+                ((List<Feature>) actual.getFeatures()).getFirst().getType());
+        assertEquals(
+                ((List<Feature>) expected.getFeatures()).getFirst().getGeometry(),
+                ((List<Feature>) actual.getFeatures()).getFirst().getGeometry());
+        assertEquals(
+                ((List<Feature>) expected.getFeatures()).getFirst().getProperties(),
+                ((List<Feature>) actual.getFeatures()).getFirst().getProperties());
+        assertEquals(
+                ((List<Feature>) expected.getFeatures()).get(1).getId(),
+                ((List<Feature>) actual.getFeatures()).get(1).getId());
+        assertEquals(
+                ((List<Feature>) expected.getFeatures()).get(1).getType(),
+                ((List<Feature>) actual.getFeatures()).get(1).getType());
+        assertEquals(
+                ((List<Feature>) expected.getFeatures()).get(1).getGeometry(),
+                ((List<Feature>) actual.getFeatures()).get(1).getGeometry());
+        assertEquals(
+                ((List<Feature>) expected.getFeatures()).get(1).getProperties(),
+                ((List<Feature>) actual.getFeatures()).get(1).getProperties());
     }
 }
