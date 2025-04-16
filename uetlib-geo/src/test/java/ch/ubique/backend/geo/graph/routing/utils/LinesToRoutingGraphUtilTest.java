@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ch.ubique.backend.geo.graph.algorithms.ConnectedComponents;
 import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
 
+import ch.ubique.backend.geo.utils.GeoJsonUtil;
 import com.pivovarit.function.ThrowingFunction;
 
 import org.junit.jupiter.api.Assertions;
@@ -13,7 +14,6 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -240,7 +240,7 @@ class LinesToRoutingGraphUtilTest {
     }
 
     @Test
-    void testSacExample() throws ParseException, IOException {
+    void testSacExample() throws ParseException {
 
         final var wktReader = new WKTReader();
 
@@ -254,9 +254,9 @@ class LinesToRoutingGraphUtilTest {
                 (LineString)
                         wktReader.read(
                                 "LINESTRING(896.0 2941.0 , 902.0 2926.0 , 916.0 2901.0 , 932.0"
-                                    + " 2869.0 , 942.0 2835.0 , 941.0 2815.0 , 933.0 2797.0 , 918.0"
-                                    + " 2779.0 , 891.0 2760.0 , 862.0 2748.0 , 826.0 2740.0 , 802.0"
-                                    + " 2740.0 , 784.0 2734.0)");
+                                        + " 2869.0 , 942.0 2835.0 , 941.0 2815.0 , 933.0 2797.0 , 918.0"
+                                        + " 2779.0 , 891.0 2760.0 , 862.0 2748.0 , 826.0 2740.0 , 802.0"
+                                        + " 2740.0 , 784.0 2734.0)");
         lineTlm.setUserData("TLM");
 
         final var graphs =
@@ -302,6 +302,6 @@ class LinesToRoutingGraphUtilTest {
                                                         .degree()
                                                 != 2));
 
-        RoutingGraphTestUtils.dumpAsGeoJson(graphs);
+        GeoJsonUtil.saveGeoJson(GeoJsonUtil.routingGraphToFeatures(graphs).toList(), "sac-example");
     }
 }

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import ch.ubique.backend.core.utils.DurationUtils;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
+import ch.ubique.backend.geo.geojson.models.jts.Feature;
 import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 import ch.ubique.backend.geo.graph.algorithms.ConnectedComponents;
 import ch.ubique.backend.geo.graph.models.Edge;
@@ -15,13 +16,14 @@ import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
 import ch.ubique.backend.geo.tlm.SwisstopoTlmParser;
 import ch.ubique.backend.geo.tlm.TlmToGraphUtil;
-import ch.ubique.backend.geo.tlm.models.TlmPath;
 import ch.ubique.backend.geo.tlm.models.WegType;
+import ch.ubique.backend.geo.utils.GeoJsonUtil;
 import ch.ubique.backend.geo.utils.duration.HikeDuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
+import java.util.stream.Stream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -49,8 +51,14 @@ public class RoutingGraphTest {
         }
     }
 
-    private static void checkRoutingGraphsValid(final RoutingGraphs graphs) throws IOException {
-        RoutingGraphTestUtils.dumpAsGeoJson(graphs);
+    private static void checkRoutingGraphsValid(final RoutingGraphs graphs, final String name) {
+        GeoJsonUtil.saveGeoJson(
+                Stream.concat(
+                                GeoJsonUtil.routingGraphToFeatures(graphs),
+                                graphs.completeGraph().getVertices().stream()
+                                        .map(GeoJsonUtil::toFeature))
+                        .toList(),
+                name);
 
         assertFalse(graphs.completeGraph().isEmpty());
         assertFalse(graphs.routingGraph().isEmpty());
@@ -119,7 +127,7 @@ public class RoutingGraphTest {
     void testMountainTunnel() throws IOException {
         final var graphs = createGraphsFromGeoJson("/mountain_tunnel.geojson");
 
-        checkRoutingGraphsValid(graphs);
+        checkRoutingGraphsValid(graphs, "mountain_tunnel");
         assertEquals(4, graphs.routingGraph().getVertices().size());
         assertEquals(4, graphs.routingGraph().getDirectedEdges().size());
         assertEquals(2, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
@@ -130,7 +138,7 @@ public class RoutingGraphTest {
     void testMountainTunnelLargerArea() throws IOException {
         final var graphs = createGraphsFromGeoJson("/mountain_tunnel_larger_area.geojson");
 
-        checkRoutingGraphsValid(graphs);
+        checkRoutingGraphsValid(graphs, "mountain_tunnel_larger_area");
         assertEquals(39, graphs.routingGraph().getVertices().size());
         assertEquals(86, graphs.routingGraph().getDirectedEdges().size());
         assertEquals(1, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
@@ -138,10 +146,10 @@ public class RoutingGraphTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/furka", "/alp_la_schera", "/large_example"})
+    @ValueSource(strings = {"hundstock", "furka", "alp_la_schera", "large_example"})
     void testFurka(final String test) throws IOException {
-        final var graphs = createGraphsFromGeoJson(test + ".geojson");
-        checkRoutingGraphsValid(graphs);
+        final var graphs = createGraphsFromGeoJson("/" + test + ".geojson");
+        checkRoutingGraphsValid(graphs, test);
     }
 
     @Test
@@ -160,7 +168,7 @@ public class RoutingGraphTest {
             final var graphs =
                     TlmToGraphUtil.buildGraph(paths, (from, to, context) -> weight(from, to));
 
-            checkRoutingGraphsValid(graphs);
+            checkRoutingGraphsValid(graphs, "switzerland");
         }
     }
 
@@ -192,11 +200,11 @@ public class RoutingGraphTest {
             final var selectedPaths =
                     SwisstopoTlmParser.parsePaths(inputStream).stream()
                             .filter(path -> !excludedTypes.contains(path.info().type()))
-                            .map(TlmPath::line)
-                            .filter(geometry -> bounds.intersects(geometry.getEnvelopeInternal()))
+                            .filter(path -> bounds.intersects(path.line().getEnvelopeInternal()))
+                            .map(path -> new Feature().setType("Feature").setGeometry(path.line()))
                             .toList();
 
-            RoutingGraphTestUtils.dumpAsGeoJson(selectedPaths);
+            GeoJsonUtil.saveGeoJson(selectedPaths, "extract");
         }
         fail("Please disable this test, it's just a helper to generated geojson extracts.");
     }
