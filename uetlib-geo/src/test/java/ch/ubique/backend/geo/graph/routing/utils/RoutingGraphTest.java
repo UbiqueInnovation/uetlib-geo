@@ -37,14 +37,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Set;
 
-class RoutingGraphTest {
+public class RoutingGraphTest {
 
     private static final GeometryFactory geometryFactory = CoordinateSystems.LV95.geometryFactory();
     private static final ObjectMapper objectMapper =
             JsonMapper.builder().addModule(new JtsModule(geometryFactory)).build();
 
-    private FeatureCollection readFile(final String path) throws IOException {
-        try (final var inputStream = getClass().getResourceAsStream(path)) {
+    private static FeatureCollection readFile(final String path) throws IOException {
+        try (final var inputStream = RoutingGraphTest.class.getResourceAsStream(path)) {
             return objectMapper.readValue(inputStream, FeatureCollection.class);
         }
     }
@@ -105,7 +105,7 @@ class RoutingGraphTest {
         return (float) DurationUtils.toFractionalSeconds(duration);
     }
 
-    private RoutingGraphs createGraphsFromGeoJson(final String path) throws IOException {
+    public static RoutingGraphs createGraphsFromGeoJson(final String path) throws IOException {
         final var featureCollection = readFile(path);
 
         return LinesToRoutingGraphUtil.buildGraph(

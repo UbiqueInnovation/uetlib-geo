@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.9
+
+- Added `Dijkstra` for searching graphs.
+
 ## 1.0.8
 
 - `LinesGraphBuilder` optimized performance when snapping tolerance is 0.
