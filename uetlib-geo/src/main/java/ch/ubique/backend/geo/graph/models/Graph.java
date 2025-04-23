@@ -3,10 +3,14 @@ package ch.ubique.backend.geo.graph.models;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.function.Suppliers;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -58,11 +62,15 @@ public class Graph<V, E> {
     }
 
     public Vertex<V, E> getOrAddVertex(final int vertexId) {
-        return getOrAddVertex(vertexId, null);
+        return getOrAddVertex(vertexId, id -> null);
     }
 
     public Vertex<V, E> getOrAddVertex(final int vertexId, final V properties) {
-        return getOrAddVertex(new Vertex<>(vertexId, properties));
+        return getOrAddVertex(vertexId, id -> properties);
+    }
+
+    public Vertex<V, E> getOrAddVertex(final int vertexId, final IntFunction<V> properties) {
+        return vertices.computeIfAbsent(vertexId, id -> new Vertex<>(id, properties.apply(id)));
     }
 
     public Optional<Edge<V, E>> getEdge(final int u, final int v) {
@@ -93,6 +101,12 @@ public class Graph<V, E> {
         return getEdge(u, v).orElseGet(() -> addDirectedEdge(u, v, properties));
     }
 
+    /** Gets or adds a <strong>directed</strong> edge */
+    public Edge<V, E> getOrAddDirectedEdge(
+            final Vertex<V, E> u, final Vertex<V, E> v, final Supplier<E> properties) {
+        return getEdge(u, v).orElseGet(() -> addDirectedEdge(u, v, properties.get()));
+    }
+
     public Edge<V, E> addDirectedEdge(
             final Vertex<V, E> u, final Vertex<V, E> v, final E properties) {
         final var edge = new Edge<>(u, v, properties);
@@ -117,7 +131,7 @@ public class Graph<V, E> {
 
     /** Gets or adds a <strong>directed</strong> edge */
     public Edge<V, E> getOrAddDirectedEdge(final Vertex<V, E> u, final Vertex<V, E> v) {
-        return getOrAddDirectedEdge(u, v, null);
+        return getOrAddDirectedEdge(u, v, Suppliers.nul());
     }
 
     /** Gets or adds a <strong>directed</strong> edge */
