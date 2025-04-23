@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.10
+
+- Added `RoutingGraphTileParser` for creating routing graphs directly from protobuf files.
+
 ## 1.0.9
 
 - Added `Dijkstra` for searching graphs.
