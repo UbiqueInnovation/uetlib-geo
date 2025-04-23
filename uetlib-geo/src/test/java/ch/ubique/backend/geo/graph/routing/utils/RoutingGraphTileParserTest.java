@@ -6,6 +6,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile;
 
+import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
+import ch.ubique.backend.geo.tile.common.models.TileInfo;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -31,7 +34,8 @@ class RoutingGraphTileParserTest {
         assertThat(tile).isNotNull();
         assertThat(tile.getVerticesCount()).isGreaterThan(2_000);
         assertThat(tile.getCoordinatesCount()).isGreaterThan(tile.getVerticesCount());
-        final var graphs = new RoutingGraphTileParser().parse(tile).graphs();
+        final var graphs =
+                new RoutingGraphTileParser().parse(tile, tileInfoFromName(file)).graphs();
         assertThat(graphs.completeGraph()).isNotNull();
         assertThat(graphs.routingGraph()).isNotNull();
         assertThat(graphs.completeGraph().getVertices())
@@ -53,7 +57,7 @@ class RoutingGraphTileParserTest {
             assertThat(resource).isNotNull();
             final var tile = RoutingGraphTile.parseFrom(new GZIPInputStream(resource));
             assertThat(tile).isNotNull();
-            parser.parse(tile);
+            parser.parse(tile, tileInfoFromName(file));
         }
         final var graphs = parser.graphs();
         assertThat(graphs.completeGraph()).isNotNull();
@@ -62,5 +66,16 @@ class RoutingGraphTileParserTest {
         assertThat(graphs.routingGraph().getVertices()).hasSize(11_037);
         assertThat(computeComponents(graphs.completeGraph()))
                 .hasSizeGreaterThanOrEqualTo(computeComponents(graphs.routingGraph()).size());
+    }
+
+    private static final Pattern PATTERN = Pattern.compile(".*_(\\d+)_(\\d+)_(\\d+).*");
+
+    public static TileInfo tileInfoFromName(final String filename) {
+        final var matcher = PATTERN.matcher(filename);
+        assertThat(matcher.matches()).isTrue();
+        final var zoom = Integer.parseInt(matcher.group(1));
+        final var x = Integer.parseInt(matcher.group(2));
+        final var y = Integer.parseInt(matcher.group(3));
+        return SwissConstants.swissTileDefinition().tileInfo(x, y, zoom);
     }
 }

@@ -9,8 +9,10 @@ import ch.ubique.backend.geo.graph.routing.models.Weight;
 import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile;
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile.VertexCoordinate;
+import ch.ubique.backend.geo.tile.common.models.TileInfo;
 
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,10 +31,12 @@ public class RoutingGraphTileParser {
         return graphs;
     }
 
-    public RoutingGraphTileParser parse(final RoutingGraphTile tile) {
+    public RoutingGraphTileParser parse(final RoutingGraphTile tile, final TileInfo tileInfo) {
+        final var envelope = tileInfo.envelope();
         for (var i = 0; i < tile.getCoordinatesCount(); i++) {
             final var coordinate = tile.getCoordinates(i);
-            coordinates.computeIfAbsent(coordinate.getIdentifier(), id -> toJts(coordinate));
+            coordinates.computeIfAbsent(
+                    coordinate.getIdentifier(), id -> parseCoordinate(coordinate, envelope));
         }
 
         for (var i = 0; i < tile.getVerticesCount(); i++) {
@@ -86,11 +90,11 @@ public class RoutingGraphTileParser {
         return new RoutingGraphVertexProperties(requireNonNull(coordinates.get(id)), isHighway);
     }
 
-    private Coordinate toJts(final VertexCoordinate coordinate) {
+    private Coordinate parseCoordinate(final VertexCoordinate coordinate, final Envelope envelope) {
         requireNonNull(coordinate);
         return new Coordinate(
-                coordinate.getX(),
-                coordinate.getY(),
+                coordinate.getX() + envelope.getMinX(),
+                coordinate.getY() + envelope.getMaxY(),
                 coordinate.hasElevation() ? coordinate.getElevation() : Coordinate.NULL_ORDINATE);
     }
 }
