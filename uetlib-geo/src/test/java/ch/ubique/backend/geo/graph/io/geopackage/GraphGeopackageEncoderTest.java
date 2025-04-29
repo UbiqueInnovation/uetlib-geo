@@ -10,6 +10,7 @@ import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile;
 import ch.ubique.backend.geo.graph.routing.utils.RoutingGraphTileParser;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -28,11 +29,13 @@ class GraphGeopackageEncoderTest {
                         .parse(tile, SwissConstants.swissTileDefinition().tileInfo(30, 90, 20))
                         .graphs();
 
-        try (final var encoder = new GraphGeopackageEncoder<>(this::getCoordinate, LV95)) {
-            encoder.encode(graphs.completeGraph());
-            assertThat(encoder.geoPackage()).isNotNull();
-            assertThat(encoder.file()).exists();
-            System.out.println(encoder.file().getAbsolutePath());
+        for (final var graph : List.of(graphs.completeGraph(), graphs.routingGraph())) {
+            try (final var encoder = new GraphGeopackageEncoder<>(this::getCoordinate, LV95)) {
+                encoder.encode(graph);
+                assertThat(encoder.geoPackage()).isNotNull();
+                assertThat(encoder.file()).exists();
+                System.out.println(encoder.file().getAbsolutePath());
+            }
         }
     }
 
