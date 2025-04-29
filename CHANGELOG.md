@@ -2,6 +2,8 @@
 
 ## 1.0.10
 
+- Added `GraphGeopackageEncoder` for writing graphs to GeoPackage.
+  Can be useful for visualizing with with e.g. QGIS.
 - Added `RoutingGraphTileParser` for creating routing graphs directly from protobuf files.
 
 ## 1.0.9
