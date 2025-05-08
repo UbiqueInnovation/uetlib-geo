@@ -4,13 +4,19 @@ import static ch.ubique.backend.geo.coordinate.constants.CoordinateSystems.LV95;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile;
 import ch.ubique.backend.geo.graph.routing.utils.RoutingGraphTileParser;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -39,6 +45,37 @@ class GraphGeopackageEncoderTest {
         }
         final var graphs = parser.graphs();
 
+        toGeoPackage(graphs);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"47.337571,7.835650", "47.375705, 8.543627"})
+    void testSwitzerlandMobilityAroundCoordinate(final double lat, final double lon)
+            throws IOException {
+        final var wgs84Coordinate = new WGS84Coordinate(lat, lon);
+        final var coordinate = JtsConverter.LV95.transform(wgs84Coordinate).toJts();
+        final var tileInfoMaybe =
+                SwissConstants.swissTileDefinition()
+                        .tileInfos(21)
+                        .filter(tileInfo -> tileInfo.envelope().contains(coordinate))
+                        .findFirst();
+        assertThat(tileInfoMaybe).isPresent();
+        final var tileInfo = tileInfoMaybe.get();
+        assertThat(tileInfo.envelope().contains(coordinate)).isTrue();
+
+        final var path =
+                "https://routing-fixture.example.invalid/"
+                        + "chmob/vectortiles/graph/2025-03-18/complete/wander/"
+                        + tileInfo.path();
+
+        try (final var inputStream = URI.create(path).toURL().openStream()) {
+            final var tile = RoutingGraphTile.parseFrom(inputStream);
+            final var graphs = new RoutingGraphTileParser().parse(tile, tileInfo).graphs();
+            toGeoPackage(graphs);
+        }
+    }
+
+    private static void toGeoPackage(final RoutingGraphs graphs) throws IOException {
         try (final var encoder = new RoutingGraphGeopackageEncoder<>(LV95)) {
             encoder.encode(graphs);
             assertThat(encoder.geoPackage()).isNotNull();
