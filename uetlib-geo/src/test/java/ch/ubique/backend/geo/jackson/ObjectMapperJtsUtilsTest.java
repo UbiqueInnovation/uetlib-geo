@@ -24,13 +24,6 @@ class ObjectMapperJtsUtilsTest {
         return Resources.toString(url, StandardCharsets.UTF_8);
     }
 
-    private FeatureCollection readResourceFile(final String path, final ObjectMapper objectMapper)
-            throws IOException {
-        try (final var inputStream = getClass().getResourceAsStream(path)) {
-            return objectMapper.readValue(inputStream, FeatureCollection.class);
-        }
-    }
-
     private static Stream<Arguments> provideLv95Parameters() {
         return Stream.of(
                 Arguments.of("furka", 4733, new Coordinate(2690265.32, 1153439.526)),

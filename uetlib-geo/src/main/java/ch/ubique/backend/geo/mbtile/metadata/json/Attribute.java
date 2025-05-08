@@ -12,6 +12,7 @@ import java.util.List;
 @JsonInclude(Include.NON_NULL)
 public class Attribute {
 
+    @SuppressWarnings("java:S1700")
     @JsonProperty("attribute")
     private String attribute;
 

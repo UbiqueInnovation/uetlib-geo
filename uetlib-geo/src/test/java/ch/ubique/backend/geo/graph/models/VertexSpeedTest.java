@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.graph.models;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 import ch.ubique.backend.geo.geojson.models.jts.GenericFeature;
@@ -41,6 +43,8 @@ class VertexSpeedTest {
                         .addLinesWithoutInfo(lines)
                         .createVerticesForIntersections()
                         .build(CoordinateSystems.WGS84);
+        assertThat(graph).isNotNull();
+        assertThat(graph.getVertices()).isNotEmpty();
 
         final var neighborPairs =
                 graph.getVertices().stream()
@@ -61,14 +65,6 @@ class VertexSpeedTest {
         }
         stopWatch.stop();
         logger.info("First took {}", stopWatch.formatTime());
-        stopWatch.reset();
-
-        stopWatch.start();
-        for (final var pair : neighborPairs) {
-            // pair.getLeft().getEdgeToFaster(pair.getRight());
-        }
-        stopWatch.stop();
-        logger.info("Second took {}", stopWatch.formatTime());
         stopWatch.reset();
     }
 

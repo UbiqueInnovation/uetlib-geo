@@ -58,7 +58,9 @@ public final class MbtileHelper {
         dataService.insertReplaceMetadata(MetadataKey.MINZOOM, minZoom);
         dataService.insertReplaceMetadata(MetadataKey.MAXZOOM, maxZoom);
 
-        dataSource.getConnection().commit();
+        try (final var connection = dataSource.getConnection()) {
+            connection.commit();
+        }
         return sqliteDb;
     }
 

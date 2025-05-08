@@ -47,6 +47,11 @@ class CoordinateConverterTest {
         assertTrue(
                 DistanceUtil.calculateDistance(wgs84, JtsConverter.WGS84.transform(webMercator))
                         < WGS84_EPSILON);
+
+        assertTrue(
+                DistanceUtil.calculateDistance(
+                                webMercator, JtsConverter.WEB_MERCATOR.transform(wgs84))
+                        < WEB_MERCATOR_EPSILON);
     }
 
     @Test

@@ -79,6 +79,7 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
         return byteFiles;
     }
 
+    @SuppressWarnings("java:S5443")
     private Collection<SimpleFeature> parseFeatures(final Collection<ByteFile> files)
             throws IOException {
 

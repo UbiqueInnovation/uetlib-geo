@@ -9,16 +9,16 @@ public class FeatureCollectionUtils {
     private FeatureCollectionUtils() {}
 
     public static <
-                    FP extends GenericFeature<P, FP>,
-                    P,
-                    TP extends GenericFeatureCollection<FP, P, TP>,
-                    FR extends GenericFeature<R, FR>,
-                    R,
-                    TR extends GenericFeatureCollection<FR, R, TR>>
-            GenericFeatureCollection<FR, R, TR> map(
-                    final GenericFeatureCollection<FP, P, TP> features,
-                    final Function<FP, FR> mapper) {
-        return new GenericFeatureCollection<FR, R, TR>()
+                    F1 extends GenericFeature<P1, F1>,
+                    P1,
+                    T1 extends GenericFeatureCollection<F1, P1, T1>,
+                    F2 extends GenericFeature<P2, F2>,
+                    P2,
+                    T2 extends GenericFeatureCollection<F2, P2, T2>>
+            GenericFeatureCollection<F2, P2, T2> map(
+                    final GenericFeatureCollection<F1, P1, T1> features,
+                    final Function<F1, F2> mapper) {
+        return new GenericFeatureCollection<F2, P2, T2>()
                 .setFeatures(features.getFeatures().stream().map(mapper).toList());
     }
 }
