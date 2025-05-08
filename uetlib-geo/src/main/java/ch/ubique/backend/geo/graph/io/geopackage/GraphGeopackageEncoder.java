@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.graph.io.geopackage;
 
+import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
 import ch.ubique.backend.core.jackson.ObjectMapperUtils;
@@ -43,6 +44,8 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
     private final GeoPackage geoPackage;
     private final ObjectMapper objectMapper;
 
+    private String layerPrefix;
+
     public GraphGeopackageEncoder(
             final Function<V, C> vertexToCoordinate, final CoordinateSystem<C> coordinateSystem)
             throws IOException {
@@ -73,6 +76,11 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
 
     public File file() {
         return geoPackage.getFile();
+    }
+
+    public GraphGeopackageEncoder<V, C> layerPrefix(final String layerPrefix) {
+        this.layerPrefix = layerPrefix;
+        return this;
     }
 
     private void writeVertices(final Graph<V, ?> graph) throws IOException {
@@ -107,7 +115,7 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
 
     private SimpleFeatureType createVertexFeatureType(final Graph<V, ?> graph) {
         final var featureTypeBuilder = new SimpleFeatureTypeBuilder().crs(coordinateSystem.crs());
-        featureTypeBuilder.setName("vertices");
+        featureTypeBuilder.setName(requireNonNullElse(layerPrefix, "") + "vertices");
         final var attributes = new HashMap<String, Class<?>>();
         attributes.put("geom", Point.class);
         featureTypeBuilder.add("degree", Integer.class);
@@ -133,7 +141,7 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
 
     private SimpleFeatureType createEdgeFeatureType(final Graph<V, ?> graph) {
         final var featureTypeBuilder = new SimpleFeatureTypeBuilder().crs(coordinateSystem.crs());
-        featureTypeBuilder.setName("edges");
+        featureTypeBuilder.setName(requireNonNullElse(layerPrefix, "") + "edges");
 
         final var additionalAttributes =
                 graph.directedEdgesStream()
