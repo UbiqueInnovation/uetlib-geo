@@ -23,7 +23,6 @@ import ch.ubique.backend.geo.utils.duration.HikeDuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
-import java.util.stream.Stream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -51,14 +50,7 @@ public class RoutingGraphTest {
         }
     }
 
-    private static void checkRoutingGraphsValid(final RoutingGraphs graphs, final String name) {
-        GeoJsonUtil.saveGeoJson(
-                Stream.concat(
-                                GeoJsonUtil.routingGraphToFeatures(graphs),
-                                graphs.completeGraph().getVertices().stream()
-                                        .map(GeoJsonUtil::toFeature))
-                        .toList(),
-                name);
+    private static void checkRoutingGraphsValid(final RoutingGraphs graphs) {
 
         assertFalse(graphs.completeGraph().isEmpty());
         assertFalse(graphs.routingGraph().isEmpty());
@@ -127,7 +119,7 @@ public class RoutingGraphTest {
     void testMountainTunnel() throws IOException {
         final var graphs = createGraphsFromGeoJson("/mountain_tunnel.geojson");
 
-        checkRoutingGraphsValid(graphs, "mountain_tunnel");
+        checkRoutingGraphsValid(graphs);
         assertEquals(4, graphs.routingGraph().getVertices().size());
         assertEquals(4, graphs.routingGraph().getDirectedEdges().size());
         assertEquals(2, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
@@ -138,7 +130,7 @@ public class RoutingGraphTest {
     void testMountainTunnelLargerArea() throws IOException {
         final var graphs = createGraphsFromGeoJson("/mountain_tunnel_larger_area.geojson");
 
-        checkRoutingGraphsValid(graphs, "mountain_tunnel_larger_area");
+        checkRoutingGraphsValid(graphs);
         assertEquals(39, graphs.routingGraph().getVertices().size());
         assertEquals(86, graphs.routingGraph().getDirectedEdges().size());
         assertEquals(1, ConnectedComponents.computeComponents(graphs.completeGraph()).size());
@@ -149,7 +141,7 @@ public class RoutingGraphTest {
     @ValueSource(strings = {"hundstock", "furka", "alp_la_schera", "large_example"})
     void testFurka(final String test) throws IOException {
         final var graphs = createGraphsFromGeoJson("/" + test + ".geojson");
-        checkRoutingGraphsValid(graphs, test);
+        checkRoutingGraphsValid(graphs);
     }
 
     @Test
@@ -168,7 +160,7 @@ public class RoutingGraphTest {
             final var graphs =
                     TlmToGraphUtil.buildGraph(paths, (from, to, context) -> weight(from, to));
 
-            checkRoutingGraphsValid(graphs, "switzerland");
+            checkRoutingGraphsValid(graphs);
         }
     }
 
