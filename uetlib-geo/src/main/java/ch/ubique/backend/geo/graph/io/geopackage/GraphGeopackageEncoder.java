@@ -117,6 +117,7 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
         final var featureTypeBuilder = new SimpleFeatureTypeBuilder().crs(coordinateSystem.crs());
         featureTypeBuilder.setName(requireNonNullElse(layerPrefix, "") + "vertices");
         final var attributes = new HashMap<String, Class<?>>();
+        attributes.put("id", Integer.class);
         attributes.put("geom", Point.class);
         featureTypeBuilder.add("degree", Integer.class);
         for (final var vertex : graph.getVertices()) {
@@ -132,6 +133,7 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
             throws IOException {
         final var outFeature = writer.next();
         final var properties = vertex.getProperties();
+        outFeature.setAttribute("id", vertex.getId());
         outFeature.setAttribute("geom", vertexToCoordinate.apply(properties).toJtsPoint());
         outFeature.setAttribute("degree", vertex.degree());
         toMap(properties).forEach(outFeature::setAttribute);
