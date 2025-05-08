@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.tile.processing;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ch.ubique.backend.geo.coordinate.models.BoundingBox;
@@ -48,25 +49,24 @@ class TileSetProcessorTest {
                     () -> generator.executeTask(failingTask(new InterruptedException())));
             assertThrows(
                     IOException.class, () -> generator.executeTask(failingTask(new IOException())));
+            final var notImplementedFailure = failingTask(new NotImplementedException());
             assertThrows(
                     NotImplementedException.class,
-                    () -> generator.executeTask(failingTask(new NotImplementedException())));
-            assertThrows(
-                    CompletionException.class,
-                    () ->
-                            generator.executeTask(
-                                    taskFromRunnable(
-                                            () -> {
-                                                throw new OutOfMemoryError();
-                                            })));
+                    () -> generator.executeTask(notImplementedFailure));
+            final var oomFailure =
+                    taskFromRunnable(
+                            () -> {
+                                throw new OutOfMemoryError();
+                            });
+            assertThrows(CompletionException.class, () -> generator.executeTask(oomFailure));
         }
     }
 
     @Test
-    void replicateSwisstopo() throws IOException {
+    void replicateSwisstopo() {
         final var task = new TestTask();
         try (final var generator = new TileSetProcessor(4)) {
-            generator.executeTask(task);
+            assertDoesNotThrow(() -> generator.executeTask(task));
         }
     }
 
@@ -79,8 +79,11 @@ class TileSetProcessorTest {
                         final var decoded = VectorTileDecoder.decode(tile.bytes());
                         final var optimized = VectorTileOptimizer.optimize(decoded);
                         final var encoded = VectorTileEncoder.encode(optimized);
-                        return new BinaryTile(
-                                tile.info(), TileOutputFormat.PBF, encoded.toByteArray());
+                        final var result =
+                                new BinaryTile(
+                                        tile.info(), TileOutputFormat.PBF, encoded.toByteArray());
+                        assertThat(result.bytes()).hasSizeLessThanOrEqualTo(tile.bytes().length);
+                        return result;
                     }
                 };
         try (final var generator = new TileSetProcessor(4)) {

@@ -26,22 +26,23 @@ public record TmsTile(int zoomLevel, int column, int row, byte[] data) {
         return (int) Math.pow(2, tileInfo.zoomLevel().level()) - tileInfo.y() - 1;
     }
 
+    @SuppressWarnings("java:S6878")
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
 
-        if (!(o instanceof final TmsTile tmsTile)) {
-            return false;
+        //noinspection DeconstructionCanBeUsed
+        if (o instanceof final TmsTile tmsTile) {
+            return new EqualsBuilder()
+                    .append(zoomLevel, tmsTile.zoomLevel)
+                    .append(column, tmsTile.column)
+                    .append(row, tmsTile.row)
+                    .append(data, tmsTile.data)
+                    .isEquals();
         }
-
-        return new EqualsBuilder()
-                .append(zoomLevel, tmsTile.zoomLevel)
-                .append(column, tmsTile.column)
-                .append(row, tmsTile.row)
-                .append(data, tmsTile.data)
-                .isEquals();
+        return false;
     }
 
     @Override

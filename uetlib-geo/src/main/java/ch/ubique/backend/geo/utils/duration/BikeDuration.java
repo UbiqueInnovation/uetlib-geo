@@ -23,34 +23,13 @@ public class BikeDuration {
             return Duration.ZERO;
         }
 
-        final double vh_kmh;
-        if (speed == null) {
-            // Use default speed if input is 0
-            vh_kmh = bikeType == BikeType.MOUNTAIN_BIKE ? 16.0 : 18.0;
-        } else {
-            // Round close values to default speed
-            if (bikeType == BikeType.MOUNTAIN_BIKE && Math.abs((speed - 16.0) / 16.0) < 0.05) {
-                vh_kmh = 16.0;
-            } else if (bikeType != BikeType.MOUNTAIN_BIKE
-                    && Math.abs((speed - 18.0) / 18.0) < 0.05) {
-                vh_kmh = 18.0;
-            } else {
-                vh_kmh = speed;
-            }
-        }
+        final var vh_kmh = vhKmh(speed, bikeType);
 
         // velocity in in m/s
         final var vh = vh_kmh / 3.6;
 
         // compute cw.A (Fahrerhaltung) based on velocity (in km/h)
-        final double cwa;
-        if (vh_kmh <= 10) {
-            cwa = 0.625;
-        } else if (vh_kmh >= 35) {
-            cwa = 0.25;
-        } else {
-            cwa = 0.625 - (vh_kmh - 10.0) * (0.625 - 0.25) / (35.0 - 10.0);
-        }
+        final var cwa = cwa(vh_kmh);
 
         // Constants
         final var p = 1.22601; // Luftdichte
@@ -117,5 +96,31 @@ public class BikeDuration {
         }
 
         return DurationUtils.ofFractionalSeconds(distance / vn);
+    }
+
+    private static double vhKmh(final Double speed, final BikeType bikeType) {
+        final var defaultSpeed = (bikeType == BikeType.MOUNTAIN_BIKE) ? 16.0 : 18.0;
+
+        // Use the default speed if input is null
+        if (speed == null) {
+            return defaultSpeed;
+        }
+
+        // Round close values to the default speed
+        if (Math.abs((speed - defaultSpeed) / defaultSpeed) < 0.05) {
+            return defaultSpeed;
+        }
+
+        return speed;
+    }
+
+    private static double cwa(final double vh_kmh) {
+        if (vh_kmh <= 10) {
+            return 0.625;
+        }
+        if (vh_kmh >= 35) {
+            return 0.25;
+        }
+        return 0.625 - (vh_kmh - 10.0) * (0.625 - 0.25) / (35.0 - 10.0);
     }
 }

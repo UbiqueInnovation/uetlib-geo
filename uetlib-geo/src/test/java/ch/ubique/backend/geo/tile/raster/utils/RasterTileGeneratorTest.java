@@ -17,6 +17,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -28,7 +29,9 @@ import javax.swing.WindowConstants;
 @Disabled("For local testing only")
 class RasterTileGeneratorTest {
 
-    //    @Test
+    private static final Random random = new Random();
+
+    @Test
     void test() {
         final var tileLevelsDefinition = SwissConstants.swissTileDefinition().withMaxLevel(17);
         final var sourceTileSize = 1000;
@@ -146,9 +149,6 @@ class RasterTileGeneratorTest {
     }
 
     private Color randomColor() {
-        return new Color(
-                (int) (Math.random() * 255),
-                (int) (Math.random() * 255),
-                (int) (Math.random() * 255));
+        return new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
     }
 }

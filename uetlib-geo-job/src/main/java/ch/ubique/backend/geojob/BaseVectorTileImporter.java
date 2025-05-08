@@ -54,6 +54,6 @@ public abstract class BaseVectorTileImporter<T> extends BaseInputJob<Collection<
         return JobRunState.DONE;
     }
 
-    @SuppressWarnings("RedundantThrows")
+    @SuppressWarnings({"RedundantThrows", "java:S112"})
     protected void processAdditionalData() throws Exception {}
 }

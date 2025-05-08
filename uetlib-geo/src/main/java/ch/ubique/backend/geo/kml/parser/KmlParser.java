@@ -38,6 +38,7 @@ public class KmlParser {
         return parse(new FileInputStream(path));
     }
 
+    @SuppressWarnings("java:S2755")
     public static KmlDocument parse(final InputStream inputStream) throws IOException {
 
         final List<Placemark> placemarks = new LinkedList<>();
@@ -86,6 +87,7 @@ public class KmlParser {
         }
     }
 
+    @SuppressWarnings("java:S3776")
     private static Placemark parsePlacemark(final XMLStreamReader reader)
             throws XMLStreamException {
         final var placemark = new Placemark();
@@ -225,6 +227,7 @@ public class KmlParser {
         return null;
     }
 
+    @SuppressWarnings("java:S3776")
     private static void addPairToStyleMap(final XMLStreamReader reader, final StyleMap styleMap)
             throws XMLStreamException {
         String key = null;

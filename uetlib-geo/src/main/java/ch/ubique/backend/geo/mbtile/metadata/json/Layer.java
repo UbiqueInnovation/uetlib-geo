@@ -12,6 +12,7 @@ import java.util.List;
 @JsonInclude(Include.NON_NULL)
 public class Layer {
 
+    @SuppressWarnings("java:S1700")
     @JsonProperty("layer")
     private String layer;
 

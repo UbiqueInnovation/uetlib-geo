@@ -35,6 +35,7 @@ public class GeoPackageParser implements AutoCloseable {
     private final GeometryFactory geometryFactory;
     private final File geoPackageTemporaryFile;
 
+    @SuppressWarnings("java:S5443")
     public GeoPackageParser(final InputStream inputStream, final GeometryFactory geometryFactory)
             throws IOException {
         this.geometryFactory = geometryFactory;
@@ -83,6 +84,7 @@ public class GeoPackageParser implements AutoCloseable {
                 .collect(Collectors.toMap(Function.identity(), row::getValue));
     }
 
+    @SuppressWarnings("java:S112")
     private Geometry getJtsGeometry(final FeatureRow row) {
         try {
             final var wkt = GeometryWriter.writeGeometry(row.getGeometry().getGeometry());

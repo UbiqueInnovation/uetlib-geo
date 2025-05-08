@@ -32,6 +32,7 @@ public final class Edge<V, E> {
         return u;
     }
 
+    @SuppressWarnings("java:S4144")
     public Vertex<V, E> getFrom() {
         return u;
     }
@@ -60,6 +61,7 @@ public final class Edge<V, E> {
                 .findFirst();
     }
 
+    @SuppressWarnings("java:S4144")
     public Vertex<V, E> getTo() {
         return v;
     }
