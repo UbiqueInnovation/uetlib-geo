@@ -1,12 +1,9 @@
 # CHANGELOG
 
-## 1.0.11
-
-- Added `OsmParserWithStore` that goes over OSM files in 3 passes and stores coordinates, to later
-  extract geometries for ways and relations.
-
 ## 1.0.10
 
+- Added `OsmParserWithStore` that goes over OSM files in three passes and stores coordinates, to
+  later extract geometries for ways and relations.
 - Added `GraphGeopackageEncoder` and `RoutingGraphGeopackageEncoder` for writing graphs to
   GeoPackage.
   This can be useful for visualizing with e.g., QGIS.
