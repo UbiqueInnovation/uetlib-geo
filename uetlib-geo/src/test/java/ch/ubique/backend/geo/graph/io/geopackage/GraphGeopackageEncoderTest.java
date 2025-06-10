@@ -49,7 +49,11 @@ class GraphGeopackageEncoderTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"47.337571,7.835650", "47.375705, 8.543627"})
+    @CsvSource({
+        "47.337571,7.835650",
+        "47.375705, 8.543627",
+        "46.991919666859474, 9.853818179472947"
+    })
     void testSwitzerlandMobilityAroundCoordinate(final double lat, final double lon)
             throws IOException {
         final var wgs84Coordinate = new WGS84Coordinate(lat, lon);

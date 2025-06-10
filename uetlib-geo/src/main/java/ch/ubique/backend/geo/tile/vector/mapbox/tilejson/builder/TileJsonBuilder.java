@@ -5,12 +5,12 @@ import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.TileJson;
 import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.TileJsonCenter;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.util.Comparator;
 import org.apache.commons.collections4.CollectionUtils;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.List;
