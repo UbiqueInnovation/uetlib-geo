@@ -6,7 +6,6 @@ import ch.ubique.backend.core.jackson.ObjectMapperUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
 
 class CoordinateObjectMapperTest {
