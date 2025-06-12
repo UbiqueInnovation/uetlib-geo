@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.0
+
+### Improvements
+
+- Latest uetlib dependencies with Spring Boot 3.5 support
+
 ## 1.0.10
 
 - Added `OsmParserWithStore` that goes over OSM files in three passes and stores coordinates, to
