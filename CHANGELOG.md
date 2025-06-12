@@ -4,7 +4,7 @@
 
 ### Improvements
 
-- Latest uetlib dependencies with Spring Boot 3.5 support
+- Latest uetlib dependencies
 
 ## 1.0.10
 
