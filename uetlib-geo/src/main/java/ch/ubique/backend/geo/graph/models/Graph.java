@@ -7,10 +7,7 @@ import org.apache.commons.lang3.function.Suppliers;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.function.IntFunction;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Stream;
 
 /**
@@ -254,14 +251,42 @@ public class Graph<V, E> {
      * @param <S> the vertex property type of the mapped graph
      * @param <T> the edge property type of the mapped graph
      * @return A new Graph (filtered and mapped) with the same {@link #graphId} as the old graph
+     * @see #filterAndMap(LongUnaryOperator, Predicate, Function, Predicate, Function)
      */
     public <S, T> Graph<S, T> filterAndMap(
             @Nullable final Predicate<Vertex<V, E>> nullableVertexFilter,
             @NotNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
             @Nullable final Predicate<Edge<V, E>> nullableEdgeFilter,
             @NotNull final Function<Edge<V, E>, T> edgePropertyMapper) {
+        return filterAndMap(
+                i -> i,
+                nullableVertexFilter,
+                vertexPropertyMapper,
+                nullableEdgeFilter,
+                edgePropertyMapper);
+    }
 
-        final var graph = new Graph<S, T>(graphId);
+    /**
+     * @param idMapper function to generate a new id
+     * @param nullableVertexFilter vertices where this predicate evaluates to true are kept. If
+     *     null, no filter is applied.
+     * @param vertexPropertyMapper specifies how vertex properties are transformed.
+     * @param nullableEdgeFilter edges where this predicate evaluates to true are kept. If null, no
+     *     filter is applied.
+     * @param edgePropertyMapper specifies how edge properties are transformed.
+     * @param <S> the vertex property type of the mapped graph
+     * @param <T> the edge property type of the mapped graph
+     * @return A new Graph (filtered and mapped) with the same {@link #graphId} as the old graph
+     * @see #filterAndMap(Predicate, Function, Predicate, Function)
+     */
+    public <S, T> Graph<S, T> filterAndMap(
+            @NotNull final LongUnaryOperator idMapper,
+            @Nullable final Predicate<Vertex<V, E>> nullableVertexFilter,
+            @NotNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
+            @Nullable final Predicate<Edge<V, E>> nullableEdgeFilter,
+            @NotNull final Function<Edge<V, E>, T> edgePropertyMapper) {
+
+        final var graph = new Graph<S, T>(idMapper.applyAsLong(graphId));
 
         final var vertexFilter = Objects.requireNonNullElse(nullableVertexFilter, v -> true);
         final var edgeFilter =
