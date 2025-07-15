@@ -4,9 +4,9 @@ import static java.util.Objects.requireNonNull;
 
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
-import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
-import ch.ubique.backend.geo.graph.routing.models.Weight;
-import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
+import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
+import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
+import ch.ubique.backend.geo.graph.routing.models.RoutingShortcutEdge;
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile;
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile.VertexCoordinate;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
@@ -62,7 +62,7 @@ public class RoutingGraphTileParser {
                     graph.getOrAddVertex(
                             neighbor.getIdentifier(),
                             id -> createProperties(id, neighbor.getIsHighway())),
-                    () -> new Weight(neighbor.getWeight()));
+                    () -> new RoutingCompleteEdge(neighbor.getWeight(), neighbor.getSurfaceType()));
         }
     }
 
@@ -78,7 +78,7 @@ public class RoutingGraphTileParser {
                             neighbor.getIdentifier(),
                             id -> createProperties(id, neighbor.getIsHighway())),
                     () ->
-                            new WeightAndDirection<>(
+                            new RoutingShortcutEdge(
                                     neighbor.getWeight(),
                                     graphs.completeGraph()
                                             .getVertex(neighbor.getDirection())
@@ -86,8 +86,8 @@ public class RoutingGraphTileParser {
         }
     }
 
-    private RoutingGraphVertexProperties createProperties(final int id, final boolean isHighway) {
-        return new RoutingGraphVertexProperties(requireNonNull(coordinates.get(id)), isHighway);
+    private RoutingVertex createProperties(final int id, final boolean isHighway) {
+        return new RoutingVertex(requireNonNull(coordinates.get(id)), isHighway);
     }
 
     private Coordinate parseCoordinate(final VertexCoordinate coordinate, final Envelope envelope) {

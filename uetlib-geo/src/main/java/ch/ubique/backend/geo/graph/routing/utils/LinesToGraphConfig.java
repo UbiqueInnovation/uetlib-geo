@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
+import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
+
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
@@ -7,7 +9,7 @@ import java.util.function.ToDoubleFunction;
 public record LinesToGraphConfig<T>(
         double snapTolerance,
         double verticalSplitThreshold,
-        WeightingFunction<T> weightingFunction,
+        RoutingEdgeFunction<T> routingEdgeFunction,
         ToDoubleFunction<T> snappingPriority,
         ToDoubleFunction<T> edgePriority,
         Predicate<T> isHighway) {
@@ -24,7 +26,7 @@ public record LinesToGraphConfig<T>(
 
         private double snapTolerance;
         private double verticalSplitThreshold;
-        private WeightingFunction<T> weightingFunction;
+        private RoutingEdgeFunction<T> routingEdgeFunction;
         private ToDoubleFunction<T> snappingPriority;
         private ToDoubleFunction<T> edgePriority;
         private Predicate<T> isHighway;
@@ -32,7 +34,8 @@ public record LinesToGraphConfig<T>(
         private LinesToGraphConfigBuilder() {
             snapTolerance = 1;
             verticalSplitThreshold = 50;
-            weightingFunction = (from, to, context) -> (float) from.distance(to);
+            routingEdgeFunction =
+                    (from, to, context) -> new RoutingCompleteEdge((float) from.distance(to), null);
             snappingPriority = t -> 0;
             edgePriority = t -> 0;
             isHighway = t -> false;
@@ -49,9 +52,9 @@ public record LinesToGraphConfig<T>(
             return this;
         }
 
-        public LinesToGraphConfigBuilder<T> weightingFunction(
-                final WeightingFunction<T> weightingFunction) {
-            this.weightingFunction = Objects.requireNonNull(weightingFunction);
+        public LinesToGraphConfigBuilder<T> routingEdgeFunction(
+                final RoutingEdgeFunction<T> routingEdgeFunction) {
+            this.routingEdgeFunction = Objects.requireNonNull(routingEdgeFunction);
             return this;
         }
 
@@ -106,7 +109,7 @@ public record LinesToGraphConfig<T>(
             return new LinesToGraphConfig<>(
                     snapTolerance,
                     verticalSplitThreshold,
-                    weightingFunction,
+                routingEdgeFunction,
                     snappingPriority,
                     edgePriority,
                     isHighway);

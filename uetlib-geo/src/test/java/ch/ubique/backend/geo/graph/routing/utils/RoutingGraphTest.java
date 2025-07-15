@@ -14,6 +14,7 @@ import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
+import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
 import ch.ubique.backend.geo.tlm.SwisstopoTlmParser;
 import ch.ubique.backend.geo.tlm.TlmToGraphUtil;
 import ch.ubique.backend.geo.tlm.models.WegType;
@@ -99,10 +100,10 @@ public class RoutingGraphTest {
         }
     }
 
-    private static float weight(final Coordinate from, final Coordinate to) {
+    private static RoutingCompleteEdge weight(final Coordinate from, final Coordinate to) {
         final var duration =
                 HikeDuration.calculateDuration(from.distance(to), to.getZ() - from.getZ());
-        return (float) DurationUtils.toFractionalSeconds(duration);
+        return new RoutingCompleteEdge((float) DurationUtils.toFractionalSeconds(duration), null);
     }
 
     public static RoutingGraphs createGraphsFromGeoJson(final String path) throws IOException {

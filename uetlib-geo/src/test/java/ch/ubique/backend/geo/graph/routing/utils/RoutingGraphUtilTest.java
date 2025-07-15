@@ -1,12 +1,11 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
-import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
-import ch.ubique.backend.geo.graph.models.properties.CoordinateVertexProperties;
-import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
-import ch.ubique.backend.geo.graph.routing.models.Weight;
+import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
+import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 
+import java.util.Objects;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -14,7 +13,7 @@ import org.locationtech.jts.geom.Coordinate;
 class RoutingGraphUtilTest {
 
     private static void routingGraphTests(
-            final Graph<RoutingGraphVertexProperties, Weight> testGraph) {
+            final Graph<RoutingVertex, RoutingCompleteEdge> testGraph) {
         final var cycles = testGraph.findCycles().size();
         final var routingVerticesByDegree =
                 testGraph.getVertices().stream()
@@ -30,7 +29,7 @@ class RoutingGraphUtilTest {
 
     @Test
     void testSimple() {
-        final var testGraph = new Graph<Coordinate, Weight>();
+        final var testGraph = new Graph<Coordinate, RoutingCompleteEdge>();
 
         testGraph.addVertex(0, new WGS84Coordinate(0, 0).toJts());
         testGraph.addVertex(1, new WGS84Coordinate(0, 1).toJts());
@@ -47,7 +46,7 @@ class RoutingGraphUtilTest {
 
     @Test
     void test() {
-        final var testGraph = new Graph<Coordinate, Weight>();
+        final var testGraph = new Graph<Coordinate, RoutingCompleteEdge>();
 
         testGraph.addVertex(0, new WGS84Coordinate(0, 0).toJts());
         testGraph.addVertex(1, new WGS84Coordinate(0, 1).toJts());
@@ -72,13 +71,20 @@ class RoutingGraphUtilTest {
         routingGraphTests(toRoutingGraph(testGraph));
     }
 
-    private record VertexProperties(WGS84Coordinate coordinate)
-            implements CoordinateVertexProperties<WGS84Coordinate> {}
-
-    private static Graph<RoutingGraphVertexProperties, Weight> toRoutingGraph(
-            final Graph<Coordinate, Weight> testGraph) {
+    private static Graph<RoutingVertex, RoutingCompleteEdge> toRoutingGraph(
+            final Graph<Coordinate, RoutingCompleteEdge> testGraph) {
         return testGraph.map(
-                v -> new RoutingGraphVertexProperties(v.getProperties(), false),
-                Edge::getProperties);
+                v -> new RoutingVertex(v.getProperties(), false),
+                e ->
+                        Objects.requireNonNullElseGet(
+                                e.getProperties(),
+                                () ->
+                                        new RoutingCompleteEdge(
+                                                (float)
+                                                        e.getFrom()
+                                                                .getProperties()
+                                                                .distance(
+                                                                        e.getTo().getProperties()),
+                                                null)));
     }
 }

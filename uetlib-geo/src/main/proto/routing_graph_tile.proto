@@ -28,10 +28,17 @@ message RoutingGraphTile {
     optional float elevation = 4;
   }
 
+  enum SurfaceType {
+    UNKNOWN = 0;
+    HARD = 1;
+    NATURE = 2;
+  }
+
   message Neighbor {
     int32 identifier = 1;
     float weight = 2;
     bool isHighway = 3;
+    optional SurfaceType surfaceType = 4;
   }
 
   message RoutingNeighbor {

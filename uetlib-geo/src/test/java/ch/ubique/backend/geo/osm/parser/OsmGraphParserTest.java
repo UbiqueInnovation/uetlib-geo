@@ -1,7 +1,7 @@
 package ch.ubique.backend.geo.osm.parser;
 
-import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
-import ch.ubique.backend.geo.graph.routing.models.Weight;
+import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
+import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 import ch.ubique.backend.geo.graph.routing.utils.RoutingGraphUtil;
 import ch.ubique.backend.geo.osm.parser.graph.OsmGraphParser;
 import ch.ubique.backend.geo.osm.parser.graph.OsmGraphParserConfig;
@@ -33,16 +33,16 @@ class OsmGraphParserTest {
                     OsmGraphParser.parse(inputStream, config)
                             .map(
                                     v ->
-                                            new RoutingGraphVertexProperties(
+                                            new RoutingVertex(
                                                     v.getProperties().coordinate().toJts(), false),
-                                    e -> new Weight(0));
+                                    e -> new RoutingCompleteEdge(0, null));
 
-            Assertions.assertTrue(graph.getVertices().size() > 0);
-            Assertions.assertTrue(graph.getDirectedEdges().size() > 0);
+            Assertions.assertFalse(graph.getVertices().isEmpty());
+            Assertions.assertFalse(graph.getDirectedEdges().isEmpty());
 
             final var routingGraph = RoutingGraphUtil.createRoutingGraph(graph);
-            Assertions.assertTrue(routingGraph.getVertices().size() > 0);
-            Assertions.assertTrue(routingGraph.getDirectedEdges().size() > 0);
+            Assertions.assertFalse(routingGraph.getVertices().isEmpty());
+            Assertions.assertFalse(routingGraph.getDirectedEdges().isEmpty());
         }
     }
 }

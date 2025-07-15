@@ -1,9 +1,12 @@
 package ch.ubique.backend.geo.tile.vector.encoder;
 
+import static java.util.Objects.requireNonNullElse;
+
 import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.Neighbor;
 import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.RoutingNeighbor;
 import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.Vertex;
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile;
+import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile.SurfaceType;
 import ch.ubique.backend.geo.tile.common.encoder.TileEncoder;
 import ch.ubique.backend.geo.tile.common.models.Tile;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
@@ -113,6 +116,7 @@ public class RoutingGraphVectorTileEncoder implements TileEncoder {
                 .setIdentifier((int) neighbor.id())
                 .setIsHighway(neighbor.isHighway())
                 .setWeight(neighbor.weight())
+                .setSurfaceType(requireNonNullElse(neighbor.surfaceType(), SurfaceType.UNKNOWN))
                 .build();
     }
 

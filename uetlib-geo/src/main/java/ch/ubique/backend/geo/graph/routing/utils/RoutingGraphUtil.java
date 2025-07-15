@@ -3,61 +3,46 @@ package ch.ubique.backend.geo.graph.routing.utils;
 import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
-import ch.ubique.backend.geo.graph.routing.models.Weight;
-import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
+import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
+import ch.ubique.backend.geo.graph.routing.models.RoutingShortcutEdge;
+import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 
-public final class RoutingGraphUtil<V, E> {
+public final class RoutingGraphUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(RoutingGraphUtil.class);
 
-    private final Graph<V, E> inputGraph;
-    private final Graph<V, WeightAndDirection<V, E>> routingGraph;
-    private final Set<Vertex<V, E>> additionalRoutingVertices;
-    private final Function<Edge<V, E>, Float> weightingFunction;
+    private final Graph<RoutingVertex, RoutingCompleteEdge> inputGraph;
+    private final Graph<RoutingVertex, RoutingShortcutEdge> routingGraph;
+    private final Set<Vertex<RoutingVertex, RoutingCompleteEdge>> additionalRoutingVertices;
 
     private RoutingGraphUtil(
-            final Graph<V, E> inputGraph,
-            final Function<Edge<V, E>, Float> weightingFunction,
-            final long graphId) {
+            final Graph<RoutingVertex, RoutingCompleteEdge> inputGraph, final long graphId) {
         this.inputGraph = inputGraph;
-        this.weightingFunction = weightingFunction;
         routingGraph = new Graph<>(graphId);
         additionalRoutingVertices = new HashSet<>();
     }
 
-    public static <S, T> Graph<S, WeightAndDirection<S, T>> createRoutingGraph(
-            final Graph<S, T> graph, final Function<Edge<S, T>, Float> weightingFunction) {
-        return createRoutingGraph(graph, weightingFunction, LongUnaryOperator.identity());
+    public static Graph<RoutingVertex, RoutingShortcutEdge> createRoutingGraph(
+            final Graph<RoutingVertex, RoutingCompleteEdge> graph) {
+        return createRoutingGraph(graph, LongUnaryOperator.identity());
     }
 
-    public static <S> Graph<S, WeightAndDirection<S, Weight>> createRoutingGraph(
-            final Graph<S, Weight> graph) {
-        return createRoutingGraph(
-                graph,
-                e -> Optional.ofNullable(e.getProperties()).map(Weight::weight).orElse(null),
-                LongUnaryOperator.identity());
-    }
-
-    public static <S, T> Graph<S, WeightAndDirection<S, T>> createRoutingGraph(
-            final Graph<S, T> graph,
-            final Function<Edge<S, T>, Float> weightingFunction,
+    public static Graph<RoutingVertex, RoutingShortcutEdge> createRoutingGraph(
+            final Graph<RoutingVertex, RoutingCompleteEdge> graph,
             final LongUnaryOperator graphIdMapper) {
         final var routingGraphUtil =
-                new RoutingGraphUtil<>(
-                        graph, weightingFunction, graphIdMapper.applyAsLong(graph.getGraphId()));
+                new RoutingGraphUtil(graph, graphIdMapper.applyAsLong(graph.getGraphId()));
         return routingGraphUtil.createRoutingGraph();
     }
 
-    private Graph<V, WeightAndDirection<V, E>> createRoutingGraph() {
+    private Graph<RoutingVertex, RoutingShortcutEdge> createRoutingGraph() {
         logger.info("Creating routing graphs");
 
         logger.info("Finding cycles");
@@ -81,25 +66,27 @@ public final class RoutingGraphUtil<V, E> {
         return routingGraph;
     }
 
-    private boolean isRoutingVertex(final Vertex<V, E> vertex) {
+    private boolean isRoutingVertex(final Vertex<RoutingVertex, RoutingCompleteEdge> vertex) {
         return vertex.degree() == 1
                 || vertex.degree() > 2
                 || additionalRoutingVertices.contains(vertex);
     }
 
-    private void addToRoutingGraph(final Vertex<V, E> vertex) {
+    private void addToRoutingGraph(final Vertex<RoutingVertex, RoutingCompleteEdge> vertex) {
         routingGraph.getOrAddVertex(vertex.getId(), vertex.getProperties());
     }
 
-    private void linkRoutingNode(final Vertex<V, E> vertex) {
+    private void linkRoutingNode(final Vertex<RoutingVertex, RoutingCompleteEdge> vertex) {
         for (final var direction : vertex.outgoingEdges()) {
             linkRoutingNodeForNeighbor(vertex, direction);
         }
     }
 
-    private void linkRoutingNodeForNeighbor(final Vertex<V, E> start, final Edge<V, E> direction) {
+    private void linkRoutingNodeForNeighbor(
+            final Vertex<RoutingVertex, RoutingCompleteEdge> start,
+            final Edge<RoutingVertex, RoutingCompleteEdge> direction) {
 
-        final var visitedEdges = new HashSet<Edge<V, E>>();
+        final var visitedEdges = new HashSet<Edge<RoutingVertex, RoutingCompleteEdge>>();
 
         var weight = 0.0f;
 
@@ -110,7 +97,7 @@ public final class RoutingGraphUtil<V, E> {
             current.getTwin().ifPresent(visitedEdges::add);
 
             final var to = current.getOther(from);
-            weight += Optional.of(current).map(weightingFunction).orElse(0.0f);
+            weight += current.getProperties().weight();
 
             // Link routing vertex and return
             if (isRoutingVertex(to)) {
@@ -134,7 +121,7 @@ public final class RoutingGraphUtil<V, E> {
     private void upsertRoutingEdge(
             final int vertexId,
             final int routingNeighborId,
-            final Vertex<V, E> direction,
+            final Vertex<RoutingVertex, RoutingCompleteEdge> direction,
             final float weight) {
 
         // Try to get existing routing edge
@@ -144,14 +131,14 @@ public final class RoutingGraphUtil<V, E> {
             final var existingRoutingEdge = existingRoutingEdgeMaybe.get();
             if (existingRoutingEdge.getProperties().weight() > weight) {
                 // Found a shorter way, update routing properties
-                final var routingProperties = new WeightAndDirection<>(weight, direction);
+                final var routingProperties = new RoutingShortcutEdge(weight, direction);
                 existingRoutingEdge.setProperties(routingProperties);
             }
             return;
         }
 
         // Insert new routing edge
-        final var routingProperties = new WeightAndDirection<>(weight, direction);
+        final var routingProperties = new RoutingShortcutEdge(weight, direction);
         if (vertexId != routingNeighborId) {
             routingGraph.getOrAddDirectedEdge(vertexId, routingNeighborId, routingProperties);
         }
