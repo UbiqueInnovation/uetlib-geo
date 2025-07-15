@@ -5,21 +5,21 @@ import ch.ubique.backend.geo.coordinate.models.Coordinate;
 import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
-import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
-import ch.ubique.backend.geo.graph.routing.models.Weight;
-import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
+import ch.ubique.backend.geo.graph.routing.models.RoutingEdge;
+import ch.ubique.backend.geo.graph.routing.models.RoutingShortcutEdge;
+import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 
-import java.util.HashMap;
 import org.apache.commons.lang3.NotImplementedException;
 import org.geotools.geopkg.GeoPackage;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RoutingGraphGeopackageEncoder<C extends Coordinate> implements AutoCloseable {
 
     private final CoordinateSystem<C> coordinateSystem;
-    private final GraphGeopackageEncoder<RoutingGraphVertexProperties, C> graphGeopackageEncoder;
+    private final GraphGeopackageEncoder<RoutingVertex, C> graphGeopackageEncoder;
 
     public RoutingGraphGeopackageEncoder(final CoordinateSystem<C> coordinateSystem)
             throws IOException {
@@ -41,7 +41,7 @@ public class RoutingGraphGeopackageEncoder<C extends Coordinate> implements Auto
         return graphGeopackageEncoder.geoPackage();
     }
 
-    private C getCoordinate(final RoutingGraphVertexProperties vertexProperties) {
+    private C getCoordinate(final RoutingVertex vertexProperties) {
         return coordinateSystem.fromJts(vertexProperties.coordinate());
     }
 
@@ -50,15 +50,15 @@ public class RoutingGraphGeopackageEncoder<C extends Coordinate> implements Auto
         graphGeopackageEncoder.close();
     }
 
-    private Map<String, Object> edgeProperties(final Edge<RoutingGraphVertexProperties, ?> edge) {
+    private Map<String, Object> edgeProperties(final Edge<RoutingVertex, ?> edge) {
         final var map = new HashMap<>(weightProperties(edge));
-        if (edge.getProperties() instanceof final WeightAndDirection<?, ?> weightAndDirection) {
-            map.put("direction", weightAndDirection.direction().getId());
+        if (edge.getProperties() instanceof final RoutingShortcutEdge routingShortcutEdge) {
+            map.put("direction", routingShortcutEdge.direction().getId());
         }
         return map;
     }
 
-    private Map<String, Object> weightProperties(final Edge<RoutingGraphVertexProperties, ?> edge) {
+    private Map<String, Object> weightProperties(final Edge<RoutingVertex, ?> edge) {
         final var properties = edge.getProperties();
         final var weight = weight(properties);
         final var length = length(edge);
@@ -70,16 +70,13 @@ public class RoutingGraphGeopackageEncoder<C extends Coordinate> implements Auto
     }
 
     private static float weight(final Object properties) {
-        if (properties instanceof Weight(final var weight)) {
-            return weight;
-        }
-        if (properties instanceof WeightAndDirection<?, ?>(final var weight, final var ignored)) {
-            return weight;
+        if (properties instanceof final RoutingEdge routingEdge) {
+            return routingEdge.weight();
         }
         throw new NotImplementedException();
     }
 
-    private static float length(final Edge<RoutingGraphVertexProperties, ?> edge) {
+    private static float length(final Edge<RoutingVertex, ?> edge) {
         return (float)
                 edge.getFrom()
                         .getProperties()

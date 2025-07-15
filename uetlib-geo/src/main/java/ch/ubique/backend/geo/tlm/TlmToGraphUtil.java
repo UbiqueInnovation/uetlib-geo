@@ -4,7 +4,7 @@ import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
 import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
 import ch.ubique.backend.geo.graph.routing.utils.LinesToGraphConfig;
 import ch.ubique.backend.geo.graph.routing.utils.LinesToRoutingGraphUtil;
-import ch.ubique.backend.geo.graph.routing.utils.WeightingFunction;
+import ch.ubique.backend.geo.graph.routing.utils.RoutingEdgeFunction;
 import ch.ubique.backend.geo.tile.vector.models.tlm.TlmPathInfo;
 import ch.ubique.backend.geo.tlm.models.TlmPath;
 import ch.ubique.backend.geo.tlm.models.WegType;
@@ -21,7 +21,7 @@ public final class TlmToGraphUtil {
 
     public static RoutingGraphs buildGraph(
             final Collection<TlmPath> paths,
-            final WeightingFunction<TlmPathInfo> weightingFunction) {
+            final RoutingEdgeFunction<TlmPathInfo> routingEdgeFunction) {
 
         final var relevantPaths =
                 paths.stream()
@@ -32,7 +32,7 @@ public final class TlmToGraphUtil {
         return LinesToRoutingGraphUtil.buildGraphWithInfo(
                 relevantPaths,
                 LinesToGraphConfig.<TlmPathInfo>builder()
-                        .weightingFunction(weightingFunction)
+                        .routingEdgeFunction(routingEdgeFunction)
                         .build());
     }
 }

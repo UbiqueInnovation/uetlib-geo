@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ch.ubique.backend.geo.graph.algorithms.ConnectedComponents;
 import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
 
+import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
 import ch.ubique.backend.geo.utils.GeoJsonUtil;
 import com.pivovarit.function.ThrowingFunction;
 
@@ -20,10 +21,10 @@ import java.util.stream.Stream;
 class LinesToRoutingGraphUtilTest {
     private final LinesToGraphConfig<String> config =
             LinesToGraphConfig.<String>builder()
-                    .weightingFunction(
+                    .routingEdgeFunction(
                             (from, to, info) -> {
                                 Assertions.assertNotNull(info);
-                                return (float) from.distance(to);
+                                return new RoutingCompleteEdge((float) from.distance(to), null);
                             })
                     .build();
 

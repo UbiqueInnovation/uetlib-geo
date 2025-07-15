@@ -9,9 +9,8 @@ import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
-import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
-import ch.ubique.backend.geo.graph.routing.models.Weight;
-import ch.ubique.backend.geo.graph.routing.models.WeightAndDirection;
+import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
+import ch.ubique.backend.geo.graph.routing.models.RoutingShortcutEdge;
 import ch.ubique.backend.geo.jackson.ObjectMapperJtsUtils;
 
 import java.util.Map;
@@ -46,13 +45,13 @@ public class GeoJsonUtil {
     }
 
     public static Feature toFeature(
-            final List<? extends Vertex<RoutingGraphVertexProperties, ?>> path) {
+            final List<? extends Vertex<RoutingVertex, ?>> path) {
         final var geometry =
                 WGS84.geometryFactory()
                         .createLineString(
                                 path.stream()
                                         .map(Vertex::getProperties)
-                                        .map(RoutingGraphVertexProperties::coordinate)
+                                        .map(RoutingVertex::coordinate)
                                         .map(c -> JtsConverter.WGS84.transform(c, LV95.srid()))
                                         .toArray(Coordinate[]::new));
 
@@ -65,7 +64,7 @@ public class GeoJsonUtil {
                 graphs.routingGraph().getDirectedEdges().stream().map(GeoJsonUtil::toFeature));
     }
 
-    public static Feature toFeature(final Vertex<RoutingGraphVertexProperties, ?> vertex) {
+    public static Feature toFeature(final Vertex<RoutingVertex, ?> vertex) {
         final var geometry =
                 JtsConverter.WGS84.transform(
                         LV95.geometryFactory().createPoint(vertex.getProperties().coordinate()));
@@ -76,10 +75,7 @@ public class GeoJsonUtil {
     }
 
     public static Feature toFeature(
-            final Edge<
-                            RoutingGraphVertexProperties,
-                            WeightAndDirection<RoutingGraphVertexProperties, Weight>>
-                    edge) {
+            final Edge<RoutingVertex, RoutingShortcutEdge> edge) {
         final var geometry =
                 JtsConverter.WGS84.transform(
                         LV95.geometryFactory()

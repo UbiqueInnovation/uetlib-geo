@@ -6,8 +6,8 @@ import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
-import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
-import ch.ubique.backend.geo.graph.routing.models.Weight;
+import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
+import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 import ch.ubique.backend.geo.spatial.TypedStrTree;
 import ch.ubique.backend.geo.utils.InterpolationUtils;
 
@@ -30,9 +30,9 @@ public class LinesToGraphUtil<T> {
     private final Collection<LineWithInfo<T>> lines;
     private final LinesToGraphConfig<T> config;
 
-    private final Graph<RoutingGraphVertexProperties, Weight> graph;
+    private final Graph<RoutingVertex, RoutingCompleteEdge> graph;
     private final Snapping3dPointIndex snapping3dPointIndex;
-    private final Map<Coordinate, Vertex<RoutingGraphVertexProperties, Weight>> coordinatesToVertex;
+    private final Map<Coordinate, Vertex<RoutingVertex, RoutingCompleteEdge>> coordinatesToVertex;
 
     private final LineIntersector lineIntersector;
 
@@ -47,7 +47,7 @@ public class LinesToGraphUtil<T> {
         lineIntersector = new RobustLineIntersector();
     }
 
-    public static <S> Graph<RoutingGraphVertexProperties, Weight> buildGraph(
+    public static <S> Graph<RoutingVertex, RoutingCompleteEdge> buildGraph(
             @NotNull final Collection<LineWithInfo<S>> lines,
             @NotNull final LinesToGraphConfig<S> config) {
         final var builder = new LinesToGraphUtil<>(lines, config);
@@ -56,7 +56,7 @@ public class LinesToGraphUtil<T> {
         return builder.graph;
     }
 
-    private static boolean isHighway(final Edge<RoutingGraphVertexProperties, ?> edge) {
+    private static boolean isHighway(final Edge<RoutingVertex, ?> edge) {
         return edge.getU().getProperties().isHighway() && edge.getV().getProperties().isHighway();
     }
 
@@ -102,23 +102,24 @@ public class LinesToGraphUtil<T> {
     }
 
     private void splitEdge(
-            final Edge<RoutingGraphVertexProperties, Weight> edge, final Coordinate coordinate) {
+            final Edge<RoutingVertex, RoutingCompleteEdge> edge, final Coordinate coordinate) {
         final var intersectionVertex = getOrCreateVertex(coordinate, isHighway(edge));
 
         logger.debug("Splitting edge {} at coordinate {}", edge, coordinate);
 
         graph.removeEdge(edge);
 
-        final var weight = edge.getProperties().weight();
+        final var edgeProperties = edge.getProperties();
+        final var weight = edgeProperties.weight();
         final var t = (float) toSegment(edge).projectionFactor(coordinate);
 
-        upsertEdge(edge.getFrom(), intersectionVertex, t * weight);
-        upsertEdge(intersectionVertex, edge.getTo(), (1 - t) * weight);
+        upsertEdge(edge.getFrom(), intersectionVertex, edgeProperties.withWeight(t * weight));
+        upsertEdge(intersectionVertex, edge.getTo(), edgeProperties.withWeight((1 - t) * weight));
     }
 
     private Optional<Coordinate> findIntersection(
-            final Edge<RoutingGraphVertexProperties, Weight> a,
-            final Edge<RoutingGraphVertexProperties, Weight> b) {
+            final Edge<RoutingVertex, RoutingCompleteEdge> a,
+            final Edge<RoutingVertex, RoutingCompleteEdge> b) {
         if (a.hasCommonVertex(b)) {
             return Optional.empty();
         }
@@ -150,8 +151,8 @@ public class LinesToGraphUtil<T> {
     }
 
     private Optional<Coordinate> findIntersectionNearVertex(
-            final Edge<RoutingGraphVertexProperties, Weight> edge,
-            final Vertex<RoutingGraphVertexProperties, Weight> vertex) {
+            final Edge<RoutingVertex, RoutingCompleteEdge> edge,
+            final Vertex<RoutingVertex, RoutingCompleteEdge> vertex) {
 
         final var coordinate = vertex.getProperties().coordinate();
         final var snapTolerance = config.snapTolerance();
@@ -178,23 +179,23 @@ public class LinesToGraphUtil<T> {
         return Optional.of(intersection);
     }
 
-    private LineSegment toSegment(final Edge<RoutingGraphVertexProperties, Weight> edge) {
+    private LineSegment toSegment(final Edge<RoutingVertex, RoutingCompleteEdge> edge) {
         return new LineSegment(
                 edge.getFrom().getProperties().coordinate(),
                 edge.getTo().getProperties().coordinate());
     }
 
     private void upsertEdge(
-            final Vertex<RoutingGraphVertexProperties, Weight> u,
-            final Vertex<RoutingGraphVertexProperties, Weight> v,
+            final Vertex<RoutingVertex, RoutingCompleteEdge> u,
+            final Vertex<RoutingVertex, RoutingCompleteEdge> v,
             final T info) {
         upsertEdge(u, v, weight(u, v, info));
     }
 
     private void upsertEdge(
-            final Vertex<RoutingGraphVertexProperties, Weight> u,
-            final Vertex<RoutingGraphVertexProperties, Weight> v,
-            final float weight) {
+            final Vertex<RoutingVertex, RoutingCompleteEdge> u,
+            final Vertex<RoutingVertex, RoutingCompleteEdge> v,
+            final RoutingCompleteEdge edgeInfo) {
 
         if (u.equals(v)) {
             return;
@@ -203,20 +204,20 @@ public class LinesToGraphUtil<T> {
         graph.getEdge(u, v)
                 .ifPresentOrElse(
                         existing -> {
-                            if (weight < existing.getProperties().weight()) {
-                                existing.setProperties(new Weight(weight));
+                            if (edgeInfo.weight() < existing.getProperties().weight()) {
+                                existing.setProperties(edgeInfo);
                             }
                         },
-                        () -> graph.addDirectedEdge(u, v, new Weight(weight)));
+                        () -> graph.addDirectedEdge(u, v, edgeInfo));
     }
 
-    private Vertex<RoutingGraphVertexProperties, Weight> getOrCreateVertex(
+    private Vertex<RoutingVertex, RoutingCompleteEdge> getOrCreateVertex(
             final Coordinate coordinate, final boolean isHighway) {
 
         final var vertex =
                 coordinatesToVertex.computeIfAbsent(
                         snapping3dPointIndex.snap(coordinate),
-                        c -> graph.createVertex(new RoutingGraphVertexProperties(c, isHighway)));
+                        c -> graph.createVertex(new RoutingVertex(c, isHighway)));
 
         // Make sure isHighway is set, if vertex already existed but with !isHighway
         vertex.setProperties(vertex.getProperties().update(isHighway));
@@ -233,23 +234,23 @@ public class LinesToGraphUtil<T> {
                 .toList();
     }
 
-    private Envelope envelope(final Edge<RoutingGraphVertexProperties, ?> edge) {
+    private Envelope envelope(final Edge<RoutingVertex, ?> edge) {
         return new Envelope(
                 edge.getU().getProperties().coordinate(), edge.getV().getProperties().coordinate());
     }
 
-    private float weight(
-            final Vertex<RoutingGraphVertexProperties, Weight> u,
-            final Vertex<RoutingGraphVertexProperties, Weight> v,
+    private RoutingCompleteEdge weight(
+            final Vertex<RoutingVertex, RoutingCompleteEdge> u,
+            final Vertex<RoutingVertex, RoutingCompleteEdge> v,
             final T info) {
         final var cU = u.getProperties().coordinate();
         final var cV = v.getProperties().coordinate();
-        return config.weightingFunction().computeWeight(cU, cV, info);
+        return config.routingEdgeFunction().toRoutingEdge(cU, cV, info);
     }
 
     private Coordinate intersection(
-            final Edge<RoutingGraphVertexProperties, Weight> a,
-            final Edge<RoutingGraphVertexProperties, Weight> b) {
+            final Edge<RoutingVertex, RoutingCompleteEdge> a,
+            final Edge<RoutingVertex, RoutingCompleteEdge> b) {
         lineIntersector.computeIntersection(
                 a.getFrom().getProperties().coordinate(),
                 a.getTo().getProperties().coordinate(),

@@ -1,7 +1,9 @@
 package ch.ubique.backend.geo.graph.routing.models;
 
+import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile.SurfaceType;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -44,7 +46,12 @@ public interface RoutingGraphTile {
         }
     }
 
-    record Neighbor(long id, boolean isHighway, @NotNull Coordinate coordinate, float weight) {}
+    record Neighbor(
+            long id,
+            boolean isHighway,
+            @NotNull Coordinate coordinate,
+            float weight,
+            @Nullable SurfaceType surfaceType) {}
 
     record RoutingNeighbor(
             long id,
