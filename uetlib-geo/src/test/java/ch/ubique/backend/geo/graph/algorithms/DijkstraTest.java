@@ -10,7 +10,7 @@ import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.models.dijkstra.SearchVertex;
-import ch.ubique.backend.geo.graph.routing.models.RoutingGraphVertexProperties;
+import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 import ch.ubique.backend.geo.utils.GeoJsonUtil;
 
 import org.junit.jupiter.api.Test;
@@ -95,8 +95,8 @@ class DijkstraTest {
         assertEquals(10_304, resultAC.score(), 1);
     }
 
-    private <E> Vertex<RoutingGraphVertexProperties, E> closestVertex(
-            final Graph<RoutingGraphVertexProperties, E> graph, final Coordinate coordinate) {
+    private <E> Vertex<RoutingVertex, E> closestVertex(
+            final Graph<RoutingVertex, E> graph, final Coordinate coordinate) {
         return graph.getVertices().stream()
                 .min(Comparator.comparing(v -> v.getProperties().coordinate().distance(coordinate)))
                 .orElseThrow();

@@ -7,10 +7,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public record WeightAndDirection<V, E>(float weight, @JsonIgnore Vertex<V, E> direction) {
+public record RoutingShortcutEdge(
+        float weight, @JsonIgnore Vertex<RoutingVertex, RoutingCompleteEdge> direction)
+        implements RoutingEdge {
 
-    public WeightAndDirection<V, E> withDirection(final Vertex<V, E> direction) {
-        return new WeightAndDirection<>(weight, direction);
+    public RoutingShortcutEdge withDirection(
+            final Vertex<RoutingVertex, RoutingCompleteEdge> direction) {
+        return new RoutingShortcutEdge(weight, direction);
     }
 
     @JsonProperty("direction")
