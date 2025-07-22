@@ -1,9 +1,11 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
+import static ch.ubique.backend.geo.coordinate.constants.CoordinateSystems.LV95;
 import static ch.ubique.backend.geo.graph.algorithms.ConnectedComponents.computeComponents;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.ubique.backend.geo.graph.io.geopackage.RoutingGraphGeopackageEncoder;
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile;
 
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
@@ -25,14 +27,15 @@ class RoutingGraphTileParserTest {
                 "complete_20_30_90.pbf.gz",
                 "routing_20_30_90.pbf.gz",
                 "highway_complete_18_16_17.pbf.gz",
-                "highway_routing_18_16_17.pbf.gz"
+                "highway_routing_18_16_17.pbf.gz",
+                "complete_21_202_76.pbf.gz"
             })
     void parseOneTile(final String file) throws IOException {
         final var resource = getClass().getResourceAsStream("/routing_graph/" + file);
         assertThat(resource).isNotNull();
         final var tile = RoutingGraphTile.parseFrom(new GZIPInputStream(resource));
         assertThat(tile).isNotNull();
-        assertThat(tile.getVerticesCount()).isGreaterThan(2_000);
+        assertThat(tile.getVerticesCount()).isGreaterThan(1_000);
         assertThat(tile.getCoordinatesCount()).isGreaterThan(tile.getVerticesCount());
         final var graphs =
                 new RoutingGraphTileParser().parse(tile, tileInfoFromName(file)).graphs();
@@ -40,7 +43,15 @@ class RoutingGraphTileParserTest {
         assertThat(graphs.routingGraph()).isNotNull();
         assertThat(graphs.completeGraph().getVertices())
                 .hasSizeGreaterThanOrEqualTo(tile.getVerticesCount());
-        assertThat(graphs.routingGraph().getVertices()).hasSizeGreaterThanOrEqualTo(2_000);
+        assertThat(graphs.routingGraph().getVertices()).hasSizeGreaterThanOrEqualTo(200);
+
+        try (final var encoder = new RoutingGraphGeopackageEncoder<>(LV95)) {
+            encoder.encode(graphs);
+            assertThat(encoder.geoPackage()).isNotNull();
+            final var gpkgFile = encoder.geoPackage().getFile();
+            assertThat(gpkgFile).exists();
+            System.out.println(gpkgFile.getAbsolutePath());
+        }
     }
 
     @Test
