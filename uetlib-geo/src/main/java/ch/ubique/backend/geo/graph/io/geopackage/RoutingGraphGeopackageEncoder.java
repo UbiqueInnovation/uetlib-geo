@@ -5,6 +5,7 @@ import ch.ubique.backend.geo.coordinate.models.Coordinate;
 import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
+import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
 import ch.ubique.backend.geo.graph.routing.models.RoutingEdge;
 import ch.ubique.backend.geo.graph.routing.models.RoutingShortcutEdge;
 import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
@@ -54,6 +55,9 @@ public class RoutingGraphGeopackageEncoder<C extends Coordinate> implements Auto
         final var map = new HashMap<>(weightProperties(edge));
         if (edge.getProperties() instanceof final RoutingShortcutEdge routingShortcutEdge) {
             map.put("direction", routingShortcutEdge.direction().getId());
+        }
+        if (edge.getProperties() instanceof final RoutingCompleteEdge completeEdge) {
+            map.put("surface", completeEdge.surfaceType());
         }
         return map;
     }
