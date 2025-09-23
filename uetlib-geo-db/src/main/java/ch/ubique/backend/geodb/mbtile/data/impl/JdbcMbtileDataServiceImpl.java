@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.core.support.SqlBinaryValue;
+import org.springframework.jdbc.core.support.SqlLobValue;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Types;
@@ -50,7 +51,7 @@ public class JdbcMbtileDataServiceImpl implements MbtileDataService {
                 .addValue("zoom_level", tile.zoomLevel())
                 .addValue("tile_column", tile.column())
                 .addValue("tile_row", tile.row())
-                .addValue("tile_data", new SqlBinaryValue(tile.data()), Types.BLOB);
+                .addValue("tile_data", new SqlBinaryValue(tile.data()));
     }
 
     @Override
