@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 1.1.2
+
+### Improvements
+
+- Added surface type to the routing drawing graph.
+
+## 1.1.1
+
+### Bugfixes
+
+- Creation of MBTiles works again
+
 ## 1.1.0
 
 ### Improvements
