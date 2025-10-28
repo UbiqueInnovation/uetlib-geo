@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.4
+
+### Improvements
+
+- `KmlParser` parses automatically closes linear rings if necessary.
+
 ## 1.1.3
 
 ### Improvements

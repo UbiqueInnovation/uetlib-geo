@@ -16,6 +16,9 @@ class KmlParserTest {
             strings = {
                 "/kml/sample.kml.gz",
                 "/kml/sample2.kml.gz",
+                "/kml/lt.kml.gz",
+                "/kml/macras.kml.gz",
+                "/kml/closed-trails.kml.gz",
                 "/kml/active-obstacles.kml.gz",
                 "/kml/polygon_with_hole.kml.gz"
             })

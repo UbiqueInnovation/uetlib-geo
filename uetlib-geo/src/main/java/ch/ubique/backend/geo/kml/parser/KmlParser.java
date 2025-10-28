@@ -177,7 +177,16 @@ public class KmlParser {
 
     private static LinearRing parseLinearRing(final XMLStreamReader reader)
             throws XMLStreamException {
-        return GEOMETRY_FACTORY.createLinearRing(parseCoordinates(reader));
+        final var coordinates = parseCoordinates(reader);
+        if (coordinates[0].equals2D(coordinates[coordinates.length - 1])) {
+            return GEOMETRY_FACTORY.createLinearRing(coordinates);
+        }
+        // A linear ring must start and end with the same coordinate.
+        // This is not the case here, so we insert the first coordinate at the end.
+        final var closedRing = new Coordinate[coordinates.length + 1];
+        System.arraycopy(coordinates, 0, closedRing, 0, coordinates.length);
+        closedRing[coordinates.length] = coordinates[0];
+        return GEOMETRY_FACTORY.createLinearRing(closedRing);
     }
 
     private static Coordinate[] parseCoordinates(final XMLStreamReader reader)
