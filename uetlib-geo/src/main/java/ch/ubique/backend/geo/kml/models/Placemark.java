@@ -1,10 +1,9 @@
 package ch.ubique.backend.geo.kml.models;
 
-import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
 
-import java.util.ArrayList;
+import org.locationtech.jts.geom.Geometry;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Placemark {
@@ -15,8 +14,7 @@ public class Placemark {
 
     private String styleId;
 
-    // placemarks can have multiple geometries
-    private List<List<LV95Coordinate>> coordinates = new ArrayList<>();
+    private Geometry geometry;
 
     private Map<String, String> extendedData;
 
@@ -40,16 +38,12 @@ public class Placemark {
         this.description = description;
     }
 
-    public List<List<LV95Coordinate>> getCoordinates() {
-        return coordinates;
+    public Geometry getGeometry() {
+        return geometry;
     }
 
-    public void setCoordinates(final List<List<LV95Coordinate>> coordinates) {
-        this.coordinates = coordinates;
-    }
-
-    public void addCoordinates(final List<LV95Coordinate> coordinates) {
-        this.coordinates.add(coordinates);
+    public void setGeometry(final Geometry geometry) {
+        this.geometry = geometry;
     }
 
     public Map<String, String> getExtendedData() {

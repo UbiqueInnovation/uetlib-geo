@@ -1,8 +1,8 @@
 package ch.ubique.backend.geo.kml.parser;
 
-import ch.ubique.backend.geo.coordinate.models.LV95Coordinate;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
-import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 import ch.ubique.backend.geo.kml.models.Icon;
 import ch.ubique.backend.geo.kml.models.ItemStyle;
 import ch.ubique.backend.geo.kml.models.KmlDocument;
@@ -12,16 +12,24 @@ import ch.ubique.backend.geo.kml.models.StyleMap;
 
 import jakarta.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.StringUtils;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Polygon;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -31,6 +39,15 @@ import javax.xml.stream.XMLStreamReader;
 public class KmlParser {
 
     private static final Logger logger = Logger.getLogger(KmlParser.class.getName());
+
+    private static final GeometryFactory GEOMETRY_FACTORY =
+            CoordinateSystems.WGS84.geometryFactory();
+
+    private static final String POINT = "Point";
+    private static final String LINE_STRING = "LineString";
+    private static final String POLYGON = "Polygon";
+    private static final String LINEAR_RING = "LinearRing";
+    private static final String MULTI_GEOMETRY = "MultiGeometry";
 
     private KmlParser() {}
 
@@ -91,75 +108,128 @@ public class KmlParser {
     private static Placemark parsePlacemark(final XMLStreamReader reader)
             throws XMLStreamException {
         final var placemark = new Placemark();
-        var isPolygon = false;
-        while (reader.hasNext()) {
+        while (!isEndElement(reader, "Placemark")) {
             reader.next();
             final var eventType = reader.getEventType();
-            final String elementName;
-            if (eventType == XMLStreamConstants.START_ELEMENT) {
-                elementName = reader.getLocalName();
-                switch (elementName) {
-                    case "name" -> {
-                        placemark.setName(reader.getElementText());
-                        if ("286-TI-40015".equals(placemark.getName())) {
-                            logger.info("debug");
-                        }
-                    }
-                    case "description" -> placemark.setDescription(reader.getElementText());
-                    case "styleUrl" ->
-                            placemark.setStyleId(reader.getElementText().replace("#", ""));
-                    case "coordinates" -> {
-                        final var coordinateList = reader.getElementText();
-                        final var coordinates =
-                                Arrays.stream(coordinateList.split("\\s"))
-                                        .map(String::trim)
-                                        .filter(v -> !v.isEmpty())
-                                        .map(KmlParser::toSwissCoordinate)
-                                        .collect(Collectors.toList());
-                        if (isPolygon && !coordinates.isEmpty()) {
-                            // make sure first and last coordinate are the same. If not, replace
-                            // last with first.
-                            final var first = coordinates.getFirst();
-                            final var last = coordinates.getLast();
-                            if (!first.equals(last)) {
-                                coordinates.set(
-                                        coordinates.size() - 1,
-                                        new LV95Coordinate(
-                                                first.east(), first.north(), first.elevation()));
-                            }
-                        }
-                        placemark.addCoordinates(coordinates);
-                    }
-                    case "SimpleData" -> {
-                        final var key = reader.getAttributeValue(0);
-                        final var value = reader.getElementText();
-                        placemark.getExtendedData().put(key, value);
-                    }
-                    case "Polygon" -> isPolygon = true;
-                    default -> {
-                        /* NO-OP */
-                    }
+            if (eventType != XMLStreamConstants.START_ELEMENT) {
+                continue;
+            }
+            switch (reader.getLocalName()) {
+                case "name" -> placemark.setName(reader.getElementText());
+                case "description" -> placemark.setDescription(reader.getElementText());
+                case "styleUrl" -> placemark.setStyleId(reader.getElementText().replace("#", ""));
+                case POINT, LINE_STRING, LINEAR_RING, POLYGON, MULTI_GEOMETRY ->
+                        placemark.setGeometry(parseGeometry(reader));
+                case "SimpleData" -> {
+                    final var key = reader.getAttributeValue(0);
+                    final var value = reader.getElementText();
+                    placemark.getExtendedData().put(key, value);
                 }
-            } else if (eventType == XMLStreamConstants.END_ELEMENT) {
-                elementName = reader.getLocalName();
-                if ("Placemark".equals(elementName)) {
-                    return placemark;
-                } else if ("Polygon".equals(elementName)) {
-                    isPolygon = false;
+                default -> {
+                    /* NO-OP */
                 }
             }
         }
-        return null;
+        return placemark;
+    }
+
+    private static Geometry parseGeometry(final XMLStreamReader reader) throws XMLStreamException {
+        final var geometryType = reader.getLocalName();
+        final var geometry =
+                switch (geometryType) {
+                    case POINT -> GEOMETRY_FACTORY.createPoint(parseCoordinates(reader)[0]);
+                    case LINE_STRING -> GEOMETRY_FACTORY.createLineString(parseCoordinates(reader));
+                    case LINEAR_RING -> parseLinearRing(reader);
+                    case POLYGON -> parsePolygon(reader);
+                    case MULTI_GEOMETRY -> parseMultiGeometry(reader);
+                    default ->
+                            throw new XMLStreamException(
+                                    "Unexpected geometry tag: " + geometryType);
+                };
+        readUntilEnd(reader, geometryType);
+        return geometry;
+    }
+
+    private static Polygon parsePolygon(final XMLStreamReader reader) throws XMLStreamException {
+        final var rings = new ArrayList<LinearRing>();
+        while (!isEndElement(reader, POLYGON)) {
+            reader.next();
+            if (isStartElement(reader, LINEAR_RING)) {
+                rings.add(parseLinearRing(reader));
+            }
+        }
+        final var outerRing = rings.getFirst();
+        final var innerRings = rings.stream().skip(1).toArray(LinearRing[]::new);
+        return GEOMETRY_FACTORY.createPolygon(outerRing, innerRings);
+    }
+
+    private static GeometryCollection parseMultiGeometry(final XMLStreamReader reader)
+            throws XMLStreamException {
+        final var geometries = new ArrayList<Geometry>();
+        while (!isEndElement(reader, MULTI_GEOMETRY)) {
+            reader.next();
+            if (isStartEvent(reader)) {
+                geometries.add(parseGeometry(reader));
+            }
+        }
+        return JtsUtil.toGeometryCollection(geometries);
+    }
+
+    private static LinearRing parseLinearRing(final XMLStreamReader reader)
+            throws XMLStreamException {
+        return GEOMETRY_FACTORY.createLinearRing(parseCoordinates(reader));
+    }
+
+    private static Coordinate[] parseCoordinates(final XMLStreamReader reader)
+            throws XMLStreamException {
+        while (reader.hasNext()) {
+            reader.next();
+            if (isStartElement(reader, "coordinates")) {
+                return parseCoordinatesText(reader);
+            }
+        }
+        throw new XMLStreamException("No coordinates found.");
+    }
+
+    private static Coordinate[] parseCoordinatesText(final XMLStreamReader reader)
+            throws XMLStreamException {
+        return Arrays.stream(reader.getElementText().split("\\s+"))
+                .filter(StringUtils::isNotBlank)
+                .map(KmlParser::toWgs84Coordinate)
+                .map(WGS84Coordinate::toJts)
+                .toArray(Coordinate[]::new);
+    }
+
+    private static boolean isStartElement(final XMLStreamReader reader, final String elementName) {
+        return reader.getEventType() == XMLStreamConstants.START_ELEMENT
+                && elementName.equals(reader.getLocalName());
+    }
+
+    private static void readUntilEnd(final XMLStreamReader reader, final String elementName)
+            throws XMLStreamException {
+        if (isEndElement(reader, elementName)) {
+            return;
+        }
+        while (reader.hasNext()) {
+            reader.next();
+            if (isEndElement(reader, elementName)) {
+                return;
+            }
+        }
+        throw new XMLStreamException("Unexpected end of file");
+    }
+
+    private static boolean isEndElement(final XMLStreamReader reader, final String elementName) {
+        return reader.getEventType() == XMLStreamConstants.END_ELEMENT
+                && elementName.equals(reader.getLocalName());
     }
 
     private static Style parseStyle(final XMLStreamReader reader) throws XMLStreamException {
         final var style = new Style();
-        while (reader.hasNext()) {
+        while (!isEndElement(reader, "Style")) {
             reader.next();
-            final var eventType = reader.getEventType();
-            final String elementName;
-            if (eventType == XMLStreamConstants.START_ELEMENT) {
-                elementName = reader.getLocalName();
+            if (isStartEvent(reader)) {
+                final var elementName = reader.getLocalName();
                 switch (elementName) {
                     case "IconStyle" -> style.setIconStyle(parseItemStyle(reader, elementName));
                     case "LabelStyle" -> style.setLabelStyle(parseItemStyle(reader, elementName));
@@ -168,26 +238,18 @@ public class KmlParser {
                         /* NO-OP */
                     }
                 }
-            } else if (eventType == XMLStreamConstants.END_ELEMENT) {
-                elementName = reader.getLocalName();
-                if ("Style".equals(elementName)) {
-                    return style;
-                }
             }
         }
-        return null;
+        return style;
     }
 
     private static ItemStyle parseItemStyle(final XMLStreamReader reader, final String endTag)
             throws XMLStreamException {
         final var style = new ItemStyle();
-        while (reader.hasNext()) {
+        while (!isEndElement(reader, endTag)) {
             reader.next();
-            final var eventType = reader.getEventType();
-            final String elementName;
-            if (eventType == XMLStreamConstants.START_ELEMENT) {
-                elementName = reader.getLocalName();
-                switch (elementName) {
+            if (isStartEvent(reader)) {
+                switch (reader.getLocalName()) {
                     case "color" -> style.setColor(reader.getElementText());
                     case "scale" -> style.setScale(Double.parseDouble(reader.getElementText()));
                     case "tileWidth" -> style.setWidth(Double.parseDouble(reader.getElementText()));
@@ -196,35 +258,24 @@ public class KmlParser {
                         /* NO-OP */
                     }
                 }
-            } else if (eventType == XMLStreamConstants.END_ELEMENT) {
-                elementName = reader.getLocalName();
-                if (elementName.equals(endTag)) {
-                    return style;
-                }
             }
         }
-        return null;
+        return style;
+    }
+
+    private static boolean isStartEvent(final XMLStreamReader reader) {
+        return reader.getEventType() == XMLStreamConstants.START_ELEMENT;
     }
 
     private static StyleMap parseStyleMap(final XMLStreamReader reader) throws XMLStreamException {
         final var styleMap = new StyleMap();
-        while (reader.hasNext()) {
+        while (!isEndElement(reader, "StyleMap")) {
             reader.next();
-            final var eventType = reader.getEventType();
-            final String elementName;
-            if (eventType == XMLStreamConstants.START_ELEMENT) {
-                elementName = reader.getLocalName();
-                if ("Pair".equals(elementName)) {
-                    addPairToStyleMap(reader, styleMap);
-                }
-            } else if (eventType == XMLStreamConstants.END_ELEMENT) {
-                elementName = reader.getLocalName();
-                if ("StyleMap".equals(elementName)) {
-                    return styleMap;
-                }
+            if (isStartElement(reader, "Pair")) {
+                addPairToStyleMap(reader, styleMap);
             }
         }
-        return null;
+        return styleMap;
     }
 
     @SuppressWarnings("java:S3776")
@@ -232,52 +283,32 @@ public class KmlParser {
             throws XMLStreamException {
         String key = null;
         String value = null;
-        while (reader.hasNext()) {
+        while (!isEndElement(reader, "Pair")) {
             reader.next();
             final var eventType = reader.getEventType();
-            final String elementName;
             if (eventType == XMLStreamConstants.START_ELEMENT) {
-                elementName = reader.getLocalName();
+                final var elementName = reader.getLocalName();
                 if ("key".equals(elementName)) {
                     key = reader.getElementText();
                 } else if ("styleUrl".equals(elementName)) {
                     value = reader.getElementText().replace("#", "");
                 }
-            } else if (eventType == XMLStreamConstants.END_ELEMENT) {
-                elementName = reader.getLocalName();
-                if ("Pair".equals(elementName)) {
-                    if (key != null && value != null) {
-                        styleMap.getMap().put(key, value);
-                    }
-                    return;
-                }
             }
+        }
+        if (key != null && value != null) {
+            styleMap.getMap().put(key, value);
         }
     }
 
     private static Icon parseIcon(final XMLStreamReader reader) throws XMLStreamException {
         final var icon = new Icon();
-        while (reader.hasNext()) {
+        while (!isEndElement(reader, "Icon")) {
             reader.next();
-            final var eventType = reader.getEventType();
-            final String elementName;
-            if (eventType == XMLStreamConstants.START_ELEMENT) {
-                elementName = reader.getLocalName();
-                if ("href".equals(elementName)) {
-                    icon.setHref(reader.getElementText());
-                }
-            } else if (eventType == XMLStreamConstants.END_ELEMENT) {
-                elementName = reader.getLocalName();
-                if ("Icon".equals(elementName)) {
-                    return icon;
-                }
+            if (isStartElement(reader, "href")) {
+                icon.setHref(reader.getElementText());
             }
         }
-        return null;
-    }
-
-    private static LV95Coordinate toSwissCoordinate(final String value) {
-        return JtsConverter.LV95.transform(toWgs84Coordinate(value));
+        return icon;
     }
 
     @NotNull
