@@ -3,6 +3,8 @@ package ch.ubique.backend.geo.geojson.models.jts;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.locationtech.jts.geom.Geometry;
@@ -73,5 +75,29 @@ public class GenericFeature<P, T extends GenericFeature<P, T>> {
                 .append("properties", properties)
                 .append("geometry", geometry)
                 .toString();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof final GenericFeature<?, ?> that)) return false;
+
+        return new EqualsBuilder()
+                .append(id, that.id)
+                .append(type, that.type)
+                .append(properties, that.properties)
+                .append(geometry, that.geometry)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(id)
+                .append(type)
+                .append(properties)
+                .append(geometry)
+                .toHashCode();
     }
 }

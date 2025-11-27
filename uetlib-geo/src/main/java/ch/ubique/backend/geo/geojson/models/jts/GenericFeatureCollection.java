@@ -2,6 +2,8 @@ package ch.ubique.backend.geo.geojson.models.jts;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -41,5 +43,19 @@ public class GenericFeatureCollection<
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("#features", features.size())
                 .toString();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof final GenericFeatureCollection<?, ?, ?> that)) return false;
+
+        return new EqualsBuilder().append(features, that.features).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(features).toHashCode();
     }
 }
