@@ -79,9 +79,13 @@ public class GenericFeature<P, T extends GenericFeature<P, T>> {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
+        if (this == o) {
+            return true;
+        }
 
-        if (!(o instanceof final GenericFeature<?, ?> that)) return false;
+        if (!(o instanceof final GenericFeature<?, ?> that)) {
+            return false;
+        }
 
         return new EqualsBuilder()
                 .append(id, that.id)
