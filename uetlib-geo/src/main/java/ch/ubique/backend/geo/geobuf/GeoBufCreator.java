@@ -23,10 +23,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -36,24 +33,39 @@ public class GeoBufCreator {
     private static final ObjectMapper objectMapper = ObjectMapperJtsUtils.objectMapperWgs84();
     private static final Logger logger = LoggerFactory.getLogger(GeoBufCreator.class);
 
-    private final int PRECISION;
-    private final long SCALE;
+    private final int precision;
+    private final long scale;
 
     public GeoBufCreator() {
-        this(4);
+        this(6);
     }
 
     public GeoBufCreator(final int precision) {
-        this.PRECISION = precision;
-        this.SCALE = (long) Math.pow(10, PRECISION);
+        this.precision = precision;
+        this.scale = (long) Math.pow(10, this.precision);
+    }
+
+    /**
+     * Infers the number of dimensions from the given FeatureCollection's geometries. May be
+     * expensive on large geometries with many points if only two dimensions are used. Defaults to 2
+     * dimensions if no coordinate with 3 dimensions is found.
+     */
+    public <
+                    P extends Map<String, Object>,
+                    F extends GenericFeature<P, F>,
+                    C extends GenericFeatureCollection<F, P, C>>
+            @NotNull byte[] toGeoBufNative(@NotNull final C featureCollection) {
+        return toGeoBufNative(featureCollection, getDimensions(featureCollection));
     }
 
     public <
                     P extends Map<String, Object>,
                     F extends GenericFeature<P, F>,
                     C extends GenericFeatureCollection<F, P, C>>
-            @NotNull byte[] toGeoBufNative(@NotNull final C featureCollection) {
-        final var geobufBuilder = Data.newBuilder().setPrecision(PRECISION).setDimensions(2);
+            @NotNull byte[] toGeoBufNative(
+                    @NotNull final C featureCollection, final int dimensions) {
+        final var geobufBuilder =
+                Data.newBuilder().setPrecision(precision).setDimensions(dimensions);
         geobufBuilder.addAllKeys(getAllKeys(featureCollection).distinct().toList());
         final var keys = geobufBuilder.getKeysList().stream().toList();
         final var keysMap =
@@ -65,6 +77,15 @@ public class GeoBufCreator {
                 featureCollection.getFeatures().stream().map(toGeoBufFeature(keysMap)).toList());
         geobufBuilder.setFeatureCollection(featureCollectionBuilder);
         return geobufBuilder.build().toByteArray();
+    }
+
+    private int getDimensions(final GenericFeatureCollection<?, ?, ?> featureCollection) {
+        final var anyZ =
+                featureCollection.getFeatures().stream()
+                        .map(GenericFeature::getGeometry)
+                        .flatMap(g -> Arrays.stream((g.getCoordinates())))
+                        .anyMatch(c -> c.z != Coordinate.NULL_ORDINATE);
+        return anyZ ? 3 : 2;
     }
 
     private static <
@@ -252,7 +273,7 @@ public class GeoBufCreator {
     }
 
     private Long deltaEncode(final double coordinateValue) {
-        return Math.round(coordinateValue * SCALE);
+        return Math.round(coordinateValue * scale);
     }
 
     private static Data.Value objectToPbfValue(final Object value) {
@@ -288,8 +309,7 @@ public class GeoBufCreator {
      */
     public static @NotNull byte[] toGeoBufNode(
             @NotNull final GenericFeatureCollection<?, ?, ?> featureCollection) throws IOException {
-        final var tempFileManager = new TempFileManager();
-        try {
+        try (final var tempFileManager = new TempFileManager()) {
             final var geojsonFile =
                     tempFileManager.createTempFile(
                             objectMapper.writeValueAsBytes(featureCollection), ".geojson");
@@ -298,8 +318,6 @@ public class GeoBufCreator {
             try (final var stream = Files.newInputStream(tempFilePath)) {
                 return stream.readAllBytes();
             }
-        } finally {
-            tempFileManager.deleteTempFiles();
         }
     }
 
@@ -357,7 +375,7 @@ public class GeoBufCreator {
             final var process = Runtime.getRuntime().exec(new String[] {"which", "geobuf2json"});
             final var result = process.getInputStream().readAllBytes();
             return result.length > 0;
-        } catch (final IOException _) {
+        } catch (final IOException e) {
             return false;
         }
     }
