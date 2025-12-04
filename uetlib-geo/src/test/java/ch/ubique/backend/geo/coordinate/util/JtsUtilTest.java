@@ -9,16 +9,26 @@ import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineSegment;
 import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Stream;
 
 class JtsUtilTest {
+
+    private final GeometryFactory factory = new GeometryFactory();
+    private final WKTReader reader = new WKTReader(factory);
 
     @Test
     void toJtsMultiPoint() {
@@ -146,5 +156,118 @@ class JtsUtilTest {
 
     private LineSegment s(final Coordinate a, final Coordinate b) {
         return new LineSegment(a, b);
+    }
+
+    @Test
+    void representativeCoordinate_shouldReturnCoordinate_whenPoint() throws ParseException {
+        final var point = (Point) reader.read("POINT (10 20)");
+        final var result = JtsUtil.representativeCoordinate(point);
+        assertEquals(new Coordinate(10, 20), result);
+    }
+
+    @Test
+    void representativeCoordinate_shouldReturnMidpoint_whenLineString() throws ParseException {
+        final var lineString = (LineString) reader.read("LINESTRING (0 0, 10 10)");
+        final var result = JtsUtil.representativeCoordinate(lineString);
+        assertEquals(new Coordinate(5, 5), result);
+    }
+
+    @Test
+    void representativeCoordinate_shouldReturnInsidePoint_whenPolygon() throws ParseException {
+        final var polygon = (Polygon) reader.read("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))");
+        final var result = JtsUtil.representativeCoordinate(polygon);
+
+        assertTrue(polygon.contains(factory.createPoint(result)), "Point should be inside polygon");
+        // MaximumInscribedCircle center for a square is roughly the center
+        assertEquals(5.0, result.x, 0.1);
+        assertEquals(5.0, result.y, 0.1);
+    }
+
+    @Test
+    void representativeCoordinate_shouldReturnCentroid_whenMultiPolygonCentroidIsInside()
+            throws ParseException {
+        // A large square and a tiny disjoint square.
+        // Centroid should be dominated by the large square and fall inside it.
+        final var multiPolygon =
+                (MultiPolygon)
+                        reader.read(
+                                "MULTIPOLYGON (((0 0, 100 0, 100 100, 0 100, 0 0)), ((200 0, 201 0, 201 1, 200 1, 200 0)))");
+
+        final var result = JtsUtil.representativeCoordinate(multiPolygon);
+
+        assertTrue(
+                multiPolygon.contains(factory.createPoint(result)),
+                "Result should be inside one of the polygons");
+        // The centroid of the combined geometry should be inside the large polygon, so it returns
+        // that directly
+        assertTrue(multiPolygon.contains(multiPolygon.getCentroid()));
+        assertEquals(multiPolygon.getCentroid().getCoordinate(), result);
+    }
+
+    @Test
+    void
+    representativeCoordinate_shouldReturnClosestChildRepresentative_whenMultiPolygonCentroidIsOutside()
+                    throws ParseException {
+        // Two squares separated by a gap. Centroid falls in the gap.
+        final var multiPolygon =
+                (MultiPolygon)
+                        reader.read(
+                                "MULTIPOLYGON (((0 0, 10 0, 10 10, 0 10, 0 0)), ((20 0, 30 0, 30 10, 20 10, 20 0)))");
+
+        final var centroid = multiPolygon.getCentroid().getCoordinate(); // Should be at (15, 5)
+        assertFalse(
+                multiPolygon.contains(multiPolygon.getCentroid()),
+                "Centroid should be outside for this test case");
+
+        final var result = JtsUtil.representativeCoordinate(multiPolygon);
+
+        assertTrue(
+                multiPolygon.contains(factory.createPoint(result)),
+                "Result should be inside geometry");
+        // It should pick one of the centers (5,5) or (25,5). Both are distance 10 from (15,5).
+        final var dist = result.distance(centroid);
+        assertEquals(10.0, dist, 0.1);
+    }
+
+    @Test
+    void representativeCoordinate_shouldProjectToSegment_whenMultiLineString()
+            throws ParseException {
+        // Two parallel lines. Centroid is exactly in between at (5, 5).
+        final var multiLineString =
+                (MultiLineString) reader.read("MULTILINESTRING ((0 0, 10 0), (0 10, 10 10))");
+
+        final var result = JtsUtil.representativeCoordinate(multiLineString);
+
+        // It should project (5,5) to either (5,0) or (5,10)
+        assertTrue(
+                multiLineString.distance(factory.createPoint(result)) < 1.0e-9,
+                "Result should be on one of the lines");
+        assertEquals(5.0, result.x, 0.001);
+        assertTrue(Math.abs(result.y - 0.0) < 0.001 || Math.abs(result.y - 10.0) < 0.001);
+    }
+
+    @Test
+    void representativeCoordinate_shouldSelectClosestGeometry_whenGeometryCollection()
+            throws ParseException {
+        // A point at (0,0) and a point at (100,100). Centroid at (50,50).
+        final var collection =
+                (GeometryCollection)
+                        reader.read("GEOMETRYCOLLECTION (POINT (0 0), POINT (100 100))");
+
+        final var result = JtsUtil.representativeCoordinate(collection);
+
+        // Should pick one of the points as they are the representative coords of the children
+        assertTrue(result.equals(new Coordinate(0, 0)) || result.equals(new Coordinate(100, 100)));
+    }
+
+    @Test
+    void representativeCoordinateShouldThrowExceptionWhenGeometryEmpty() throws ParseException {
+        final var empty = reader.read("POINT EMPTY");
+        assertThrows(NoSuchElementException.class, () -> JtsUtil.representativeCoordinate(empty));
+    }
+
+    @Test
+    void representativeCoordinate_shouldThrowException_whenGeometryNull() {
+        assertThrows(NoSuchElementException.class, () -> JtsUtil.representativeCoordinate(null));
     }
 }

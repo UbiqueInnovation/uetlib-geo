@@ -2,6 +2,8 @@ package ch.ubique.backend.geo.coordinate.util;
 
 import static org.locationtech.jts.noding.SegmentStringUtil.extractSegmentStrings;
 
+import static java.util.Comparator.comparing;
+
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
@@ -17,6 +19,7 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.builder.MissingInfoException;
+import org.locationtech.jts.algorithm.construct.MaximumInscribedCircle;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.noding.SegmentStringUtil;
@@ -27,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -451,5 +455,80 @@ public final class JtsUtil {
     public static Geometry toGeometry(
             final Envelope envelope, final CoordinateSystem<?> coordinateSystem) {
         return JTS.toGeometry(envelope, coordinateSystem.geometryFactory());
+    }
+
+    /**
+     * Returns a coordinate in the interior of the geometry that represents the given geometry as
+     * reasonably as possible.
+     */
+    public static Coordinate representativeCoordinate(final Geometry geometry) {
+        if (geometry == null || geometry.isEmpty()) {
+            throw new NoSuchElementException("No/empty geometry provided.");
+        }
+        return switch (geometry) {
+            case final Point point -> point.getCoordinate();
+            case final LineString lineString -> midPoint(lineString);
+            case final Polygon polygon ->
+                    maximumInscribedCircle(polygon).getCenter().getCoordinate();
+            case final GeometryCollection geometryCollection ->
+                    representativeCoordinate(geometryCollection);
+            default -> geometry.getInteriorPoint().getCoordinate();
+        };
+    }
+
+    private static Coordinate representativeCoordinate(
+            final GeometryCollection geometryCollection) {
+        final var centroid = geometryCollection.getCentroid();
+        final var centroidCoordinate = centroid.getCoordinate();
+
+        // Shortcut if centroid already in multi polygon
+        if (geometryCollection instanceof MultiPolygon && geometryCollection.contains(centroid)) {
+            return centroidCoordinate;
+        }
+
+        // Closest projection of centroid to multiline
+        if (geometryCollection instanceof final MultiLineString multiLineString) {
+            return getLinesStream(multiLineString)
+                    .flatMap(JtsUtil::segmentsStream)
+                    .min(comparing(segment -> segment.distance(centroidCoordinate)))
+                    .map(segment -> projectCoordinateToSegment(segment, centroidCoordinate))
+                    .orElseThrow();
+        }
+
+        // Calculate representative coordinates of each child geometry and use the one closest to
+        // the centroid of the geometry collection
+        return flatGeometriesStream(geometryCollection)
+                .filter(Predicate.not(Geometry::isEmpty))
+                .map(JtsUtil::representativeCoordinate)
+                .min(comparing(c -> c.distance(centroidCoordinate)))
+                .orElseThrow();
+    }
+
+    /** Projects the coordinate to the interior of the given segment. */
+    public static Coordinate projectCoordinateToSegment(
+            final LineSegment segment, final Coordinate coordinate) {
+        final var t = Math.clamp(segment.projectionFactor(coordinate), 0, 1);
+        final var p0 = segment.p0;
+        final var p1 = segment.p1;
+        final var coord = new Coordinate();
+        coord.x = p0.x + t * (p1.x - p0.x);
+        coord.y = p0.y + t * (p1.y - p0.y);
+        if (Double.isFinite(p0.getZ()) || Double.isFinite(p1.getZ())) {
+            coord.setZ(p0.getZ() + t * (p1.getZ() - p0.getZ()));
+        }
+        return coord;
+    }
+
+    public static MaximumInscribedCircle maximumInscribedCircle(final Polygon polygon) {
+        final var tolerance = polygon.getEnvelopeInternal().getDiameter() / 100;
+        return maximumInscribedCircle(polygon, tolerance);
+    }
+
+    public static MaximumInscribedCircle maximumInscribedCircle(
+            final Polygon polygon, final double tolerance) {
+        if (polygon == null || polygon.isEmpty()) {
+            throw new NoSuchElementException("No/empty polygon provided.");
+        }
+        return new MaximumInscribedCircle(polygon, tolerance);
     }
 }
