@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.5
+
+### Improvements
+
+- `JtsUtil` now has a `representativeCoordinate(Geometry)` method.`
+
 ## 1.1.4
 
 ### Improvements
