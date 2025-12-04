@@ -14,6 +14,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineSegment;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
@@ -206,7 +207,7 @@ class JtsUtilTest {
 
     @Test
     void
-    representativeCoordinate_shouldReturnClosestChildRepresentative_whenMultiPolygonCentroidIsOutside()
+            representativeCoordinate_shouldReturnClosestChildRepresentative_whenMultiPolygonCentroidIsOutside()
                     throws ParseException {
         // Two squares separated by a gap. Centroid falls in the gap.
         final var multiPolygon =
@@ -269,5 +270,74 @@ class JtsUtilTest {
     @Test
     void representativeCoordinate_shouldThrowException_whenGeometryNull() {
         assertThrows(NoSuchElementException.class, () -> JtsUtil.representativeCoordinate(null));
+    }
+
+    // ... existing code ...
+    @Test
+    void toMultiGeometry_shouldWrapPointInMultiPoint() throws ParseException {
+        final var point = (Point) reader.read("POINT (10 20)");
+
+        final Geometry result = JtsUtil.toMultiGeometry(Stream.of(point));
+
+        assertInstanceOf(MultiPoint.class, result);
+        assertEquals(1, result.getNumGeometries());
+        assertEquals(point, result.getGeometryN(0));
+    }
+
+    @Test
+    void toMultiGeometry_shouldWrapLineStringInMultiLineString() throws ParseException {
+        final var lineString = (LineString) reader.read("LINESTRING (0 0, 10 10)");
+
+        final Geometry result = JtsUtil.toMultiGeometry(Stream.of(lineString, lineString));
+
+        assertInstanceOf(MultiLineString.class, result);
+        assertEquals(2, result.getNumGeometries());
+        assertEquals(lineString, result.getGeometryN(0));
+    }
+
+    @Test
+    void toMultiGeometry_shouldWrapPolygonInMultiPolygon() throws ParseException {
+        final var polygon = (Polygon) reader.read("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))");
+
+        final Geometry result = JtsUtil.toMultiGeometry(Stream.of(polygon, polygon));
+
+        assertInstanceOf(MultiPolygon.class, result);
+        assertEquals(2, result.getNumGeometries());
+        assertEquals(polygon, result.getGeometryN(0));
+    }
+
+    @Test
+    void toMultiGeometry_shouldReturnInput_whenAlreadyMultiPoint() throws ParseException {
+        final var multiPoint = (MultiPoint) reader.read("MULTIPOINT ((10 20), (30 40))");
+
+        final var result = JtsUtil.toMultiGeometry(Stream.of(multiPoint));
+
+        assertEquals(multiPoint, result, "Should return the same instance if already MultiPoint");
+    }
+
+    @Test
+    void toMultiGeometry_shouldReturnInput_whenAlreadyMultiPolygon() throws ParseException {
+        final var multiPolygon =
+                (MultiPolygon) reader.read("MULTIPOLYGON (((0 0, 10 0, 10 10, 0 10, 0 0)))");
+
+        final var result = JtsUtil.toMultiGeometry(Stream.of(multiPolygon));
+
+        assertEquals(
+                multiPolygon, result, "Should return the same instance if already MultiPolygon");
+    }
+
+    @Test
+    void toMultiGeometry_shouldReturnGeometryCollection_whenGeometryCollection()
+            throws ParseException {
+        final var collection =
+                (GeometryCollection)
+                        reader.read("GEOMETRYCOLLECTION (POINT(10 10), LINESTRING(0 0, 10 10))");
+
+        final var result = JtsUtil.toMultiGeometry(Stream.of(collection));
+
+        assertEquals(
+                collection,
+                result,
+                "Should return the same instance if it is a generic GeometryCollection");
     }
 }

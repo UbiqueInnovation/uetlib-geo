@@ -1,10 +1,16 @@
 # CHANGELOG
 
+## 1.1.6
+
+### Improvements
+
+- `JtsUtil` now has a `toMultiGeometry` method.
+
 ## 1.1.5
 
 ### Improvements
 
-- `JtsUtil` now has a `representativeCoordinate(Geometry)` method.`
+- `JtsUtil` now has a `representativeCoordinate(Geometry)` method.
 
 ## 1.1.4
 

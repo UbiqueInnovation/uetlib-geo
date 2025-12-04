@@ -77,6 +77,31 @@ public final class JtsUtil {
         return factoryFromGeometryCollection(array).createMultiPolygon(array);
     }
 
+    /**
+     * Converts a stream of geometries into a MultiGeometry object.
+     *
+     * <ul>
+     *   <li>If all geometries are of the same type (e.g., Point, LineString, Polygon), the method
+     *       creates a corresponding MultiPoint, MultiLineString, or MultiPolygon.
+     *   <li>Otherwise, it creates a generic GeometryCollection.
+     * </ul>
+     */
+    public static GeometryCollection toMultiGeometry(final Stream<Geometry> geometries) {
+        final var array = flattenGeometries(geometries).toArray(Geometry[]::new);
+        final var factory = factoryFromGeometryCollection(array);
+        if (Arrays.stream(array).allMatch(Point.class::isInstance)) {
+            return factory.createMultiPoint(Arrays.copyOf(array, array.length, Point[].class));
+        }
+        if (Arrays.stream(array).allMatch(LineString.class::isInstance)) {
+            return factory.createMultiLineString(
+                    Arrays.copyOf(array, array.length, LineString[].class));
+        }
+        if (Arrays.stream(array).allMatch(Polygon.class::isInstance)) {
+            return factory.createMultiPolygon(Arrays.copyOf(array, array.length, Polygon[].class));
+        }
+        return factory.createGeometryCollection(array);
+    }
+
     @NotNull
     public static GeometryCollection toGeometryCollection(
             @NotNull final Collection<Geometry> geometries) {
