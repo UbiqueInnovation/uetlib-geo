@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.1.7
+
+### Improvements
+
+- Added `parseFeatures` to `ShapefileParser`, that directly parses the features without creating
+  in-memory files. Should be prefered over `ShapefileParser.loadData`.
+
 ## 1.1.6
 
 ### Improvements

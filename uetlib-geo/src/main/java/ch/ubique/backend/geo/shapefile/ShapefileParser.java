@@ -1,6 +1,7 @@
 package ch.ubique.backend.geo.shapefile;
 
 import ch.ubique.backend.core.file.ByteFile;
+import ch.ubique.backend.core.file.temp.TempFileManager;
 import ch.ubique.backend.core.service.DataAndInput;
 import ch.ubique.backend.core.service.InputCollectionLoaderService;
 import ch.ubique.backend.geo.utils.GeotoolsUtils;
@@ -60,9 +61,46 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
     @Override
     public DataAndInput<Collection<SimpleFeature>> loadData() throws IOException {
         final var files = downloadFiles();
-        final var features = parseFeatures(files);
+        final var features = parseFeaturesFromByteFiles(files);
 
         return new DataAndInput<>(features, files);
+    }
+
+    @NotNull
+    public Collection<SimpleFeature> parseFeatures() throws IOException {
+        try (final var tmpFileManager = new TempFileManager()) {
+            final var directory = tmpFileManager.createTempDir();
+            final var files = copyNeededFilesToDirectory(directory);
+            return parseFeaturesFromFiles(files);
+        }
+    }
+
+    private Collection<Path> copyNeededFilesToDirectory(final Path directory) throws IOException {
+        final var filePaths = new ArrayList<Path>();
+        ArchiveEntry zipEntry;
+        while ((zipEntry = zipArchiveInputStream.getNextEntry()) != null) {
+            if (isEntryNeeded(zipEntry)) {
+                final var fileName = Path.of(zipEntry.getName()).getFileName().toString();
+                final var filePath = directory.resolve(fileName);
+                Files.copy(zipArchiveInputStream, filePath);
+                filePaths.add(filePath);
+            }
+        }
+        return filePaths;
+    }
+
+    private boolean isEntryNeeded(final ArchiveEntry zipEntry) {
+        final var name = zipEntry.getName();
+        if (!isRelevant(zipEntry)) {
+            logger.trace("{} is not relevant.", name);
+            return false;
+        }
+        if (includeEntry.test(zipEntry)) {
+            logger.debug("Including {} for parsing.", name);
+            return true;
+        }
+        logger.trace("Ignoring {} for parsing.", name);
+        return false;
     }
 
     private Collection<ByteFile> downloadFiles() throws IOException {
@@ -70,20 +108,18 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
 
         ArchiveEntry zipEntry;
         while ((zipEntry = zipArchiveInputStream.getNextEntry()) != null) {
-            logger.debug("Found zip entry {}", zipEntry);
-            if (includeEntry(zipEntry) && includeEntry.test(zipEntry)) {
+            if (isEntryNeeded(zipEntry)) {
                 byteFiles.add(toByteFile(zipEntry));
-                logger.info("Including entry for parsing {}", zipEntry);
             }
         }
         return byteFiles;
     }
 
     @SuppressWarnings("java:S5443")
-    private Collection<SimpleFeature> parseFeatures(final Collection<ByteFile> files)
+    private Collection<SimpleFeature> parseFeaturesFromByteFiles(final Collection<ByteFile> files)
             throws IOException {
 
-        logger.info("Saving files to temporary directory");
+        logger.debug("Saving files to temporary directory");
         final var tempDir = Files.createTempDirectory("shapefile-parser");
         final var filePaths = new ArrayList<Path>(files.size());
         for (final var file : files) {
@@ -94,8 +130,19 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
                 outStream.write(file.getBytes());
             }
             filePaths.add(filePath);
-            logger.info("Saved {} to temporary directory", file.getFileName());
+            logger.debug("Saved {} to temporary directory", file.getFileName());
         }
+
+        final var features = parseFeaturesFromFiles(filePaths);
+
+        FileUtils.deleteDirectory(tempDir.toFile());
+        logger.debug("Deleted temporary directory");
+
+        return features;
+    }
+
+    private static Collection<SimpleFeature> parseFeaturesFromFiles(
+            final Collection<Path> filePaths) throws IOException {
 
         final var shapeFile =
                 filePaths.stream()
@@ -118,13 +165,10 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
 
         final var features = GeotoolsUtils.stream(featureIterator).toList();
 
-        logger.info("Parsed {} features", features.size());
+        logger.debug("Parsed {} features", features.size());
 
         featureIterator.close();
         dataStore.dispose();
-
-        FileUtils.deleteDirectory(tempDir.toFile());
-        logger.info("Deleted temporary directory");
 
         return features;
     }
@@ -138,7 +182,7 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
                 .setContentType("x-gis/x-shapefile");
     }
 
-    private boolean includeEntry(final ArchiveEntry archiveEntry) {
+    private boolean isRelevant(final ArchiveEntry archiveEntry) {
         final var fileName = archiveEntry.getName();
         return !archiveEntry.isDirectory()
                 && relevantFileExtensions.stream().anyMatch(fileName::endsWith);
