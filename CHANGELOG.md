@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.9
+
+### Improvements
+
+- Added `GdbConverter`
+
 ## 1.1.8
 
 ### Improvements
