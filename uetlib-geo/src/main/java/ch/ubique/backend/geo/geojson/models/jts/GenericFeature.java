@@ -18,7 +18,7 @@ public class GenericFeature<P, T extends GenericFeature<P, T>> {
 
     @JsonInclude private String id;
 
-    @JsonInclude private String type;
+    @JsonInclude private String type = "Feature";
 
     @JsonInclude private P properties;
 
