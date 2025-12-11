@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.8
+
+### Improvements
+
+- Added `GeoPackageSqlReader` to read non-geometry data from a GeoPackage.
+
 ## 1.1.7
 
 ### Improvements
