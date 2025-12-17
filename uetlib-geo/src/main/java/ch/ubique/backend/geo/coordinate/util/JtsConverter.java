@@ -8,11 +8,10 @@ import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.models.*;
 import ch.ubique.backend.geo.geojson.models.jts.GenericFeature;
 import ch.ubique.backend.geo.geojson.models.jts.GenericFeatureCollection;
-
 import ch.ubique.backend.geo.utils.transform.JtsTransform;
+
 import jakarta.validation.constraints.NotNull;
 
-import java.util.Objects;
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -27,6 +26,7 @@ import org.locationtech.jts.geom.Coordinate;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -178,7 +178,7 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
 
     /** Transforms the given geometry into the current spatial reference system. */
     public Geometry transform(final Geometry geometry) {
-        return transform(geometry, false);
+        return transform(geometry, true);
     }
 
     /** Transforms the given geometry into the current spatial reference system. */
@@ -193,17 +193,14 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
         try {
             final var withHeight = !Double.isNaN(geometry.getCoordinate().getZ());
 
-            final var bounds =
-                    JTS.toGeometry(coordinateSystem.bounds().transform(getCrs(geometry), false));
-
-            final var geometryWithinBounds =
-                    (ignoreCoordinateSystemBounds || bounds.covers(geometry))
+            final var geometryToTransform =
+                    ignoreCoordinateSystemBounds
                             ? geometry
-                            : geometry.intersection(bounds);
+                            : geometryWithinCoordinateSystemBounds(geometry);
 
-            final var transformedGeometry =
-                    new JtsTransform(findMathTransform(geometry.getSRID(), withHeight))
-                            .transform(geometryWithinBounds);
+            final var jtsTransform =
+                    new JtsTransform(findMathTransform(geometry.getSRID(), withHeight));
+            final var transformedGeometry = jtsTransform.transform(geometryToTransform);
 
             // We need to recreate the geometry, otherwise it has the wrong geometry factory
             return coordinateSystem.geometryFactory().createGeometry(transformedGeometry);
@@ -213,6 +210,15 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
             // rethrow as runtime exception. no way for caller to handle this
             throw new WrappedException(e);
         }
+    }
+
+    private Geometry geometryWithinCoordinateSystemBounds(final Geometry geometry)
+            throws TransformException, FactoryException {
+
+        final var bounds =
+                JTS.toGeometry(coordinateSystem.bounds().transform(getCrs(geometry), false));
+
+        return bounds.covers(geometry) ? geometry : geometry.intersection(bounds);
     }
 
     public C transform(final ch.ubique.backend.geo.coordinate.models.Coordinate coordinate) {
