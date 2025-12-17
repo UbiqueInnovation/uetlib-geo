@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.1.10
+
+### Improvements
+
+- `JtsConverter.transform` now defaults to transforming the geometry without intersecting it with
+  coordinate system boundaries.
+
 ## 1.1.9
 
 ### Improvements
