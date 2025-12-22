@@ -11,8 +11,7 @@ import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nullable;
 
 import org.apache.commons.lang3.exception.UncheckedException;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,7 +24,10 @@ import org.geotools.geopkg.FeatureEntry;
 import org.geotools.geopkg.GeoPackage;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
+
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,8 +36,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoCloseable {
 

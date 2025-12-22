@@ -15,9 +15,8 @@ public class TileJsonBoundsDeserializer extends ValueDeserializer<BoundingBox<WG
 
     @Override
     public BoundingBox<WGS84Coordinate> deserialize(
-            final JsonParser p, final DeserializationContext deserializationContext)
-            throws IOException {
-        final var list = p.<List<Double>>readValueAs(new TypeReference<List<Double>>() {});
+            final JsonParser p, final DeserializationContext deserializationContext) {
+        final var list = p.<List<Double>>readValueAs(new TypeReference<>() {});
         final var left = list.getFirst();
         final var bottom = list.get(1);
         final var right = list.get(2);

@@ -25,7 +25,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
-public class GeoJsonUtil {
+public final class GeoJsonUtil {
+
     public static final Logger logger = LoggerFactory.getLogger(GeoJsonUtil.class);
 
     private GeoJsonUtil() {}

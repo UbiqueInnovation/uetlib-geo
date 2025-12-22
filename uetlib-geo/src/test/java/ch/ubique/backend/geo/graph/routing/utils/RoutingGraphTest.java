@@ -15,6 +15,7 @@ import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphs;
 import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
+import ch.ubique.backend.geo.jackson.jts.JtsModule;
 import ch.ubique.backend.geo.tlm.SwisstopoTlmParser;
 import ch.ubique.backend.geo.tlm.TlmToGraphUtil;
 import ch.ubique.backend.geo.tlm.models.WegType;
@@ -33,7 +34,6 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
-import org.n52.jackson.datatype.jts.JtsModule;
 
 import java.io.IOException;
 import java.net.URI;

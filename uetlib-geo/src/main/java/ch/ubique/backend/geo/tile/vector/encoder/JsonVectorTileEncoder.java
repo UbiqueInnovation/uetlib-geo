@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.tile.vector.encoder;
 
+import ch.ubique.backend.geo.jackson.jts.JtsModule;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 
@@ -8,7 +9,6 @@ import com.pivovarit.function.exception.WrappedException;
 
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.n52.jackson.datatype.jts.JtsModule;
 import tools.jackson.core.JacksonException;
 
 public class JsonVectorTileEncoder extends AbstractVectorTileEncoder {
