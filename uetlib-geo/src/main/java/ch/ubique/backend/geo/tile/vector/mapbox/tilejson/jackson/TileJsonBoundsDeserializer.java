@@ -3,15 +3,15 @@ package ch.ubique.backend.geo.tile.vector.mapbox.tilejson.jackson;
 import ch.ubique.backend.geo.coordinate.models.BoundingBox;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
 import java.io.IOException;
 import java.util.List;
 
-public class TileJsonBoundsDeserializer extends JsonDeserializer<BoundingBox<WGS84Coordinate>> {
+public class TileJsonBoundsDeserializer extends ValueDeserializer<BoundingBox<WGS84Coordinate>> {
 
     @Override
     public BoundingBox<WGS84Coordinate> deserialize(

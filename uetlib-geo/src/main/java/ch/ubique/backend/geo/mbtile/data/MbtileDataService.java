@@ -5,9 +5,9 @@ import ch.ubique.backend.geo.mbtile.metadata.constants.MbtileFormat;
 import ch.ubique.backend.geo.mbtile.metadata.constants.MetadataKey;
 import ch.ubique.backend.geo.mbtile.metadata.json.MetadataJson;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import java.util.List;
+
+import tools.jackson.core.JacksonException;
 
 public interface MbtileDataService {
     void insertReplaceMetadata(MetadataKey key, String value);
@@ -18,7 +18,7 @@ public interface MbtileDataService {
 
     void insertReplaceMetadataFormat(MbtileFormat format);
 
-    void insertReplaceMetadataJson(MetadataJson json) throws JsonProcessingException;
+    void insertReplaceMetadataJson(MetadataJson json) throws JacksonException;
 
     void insertTile(TmsTile tiles);
 

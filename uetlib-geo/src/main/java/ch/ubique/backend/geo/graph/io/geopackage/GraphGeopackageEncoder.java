@@ -11,9 +11,8 @@ import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import org.apache.commons.lang3.exception.UncheckedException;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,6 +25,7 @@ import org.geotools.geopkg.FeatureEntry;
 import org.geotools.geopkg.GeoPackage;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
+import tools.jackson.core.JacksonException;
 
 import java.io.File;
 import java.io.IOException;
@@ -215,7 +215,7 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
     private String serializeWithObjectMapper(final Object object) {
         try {
             return objectMapper.writeValueAsString(object);
-        } catch (final JsonProcessingException e) {
+        } catch (final JacksonException e) {
             throw new UncheckedException(e);
         }
     }

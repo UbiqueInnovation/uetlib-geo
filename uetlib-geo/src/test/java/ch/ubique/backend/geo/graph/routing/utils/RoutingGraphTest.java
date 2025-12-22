@@ -21,8 +21,8 @@ import ch.ubique.backend.geo.tlm.models.WegType;
 import ch.ubique.backend.geo.utils.GeoJsonUtil;
 import ch.ubique.backend.geo.utils.duration.HikeDuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.junit.jupiter.api.Disabled;

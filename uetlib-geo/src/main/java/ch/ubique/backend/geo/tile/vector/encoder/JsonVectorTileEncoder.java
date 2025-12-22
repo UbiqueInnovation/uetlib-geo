@@ -3,14 +3,13 @@ package ch.ubique.backend.geo.tile.vector.encoder;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.databind.ObjectMapper;
 import com.pivovarit.function.exception.WrappedException;
 
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.n52.jackson.datatype.jts.JtsModule;
+import tools.jackson.core.JacksonException;
 
 public class JsonVectorTileEncoder extends AbstractVectorTileEncoder {
 
@@ -22,17 +21,14 @@ public class JsonVectorTileEncoder extends AbstractVectorTileEncoder {
         final var geometryFactory = new GeometryFactory(new PrecisionModel(1), srid);
 
         this.objectMapper =
-                config.objectMapper()
-                        .copy()
-                        .registerModule(new JtsModule(geometryFactory))
-                        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+                config.objectMapper().rebuild().addModule(new JtsModule(geometryFactory)).build();
     }
 
     @Override
     public final byte[] encodeVectorTile(final VectorTile tile) {
         try {
             return objectMapper.writeValueAsBytes(mapToOutputObject(tile));
-        } catch (final JsonProcessingException e) {
+        } catch (final JacksonException e) {
             throw new WrappedException(e);
         }
     }

@@ -6,8 +6,8 @@ import static java.util.Objects.requireNonNullElse;
 
 import ch.ubique.backend.geo.graph.models.Graph;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.validation.constraints.NotNull;
 

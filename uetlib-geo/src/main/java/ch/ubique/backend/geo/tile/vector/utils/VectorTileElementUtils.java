@@ -5,10 +5,9 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElementWithMetadata;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElementWithTags;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +39,7 @@ public final class VectorTileElementUtils {
                 && withMetadata.metadata() != null) {
             try {
                 tags.put("metadata", objectMapper.writeValueAsString(withMetadata.metadata()));
-            } catch (final JsonProcessingException e) {
+            } catch (final JacksonException e) {
                 logger.error("Could not serialize metadata to JSON");
             }
         }
