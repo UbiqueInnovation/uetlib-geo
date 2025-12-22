@@ -1,10 +1,10 @@
 package ch.ubique.backend.geo.geojson.models.jts;
 
+import ch.ubique.backend.geo.jackson.jts.GeometryDeserializer;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 import org.locationtech.jts.geom.*;
-import org.n52.jackson.datatype.jts.GeometryDeserializer;
 
 @JsonDeserialize(contentUsing = GeometryDeserializer.class)
 @JsonSubTypes({

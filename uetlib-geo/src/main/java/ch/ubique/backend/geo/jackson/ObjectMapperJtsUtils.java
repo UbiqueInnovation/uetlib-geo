@@ -3,11 +3,11 @@ package ch.ubique.backend.geo.jackson;
 import ch.ubique.backend.core.jackson.ObjectMapperUtils;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 
+import ch.ubique.backend.geo.jackson.jts.JtsModule;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 import org.locationtech.jts.geom.GeometryFactory;
-import org.n52.jackson.datatype.jts.JtsModule;
 
 import java.util.function.Consumer;
 
