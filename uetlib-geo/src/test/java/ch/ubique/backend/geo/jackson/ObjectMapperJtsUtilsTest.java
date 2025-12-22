@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 
 import org.junit.jupiter.params.ParameterizedTest;

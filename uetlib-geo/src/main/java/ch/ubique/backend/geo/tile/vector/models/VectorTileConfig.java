@@ -9,7 +9,7 @@ import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileGenerator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;

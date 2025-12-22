@@ -6,8 +6,7 @@ import ch.ubique.backend.geo.mbtile.metadata.constants.MbtileFormat;
 import ch.ubique.backend.geo.mbtile.metadata.constants.MetadataKey;
 import ch.ubique.backend.geo.mbtile.metadata.json.MetadataJson;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -15,6 +14,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.core.support.SqlBinaryValue;
 import org.springframework.jdbc.core.support.SqlLobValue;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
 
 import java.sql.Types;
 import java.util.List;
@@ -80,7 +80,7 @@ public class JdbcMbtileDataServiceImpl implements MbtileDataService {
     @Override
     @Transactional
     @SuppressWarnings("java:S6809")
-    public void insertReplaceMetadataJson(final MetadataJson json) throws JsonProcessingException {
+    public void insertReplaceMetadataJson(final MetadataJson json) throws JacksonException {
         insertReplaceMetadata(MetadataKey.JSON, new ObjectMapper().writeValueAsString(json));
     }
 
