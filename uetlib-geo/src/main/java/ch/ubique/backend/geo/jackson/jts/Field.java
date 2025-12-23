@@ -15,24 +15,24 @@
  */
 package ch.ubique.backend.geo.jackson.jts;
 
-/**
- * JSON field names.
- */
-public interface Field {
-    /**
-     * The {@value} field.
-     */
-    String TYPE = "type";
-    /**
-     * The {@value} field.
-     */
-    String GEOMETRIES = "geometries";
-    /**
-     * The {@value} field.
-     */
-    String COORDINATES = "coordinates";
-    /**
-     * The {@value} field.
-     */
-    String BOUNDING_BOX = "bbox";
+/** JSON field names. */
+public enum Field {
+    /** The {@value} field. */
+    TYPE("type"),
+
+    /** The {@value} field. */
+    GEOMETRIES("geometries"),
+
+    /** The {@value} field. */
+    COORDINATES("coordinates");
+
+    private final String value;
+
+    Field(final String value) {
+        this.value = value;
+    }
+
+    public String value() {
+        return value;
+    }
 }

@@ -15,8 +15,6 @@
  */
 package ch.ubique.backend.geo.jackson.jts;
 
-import jakarta.annotation.Nullable;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
@@ -35,10 +33,8 @@ import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ValueSerializer;
 
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.Optional;
 
 /**
  * {@link ValueSerializer} for {@link Geometry}.
@@ -48,32 +44,13 @@ import java.util.Optional;
 public class GeometrySerializer extends ValueSerializer<Geometry> {
     static final int DEFAULT_DECIMAL_PLACES = 8;
     private final NumberFormat decimalFormat;
-    private final IncludeBoundingBox includeBoundingBox;
-
-    /** Creates a new {@link GeometrySerializer}. */
-    public GeometrySerializer() {
-        this(null, DEFAULT_DECIMAL_PLACES);
-    }
 
     /**
      * Creates a new {@link GeometrySerializer}.
      *
-     * @param includeBoundingBox when to include a bounding box for a {@link Geometry}.
-     */
-    public GeometrySerializer(@Nullable final IncludeBoundingBox includeBoundingBox) {
-        this(includeBoundingBox, DEFAULT_DECIMAL_PLACES);
-    }
-
-    /**
-     * Creates a new {@link GeometrySerializer}.
-     *
-     * @param includeBoundingBox when to include a bounding box for a {@link Geometry}.
      * @param decimalPlaces The number of decimal places for encoded coordinates.
      */
-    public GeometrySerializer(
-            @Nullable final IncludeBoundingBox includeBoundingBox, final int decimalPlaces) {
-        this.includeBoundingBox =
-                Optional.ofNullable(includeBoundingBox).orElseGet(IncludeBoundingBox::never);
+    public GeometrySerializer(final int decimalPlaces) {
         if (decimalPlaces < 0) {
             throw new IllegalArgumentException("decimalPlaces < 0");
         }
@@ -81,7 +58,7 @@ public class GeometrySerializer extends ValueSerializer<Geometry> {
     }
 
     private NumberFormat createNumberFormat(final int decimalPlaces) {
-        final var format = DecimalFormat.getInstance(Locale.ROOT);
+        final var format = NumberFormat.getInstance(Locale.ROOT);
         format.setRoundingMode(RoundingMode.HALF_UP);
         format.setMinimumFractionDigits(0);
         format.setMaximumFractionDigits(decimalPlaces);
@@ -102,13 +79,12 @@ public class GeometrySerializer extends ValueSerializer<Geometry> {
             throws JacksonException {
         switch (geometry) {
             case null -> generator.writeNull();
-            case final Polygon polygon -> serialize(polygon, generator, provider);
-            case final Point point -> serialize(point, generator, provider);
-            case final MultiPoint multiPoint -> serialize(multiPoint, generator, provider);
-            case final MultiPolygon multiPolygon -> serialize(multiPolygon, generator, provider);
-            case final LineString lineString -> serialize(lineString, generator, provider);
-            case final MultiLineString multiLineString ->
-                    serialize(multiLineString, generator, provider);
+            case final Polygon polygon -> serialize(polygon, generator);
+            case final Point point -> serialize(point, generator);
+            case final MultiPoint multiPoint -> serialize(multiPoint, generator);
+            case final MultiPolygon multiPolygon -> serialize(multiPolygon, generator);
+            case final LineString lineString -> serialize(lineString, generator);
+            case final MultiLineString multiLineString -> serialize(multiLineString, generator);
             case final GeometryCollection geometryCollection ->
                     serialize(geometryCollection, generator, provider);
             default ->
@@ -126,9 +102,9 @@ public class GeometrySerializer extends ValueSerializer<Geometry> {
             final SerializationContext provider) {
         generator.writeStartObject();
 
-        serializeTypeAndBoundingBox(GeometryType.GEOMETRY_COLLECTION, value, generator);
+        serializeType(GeometryType.GEOMETRY_COLLECTION, generator);
 
-        generator.writeArrayPropertyStart(Field.GEOMETRIES);
+        generator.writeArrayPropertyStart(Field.GEOMETRIES.value());
 
         for (var i = 0; i != value.getNumGeometries(); ++i) {
             serialize(value.getGeometryN(i), generator, provider);
@@ -138,143 +114,103 @@ public class GeometrySerializer extends ValueSerializer<Geometry> {
         generator.writeEndObject();
     }
 
-    private void serialize(
-            final MultiPoint value,
-            final JsonGenerator generator,
-            final SerializationContext provider) {
+    private void serialize(final MultiPoint value, final JsonGenerator generator) {
         generator.writeStartObject();
-        serializeTypeAndBoundingBox(GeometryType.MULTI_POINT, value, generator);
-        generator.writeArrayPropertyStart(Field.COORDINATES);
+        serializeType(GeometryType.MULTI_POINT, generator);
+        generator.writeArrayPropertyStart(Field.COORDINATES.value());
 
         for (var i = 0; i < value.getNumGeometries(); ++i) {
-            serializeCoordinate((Point) value.getGeometryN(i), generator, provider);
+            serializeCoordinate((Point) value.getGeometryN(i), generator);
         }
 
         generator.writeEndArray();
         generator.writeEndObject();
     }
 
-    private void serialize(
-            final MultiLineString value,
-            final JsonGenerator generator,
-            final SerializationContext provider) {
+    private void serialize(final MultiLineString value, final JsonGenerator generator) {
         generator.writeStartObject();
-        serializeTypeAndBoundingBox(GeometryType.MULTI_LINE_STRING, value, generator);
-        generator.writeArrayPropertyStart(Field.COORDINATES);
+        serializeType(GeometryType.MULTI_LINE_STRING, generator);
+        generator.writeArrayPropertyStart(Field.COORDINATES.value());
         for (var i = 0; i < value.getNumGeometries(); ++i) {
-            serializeCoordinates((LineString) value.getGeometryN(i), generator, provider);
+            serializeCoordinates((LineString) value.getGeometryN(i), generator);
         }
         generator.writeEndArray();
         generator.writeEndObject();
     }
 
-    private void serialize(
-            final MultiPolygon value,
-            final JsonGenerator generator,
-            final SerializationContext provider) {
+    private void serialize(final MultiPolygon value, final JsonGenerator generator) {
         generator.writeStartObject();
-        serializeTypeAndBoundingBox(GeometryType.MULTI_POLYGON, value, generator);
-        generator.writeArrayPropertyStart(Field.COORDINATES);
+        serializeType(GeometryType.MULTI_POLYGON, generator);
+        generator.writeArrayPropertyStart(Field.COORDINATES.value());
         for (var i = 0; i < value.getNumGeometries(); ++i) {
-            serializeCoordinates((Polygon) value.getGeometryN(i), generator, provider);
+            serializeCoordinates((Polygon) value.getGeometryN(i), generator);
         }
         generator.writeEndArray();
         generator.writeEndObject();
     }
 
-    private void serialize(
-            final Polygon value,
-            final JsonGenerator generator,
-            final SerializationContext provider) {
+    private void serialize(final Polygon value, final JsonGenerator generator) {
         generator.writeStartObject();
-        serializeTypeAndBoundingBox(GeometryType.POLYGON, value, generator);
-        generator.writeName(Field.COORDINATES);
-        serializeCoordinates(value, generator, provider);
+        serializeType(GeometryType.POLYGON, generator);
+        generator.writeName(Field.COORDINATES.value());
+        serializeCoordinates(value, generator);
         generator.writeEndObject();
     }
 
-    private void serialize(
-            final LineString value,
-            final JsonGenerator generator,
-            final SerializationContext provider) {
+    private void serialize(final LineString value, final JsonGenerator generator) {
         generator.writeStartObject();
-        serializeTypeAndBoundingBox(GeometryType.LINE_STRING, value, generator);
-        generator.writeName(Field.COORDINATES);
-        serializeCoordinates(value, generator, provider);
+        serializeType(GeometryType.LINE_STRING, generator);
+        generator.writeName(Field.COORDINATES.value());
+        serializeCoordinates(value, generator);
         generator.writeEndObject();
     }
 
-    private void serialize(
-            final Point value, final JsonGenerator generator, final SerializationContext provider) {
+    private void serialize(final Point value, final JsonGenerator generator) {
         generator.writeStartObject();
-        serializeTypeAndBoundingBox(GeometryType.POINT, value, generator);
-        generator.writeName(Field.COORDINATES);
-        serializeCoordinate(value, generator, provider);
+        serializeType(GeometryType.POINT, generator);
+        generator.writeName(Field.COORDINATES.value());
+        serializeCoordinate(value, generator);
         generator.writeEndObject();
     }
 
-    private void serializeTypeAndBoundingBox(
-            final GeometryType type, final Geometry geometry, final JsonGenerator generator) {
-
-        generator.writeStringProperty(Field.TYPE, type.toString());
-
-        if (includeBoundingBox.shouldIncludeBoundingBoxFor(type) && !geometry.isEmpty()) {
-            final var envelope = geometry.getEnvelopeInternal();
-            generator.writeArrayPropertyStart(Field.BOUNDING_BOX);
-            generator.writeNumber(envelope.getMinX());
-            generator.writeNumber(envelope.getMinY());
-            generator.writeNumber(envelope.getMaxX());
-            generator.writeNumber(envelope.getMaxY());
-            generator.writeEndArray();
-        }
+    private void serializeType(final GeometryType type, final JsonGenerator generator) {
+        generator.writeStringProperty(Field.TYPE.value(), type.toString());
     }
 
-    private void serializeCoordinates(
-            final Polygon value,
-            final JsonGenerator generator,
-            final SerializationContext provider) {
+    private void serializeCoordinates(final Polygon value, final JsonGenerator generator) {
         generator.writeStartArray();
         if (!value.isEmpty()) {
-            serializeCoordinates(value.getExteriorRing(), generator, provider);
+            serializeCoordinates(value.getExteriorRing(), generator);
 
             for (var i = 0; i < value.getNumInteriorRing(); ++i) {
-                serializeCoordinates(value.getInteriorRingN(i), generator, provider);
+                serializeCoordinates(value.getInteriorRingN(i), generator);
             }
         }
         generator.writeEndArray();
     }
 
-    private void serializeCoordinates(
-            final LineString value,
-            final JsonGenerator generator,
-            final SerializationContext provider) {
-        serializeCoordinates(value.getCoordinateSequence(), generator, provider);
+    private void serializeCoordinates(final LineString value, final JsonGenerator generator) {
+        serializeCoordinates(value.getCoordinateSequence(), generator);
     }
 
     private void serializeCoordinates(
-            final CoordinateSequence value,
-            final JsonGenerator generator,
-            final SerializationContext provider) {
+            final CoordinateSequence value, final JsonGenerator generator) {
         generator.writeStartArray();
         for (var i = 0; i < value.size(); ++i) {
-            serializeCoordinate(value.getCoordinate(i), generator, provider);
+            serializeCoordinate(value.getCoordinate(i), generator);
         }
         generator.writeEndArray();
     }
 
-    private void serializeCoordinate(
-            final Point value, final JsonGenerator generator, final SerializationContext provider) {
-        serializeCoordinate(value.getCoordinate(), generator, provider);
+    private void serializeCoordinate(final Point value, final JsonGenerator generator) {
+        serializeCoordinate(value.getCoordinate(), generator);
     }
 
-    private void serializeCoordinate(
-            final Coordinate value,
-            final JsonGenerator generator,
-            final SerializationContext provider) {
+    private void serializeCoordinate(final Coordinate value, final JsonGenerator generator) {
         generator.writeStartArray();
         generator.writeNumber(decimalFormat.format(value.getX()));
         generator.writeNumber(decimalFormat.format(value.getY()));
-        if (!Double.isNaN(value.getZ()) && Double.isFinite(value.getZ())) {
+        if (Double.isFinite(value.getZ())) {
             generator.writeNumber(decimalFormat.format(value.getZ()));
         }
         generator.writeEndArray();

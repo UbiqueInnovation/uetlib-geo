@@ -48,11 +48,6 @@ public class GeometryDeserializer extends ValueDeserializer<Geometry> {
     private static final GeometryFactory DEFAULT_GEOMETRY_FACTORY = getDefaultGeometryFactory();
     private final GeometryFactory geometryFactory;
 
-    /** Creates a new {@link GeometryDeserializer}. */
-    public GeometryDeserializer() {
-        this(null);
-    }
-
     /**
      * Creates a new {@link GeometryDeserializer}.
      *
@@ -70,7 +65,7 @@ public class GeometryDeserializer extends ValueDeserializer<Geometry> {
 
     private Geometry deserializeGeometry(final JsonNode node, final DeserializationContext context)
             throws DatabindException {
-        final var typeName = node.get(Field.TYPE).asString();
+        final var typeName = node.get(Field.TYPE.value()).asString();
 
         final var type =
                 GeometryType.fromString(typeName)
@@ -94,19 +89,19 @@ public class GeometryDeserializer extends ValueDeserializer<Geometry> {
 
     private Point deserializePoint(final JsonNode node, final DeserializationContext context)
             throws DatabindException {
-        final var coordinates = getArray(node, context, Field.COORDINATES);
+        final var coordinates = getArray(node, context, Field.COORDINATES.value());
         return geometryFactory.createPoint(deserializeCoordinate(coordinates, context));
     }
 
     private Polygon deserializePolygon(final JsonNode node, final DeserializationContext context)
             throws DatabindException {
-        final var coordinates = getArray(node, context, Field.COORDINATES);
+        final var coordinates = getArray(node, context, Field.COORDINATES.value());
         return deserializeLinearRings(coordinates, context);
     }
 
     private MultiPolygon deserializeMultiPolygon(
             final JsonNode node, final DeserializationContext context) throws DatabindException {
-        final var coordinates = getArray(node, context, Field.COORDINATES);
+        final var coordinates = getArray(node, context, Field.COORDINATES.value());
         final var polygons = new Polygon[coordinates.size()];
         for (var i = 0; i != coordinates.size(); ++i) {
             polygons[i] = deserializeLinearRings(coordinates.get(i), context);
@@ -116,14 +111,14 @@ public class GeometryDeserializer extends ValueDeserializer<Geometry> {
 
     private MultiPoint deserializeMultiPoint(
             final JsonNode node, final DeserializationContext context) throws DatabindException {
-        final var coordinates = getArray(node, context, Field.COORDINATES);
+        final var coordinates = getArray(node, context, Field.COORDINATES.value());
         final var coords = deserializeCoordinates(coordinates, context);
         return geometryFactory.createMultiPointFromCoords(coords);
     }
 
     private GeometryCollection deserializeGeometryCollection(
             final JsonNode node, final DeserializationContext context) throws DatabindException {
-        final var geometries = getArray(node, context, Field.GEOMETRIES);
+        final var geometries = getArray(node, context, Field.GEOMETRIES.value());
         final var geom = new Geometry[geometries.size()];
         for (var i = 0; i != geometries.size(); ++i) {
             geom[i] = deserializeGeometry(geometries.get(i), context);
@@ -133,7 +128,7 @@ public class GeometryDeserializer extends ValueDeserializer<Geometry> {
 
     private MultiLineString deserializeMultiLineString(
             final JsonNode node, final DeserializationContext context) throws DatabindException {
-        final var coordinates = getArray(node, context, Field.COORDINATES);
+        final var coordinates = getArray(node, context, Field.COORDINATES.value());
         final var lineStrings = lineStringsFromJson(coordinates, context);
         return geometryFactory.createMultiLineString(lineStrings);
     }
@@ -150,7 +145,7 @@ public class GeometryDeserializer extends ValueDeserializer<Geometry> {
 
     private LineString deserializeLineString(
             final JsonNode node, final DeserializationContext context) throws DatabindException {
-        final var coordinates = getArray(node, context, Field.COORDINATES);
+        final var coordinates = getArray(node, context, Field.COORDINATES.value());
         final var coords = deserializeCoordinates(coordinates, context);
         return geometryFactory.createLineString(coords);
     }
