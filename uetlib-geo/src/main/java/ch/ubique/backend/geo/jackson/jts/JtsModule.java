@@ -27,12 +27,13 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 
+import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.ValueSerializer;
 import tools.jackson.databind.module.SimpleModule;
 
 /**
- * {@link com.fasterxml.jackson.databind.Module} to add serialization for JTS geometries.
+ * {@link JacksonModule} to add serialization for JTS geometries.
  *
  * @author Christian Autermann
  */
@@ -52,7 +53,7 @@ public class JtsModule extends SimpleModule {
      *
      * @param decimalPlaces The number of decimal places for encoded coordinates.
      */
-    public JtsModule(int decimalPlaces) {
+    public JtsModule(final int decimalPlaces) {
         this(null, null, decimalPlaces);
     }
 
@@ -61,7 +62,7 @@ public class JtsModule extends SimpleModule {
      *
      * @param geometryFactory The {@link GeometryFactory} to use to construct geometries.
      */
-    public JtsModule(@Nullable GeometryFactory geometryFactory) {
+    public JtsModule(@Nullable final GeometryFactory geometryFactory) {
         this(geometryFactory, null, GeometrySerializer.DEFAULT_DECIMAL_PLACES);
     }
 
@@ -71,7 +72,7 @@ public class JtsModule extends SimpleModule {
      * @param geometryFactory The {@link GeometryFactory} to use to construct geometries.
      * @param decimalPlaces The number of decimal places for encoded coordinates.
      */
-    public JtsModule(@Nullable GeometryFactory geometryFactory, int decimalPlaces) {
+    public JtsModule(@Nullable final GeometryFactory geometryFactory, final int decimalPlaces) {
         this(geometryFactory, null, decimalPlaces);
     }
 
@@ -80,7 +81,7 @@ public class JtsModule extends SimpleModule {
      *
      * @param includeBoundingBox The {@link IncludeBoundingBox} to use to serialize geometries.
      */
-    public JtsModule(@Nullable IncludeBoundingBox includeBoundingBox) {
+    public JtsModule(@Nullable final IncludeBoundingBox includeBoundingBox) {
         this(null, includeBoundingBox, GeometrySerializer.DEFAULT_DECIMAL_PLACES);
     }
 
@@ -90,7 +91,8 @@ public class JtsModule extends SimpleModule {
      * @param includeBoundingBox The {@link IncludeBoundingBox} to use to serialize geometries.
      * @param decimalPlaces The number of decimal places for encoded coordinates.
      */
-    public JtsModule(@Nullable IncludeBoundingBox includeBoundingBox, int decimalPlaces) {
+    public JtsModule(
+            @Nullable final IncludeBoundingBox includeBoundingBox, final int decimalPlaces) {
         this(null, includeBoundingBox, decimalPlaces);
     }
 
@@ -101,8 +103,8 @@ public class JtsModule extends SimpleModule {
      * @param includeBoundingBox The {@link IncludeBoundingBox} to use to serialize geometries.
      */
     public JtsModule(
-            @Nullable GeometryFactory geometryFactory,
-            @Nullable IncludeBoundingBox includeBoundingBox) {
+            @Nullable final GeometryFactory geometryFactory,
+            @Nullable final IncludeBoundingBox includeBoundingBox) {
         this(geometryFactory, includeBoundingBox, GeometrySerializer.DEFAULT_DECIMAL_PLACES);
     }
 
@@ -113,9 +115,9 @@ public class JtsModule extends SimpleModule {
      * @param includeBoundingBox The {@link IncludeBoundingBox} to use to serialize geometries.
      */
     public JtsModule(
-            @Nullable GeometryFactory geometryFactory,
-            @Nullable IncludeBoundingBox includeBoundingBox,
-            int decimalPlaces) {
+            @Nullable final GeometryFactory geometryFactory,
+            @Nullable final IncludeBoundingBox includeBoundingBox,
+            final int decimalPlaces) {
         this.geometryFactory = geometryFactory;
         this.includeBoundingBox = includeBoundingBox;
         if (decimalPlaces < 0) {
@@ -125,8 +127,8 @@ public class JtsModule extends SimpleModule {
     }
 
     @Override
-    public void setupModule(SetupContext context) {
-        var deserializer = getDeserializer();
+    public void setupModule(final SetupContext context) {
+        final var deserializer = getDeserializer();
         addSerializer(Geometry.class, getSerializer());
         addDeserializer(Geometry.class, deserializer);
         addDeserializer(Point.class, new TypeSafeValueDeserializer<>(Point.class, deserializer));
@@ -149,7 +151,7 @@ public class JtsModule extends SimpleModule {
     }
 
     private ValueSerializer<Geometry> getSerializer() {
-        return new GeometrySerializer(this.includeBoundingBox, this.decimalPlaces);
+        return new GeometrySerializer(includeBoundingBox, decimalPlaces);
     }
 
     private ValueDeserializer<Geometry> getDeserializer() {

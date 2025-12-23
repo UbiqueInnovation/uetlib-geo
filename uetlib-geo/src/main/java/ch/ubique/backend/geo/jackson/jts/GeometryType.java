@@ -30,33 +30,19 @@ import org.locationtech.jts.geom.Polygon;
 import java.util.Optional;
 
 public enum GeometryType {
-    /**
-     * Geometries of type {@link Point}.
-     */
+    /** Geometries of type {@link Point}. */
     POINT(Type.POINT),
-    /**
-     * Geometries of type {@link LineString}.
-     */
+    /** Geometries of type {@link LineString}. */
     LINE_STRING(Type.LINE_STRING),
-    /**
-     * Geometries of type {@link Polygon}.
-     */
+    /** Geometries of type {@link Polygon}. */
     POLYGON(Type.POLYGON),
-    /**
-     * Geometries of type {@link MultiPoint}.
-     */
+    /** Geometries of type {@link MultiPoint}. */
     MULTI_POINT(Type.MULTI_POINT),
-    /**
-     * Geometries of type {@link MultiLineString}.
-     */
+    /** Geometries of type {@link MultiLineString}. */
     MULTI_LINE_STRING(Type.MULTI_LINE_STRING),
-    /**
-     * Geometries of type {@link MultiPolygon}.
-     */
+    /** Geometries of type {@link MultiPolygon}. */
     MULTI_POLYGON(Type.MULTI_POLYGON),
-    /**
-     * Geometries of type {@link GeometryCollection}.
-     */
+    /** Geometries of type {@link GeometryCollection}. */
     GEOMETRY_COLLECTION(Type.GEOMETRY_COLLECTION);
 
     private final String type;
@@ -66,7 +52,7 @@ public enum GeometryType {
      *
      * @param type The string type.
      */
-    GeometryType(String type) {
+    GeometryType(final String type) {
         this.type = type;
     }
 
@@ -76,13 +62,13 @@ public enum GeometryType {
      * @return The bit mask.
      */
     int mask() {
-        return 1 << this.ordinal();
+        return 1 << ordinal();
     }
 
     @Override
     @JsonValue
     public String toString() {
-        return this.type;
+        return type;
     }
 
     /**
@@ -92,8 +78,8 @@ public enum GeometryType {
      * @return The {@link GeometryType}
      */
     @JsonCreator
-    public static Optional<GeometryType> fromString(String value) {
-        for (GeometryType type : GeometryType.values()) {
+    public static Optional<GeometryType> fromString(final String value) {
+        for (final var type : GeometryType.values()) {
             if (type.toString().equals(value)) {
                 return Optional.of(type);
             }
@@ -107,26 +93,16 @@ public enum GeometryType {
      * @param geometry The {@link Geometry}.
      * @return The {@link GeometryType}.
      */
-    public static Optional<GeometryType> forGeometry(Geometry geometry) {
-        if (geometry == null) {
-            return Optional.empty();
-        } else if (geometry instanceof Polygon) {
-            return Optional.of(POLYGON);
-        } else if (geometry instanceof Point) {
-            return Optional.of(POINT);
-        } else if (geometry instanceof MultiPoint) {
-            return Optional.of(MULTI_POINT);
-        } else if (geometry instanceof MultiPolygon) {
-            return Optional.of(MULTI_POLYGON);
-        } else if (geometry instanceof LineString) {
-            return Optional.of(LINE_STRING);
-        } else if (geometry instanceof MultiLineString) {
-            return Optional.of(MULTI_LINE_STRING);
-        } else if (geometry instanceof GeometryCollection) {
-            return Optional.of(GEOMETRY_COLLECTION);
-        } else {
-            return Optional.empty();
-        }
+    public static Optional<GeometryType> forGeometry(final Geometry geometry) {
+        return switch (geometry) {
+            case final Polygon _ -> Optional.of(POLYGON);
+            case final Point _ -> Optional.of(POINT);
+            case final MultiPoint _ -> Optional.of(MULTI_POINT);
+            case final MultiPolygon _ -> Optional.of(MULTI_POLYGON);
+            case final LineString _ -> Optional.of(LINE_STRING);
+            case final MultiLineString _ -> Optional.of(MULTI_LINE_STRING);
+            case final GeometryCollection _ -> Optional.of(GEOMETRY_COLLECTION);
+            case null, default -> Optional.empty();
+        };
     }
-
 }
