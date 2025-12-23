@@ -15,10 +15,6 @@
     <packaging>pom</packaging>
 
     <properties>
-        <java.version>21</java.version>
-        <maven.compiler.release>${java.version}</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
         <!-- Sonar-->
         <sonar.projectName>uetlib-geo</sonar.projectName>
         <sonar.coverage.module>uetlib-geo-coverage</sonar.coverage.module>
