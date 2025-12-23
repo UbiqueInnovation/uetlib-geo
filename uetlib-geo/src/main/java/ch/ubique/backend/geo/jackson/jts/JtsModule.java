@@ -38,23 +38,13 @@ import tools.jackson.databind.module.SimpleModule;
  * @author Christian Autermann
  */
 public class JtsModule extends SimpleModule {
-    private static final long serialVersionUID = 1L;
+
     private final GeometryFactory geometryFactory;
-    private final IncludeBoundingBox includeBoundingBox;
     private final int decimalPlaces;
 
     /** Creates a new {@link JtsModule}. */
     public JtsModule() {
-        this(null, null, GeometrySerializer.DEFAULT_DECIMAL_PLACES);
-    }
-
-    /**
-     * Creates a new {@link JtsModule}.
-     *
-     * @param decimalPlaces The number of decimal places for encoded coordinates.
-     */
-    public JtsModule(final int decimalPlaces) {
-        this(null, null, decimalPlaces);
+        this(null, GeometrySerializer.DEFAULT_DECIMAL_PLACES);
     }
 
     /**
@@ -63,7 +53,7 @@ public class JtsModule extends SimpleModule {
      * @param geometryFactory The {@link GeometryFactory} to use to construct geometries.
      */
     public JtsModule(@Nullable final GeometryFactory geometryFactory) {
-        this(geometryFactory, null, GeometrySerializer.DEFAULT_DECIMAL_PLACES);
+        this(geometryFactory, GeometrySerializer.DEFAULT_DECIMAL_PLACES);
     }
 
     /**
@@ -73,53 +63,7 @@ public class JtsModule extends SimpleModule {
      * @param decimalPlaces The number of decimal places for encoded coordinates.
      */
     public JtsModule(@Nullable final GeometryFactory geometryFactory, final int decimalPlaces) {
-        this(geometryFactory, null, decimalPlaces);
-    }
-
-    /**
-     * Creates a new {@link JtsModule}.
-     *
-     * @param includeBoundingBox The {@link IncludeBoundingBox} to use to serialize geometries.
-     */
-    public JtsModule(@Nullable final IncludeBoundingBox includeBoundingBox) {
-        this(null, includeBoundingBox, GeometrySerializer.DEFAULT_DECIMAL_PLACES);
-    }
-
-    /**
-     * Creates a new {@link JtsModule}.
-     *
-     * @param includeBoundingBox The {@link IncludeBoundingBox} to use to serialize geometries.
-     * @param decimalPlaces The number of decimal places for encoded coordinates.
-     */
-    public JtsModule(
-            @Nullable final IncludeBoundingBox includeBoundingBox, final int decimalPlaces) {
-        this(null, includeBoundingBox, decimalPlaces);
-    }
-
-    /**
-     * Creates a new {@link JtsModule}.
-     *
-     * @param geometryFactory The {@link GeometryFactory} to use to construct geometries.
-     * @param includeBoundingBox The {@link IncludeBoundingBox} to use to serialize geometries.
-     */
-    public JtsModule(
-            @Nullable final GeometryFactory geometryFactory,
-            @Nullable final IncludeBoundingBox includeBoundingBox) {
-        this(geometryFactory, includeBoundingBox, GeometrySerializer.DEFAULT_DECIMAL_PLACES);
-    }
-
-    /**
-     * Creates a new {@link JtsModule}.
-     *
-     * @param geometryFactory The {@link GeometryFactory} to use to construct geometries.
-     * @param includeBoundingBox The {@link IncludeBoundingBox} to use to serialize geometries.
-     */
-    public JtsModule(
-            @Nullable final GeometryFactory geometryFactory,
-            @Nullable final IncludeBoundingBox includeBoundingBox,
-            final int decimalPlaces) {
         this.geometryFactory = geometryFactory;
-        this.includeBoundingBox = includeBoundingBox;
         if (decimalPlaces < 0) {
             throw new IllegalArgumentException("decimalPlaces < 0");
         }
@@ -151,7 +95,7 @@ public class JtsModule extends SimpleModule {
     }
 
     private ValueSerializer<Geometry> getSerializer() {
-        return new GeometrySerializer(includeBoundingBox, decimalPlaces);
+        return new GeometrySerializer(decimalPlaces);
     }
 
     private ValueDeserializer<Geometry> getDeserializer() {
