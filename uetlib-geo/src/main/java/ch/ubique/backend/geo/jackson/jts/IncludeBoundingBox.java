@@ -26,9 +26,7 @@ import org.locationtech.jts.geom.Polygon;
 
 import java.io.Serializable;
 
-/**
- * Class to determine when to include a bounding box for geometries.
- */
+/** Class to determine when to include a bounding box for geometries. */
 public final class IncludeBoundingBox implements Serializable {
     private static final long serialVersionUID = 204690259235746434L;
     private final int mask;
@@ -38,7 +36,7 @@ public final class IncludeBoundingBox implements Serializable {
      *
      * @param mask The bit mask.
      */
-    private IncludeBoundingBox(int mask) {
+    private IncludeBoundingBox(final int mask) {
         this.mask = mask;
     }
 
@@ -46,8 +44,8 @@ public final class IncludeBoundingBox implements Serializable {
      * @param type The {@link GeometryType}.
      * @return The {@link IncludeBoundingBox}.
      */
-    private IncludeBoundingBox include(GeometryType type) {
-        return new IncludeBoundingBox(this.mask | type.mask());
+    private IncludeBoundingBox include(final GeometryType type) {
+        return new IncludeBoundingBox(mask | type.mask());
     }
 
     /**
@@ -114,8 +112,8 @@ public final class IncludeBoundingBox implements Serializable {
     }
 
     /**
-     * Include the bounding box for geometries of type {@link MultiPoint}, {@link MultiLineString}, {@link MultiPolygon}
-     * and {@link GeometryCollection}.
+     * Include the bounding box for geometries of type {@link MultiPoint}, {@link MultiLineString},
+     * {@link MultiPolygon} and {@link GeometryCollection}.
      *
      * @return The {@link IncludeBoundingBox}.
      */
@@ -132,8 +130,10 @@ public final class IncludeBoundingBox implements Serializable {
      * @param geometry The {@link Geometry}.
      * @return If the bounding box should be included.
      */
-    public boolean shouldIncludeBoundingBoxFor(Geometry geometry) {
-        return GeometryType.forGeometry(geometry).map(this::shouldIncludeBoundingBoxFor).orElse(false);
+    public boolean shouldIncludeBoundingBoxFor(final Geometry geometry) {
+        return GeometryType.forGeometry(geometry)
+                .map(this::shouldIncludeBoundingBoxFor)
+                .orElse(false);
     }
 
     /**
@@ -142,8 +142,8 @@ public final class IncludeBoundingBox implements Serializable {
      * @param type The {@link GeometryType}.
      * @return If the bounding box should be included.
      */
-    public boolean shouldIncludeBoundingBoxFor(GeometryType type) {
-        return (this.mask & type.mask()) != 0;
+    public boolean shouldIncludeBoundingBoxFor(final GeometryType type) {
+        return (mask & type.mask()) != 0;
     }
 
     /**
@@ -161,8 +161,7 @@ public final class IncludeBoundingBox implements Serializable {
      * @return The {@link IncludeBoundingBox}.
      */
     public static IncludeBoundingBox always() {
-        return never()
-                .forGeometryCollection()
+        return never().forGeometryCollection()
                 .forMultiPolygon()
                 .forMultiLineString()
                 .forMultiPoint()
@@ -177,13 +176,11 @@ public final class IncludeBoundingBox implements Serializable {
      * @return The {@link IncludeBoundingBox}.
      */
     public static IncludeBoundingBox exceptPoints() {
-        return never()
-                .forGeometryCollection()
+        return never().forGeometryCollection()
                 .forMultiPolygon()
                 .forMultiLineString()
                 .forMultiPoint()
                 .forPolygon()
                 .forLineString();
     }
-
 }
