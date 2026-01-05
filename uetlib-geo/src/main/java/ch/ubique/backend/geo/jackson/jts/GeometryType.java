@@ -95,13 +95,13 @@ public enum GeometryType {
      */
     public static Optional<GeometryType> forGeometry(final Geometry geometry) {
         return switch (geometry) {
-            case final Polygon _ -> Optional.of(POLYGON);
-            case final Point _ -> Optional.of(POINT);
-            case final MultiPoint _ -> Optional.of(MULTI_POINT);
-            case final MultiPolygon _ -> Optional.of(MULTI_POLYGON);
-            case final LineString _ -> Optional.of(LINE_STRING);
-            case final MultiLineString _ -> Optional.of(MULTI_LINE_STRING);
-            case final GeometryCollection _ -> Optional.of(GEOMETRY_COLLECTION);
+            case final Polygon ignored -> Optional.of(POLYGON);
+            case final Point ignored -> Optional.of(POINT);
+            case final MultiPoint ignored -> Optional.of(MULTI_POINT);
+            case final MultiPolygon ignored -> Optional.of(MULTI_POLYGON);
+            case final LineString ignored -> Optional.of(LINE_STRING);
+            case final MultiLineString ignored -> Optional.of(MULTI_LINE_STRING);
+            case final GeometryCollection ignored -> Optional.of(GEOMETRY_COLLECTION);
             case null, default -> Optional.empty();
         };
     }
