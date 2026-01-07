@@ -4,12 +4,10 @@ import ch.ubique.backend.geo.jackson.jts.JtsModule;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 
-import tools.jackson.databind.ObjectMapper;
-import com.pivovarit.function.exception.WrappedException;
-
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
-import tools.jackson.core.JacksonException;
+
+import tools.jackson.databind.ObjectMapper;
 
 public class JsonVectorTileEncoder extends AbstractVectorTileEncoder {
 
@@ -26,11 +24,7 @@ public class JsonVectorTileEncoder extends AbstractVectorTileEncoder {
 
     @Override
     public final byte[] encodeVectorTile(final VectorTile tile) {
-        try {
-            return objectMapper.writeValueAsBytes(mapToOutputObject(tile));
-        } catch (final JacksonException e) {
-            throw new WrappedException(e);
-        }
+        return objectMapper.writeValueAsBytes(mapToOutputObject(tile));
     }
 
     protected Object mapToOutputObject(final VectorTile tile) {

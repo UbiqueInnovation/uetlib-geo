@@ -213,11 +213,7 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
     }
 
     private String serializeWithObjectMapper(final Object object) {
-        try {
             return objectMapper.writeValueAsString(object);
-        } catch (final JacksonException e) {
-            throw new UncheckedException(e);
-        }
     }
 
     @SuppressWarnings("java:S5443")
