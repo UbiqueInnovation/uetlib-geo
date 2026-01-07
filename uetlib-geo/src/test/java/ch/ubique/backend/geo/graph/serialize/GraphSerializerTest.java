@@ -83,7 +83,7 @@ class GraphSerializerTest {
 
     private FeatureCollection readFile(final String path) throws IOException {
         try (final var inputStream = getClass().getResourceAsStream(path)) {
-            return ObjectMapperJtsUtils.objectMapperLv95()
+            return ObjectMapperJtsUtils.jsonMapperLv95()
                     .readValue(inputStream, FeatureCollection.class);
         }
     }
