@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 class ObjectMapperJtsUtilsTest {
-    private final ObjectMapper objectMapperLv95 = ObjectMapperJtsUtils.objectMapperLv95();
+    private final ObjectMapper objectMapperLv95 = ObjectMapperJtsUtils.jsonMapperLv95();
 
     private static String readResourceFile(final String path) throws IOException {
         final var url = Resources.getResource(path);

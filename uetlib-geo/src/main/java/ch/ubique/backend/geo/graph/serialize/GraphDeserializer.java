@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.graph.serialize;
 
-import static ch.ubique.backend.geo.jackson.ObjectMapperJtsUtils.objectMapperWgs84;
+import static ch.ubique.backend.geo.jackson.ObjectMapperJtsUtils.jsonMapperWgs84;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -36,7 +36,7 @@ public final class GraphDeserializer<V, E> {
             final ObjectMapper objectMapper,
             final Class<V> vertexPropertyClass,
             final Class<E> edgePropertyClass) {
-        this.objectMapper = requireNonNullElse(objectMapper, objectMapperWgs84());
+        this.objectMapper = requireNonNullElse(objectMapper, jsonMapperWgs84());
         this.vertexPropertyType = vertexPropertyClass;
         this.edgePropertyType = edgePropertyClass;
     }

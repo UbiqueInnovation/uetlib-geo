@@ -37,7 +37,7 @@ public final class GeoJsonUtil {
         try {
             final var file = TEMP_FOLDER.resolve(fileName + ".geojson").toFile();
             FileUtils.createParentDirectories(file);
-            ObjectMapperJtsUtils.objectMapperWgs84()
+            ObjectMapperJtsUtils.jsonMapperWgs84()
                     .writeValue(file, new FeatureCollection().setFeatures(features));
             logger.info("Wrote debug output: {}", file);
         } catch (IOException e) {
