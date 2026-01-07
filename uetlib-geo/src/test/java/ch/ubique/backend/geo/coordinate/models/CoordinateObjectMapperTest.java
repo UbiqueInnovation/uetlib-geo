@@ -5,12 +5,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import ch.ubique.backend.core.jackson.ObjectMapperUtils;
 
 import org.junit.jupiter.api.Test;
-import tools.jackson.core.JacksonException;
 
 class CoordinateObjectMapperTest {
 
     @Test
-    void testLV03() throws JacksonException {
+    void testLV03() {
 
         final var c1 = new LV03Coordinate(1, 2);
         final var c1Json = "{\"east\":1.0,\"north\":2.0}";
@@ -23,7 +22,7 @@ class CoordinateObjectMapperTest {
     }
 
     @Test
-    void testLV95() throws JacksonException {
+    void testLV95() {
 
         final var c1 = new LV95Coordinate(1, 2);
         final var c1Json = "{\"east\":1.0,\"north\":2.0}";
@@ -36,7 +35,7 @@ class CoordinateObjectMapperTest {
     }
 
     @Test
-    void testUTM32() throws JacksonException {
+    void testUTM32() {
 
         final var c1 = new UTM32Coordinate(1, 2);
         final var c1Json = "{\"east\":1.0,\"north\":2.0}";
@@ -49,7 +48,7 @@ class CoordinateObjectMapperTest {
     }
 
     @Test
-    void testWebMercator() throws JacksonException {
+    void testWebMercator() {
 
         final var c1 = new WebMercatorCoordinate(1, 2);
         final var c1Json = "{\"x\":1.0,\"y\":2.0}";
@@ -62,7 +61,7 @@ class CoordinateObjectMapperTest {
     }
 
     @Test
-    void testWGS84() throws JacksonException {
+    void testWGS84() {
 
         final var c1 = new WGS84Coordinate(1, 2);
         final var c1Json = "{\"latitude\":1.0,\"longitude\":2.0}";
@@ -75,8 +74,8 @@ class CoordinateObjectMapperTest {
     }
 
     private static <C extends Coordinate> void testSerializeAndDeserialize(
-            final String json, final C coordinate) throws JacksonException {
-        final var objectMapper = ObjectMapperUtils.objectMapper();
+            final String json, final C coordinate) {
+        final var objectMapper = ObjectMapperUtils.jsonMapper();
 
         final var serialized = objectMapper.writeValueAsString(coordinate);
         final var deserialized = objectMapper.readValue(json, coordinate.getClass());

@@ -13,7 +13,6 @@ import ch.ubique.backend.geo.graph.models.Vertex;
 
 import jakarta.annotation.Nullable;
 
-import org.apache.commons.lang3.exception.UncheckedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.geotools.api.data.SimpleFeatureWriter;
 import org.geotools.api.feature.simple.SimpleFeatureType;
@@ -25,7 +24,6 @@ import org.geotools.geopkg.GeoPackage;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 
-import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -60,7 +58,7 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
             throws IOException {
         this.coordinateSystem = coordinateSystem;
         this.vertexToCoordinate = vertexToCoordinate;
-        this.objectMapper = requireNonNullElseGet(objectMapper, ObjectMapperUtils::objectMapper);
+        this.objectMapper = requireNonNullElseGet(objectMapper, ObjectMapperUtils::jsonMapper);
         geoPackage = new GeoPackage(getOrCreateFile(targetFile));
         geoPackage.init();
     }

@@ -39,7 +39,7 @@ class TileLoaderTest {
     }
 
     private static TileJson getTestTileJson() throws IOException {
-        final var objectMapper = ObjectMapperUtils.objectMapper();
+        final var objectMapper = ObjectMapperUtils.jsonMapper();
         try (final var inputStream =
                 TileLoaderTest.class.getResourceAsStream("/tilejson/ch.swisstopo.relief.vt.json")) {
             return objectMapper.readValue(inputStream, TileJson.class);

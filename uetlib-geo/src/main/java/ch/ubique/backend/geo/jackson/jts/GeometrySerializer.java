@@ -99,7 +99,7 @@ public class GeometrySerializer extends ValueSerializer<Geometry> {
             final Geometry geometry,
             final JsonGenerator generator,
             final SerializationContext provider)
-            throws JacksonException {
+            {
         switch (geometry) {
             case null -> generator.writeNull();
             case final Polygon polygon -> serialize(polygon, generator, provider);
