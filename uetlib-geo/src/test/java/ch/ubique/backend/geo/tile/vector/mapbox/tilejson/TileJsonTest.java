@@ -20,7 +20,7 @@ class TileJsonTest {
     @ParameterizedTest
     @ValueSource(strings = {"osm", "ch.swisstopo.base.vt", "ch.swisstopo.relief.vt"})
     void testTileJson(final String id) throws IOException, JSONException {
-        final var objectMapper = ObjectMapperUtils.objectMapper();
+        final var objectMapper = ObjectMapperUtils.jsonMapper();
 
         final var jsonString = readToString(id);
         final var tileJson = objectMapper.readValue(jsonString, TileJson.class);

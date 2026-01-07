@@ -32,7 +32,7 @@ public class TileLoader {
     }
 
     public static TileJson loadTileJson(final URL tileJsonUrl) throws IOException {
-        final var objectMapper = ObjectMapperUtils.objectMapper();
+        final var objectMapper = ObjectMapperUtils.jsonMapper();
         try (final var inputStream = getInputStream(tileJsonUrl)) {
             return objectMapper.readValue(inputStream, TileJson.class);
         }

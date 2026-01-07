@@ -98,7 +98,7 @@ public record VectorTileConfig(
         private TileOutputFormat outputFormat = TileOutputFormat.PBF;
         private Collection<ReferencedEnvelope> outputEnvelopes;
         private Set<Integer> zoomLevels;
-        private ObjectMapper objectMapper = ObjectMapperUtils.objectMapper();
+        private ObjectMapper objectMapper = ObjectMapperUtils.jsonMapper();
         private Level emptyGeometryLogLevel = Level.WARN;
         private int vectorTileGeneratorParallelism = 64;
 

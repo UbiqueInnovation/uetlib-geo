@@ -71,7 +71,7 @@ class VectorTileFilterTest {
 
             encodeTile(Path.of(name, vectorTilePath), filteredTile);
 
-            ObjectMapperUtils.objectMapper()
+            ObjectMapperUtils.jsonMapper()
                     .writeValue(
                             TEST_OUTPUT_DIR.resolve(name + "/filter.json").toFile(),
                             filterDefinition);

@@ -80,7 +80,7 @@ public class JdbcMbtileDataServiceImpl implements MbtileDataService {
     @Override
     @Transactional
     @SuppressWarnings("java:S6809")
-    public void insertReplaceMetadataJson(final MetadataJson json) throws JacksonException {
+    public void insertReplaceMetadataJson(final MetadataJson json) {
         insertReplaceMetadata(MetadataKey.JSON, new ObjectMapper().writeValueAsString(json));
     }
 
