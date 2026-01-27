@@ -1,11 +1,13 @@
 package ch.ubique.backend.geo.tile.vector.mapbox.models;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElseGet;
+
 import jakarta.validation.constraints.NotNull;
 
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.Map;
-import java.util.Objects;
 
 public record VectorTileFeature(
         long id, @NotNull Geometry geometry, @NotNull Map<String, Object> tags) {
@@ -16,8 +18,8 @@ public record VectorTileFeature(
     }
 
     public VectorTileFeature {
-        Objects.requireNonNull(geometry);
-        tags = Objects.requireNonNullElseGet(tags, Map::of);
+        requireNonNull(geometry);
+        tags = requireNonNullElseGet(tags, Map::of);
     }
 
     public VectorTileFeature withTags(final Map<String, Object> tags) {

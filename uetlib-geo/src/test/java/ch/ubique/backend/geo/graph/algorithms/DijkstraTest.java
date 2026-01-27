@@ -11,7 +11,7 @@ import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.models.dijkstra.SearchVertex;
 import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
-import ch.ubique.backend.geo.utils.GeoJsonUtil;
+import ch.ubique.backend.geo.utils.TestGeoJsonUtil;
 
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -76,8 +76,8 @@ class DijkstraTest {
                         .find(List.of(b, c, d, e, f));
         assertNotNull(results);
         assertEquals(5, results.size());
-        GeoJsonUtil.saveGeoJson(
-                results.stream().map(SearchUtils::computePath).map(GeoJsonUtil::toFeature).toList(),
+        TestGeoJsonUtil.saveGeoJson(
+                results.stream().map(SearchUtils::computePath).map(TestGeoJsonUtil::toFeature).toList(),
                 "dijkstra-test");
 
         final var resultsByTarget =
@@ -85,7 +85,7 @@ class DijkstraTest {
 
         final var resultAB = resultsByTarget.get(b);
         final var pathAB = SearchUtils.computePath(resultAB);
-        GeoJsonUtil.saveGeoJson(List.of(GeoJsonUtil.toFeature(pathAB)), "path-a-b");
+        TestGeoJsonUtil.saveGeoJson(List.of(TestGeoJsonUtil.toFeature(pathAB)), "path-a-b");
         assertEquals(983, pathAB.size());
         assertEquals(8_829, resultAB.score(), 1);
 

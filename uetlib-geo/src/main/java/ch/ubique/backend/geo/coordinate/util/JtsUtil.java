@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.coordinate.util;
 import static org.locationtech.jts.noding.SegmentStringUtil.extractSegmentStrings;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.requireNonNull;
 
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
@@ -440,7 +441,7 @@ public final class JtsUtil {
 
     public static <C extends ch.ubique.backend.geo.coordinate.models.Coordinate>
             ReferencedEnvelope getEnvelope(@NotNull final C coordinate) {
-        Objects.requireNonNull(coordinate);
+        requireNonNull(coordinate);
         return new ReferencedEnvelope(
                 new Envelope(coordinate.toJts()),
                 CoordinateSystems.forClass(coordinate.getClass()).crs());

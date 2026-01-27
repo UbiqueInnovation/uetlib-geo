@@ -2,7 +2,7 @@ package ch.ubique.backend.geo.tile.vector.mapbox.filter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import ch.ubique.backend.core.jackson.ObjectMapperUtils;
+import ch.ubique.backend.core.jackson.JsonMapperUtils;
 import ch.ubique.backend.geo.tile.vector.mapbox.decoding.VectorTileDecoder;
 import ch.ubique.backend.geo.tile.vector.mapbox.encoding.VectorTileEncoder;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterDefinition;
@@ -14,12 +14,16 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
 class VectorTileFilterTest {
+
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapperUtils.jsonMapper();
 
     private static final Path TEST_OUTPUT_DIR = Path.of("/tmp", "vector-tiles-filter-test");
 
@@ -71,10 +75,8 @@ class VectorTileFilterTest {
 
             encodeTile(Path.of(name, vectorTilePath), filteredTile);
 
-            ObjectMapperUtils.jsonMapper()
-                    .writeValue(
-                            TEST_OUTPUT_DIR.resolve(name + "/filter.json").toFile(),
-                            filterDefinition);
+            OBJECT_MAPPER.writeValue(
+                    TEST_OUTPUT_DIR.resolve(name + "/filter.json").toFile(), filterDefinition);
         }
     }
 

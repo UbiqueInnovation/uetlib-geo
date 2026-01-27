@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.graph.models;
 
+import static java.util.Objects.requireNonNullElse;
+
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
@@ -288,9 +290,9 @@ public class Graph<V, E> {
 
         final var graph = new Graph<S, T>(idMapper.applyAsLong(graphId));
 
-        final var vertexFilter = Objects.requireNonNullElse(nullableVertexFilter, v -> true);
+        final var vertexFilter = requireNonNullElse(nullableVertexFilter, v -> true);
         final var edgeFilter =
-                Objects.requireNonNullElse(nullableEdgeFilter, e -> true)
+                requireNonNullElse(nullableEdgeFilter, e -> true)
                         .and(e -> vertexFilter.test(e.getU()))
                         .and(e -> vertexFilter.test(e.getV()));
 

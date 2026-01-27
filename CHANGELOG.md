@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 2.0.0
+
+### Breaking Changes
+
+- `ObjectMapperUtils` replaced by `JsonMapperUtils`. This one should not be used directly anymore in a Spring Boot App
+  to create a bean. For that, use the new module `uetlib-spring-boot-geo` instead. Autoconfiguration in
+  `uetlib-spring-boot`
+  registers the necessary `JsonMapper` config and your config has to define one of the available
+  `JsonMapperBuilderCustomizer`:
+  ```diff
+  - @Bean
+  - public ObjectMapper objectMapper() {
+  -     return ObjectMapperUtils.jsonMapperLv95();
+  - }
+  + @Bean
+  + public JsonMapperBuilderCustomizer objectMapper() {
+  +     return new UetlibJacksonGeoJtsLv95JsonMapperBuilderCustomizer();
+  + }
+  ```
+  If you has additional customizations, add them as separate `JsonMapperBuilderCustomizer` beans. All these customizers
+  are applied to the Spring Boot autoconfigured bean.
+
 ## 1.1.10
 
 ### Improvements

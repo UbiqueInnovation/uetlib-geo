@@ -15,6 +15,10 @@
     <packaging>pom</packaging>
 
     <properties>
+        <uetlib-core.version>2.0.0-alpha.16</uetlib-core.version>
+        <uetlib-test.version>2.0.0-alpha.2</uetlib-test.version>
+        <uetlib-db.version>2.0.0-alpha.2</uetlib-db.version>
+
         <!-- Sonar-->
         <sonar.projectName>uetlib-geo</sonar.projectName>
         <sonar.coverage.module>uetlib-geo-coverage</sonar.coverage.module>
@@ -31,7 +35,7 @@
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>uetlib-test</artifactId>
-            <version>2.0.0-alpha.2</version>
+            <version>${uetlib-test.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

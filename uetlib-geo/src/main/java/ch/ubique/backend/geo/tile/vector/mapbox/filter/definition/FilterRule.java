@@ -1,7 +1,10 @@
 package ch.ubique.backend.geo.tile.vector.mapbox.filter.definition;
 
+import static java.util.Objects.requireNonNullElseGet;
+
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.builder.ExcludeRuleBuilder;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.builder.IncludeRuleBuilder;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -11,7 +14,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @JsonInclude(Include.NON_EMPTY)
 public record FilterRule(
@@ -21,8 +23,8 @@ public record FilterRule(
         @Nullable TagFilterRule tagRule) {
 
     public FilterRule {
-        layers = Objects.requireNonNullElseGet(layers, List::of);
-        tags = Objects.requireNonNullElseGet(tags, Map::of);
+        layers = requireNonNullElseGet(layers, List::of);
+        tags = requireNonNullElseGet(tags, Map::of);
     }
 
     public static IncludeRuleBuilder include() {

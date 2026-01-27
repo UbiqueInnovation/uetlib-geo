@@ -1,12 +1,13 @@
 package ch.ubique.backend.geo.graph.models;
 
+import static ch.ubique.backend.geo.jackson.JsonMapperJtsUtils.jsonMapperLv95;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 import ch.ubique.backend.geo.geojson.models.jts.GenericFeature;
 import ch.ubique.backend.geo.graph.utils.LinesGraphBuilder;
-import ch.ubique.backend.geo.jackson.ObjectMapperJtsUtils;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,11 +17,15 @@ import org.locationtech.jts.geom.LineString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 
 class VertexSpeedTest {
 
     private static final Logger logger = LoggerFactory.getLogger(VertexSpeedTest.class);
+
+    private static final ObjectMapper OBJECT_MAPPER = jsonMapperLv95();
 
     @ParameterizedTest
     @ValueSource(
@@ -70,8 +75,7 @@ class VertexSpeedTest {
 
     private FeatureCollection readFile(final String path) throws IOException {
         try (final var inputStream = getClass().getResourceAsStream(path)) {
-            return ObjectMapperJtsUtils.jsonMapperLv95()
-                    .readValue(inputStream, FeatureCollection.class);
+            return OBJECT_MAPPER.readValue(inputStream, FeatureCollection.class);
         }
     }
 }

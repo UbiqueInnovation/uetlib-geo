@@ -1,19 +1,19 @@
 package ch.ubique.backend.geo.tile.common.io;
 
-import ch.ubique.backend.core.jackson.ObjectMapperUtils;
+import ch.ubique.backend.core.jackson.JsonMapperUtils;
 import ch.ubique.backend.core.utils.InputStreamUtils;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.TileJson;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
+import java.util.List;
 
 public class TileLoader {
 
@@ -32,7 +32,7 @@ public class TileLoader {
     }
 
     public static TileJson loadTileJson(final URL tileJsonUrl) throws IOException {
-        final var objectMapper = ObjectMapperUtils.jsonMapper();
+        final var objectMapper = JsonMapperUtils.jsonMapper();
         try (final var inputStream = getInputStream(tileJsonUrl)) {
             return objectMapper.readValue(inputStream, TileJson.class);
         }

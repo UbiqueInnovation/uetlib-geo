@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.shapefile;
 
+import static java.util.Objects.requireNonNull;
+
 import ch.ubique.backend.core.file.ByteFile;
 import ch.ubique.backend.core.file.temp.TempFileManager;
 import ch.ubique.backend.core.service.DataAndInput;
@@ -30,7 +32,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -53,8 +54,8 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
     public ShapefileParser(
             @NotNull final ZipArchiveInputStream zipArchiveInputStream,
             @NotNull final Predicate<ArchiveEntry> includeEntry) {
-        this.zipArchiveInputStream = Objects.requireNonNull(zipArchiveInputStream);
-        this.includeEntry = Objects.requireNonNull(includeEntry);
+        this.zipArchiveInputStream = requireNonNull(zipArchiveInputStream);
+        this.includeEntry = requireNonNull(includeEntry);
     }
 
     @NotNull

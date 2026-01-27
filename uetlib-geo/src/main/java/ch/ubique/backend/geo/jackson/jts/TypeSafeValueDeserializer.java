@@ -15,14 +15,14 @@
  */
 package ch.ubique.backend.geo.jackson.jts;
 
+import static java.util.Objects.requireNonNull;
+
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.type.TypeFactory;
-
-import java.util.Objects;
 
 /**
  * Type safe variant of a JsonDeserializer that checks the parsed value is of the right type.
@@ -52,8 +52,8 @@ public class TypeSafeValueDeserializer<T> extends ValueDeserializer<T> {
      */
     public TypeSafeValueDeserializer(
             final JavaType type, final ValueDeserializer<? super T> delegate) {
-        this.delegate = Objects.requireNonNull(delegate);
-        this.type = Objects.requireNonNull(type);
+        this.delegate = requireNonNull(delegate);
+        this.type = requireNonNull(type);
     }
 
     @Override

@@ -2,11 +2,12 @@ package ch.ubique.backend.geo.kml.parser;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import static java.util.Objects.requireNonNull;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 
 class KmlParserTest {
@@ -24,8 +25,7 @@ class KmlParserTest {
             })
     void testParseKml(final String resourcePath) throws IOException {
         try (final var inputStream =
-                new GZIPInputStream(
-                        Objects.requireNonNull(getClass().getResourceAsStream(resourcePath)))) {
+                new GZIPInputStream(requireNonNull(getClass().getResourceAsStream(resourcePath)))) {
             final var document = assertDoesNotThrow(() -> KmlParser.parse(inputStream));
             assertNotNull(document);
             assertFalse(document.getPlacemarks().isEmpty());
