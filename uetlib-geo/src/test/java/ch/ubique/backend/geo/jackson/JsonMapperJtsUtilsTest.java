@@ -1,10 +1,11 @@
 package ch.ubique.backend.geo.jackson;
 
+import static ch.ubique.backend.geo.jackson.JsonMapperJtsUtils.jsonMapperLv95;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 
-import tools.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,12 +13,15 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.locationtech.jts.geom.Coordinate;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 class ObjectMapperJtsUtilsTest {
-    private final ObjectMapper objectMapperLv95 = ObjectMapperJtsUtils.jsonMapperLv95();
+
+    private static final ObjectMapper OBJECT_MAPPER = jsonMapperLv95();
 
     private static String readResourceFile(final String path) throws IOException {
         final var url = Resources.getResource(path);
@@ -39,7 +43,7 @@ class ObjectMapperJtsUtilsTest {
             final String path, final int numFeatures, final Coordinate firstCoordinate)
             throws IOException {
         final var geoJson = readResourceFile(path + ".geojson");
-        final var featureCollection = objectMapperLv95.readValue(geoJson, FeatureCollection.class);
+        final var featureCollection = OBJECT_MAPPER.readValue(geoJson, FeatureCollection.class);
         assertEquals(numFeatures, featureCollection.getFeatures().size());
         final var firstFeature = featureCollection.getFeatures().stream().findFirst().orElseThrow();
         assertEquals(firstCoordinate, firstFeature.getGeometry().getGeometryN(0).getCoordinate());

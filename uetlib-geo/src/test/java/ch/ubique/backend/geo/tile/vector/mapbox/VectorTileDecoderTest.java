@@ -4,6 +4,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.IterableAssert.assertThatIterable;
 import static org.junit.jupiter.api.Assertions.*;
 
+import static java.util.Objects.requireNonNull;
+
 import ch.ubique.backend.geo.tile.vector.mapbox.decoding.VectorTileDecoder;
 import ch.ubique.backend.geo.tile.vector.mapbox.encoding.VectorTileEncoder;
 import ch.ubique.backend.geo.vectortile.protobuf.Tile;
@@ -18,7 +20,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -105,7 +106,7 @@ class VectorTileDecoderTest {
 
     private byte[] readBytes(final String resourcePath) throws IOException {
         try (final var inputStream = getClass().getResourceAsStream(resourcePath)) {
-            return IOUtils.toByteArray(Objects.requireNonNull(inputStream));
+            return IOUtils.toByteArray(requireNonNull(inputStream));
         }
     }
 }

@@ -19,7 +19,7 @@ import ch.ubique.backend.geo.jackson.jts.JtsModule;
 import ch.ubique.backend.geo.tlm.SwisstopoTlmParser;
 import ch.ubique.backend.geo.tlm.TlmToGraphUtil;
 import ch.ubique.backend.geo.tlm.models.WegType;
-import ch.ubique.backend.geo.utils.GeoJsonUtil;
+import ch.ubique.backend.geo.utils.TestGeoJsonUtil;
 import ch.ubique.backend.geo.utils.duration.HikeDuration;
 
 import tools.jackson.databind.ObjectMapper;
@@ -197,7 +197,7 @@ public class RoutingGraphTest {
                             .map(path -> new Feature().setType("Feature").setGeometry(path.line()))
                             .toList();
 
-            GeoJsonUtil.saveGeoJson(selectedPaths, "extract");
+            TestGeoJsonUtil.saveGeoJson(selectedPaths, "extract");
         }
         fail("Please disable this test, it's just a helper to generated geojson extracts.");
     }

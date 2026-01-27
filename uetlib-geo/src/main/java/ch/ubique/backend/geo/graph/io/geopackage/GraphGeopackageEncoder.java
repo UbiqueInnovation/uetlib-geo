@@ -1,9 +1,8 @@
 package ch.ubique.backend.geo.graph.io.geopackage;
 
-import static java.util.Objects.requireNonNullElse;
-import static java.util.Objects.requireNonNullElseGet;
+import static java.util.Objects.*;
 
-import ch.ubique.backend.core.jackson.ObjectMapperUtils;
+import ch.ubique.backend.core.jackson.JsonMapperUtils;
 import ch.ubique.backend.core.utils.MapCollectors;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.coordinate.models.Coordinate;
@@ -12,6 +11,7 @@ import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.geotools.api.data.SimpleFeatureWriter;
@@ -58,7 +58,7 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
             throws IOException {
         this.coordinateSystem = coordinateSystem;
         this.vertexToCoordinate = vertexToCoordinate;
-        this.objectMapper = requireNonNullElseGet(objectMapper, ObjectMapperUtils::jsonMapper);
+        this.objectMapper = requireNonNullElseGet(objectMapper, JsonMapperUtils::jsonMapper);
         geoPackage = new GeoPackage(getOrCreateFile(targetFile));
         geoPackage.init();
     }
@@ -211,7 +211,7 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
     }
 
     private String serializeWithObjectMapper(final Object object) {
-            return objectMapper.writeValueAsString(object);
+        return objectMapper.writeValueAsString(object);
     }
 
     @SuppressWarnings("java:S5443")

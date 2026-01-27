@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.gdal.warp;
 
+import static java.util.Objects.requireNonNull;
+
 import ch.ubique.backend.geo.common.models.WidthAndHeight;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.gdal.common.GdalDataSetFormat;
@@ -76,8 +78,8 @@ public final class GdalWarpOptions {
             args.addAll(additionalArguments);
         }
 
-        args.add(Objects.requireNonNull(sourcePath).toString());
-        args.add(Objects.requireNonNull(targetPath).toString());
+        args.add(requireNonNull(sourcePath).toString());
+        args.add(requireNonNull(targetPath).toString());
 
         return Collections.unmodifiableList(args);
     }

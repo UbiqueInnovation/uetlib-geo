@@ -1,13 +1,12 @@
 package ch.ubique.backend.geo.graph.serialize;
 
-import static ch.ubique.backend.geo.jackson.ObjectMapperJtsUtils.jsonMapperWgs84;
-
-import static java.util.Objects.requireNonNullElse;
+import static java.util.Objects.requireNonNullElseGet;
 
 import ch.ubique.backend.core.utils.MapCollectors;
 import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
+import ch.ubique.backend.geo.jackson.JsonMapperJtsUtils;
 
 import jakarta.annotation.Nullable;
 
@@ -35,7 +34,8 @@ public final class GraphSerializer<V, E> {
 
     public GraphSerializer(final Graph<V, E> graph, @Nullable final ObjectMapper objectMapper) {
         this.graph = graph;
-        this.objectMapper = requireNonNullElse(objectMapper, jsonMapperWgs84());
+        this.objectMapper =
+                requireNonNullElseGet(objectMapper, JsonMapperJtsUtils::jsonMapperWgs84);
     }
 
     public void write(final File file) throws IOException {

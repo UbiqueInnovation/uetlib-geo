@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.formats.gdb;
 
+import static java.util.Objects.requireNonNullElse;
+
 import ch.ubique.backend.core.file.temp.TempFileManager;
 import ch.ubique.backend.core.io.InputStreamProvider;
 import ch.ubique.backend.core.process.ProcessConfig;
@@ -19,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 
 public class GdbConverter implements AutoCloseable {
 
@@ -36,7 +37,7 @@ public class GdbConverter implements AutoCloseable {
     public GdbConverter(final InputStreamProvider gdbProvider, @Nullable final Duration timeout) {
         this.gdbProvider = gdbProvider;
         this.tempFileManager = new TempFileManager();
-        this.timeout = Objects.requireNonNullElse(timeout, Duration.ofMinutes(5));
+        this.timeout = requireNonNullElse(timeout, Duration.ofMinutes(5));
     }
 
     public GeoPackage createAndOpenGeoPackage() throws IOException {

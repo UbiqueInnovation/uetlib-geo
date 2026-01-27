@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.graph.serialize;
 
+import static ch.ubique.backend.geo.jackson.JsonMapperJtsUtils.jsonMapperLv95;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
@@ -10,16 +12,19 @@ import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.utils.LinesGraphBuilder;
-import ch.ubique.backend.geo.jackson.ObjectMapperJtsUtils;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.locationtech.jts.geom.LineString;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.util.Objects;
 
 class GraphSerializerTest {
+
+    private static final ObjectMapper OBJECT_MAPPER = jsonMapperLv95();
 
     @ParameterizedTest
     @ValueSource(
@@ -83,8 +88,7 @@ class GraphSerializerTest {
 
     private FeatureCollection readFile(final String path) throws IOException {
         try (final var inputStream = getClass().getResourceAsStream(path)) {
-            return ObjectMapperJtsUtils.jsonMapperLv95()
-                    .readValue(inputStream, FeatureCollection.class);
+            return OBJECT_MAPPER.readValue(inputStream, FeatureCollection.class);
         }
     }
 }

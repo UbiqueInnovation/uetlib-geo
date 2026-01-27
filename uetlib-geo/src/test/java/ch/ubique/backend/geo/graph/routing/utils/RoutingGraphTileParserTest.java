@@ -7,16 +7,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.ubique.backend.geo.graph.io.geopackage.RoutingGraphGeopackageEncoder;
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile;
-
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
-import java.util.regex.Pattern;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 class RoutingGraphTileParserTest {

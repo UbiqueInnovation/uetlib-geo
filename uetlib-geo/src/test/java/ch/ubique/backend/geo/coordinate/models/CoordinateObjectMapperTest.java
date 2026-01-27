@@ -1,12 +1,16 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static ch.ubique.backend.geo.jackson.JsonMapperJtsUtils.jsonMapperLv95;
 
-import ch.ubique.backend.core.jackson.ObjectMapperUtils;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+import tools.jackson.databind.ObjectMapper;
+
 class CoordinateObjectMapperTest {
+
+    private static final ObjectMapper OBJECT_MAPPER = jsonMapperLv95();
 
     @Test
     void testLV03() {
@@ -75,15 +79,13 @@ class CoordinateObjectMapperTest {
 
     private static <C extends Coordinate> void testSerializeAndDeserialize(
             final String json, final C coordinate) {
-        final var objectMapper = ObjectMapperUtils.jsonMapper();
-
-        final var serialized = objectMapper.writeValueAsString(coordinate);
-        final var deserialized = objectMapper.readValue(json, coordinate.getClass());
+        final var serialized = OBJECT_MAPPER.writeValueAsString(coordinate);
+        final var deserialized = OBJECT_MAPPER.readValue(json, coordinate.getClass());
 
         assertEquals(json, serialized);
         assertEquals(coordinate, deserialized);
 
-        assertEquals(coordinate, objectMapper.readValue(serialized, coordinate.getClass()));
-        assertEquals(json, objectMapper.writeValueAsString(deserialized));
+        assertEquals(coordinate, OBJECT_MAPPER.readValue(serialized, coordinate.getClass()));
+        assertEquals(json, OBJECT_MAPPER.writeValueAsString(deserialized));
     }
 }

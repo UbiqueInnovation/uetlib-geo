@@ -1,11 +1,12 @@
 package ch.ubique.backend.geo.graph.routing.utils;
 
+import static java.util.Objects.requireNonNullElseGet;
+
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
 import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 
-import java.util.Objects;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -76,7 +77,7 @@ class RoutingGraphUtilTest {
         return testGraph.map(
                 v -> new RoutingVertex(v.getProperties(), false),
                 e ->
-                        Objects.requireNonNullElseGet(
+                        requireNonNullElseGet(
                                 e.getProperties(),
                                 () ->
                                         new RoutingCompleteEdge(

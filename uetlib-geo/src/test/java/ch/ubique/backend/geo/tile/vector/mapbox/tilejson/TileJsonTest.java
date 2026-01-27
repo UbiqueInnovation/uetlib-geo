@@ -3,7 +3,7 @@ package ch.ubique.backend.geo.tile.vector.mapbox.tilejson;
 import static org.assertj.core.api.IterableAssert.assertThatIterable;
 import static org.junit.jupiter.api.Assertions.*;
 
-import ch.ubique.backend.core.jackson.ObjectMapperUtils;
+import ch.ubique.backend.core.jackson.JsonMapperUtils;
 import ch.ubique.backend.core.utils.ValidationUtils;
 
 import org.apache.commons.io.IOUtils;
@@ -12,22 +12,24 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 class TileJsonTest {
 
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapperUtils.jsonMapper();
+
     @ParameterizedTest
     @ValueSource(strings = {"osm", "ch.swisstopo.base.vt", "ch.swisstopo.relief.vt"})
     void testTileJson(final String id) throws IOException, JSONException {
-        final var objectMapper = ObjectMapperUtils.jsonMapper();
-
         final var jsonString = readToString(id);
-        final var tileJson = objectMapper.readValue(jsonString, TileJson.class);
+        final var tileJson = OBJECT_MAPPER.readValue(jsonString, TileJson.class);
         assertNotNull(tileJson);
         assertThatIterable(ValidationUtils.validate(tileJson)).isEmpty();
 
-        final var serialized = objectMapper.writeValueAsString(tileJson);
+        final var serialized = OBJECT_MAPPER.writeValueAsString(tileJson);
 
         JSONAssert.assertEquals(jsonString, serialized, false);
     }
