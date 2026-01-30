@@ -7,6 +7,7 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 public class JsonVectorTileEncoder extends AbstractVectorTileEncoder {
@@ -22,6 +23,9 @@ public class JsonVectorTileEncoder extends AbstractVectorTileEncoder {
                 config.objectMapper().rebuild().addModule(new JtsModule(geometryFactory)).build();
     }
 
+    /**
+     * @throws JacksonException if encoding with Jackson JsonMapper fails
+     */
     @Override
     public final byte[] encodeVectorTile(final VectorTile tile) {
         return objectMapper.writeValueAsBytes(mapToOutputObject(tile));
