@@ -35,8 +35,9 @@ public final class JsonMapperJtsUtils {
 
     /**
      * Prefer to not use this method directly, use the Spring Boot autoconfigured one, together with
-     * the autoconfiguration from {@code uetlib-spring-boot}. This one exists for cases where the
-     * other one is super inconvenient.
+     * the autoconfiguration from {@code uetlib-spring-boot}, together with a {@code
+     * UetlibJacksonGeoJtsLv95JsonMapperBuilderCustomizer} bean from {@code uetlib-spring-boot-geo}.
+     * This one exists for cases where the other one is super inconvenient.
      */
     public static JsonMapper jsonMapperLv95() {
         final var jsonMapperBuilder = JsonMapper.builder();
@@ -47,8 +48,9 @@ public final class JsonMapperJtsUtils {
 
     /**
      * Prefer to not use this method directly, use the Spring Boot autoconfigured one, together with
-     * the autoconfiguration from {@code uetlib-spring-boot}. This one exists for cases where the
-     * other one is super inconvenient.
+     * the autoconfiguration from {@code uetlib-spring-boot}, together with a {@code
+     * UetlibJacksonGeoJtsLv03JsonMapperBuilderCustomizer} bean from {@code uetlib-spring-boot-geo}.
+     * This one exists for cases where the other one is super inconvenient.
      */
     public static JsonMapper jsonMapperLv03() {
         final var jsonMapperBuilder = JsonMapper.builder();
@@ -59,8 +61,9 @@ public final class JsonMapperJtsUtils {
 
     /**
      * Prefer to not use this method directly, use the Spring Boot autoconfigured one, together with
-     * the autoconfiguration from {@code uetlib-spring-boot}. This one exists for cases where the
-     * other one is super inconvenient.
+     * the autoconfiguration from {@code uetlib-spring-boot}, together with a {@code
+     * UetlibJacksonGeoJtsWgs84JsonMapperBuilderCustomizer} bean from {@code
+     * uetlib-spring-boot-geo}. This one exists for cases where the other one is super inconvenient.
      */
     public static JsonMapper jsonMapperWgs84() {
         final var jsonMapperBuilder = JsonMapper.builder();
@@ -71,8 +74,9 @@ public final class JsonMapperJtsUtils {
 
     /**
      * Prefer to not use this method directly, use the Spring Boot autoconfigured one, together with
-     * the autoconfiguration from {@code uetlib-spring-boot}. This one exists for cases where the
-     * other one is super inconvenient.
+     * the autoconfiguration from {@code uetlib-spring-boot}, together with a {@code
+     * UetlibJacksonGeoJtsWebMercatorJsonMapperBuilderCustomizer} bean from {@code
+     * uetlib-spring-boot-geo}. This one exists for cases where the other one is super inconvenient.
      */
     public static JsonMapper jsonMapperWebMercator() {
         final var jsonMapperBuilder = JsonMapper.builder();
