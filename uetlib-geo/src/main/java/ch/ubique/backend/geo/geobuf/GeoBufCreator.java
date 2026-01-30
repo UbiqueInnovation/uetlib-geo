@@ -282,18 +282,18 @@ public class GeoBufCreator {
 
     private static Predicate<String> isSpecialKey(final String type) {
         return key -> {
-            if (Objects.equals(key, "type")) return true;
-            else if (Objects.equals(type, "FeatureCollection")) {
-                return Objects.equals(key, "features");
-            } else if (Objects.equals(type, "Feature")) {
-                return Objects.equals(key, "id")
-                        || Objects.equals(key, "properties")
-                        || Objects.equals(key, "geometry");
-            } else if (Objects.equals(type, "GeometryCollection")) {
-                return Objects.equals(key, "geometries");
-            } else {
-                return Objects.equals(key, "coordinates");
+            if (Objects.equals(key, "type")) {
+                return true;
             }
+            return switch (type) {
+                case "FeatureCollection" -> Objects.equals(key, "features");
+                case "Feature" ->
+                        Objects.equals(key, "id")
+                                || Objects.equals(key, "properties")
+                                || Objects.equals(key, "geometry");
+                case "GeometryCollection" -> Objects.equals(key, "geometries");
+                default -> Objects.equals(key, "coordinates");
+            };
         };
     }
 
