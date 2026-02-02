@@ -7,7 +7,7 @@
     <parent>
         <groupId>ch.ubique</groupId>
         <artifactId>uetlib-parent</artifactId>
-        <version>2026.0.0-alpha.5</version>
+        <version>2026.0.0-alpha.8</version>
     </parent>
 
     <artifactId>uetlib-geo-parent</artifactId>
@@ -15,9 +15,9 @@
     <packaging>pom</packaging>
 
     <properties>
-        <uetlib-core.version>2.0.0-alpha.16</uetlib-core.version>
-        <uetlib-test.version>2.0.0-alpha.2</uetlib-test.version>
-        <uetlib-db.version>2.0.0-alpha.2</uetlib-db.version>
+        <uetlib-core.version>2.0.0-alpha.19</uetlib-core.version>
+        <uetlib-test.version>2.0.0-alpha.5</uetlib-test.version>
+        <uetlib-db.version>2.0.0-alpha.3</uetlib-db.version>
 
         <!-- Sonar-->
         <sonar.projectName>uetlib-geo</sonar.projectName>
