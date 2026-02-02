@@ -39,7 +39,7 @@ public final class MbtileHelper {
             final int maxZoom)
             throws SQLException, IOException, ClassNotFoundException {
         final var sqliteDb = getUninitializedDb(name, version);
-        final var dataSource = sqliteDb.getDataSource();
+        final var dataSource = sqliteDb.dataSource();
         final var dataService = new JdbcMbtileDataServiceImpl(dataSource);
 
         dataService.insertReplaceMetadataName(name);
