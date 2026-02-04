@@ -17,7 +17,7 @@
     <properties>
         <uetlib-core.version>2.0.0</uetlib-core.version>
         <uetlib-test.version>2.0.0</uetlib-test.version>
-        <uetlib-db.version>2.0.0-alpha.3</uetlib-db.version>
+        <uetlib-db.version>2.0.0</uetlib-db.version>
 
         <!-- Sonar-->
         <sonar.projectName>uetlib-geo</sonar.projectName>
