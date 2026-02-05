@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import java.util.Optional;
 
 /**
@@ -18,14 +21,14 @@ public record LV03Coordinate(
         @Schema(description = "specifies the north–south position", example = "600 000")
                 double east,
         @Schema(description = "specifies the east–west position", example = "200 000") double north,
-        @Schema(description = "meters above sea level", nullable = true) Double elevation)
+        @Schema(description = "meters above sea level", nullable = true) @Nullable Double elevation)
         implements Coordinate {
 
     public LV03Coordinate(final double east, final double north) {
         this(east, north, null);
     }
 
-    public LV03Coordinate withElevation(final Double elevation) {
+    public LV03Coordinate withElevation(final @Nullable Double elevation) {
         return new LV03Coordinate(east, north, elevation);
     }
 

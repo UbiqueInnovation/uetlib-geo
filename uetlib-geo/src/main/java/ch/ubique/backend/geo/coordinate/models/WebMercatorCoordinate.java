@@ -8,20 +8,22 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Optional;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /** <a href="https://epsg.io/3857">https://epsg.io/3857</a> Pseudo-Mercator, Web Mercator */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record WebMercatorCoordinate(
         @Schema(description = "specifies the north–south position") double x,
         @Schema(description = "specifies the east–west position") double y,
-        @Schema(description = "meters above sea level", nullable = true) Double elevation)
+        @Schema(description = "meters above sea level", nullable = true) @Nullable Double elevation)
         implements Coordinate {
 
     public WebMercatorCoordinate(final double x, final double y) {
         this(x, y, null);
     }
 
-    public WebMercatorCoordinate withElevation(final Double elevation) {
+    public WebMercatorCoordinate withElevation(final @Nullable Double elevation) {
         return new WebMercatorCoordinate(x, y, elevation);
     }
 

@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Optional;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record UTM32Coordinate(
@@ -33,13 +35,13 @@ public record UTM32Coordinate(
                         description = "meters above sea level",
                         nullable = true)
                 @JsonProperty
-                Double elevation)
+                @Nullable Double elevation)
         implements Coordinate {
     public UTM32Coordinate(final double east, final double north) {
         this(east, north, null);
     }
 
-    public UTM32Coordinate withElevation(final Double elevation) {
+    public UTM32Coordinate withElevation(final @Nullable Double elevation) {
         return new UTM32Coordinate(east, north, elevation);
     }
 

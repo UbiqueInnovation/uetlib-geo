@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Optional;
 
 /**
@@ -34,14 +36,14 @@ public record WGS84Coordinate(
                         example = "574",
                         description = "meters above sea level",
                         nullable = true)
-                Double elevation)
+                @Nullable Double elevation)
         implements Coordinate {
 
     public WGS84Coordinate(final double latitude, final double longitude) {
         this(latitude, longitude, null);
     }
 
-    public WGS84Coordinate withElevation(final Double elevation) {
+    public WGS84Coordinate withElevation(final @Nullable Double elevation) {
         return new WGS84Coordinate(latitude, longitude, elevation);
     }
 

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Swiss coordinates (1995) <a href="https://epsg.io/2056">https://epsg.io/2056</a> Most recent
@@ -19,14 +20,14 @@ public record LV95Coordinate(
                 double east,
         @Schema(description = "specifies the east–west position", example = "1 200 000")
                 double north,
-        @Schema(description = "meters above sea level", nullable = true) Double elevation)
+        @Schema(description = "meters above sea level", nullable = true) @Nullable Double elevation)
         implements Coordinate {
 
     public LV95Coordinate(final double east, final double north) {
         this(east, north, null);
     }
 
-    public LV95Coordinate withElevation(final Double elevation) {
+    public LV95Coordinate withElevation(@Nullable final Double elevation) {
         return new LV95Coordinate(east, north, elevation);
     }
 
