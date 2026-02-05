@@ -7,7 +7,7 @@ import ch.ubique.backend.core.io.InputStreamProvider;
 import ch.ubique.backend.core.process.ProcessConfig;
 import ch.ubique.backend.core.utils.ProcessUtils;
 
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;

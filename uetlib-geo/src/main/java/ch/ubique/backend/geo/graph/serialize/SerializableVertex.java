@@ -1,5 +1,5 @@
 package ch.ubique.backend.geo.graph.serialize;
 
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 record SerializableVertex(int id, @Nullable Integer propertyKey) {}

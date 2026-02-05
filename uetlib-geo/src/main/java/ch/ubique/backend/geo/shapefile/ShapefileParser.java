@@ -8,7 +8,7 @@ import ch.ubique.backend.core.service.DataAndInput;
 import ch.ubique.backend.core.service.InputCollectionLoaderService;
 import ch.ubique.backend.geo.utils.GeotoolsUtils;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -47,18 +47,18 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
     private final ZipArchiveInputStream zipArchiveInputStream;
     private final Predicate<ArchiveEntry> includeEntry;
 
-    public ShapefileParser(@NotNull final ZipArchiveInputStream zipArchiveInputStream) {
+    public ShapefileParser(@NonNull final ZipArchiveInputStream zipArchiveInputStream) {
         this(zipArchiveInputStream, t -> true);
     }
 
     public ShapefileParser(
-            @NotNull final ZipArchiveInputStream zipArchiveInputStream,
-            @NotNull final Predicate<ArchiveEntry> includeEntry) {
+            @NonNull final ZipArchiveInputStream zipArchiveInputStream,
+            @NonNull final Predicate<ArchiveEntry> includeEntry) {
         this.zipArchiveInputStream = requireNonNull(zipArchiveInputStream);
         this.includeEntry = requireNonNull(includeEntry);
     }
 
-    @NotNull
+    @NonNull
     @Override
     public DataAndInput<Collection<SimpleFeature>> loadData() throws IOException {
         final var files = downloadFiles();
@@ -67,7 +67,7 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
         return new DataAndInput<>(features, files);
     }
 
-    @NotNull
+    @NonNull
     public Collection<SimpleFeature> parseFeatures() throws IOException {
         try (final var tmpFileManager = new TempFileManager()) {
             final var directory = tmpFileManager.createTempDir();

@@ -5,7 +5,7 @@ import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
 import ch.ubique.backend.geo.tile.raster.models.RasterTile;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -145,7 +145,7 @@ public abstract class RasterTileGenerator {
         }
     }
 
-    @NotNull
+    @NonNull
     private List<TileInfo> getTileTopLevelTileInfos() {
         final var maxLevel = levelsDefinition.minZoomLevel();
         return IntStream.range(0, maxLevel.tilesX())

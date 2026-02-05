@@ -14,10 +14,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.annotation.JsonSerialize;
 
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,7 @@ import java.util.Map;
 public record TileJson(
         @JsonProperty("tilejson") @NotBlank String tileJsonVersion,
         @JsonProperty("tiles") @NotEmpty List<String> tiles,
-        @JsonProperty("vector_layers") @NotNull List<TileJsonVectorLayer> vectorLayers,
+        @JsonProperty("vector_layers") @NonNull List<TileJsonVectorLayer> vectorLayers,
         @JsonProperty("attribution") @Nullable String attribution,
         @JsonProperty("bounds")
                 @JsonDeserialize(using = TileJsonBoundsDeserializer.class)

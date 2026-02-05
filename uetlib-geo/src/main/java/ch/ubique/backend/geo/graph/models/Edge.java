@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.graph.models;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -18,11 +18,11 @@ public final class Edge<V, E> {
 
     private E properties;
 
-    public Edge(@NotNull final Vertex<V, E> u, @NotNull final Vertex<V, E> v) {
+    public Edge(@NonNull final Vertex<V, E> u, @NonNull final Vertex<V, E> v) {
         this(u, v, null);
     }
 
-    public Edge(@NotNull final Vertex<V, E> u, @NotNull final Vertex<V, E> v, final E properties) {
+    public Edge(@NonNull final Vertex<V, E> u, @NonNull final Vertex<V, E> v, final E properties) {
         this.u = u;
         this.v = v;
         this.properties = properties;

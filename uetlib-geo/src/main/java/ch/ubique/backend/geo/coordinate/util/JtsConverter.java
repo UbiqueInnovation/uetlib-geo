@@ -10,7 +10,7 @@ import ch.ubique.backend.geo.geojson.models.jts.GenericFeature;
 import ch.ubique.backend.geo.geojson.models.jts.GenericFeatureCollection;
 import ch.ubique.backend.geo.utils.transform.JtsTransform;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.api.referencing.FactoryException;
@@ -77,22 +77,22 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
         return forClass((Class<C>) instance.getClass());
     }
 
-    @NotNull
+    @NonNull
     public Coordinate toJts(final C coordinate) {
         return coordinateSystem.toJts(coordinate);
     }
 
-    @NotNull
+    @NonNull
     public C toBackendLib(final Coordinate coordinate) {
         return coordinateSystem.fromJts(coordinate);
     }
 
-    @NotNull
+    @NonNull
     public C toBackendLib(final Point point) {
         return toBackendLib(point.getCoordinate());
     }
 
-    @NotNull
+    @NonNull
     public BoundingBox<C> toBackendLib(final ReferencedEnvelope envelope) {
         if (!Objects.equals(coordinateSystem.crs(), envelope.getCoordinateReferenceSystem())) {
             throw new IllegalArgumentException("Coordinate system mismatch.");
@@ -102,27 +102,27 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                 toBackendLib(JtsUtil.maxCoordinate(envelope)));
     }
 
-    @NotNull
+    @NonNull
     public Point toJtsPoint(final C coordinate) {
         return coordinateSystem.geometryFactory().createPoint(toJts(coordinate));
     }
 
-    @NotNull
+    @NonNull
     public LineString toJtsLineString(final Collection<C> coordinates) {
         return coordinateSystem.geometryFactory().createLineString(toJts(coordinates));
     }
 
-    @NotNull
+    @NonNull
     public Coordinate[] toJts(final Collection<C> coordinates) {
         return coordinates.stream().map(this::toJts).toArray(Coordinate[]::new);
     }
 
-    @NotNull
+    @NonNull
     public Polygon toJtsPolygon(final Collection<C> exteriorRing) {
         return toJtsPolygon(exteriorRing, Set.of());
     }
 
-    @NotNull
+    @NonNull
     public Polygon toJtsPolygon(
             final Collection<C> exteriorRing, final Collection<List<C>> interiorRings) {
         return coordinateSystem
@@ -130,12 +130,12 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
                 .createPolygon(toJtsLinearRing(exteriorRing), toJtsLinearRings(interiorRings));
     }
 
-    @NotNull
+    @NonNull
     public LinearRing toJtsLinearRing(final Collection<C> coordinates) {
         return coordinateSystem.geometryFactory().createLinearRing(toJts(coordinates));
     }
 
-    @NotNull
+    @NonNull
     public LinearRing[] toJtsLinearRings(final Collection<List<C>> coordinates) {
         return coordinates.stream().map(this::toJtsLinearRing).toArray(LinearRing[]::new);
     }

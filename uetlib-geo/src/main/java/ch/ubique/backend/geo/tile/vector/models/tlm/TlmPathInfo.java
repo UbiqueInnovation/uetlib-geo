@@ -2,18 +2,18 @@ package ch.ubique.backend.geo.tile.vector.models.tlm;
 
 import ch.ubique.backend.geo.tlm.models.*;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 public record TlmPathInfo(
-        @NotNull UnstructuredTlmInfo unstructured,
-        @NotNull String uuid,
-        @NotNull WegType type,
+        @NonNull UnstructuredTlmInfo unstructured,
+        @NonNull String uuid,
+        @NonNull WegType type,
         @Nullable WanderwegType trailType,
         @Nullable Integer level,
         @Nullable BelagType surfaceType,
         @Nullable Verkehrsbedeutung significanceForTraffic,
-        @NotNull TrafficRestriction trafficRestriction,
+        @NonNull TrafficRestriction trafficRestriction,
         @Nullable Structure structure,
         @Nullable String name,
         @Nullable String streetName,

@@ -9,7 +9,7 @@ import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.RoutingNeighb
 import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 import ch.ubique.backend.geo.graph.routing.models.RoutingShortcutEdge;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.locationtech.jts.geom.GeometryFactory;
 
@@ -27,8 +27,7 @@ public final class RoutingGraphsToTileElementsUtil {
                 .toList();
     }
 
-    @NotNull
-    private static RoutingGraphTile.Vertex vertex(
+    private static RoutingGraphTile.@NonNull Vertex vertex(
             final RoutingGraphs graphs,
             final GeometryFactory geometryFactory,
             final ch.ubique.backend.geo.graph.models.Vertex<RoutingVertex, RoutingCompleteEdge>
@@ -47,8 +46,7 @@ public final class RoutingGraphsToTileElementsUtil {
                         .toList());
     }
 
-    @NotNull
-    private static RoutingGraphTile.Neighbor mapToNeighbor(
+    private static RoutingGraphTile.@NonNull Neighbor mapToNeighbor(
             final Edge<RoutingVertex, RoutingCompleteEdge> edge) {
         final var to = edge.getTo();
         return new Neighbor(
@@ -59,8 +57,7 @@ public final class RoutingGraphsToTileElementsUtil {
                 edge.getProperties().surfaceType());
     }
 
-    @NotNull
-    private static RoutingGraphTile.RoutingNeighbor mapToRoutingNeighbor(
+    private static RoutingGraphTile.@NonNull RoutingNeighbor mapToRoutingNeighbor(
             final Edge<RoutingVertex, RoutingShortcutEdge> edge) {
         return new RoutingNeighbor(
                 edge.getTo().getId(),

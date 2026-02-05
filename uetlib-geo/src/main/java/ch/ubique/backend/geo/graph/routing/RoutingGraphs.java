@@ -5,11 +5,11 @@ import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
 import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 import ch.ubique.backend.geo.graph.routing.models.RoutingShortcutEdge;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public record RoutingGraphs(
-        @NotNull Graph<RoutingVertex, RoutingCompleteEdge> completeGraph,
-        @NotNull Graph<RoutingVertex, RoutingShortcutEdge> routingGraph) {
+        @NonNull Graph<RoutingVertex, RoutingCompleteEdge> completeGraph,
+        @NonNull Graph<RoutingVertex, RoutingShortcutEdge> routingGraph) {
 
     public static RoutingGraphs empty() {
         return new RoutingGraphs(new Graph<>(), new Graph<>());

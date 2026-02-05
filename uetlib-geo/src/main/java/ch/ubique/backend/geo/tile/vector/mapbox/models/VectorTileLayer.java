@@ -3,7 +3,7 @@ package ch.ubique.backend.geo.tile.vector.mapbox.models;
 import static java.util.Objects.requireNonNullElseGet;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 import jakarta.validation.constraints.Positive;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +14,7 @@ import java.util.List;
 public record VectorTileLayer(
         @Positive int extent,
         @NotBlank String name,
-        @NotNull Collection<VectorTileFeature> features) {
+        @NonNull Collection<VectorTileFeature> features) {
 
     public VectorTileLayer {
         if (extent <= 0) {

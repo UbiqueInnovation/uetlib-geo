@@ -9,9 +9,6 @@ import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.geometry.exception.UnfixableGeometryException;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
-
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -20,6 +17,8 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.builder.MissingInfoException;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.algorithm.construct.MaximumInscribedCircle;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.util.GeometryFixer;
@@ -41,39 +40,39 @@ public final class JtsUtil {
 
     private JtsUtil() {}
 
-    @NotNull
-    public static MultiPoint toJtsMultiPoint(@NotNull final Collection<Point> points) {
+    @NonNull
+    public static MultiPoint toJtsMultiPoint(@NonNull final Collection<Point> points) {
         return factoryFromGeometryCollection(points).createMultiPoint(points.toArray(Point[]::new));
     }
 
-    @NotNull
-    public static MultiPoint toJtsMultiPoint(@NotNull final Stream<Point> points) {
+    @NonNull
+    public static MultiPoint toJtsMultiPoint(@NonNull final Stream<Point> points) {
         final var array = points.toArray(Point[]::new);
         return factoryFromGeometryCollection(array).createMultiPoint(array);
     }
 
-    @NotNull
+    @NonNull
     public static MultiLineString toJtsMultiLineString(
-            @NotNull final Collection<LineString> lineStrings) {
+            @NonNull final Collection<LineString> lineStrings) {
         return factoryFromGeometryCollection(lineStrings)
                 .createMultiLineString(lineStrings.toArray(LineString[]::new));
     }
 
-    @NotNull
+    @NonNull
     public static MultiLineString toJtsMultiLineString(
-            @NotNull final Stream<LineString> lineStrings) {
+            @NonNull final Stream<LineString> lineStrings) {
         final var array = lineStrings.toArray(LineString[]::new);
         return factoryFromGeometryCollection(array).createMultiLineString(array);
     }
 
-    @NotNull
-    public static MultiPolygon toJtsMultiPolygon(@NotNull final Collection<Polygon> polygons) {
+    @NonNull
+    public static MultiPolygon toJtsMultiPolygon(@NonNull final Collection<Polygon> polygons) {
         return factoryFromGeometryCollection(polygons)
                 .createMultiPolygon(polygons.toArray(Polygon[]::new));
     }
 
-    @NotNull
-    public static MultiPolygon toJtsMultiPolygon(@NotNull final Stream<Polygon> polygons) {
+    @NonNull
+    public static MultiPolygon toJtsMultiPolygon(@NonNull final Stream<Polygon> polygons) {
         final var array = polygons.toArray(Polygon[]::new);
         return factoryFromGeometryCollection(array).createMultiPolygon(array);
     }
@@ -103,28 +102,28 @@ public final class JtsUtil {
         return factory.createGeometryCollection(array);
     }
 
-    @NotNull
+    @NonNull
     public static GeometryCollection toGeometryCollection(
-            @NotNull final Collection<Geometry> geometries) {
+            @NonNull final Collection<Geometry> geometries) {
         return factoryFromGeometryCollection(geometries)
                 .createGeometryCollection(geometries.toArray(Geometry[]::new));
     }
 
-    @NotNull
+    @NonNull
     public static GeometryCollection toGeometryCollection(
-            @NotNull final Stream<Geometry> geometries) {
+            @NonNull final Stream<Geometry> geometries) {
         final var array = geometries.toArray(Geometry[]::new);
         return factoryFromGeometryCollection(array).createGeometryCollection(array);
     }
 
     public static GeometryFactory factoryFromGeometryCollection(
-            @NotNull final Collection<? extends Geometry> geometries) {
+            @NonNull final Collection<? extends Geometry> geometries) {
         final var geometryMaybe = geometries.stream().findAny();
         return geometryMaybe.map(Geometry::getFactory).orElseGet(GeometryFactory::new);
     }
 
     public static GeometryFactory factoryFromGeometryCollection(
-            @NotNull final Geometry[] geometries) {
+            @NonNull final Geometry[] geometries) {
         if (geometries.length > 0) {
             return geometries[0].getFactory();
         }
@@ -164,8 +163,8 @@ public final class JtsUtil {
                 .mapToObj(i -> new LineSegment(coordinates[i], coordinates[i + 1]));
     }
 
-    @Nullable
-    public static Coordinate midPoint(final @NotNull LineString lineString) {
+    @NonNull
+    public static Coordinate midPoint(final @NonNull LineString lineString) {
         final var length = lineString.getLength();
         if (length <= 0) {
             return lineString.getCoordinate();
@@ -185,14 +184,14 @@ public final class JtsUtil {
 
     @Nullable
     public static LineSegment closestSegment(
-            final @NotNull LineString lineString, final @NotNull Coordinate coordinate) {
+            final @NonNull LineString lineString, final @NonNull Coordinate coordinate) {
         return segmentsStream(lineString)
                 .min(Comparator.comparingDouble(segment -> segment.distance(coordinate)))
                 .orElse(null);
     }
 
     @Nullable
-    public static LineSegment midPointSegment(final @NotNull LineString lineString) {
+    public static LineSegment midPointSegment(final @NonNull LineString lineString) {
         return closestSegment(lineString, midPoint(lineString));
     }
 
@@ -272,32 +271,32 @@ public final class JtsUtil {
      * @param geometry the Geometry object from which to extract the geometries
      * @return a stream of the individual geometries within the provided Geometry object
      */
-    @NotNull
+    @NonNull
     public static Stream<Geometry> getGeometriesAsStream(final Geometry geometry) {
         return IntStream.range(0, geometry.getNumGeometries()).mapToObj(geometry::getGeometryN);
     }
 
-    @NotNull
+    @NonNull
     public static Stream<Point> getPointsStream(final MultiPoint multiPoint) {
         return getGeometriesAsStream(multiPoint).map(Point.class::cast);
     }
 
-    @NotNull
+    @NonNull
     public static Stream<LineString> getLinesStream(final MultiLineString multiLineString) {
         return getGeometriesAsStream(multiLineString).map(LineString.class::cast);
     }
 
-    @NotNull
+    @NonNull
     public static Stream<Polygon> getPolygonsStream(final MultiPolygon multiPolygon) {
         return getGeometriesAsStream(multiPolygon).map(Polygon.class::cast);
     }
 
-    @NotNull
+    @NonNull
     public static Stream<LinearRing> getInteriorRingsStream(final Polygon polygon) {
         return IntStream.range(0, polygon.getNumInteriorRing()).mapToObj(polygon::getInteriorRingN);
     }
 
-    @NotNull
+    @NonNull
     public static Collection<Geometry> getGeometries(final Geometry geometry) {
         return getGeometriesAsStream(geometry).toList();
     }
@@ -314,8 +313,8 @@ public final class JtsUtil {
         return flatGeometriesStream(geometry).iterator();
     }
 
-    @NotNull
-    public static Geometry tryToGetValidGeometry(@NotNull final Geometry geometry)
+    @NonNull
+    public static Geometry tryToGetValidGeometry(@NonNull final Geometry geometry)
             throws UnfixableGeometryException {
         final var validator = new IsValidOp(geometry);
 
@@ -440,7 +439,7 @@ public final class JtsUtil {
     }
 
     public static <C extends ch.ubique.backend.geo.coordinate.models.Coordinate>
-            ReferencedEnvelope getEnvelope(@NotNull final C coordinate) {
+            ReferencedEnvelope getEnvelope(@NonNull final C coordinate) {
         requireNonNull(coordinate);
         return new ReferencedEnvelope(
                 new Envelope(coordinate.toJts()),

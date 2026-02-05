@@ -10,7 +10,7 @@ import ch.ubique.backend.geo.kml.models.Placemark;
 import ch.ubique.backend.geo.kml.models.Style;
 import ch.ubique.backend.geo.kml.models.StyleMap;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.locationtech.jts.geom.Coordinate;
@@ -320,7 +320,7 @@ public class KmlParser {
         return icon;
     }
 
-    @NotNull
+    @NonNull
     private static WGS84Coordinate toWgs84Coordinate(final String value) {
         final var split = value.split(",");
         final var lon = Double.parseDouble(split[0]);

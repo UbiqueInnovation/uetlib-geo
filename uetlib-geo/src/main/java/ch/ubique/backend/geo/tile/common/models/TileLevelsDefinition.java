@@ -4,7 +4,7 @@ import ch.ubique.backend.core.utils.IntervalUtils;
 import ch.ubique.backend.geo.coordinate.models.Coordinate;
 import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -145,7 +145,7 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
     }
 
     /** Return given zoom level object */
-    @NotNull
+    @NonNull
     public ZoomLevel getZoomLevel(final int level) {
         return getZoomLevelOptional(level).orElseThrow();
     }

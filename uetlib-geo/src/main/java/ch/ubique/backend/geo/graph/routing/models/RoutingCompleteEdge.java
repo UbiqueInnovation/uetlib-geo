@@ -2,7 +2,7 @@ package ch.ubique.backend.geo.graph.routing.models;
 
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile.SurfaceType;
 
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record RoutingCompleteEdge(float weight, @Nullable SurfaceType surfaceType)
         implements RoutingEdge {

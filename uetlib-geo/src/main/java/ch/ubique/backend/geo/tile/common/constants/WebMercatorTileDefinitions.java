@@ -6,7 +6,7 @@ import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
 import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.stream.IntStream;
 
@@ -26,7 +26,7 @@ public class WebMercatorTileDefinitions {
         return new TileLevelsDefinition(origin, zoomLevels);
     }
 
-    @NotNull
+    @NonNull
     private static ZoomLevel zoomLevel(final int level) {
         final var numTiles = (int) Math.pow(2, level);
         final var tileWidth = WEB_MERCATOR.bounds().getWidth() / numTiles;

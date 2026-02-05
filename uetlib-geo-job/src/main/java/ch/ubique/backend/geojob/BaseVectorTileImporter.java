@@ -7,7 +7,7 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import ch.ubique.backend.job.BaseInputJob;
 import ch.ubique.backend.job.model.JobRunState;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.springframework.context.ApplicationContext;
 
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public abstract class BaseVectorTileImporter<T> extends BaseInputJob<Collection<T>> {
 
-    protected BaseVectorTileImporter(@NotNull final ApplicationContext applicationContext) {
+    protected BaseVectorTileImporter(@NonNull final ApplicationContext applicationContext) {
         super(applicationContext);
     }
 

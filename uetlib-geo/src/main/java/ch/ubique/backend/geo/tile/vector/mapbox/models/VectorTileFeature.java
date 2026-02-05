@@ -3,17 +3,17 @@ package ch.ubique.backend.geo.tile.vector.mapbox.models;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElseGet;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.Map;
 
 public record VectorTileFeature(
-        long id, @NotNull Geometry geometry, @NotNull Map<String, Object> tags) {
+        long id, @NonNull Geometry geometry, @NonNull Map<String, Object> tags) {
 
     public VectorTileFeature(
-            @NotNull final Geometry geometry, @NotNull final Map<String, Object> tags) {
+            @NonNull final Geometry geometry, @NonNull final Map<String, Object> tags) {
         this(0, geometry, tags);
     }
 
