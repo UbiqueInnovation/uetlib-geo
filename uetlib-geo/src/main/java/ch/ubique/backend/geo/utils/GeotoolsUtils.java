@@ -4,7 +4,7 @@ import ch.ubique.backend.core.utils.OptionalUtils;
 
 import com.pivovarit.function.ThrowingSupplier;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.geotools.api.data.SimpleFeatureReader;
 import org.geotools.api.feature.Property;
@@ -22,29 +22,29 @@ public final class GeotoolsUtils {
 
     private GeotoolsUtils() {}
 
-    @NotNull
+    @NonNull
     public static Stream<SimpleFeature> stream(final SimpleFeatureReader featureReader) {
         return OptionalUtils.generateAsLongAsPresent(nextOptional(featureReader).uncheck());
     }
 
-    @NotNull
+    @NonNull
     public static Stream<SimpleFeature> stream(final SimpleFeatureIterator featureIterator) {
         return OptionalUtils.generateAsLongAsPresent(nextOptional(featureIterator));
     }
 
-    @NotNull
+    @NonNull
     public static ThrowingSupplier<Optional<SimpleFeature>, IOException> nextOptional(
             final SimpleFeatureReader reader) {
         return () -> reader.hasNext() ? Optional.of(reader.next()) : Optional.empty();
     }
 
-    @NotNull
+    @NonNull
     public static Supplier<Optional<SimpleFeature>> nextOptional(
             final SimpleFeatureIterator iterator) {
         return () -> iterator.hasNext() ? Optional.of(iterator.next()) : Optional.empty();
     }
 
-    @NotNull
+    @NonNull
     public static Map<String, Object> getProperties(final SimpleFeature feature) {
         return feature.getProperties().stream()
                 .filter(f -> f.getValue() != null)

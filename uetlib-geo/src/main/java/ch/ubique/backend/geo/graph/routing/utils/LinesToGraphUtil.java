@@ -11,7 +11,7 @@ import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 import ch.ubique.backend.geo.spatial.TypedStrTree;
 import ch.ubique.backend.geo.utils.InterpolationUtils;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.locationtech.jts.algorithm.LineIntersector;
 import org.locationtech.jts.algorithm.RobustLineIntersector;
@@ -37,8 +37,8 @@ public class LinesToGraphUtil<T> {
     private final LineIntersector lineIntersector;
 
     private LinesToGraphUtil(
-            @NotNull final Collection<LineWithInfo<T>> lines,
-            @NotNull final LinesToGraphConfig<T> config) {
+            @NonNull final Collection<LineWithInfo<T>> lines,
+            @NonNull final LinesToGraphConfig<T> config) {
         this.config = config;
         this.lines = lines;
         this.graph = new Graph<>();
@@ -48,8 +48,8 @@ public class LinesToGraphUtil<T> {
     }
 
     public static <S> Graph<RoutingVertex, RoutingCompleteEdge> buildGraph(
-            @NotNull final Collection<LineWithInfo<S>> lines,
-            @NotNull final LinesToGraphConfig<S> config) {
+            @NonNull final Collection<LineWithInfo<S>> lines,
+            @NonNull final LinesToGraphConfig<S> config) {
         final var builder = new LinesToGraphUtil<>(lines, config);
         builder.createGraph();
         builder.findIntersections();

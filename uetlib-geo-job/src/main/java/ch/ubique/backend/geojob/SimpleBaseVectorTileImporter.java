@@ -6,7 +6,7 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.springframework.context.ApplicationContext;
 
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 public abstract class SimpleBaseVectorTileImporter
         extends BaseVectorTileImporter<VectorTileElement> {
 
-    protected SimpleBaseVectorTileImporter(@NotNull final ApplicationContext applicationContext) {
+    protected SimpleBaseVectorTileImporter(@NonNull final ApplicationContext applicationContext) {
         super(applicationContext);
     }
 

@@ -5,7 +5,7 @@ import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.TileJson;
 import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.TileJsonCenter;
 
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 

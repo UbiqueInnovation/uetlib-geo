@@ -1,14 +1,12 @@
 package ch.ubique.backend.geo.graph.serialize;
 
-import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
 import ch.ubique.backend.geo.graph.models.Graph;
-
 import ch.ubique.backend.geo.jackson.JsonMapperJtsUtils;
-import jakarta.validation.constraints.NotNull;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.jspecify.annotations.NonNull;
 
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
@@ -36,7 +34,8 @@ public final class GraphDeserializer<V, E> {
             final ObjectMapper objectMapper,
             final Class<V> vertexPropertyClass,
             final Class<E> edgePropertyClass) {
-        this.objectMapper = requireNonNullElseGet(objectMapper, JsonMapperJtsUtils::jsonMapperWgs84);
+        this.objectMapper =
+                requireNonNullElseGet(objectMapper, JsonMapperJtsUtils::jsonMapperWgs84);
         this.vertexPropertyType = vertexPropertyClass;
         this.edgePropertyType = edgePropertyClass;
     }
@@ -66,12 +65,12 @@ public final class GraphDeserializer<V, E> {
             public Type getType() {
                 return new ParameterizedType() {
                     @Override
-                    public Type[] getActualTypeArguments() {
+                    public Type @NonNull [] getActualTypeArguments() {
                         return new Type[] {vertexPropertyType, edgePropertyType};
                     }
 
                     @Override
-                    public Type getRawType() {
+                    public @NonNull Type getRawType() {
                         return SerializableGraph.class;
                     }
 
@@ -87,7 +86,7 @@ public final class GraphDeserializer<V, E> {
     private void addVertex(
             final Graph<V, E> graph,
             final SerializableVertex vertex,
-            @NotNull final List<V> properties) {
+            @NonNull final List<V> properties) {
         graph.addVertex(
                 vertex.id(),
                 Optional.ofNullable(vertex.propertyKey()).map(properties::get).orElse(null));
@@ -96,7 +95,7 @@ public final class GraphDeserializer<V, E> {
     private void addEdge(
             final Graph<V, E> graph,
             final SerializableEdge edge,
-            @NotNull final List<E> properties) {
+            @NonNull final List<E> properties) {
         graph.addDirectedEdge(
                 graph.getVertex(edge.u()).orElseThrow(),
                 graph.getVertex(edge.v()).orElseThrow(),

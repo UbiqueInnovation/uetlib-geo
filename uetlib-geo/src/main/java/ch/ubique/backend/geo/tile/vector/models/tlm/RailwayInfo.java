@@ -3,32 +3,32 @@ package ch.ubique.backend.geo.tile.vector.models.tlm;
 import ch.ubique.backend.geo.tlm.models.Gauge;
 import ch.ubique.backend.geo.tlm.models.RailServiceType;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 
 public record RailwayInfo(
-        @NotNull UnstructuredTlmInfo unstructured,
-        @NotNull String id,
-        @NotNull String uuid,
-        @NotNull Gauge gauge,
-        @NotNull RailServiceType railServiceType,
-        @NotNull Instant created,
-        @NotNull Instant changeTimestamp,
-        @NotNull String changeReason,
-        @NotNull TlmSource source,
-        @NotNull Instant sourceTimestamp,
-        @NotNull Instant revisionTimestamp,
-        @NotNull int level,
-        @NotNull boolean siding,
-        @NotNull boolean selectedForDigitalMap,
-        @NotNull boolean museumTrain,
-        @NotNull boolean onStreet,
-        @NotNull boolean outOfOrder,
-        @NotNull boolean rackRailway,
-        @NotNull boolean funicular,
-        @NotNull boolean serviceRailway,
+        @NonNull UnstructuredTlmInfo unstructured,
+        @NonNull String id,
+        @NonNull String uuid,
+        @NonNull Gauge gauge,
+        @NonNull RailServiceType railServiceType,
+        @NonNull Instant created,
+        @NonNull Instant changeTimestamp,
+        @NonNull String changeReason,
+        @NonNull TlmSource source,
+        @NonNull Instant sourceTimestamp,
+        @NonNull Instant revisionTimestamp,
+        @NonNull int level,
+        @NonNull boolean siding,
+        @NonNull boolean selectedForDigitalMap,
+        @NonNull boolean museumTrain,
+        @NonNull boolean onStreet,
+        @NonNull boolean outOfOrder,
+        @NonNull boolean rackRailway,
+        @NonNull boolean funicular,
+        @NonNull boolean serviceRailway,
         @Nullable String name,
         @Nullable Structure structure,
         @Nullable Integer numberOfTracks,

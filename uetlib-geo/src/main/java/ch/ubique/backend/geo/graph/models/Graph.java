@@ -2,8 +2,8 @@ package ch.ubique.backend.geo.graph.models;
 
 import static java.util.Objects.requireNonNullElse;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import org.apache.commons.lang3.function.Suppliers;
 
@@ -225,8 +225,8 @@ public class Graph<V, E> {
      * @param <T> the edge property type of the mapped graph
      */
     public <S, T> Graph<S, T> map(
-            @NotNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
-            @NotNull final Function<Edge<V, E>, T> edgePropertyMapper) {
+            @NonNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
+            @NonNull final Function<Edge<V, E>, T> edgePropertyMapper) {
         return filterAndMap(null, vertexPropertyMapper, null, edgePropertyMapper);
     }
 
@@ -257,9 +257,9 @@ public class Graph<V, E> {
      */
     public <S, T> Graph<S, T> filterAndMap(
             @Nullable final Predicate<Vertex<V, E>> nullableVertexFilter,
-            @NotNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
+            @NonNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
             @Nullable final Predicate<Edge<V, E>> nullableEdgeFilter,
-            @NotNull final Function<Edge<V, E>, T> edgePropertyMapper) {
+            @NonNull final Function<Edge<V, E>, T> edgePropertyMapper) {
         return filterAndMap(
                 i -> i,
                 nullableVertexFilter,
@@ -282,11 +282,11 @@ public class Graph<V, E> {
      * @see #filterAndMap(Predicate, Function, Predicate, Function)
      */
     public <S, T> Graph<S, T> filterAndMap(
-            @NotNull final LongUnaryOperator idMapper,
+            @NonNull final LongUnaryOperator idMapper,
             @Nullable final Predicate<Vertex<V, E>> nullableVertexFilter,
-            @NotNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
+            @NonNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
             @Nullable final Predicate<Edge<V, E>> nullableEdgeFilter,
-            @NotNull final Function<Edge<V, E>, T> edgePropertyMapper) {
+            @NonNull final Function<Edge<V, E>, T> edgePropertyMapper) {
 
         final var graph = new Graph<S, T>(idMapper.applyAsLong(graphId));
 

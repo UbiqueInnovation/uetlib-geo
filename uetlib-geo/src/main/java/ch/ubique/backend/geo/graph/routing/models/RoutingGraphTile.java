@@ -3,8 +3,8 @@ package ch.ubique.backend.geo.graph.routing.models;
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile.SurfaceType;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -18,9 +18,9 @@ public interface RoutingGraphTile {
     record Vertex(
             long id,
             boolean isHighway,
-            @NotNull Point point,
-            @NotNull Collection<RoutingGraphTile.Neighbor> neighbors,
-            @NotNull Collection<RoutingGraphTile.RoutingNeighbor> routingNeighbors)
+            @NonNull Point point,
+            @NonNull Collection<RoutingGraphTile.Neighbor> neighbors,
+            @NonNull Collection<RoutingGraphTile.RoutingNeighbor> routingNeighbors)
             implements VectorTileElement {
 
         @Override
@@ -49,14 +49,14 @@ public interface RoutingGraphTile {
     record Neighbor(
             long id,
             boolean isHighway,
-            @NotNull Coordinate coordinate,
+            @NonNull Coordinate coordinate,
             float weight,
             @Nullable SurfaceType surfaceType) {}
 
     record RoutingNeighbor(
             long id,
             boolean isHighway,
-            @NotNull Coordinate coordinate,
+            @NonNull Coordinate coordinate,
             float weight,
             long direction) {}
 }

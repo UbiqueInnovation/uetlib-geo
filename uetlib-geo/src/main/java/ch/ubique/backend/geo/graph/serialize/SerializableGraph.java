@@ -1,13 +1,13 @@
 package ch.ubique.backend.geo.graph.serialize;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
 import java.util.List;
 
 record SerializableGraph<V, E>(
         long graphId,
-        @NotNull Collection<SerializableVertex> vertices,
-        @NotNull Collection<SerializableEdge> edges,
-        @NotNull List<V> vertexProperties,
-        @NotNull List<E> edgeProperties) {}
+        @NonNull Collection<SerializableVertex> vertices,
+        @NonNull Collection<SerializableEdge> edges,
+        @NonNull List<V> vertexProperties,
+        @NonNull List<E> edgeProperties) {}

@@ -18,7 +18,7 @@ import ch.ubique.backend.geo.graph.routing.utils.Snapping3dPointIndex;
 import ch.ubique.backend.geo.spatial.TypedStrTree;
 import ch.ubique.backend.geo.utils.InterpolationUtils;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.locationtech.jts.algorithm.LineIntersector;
@@ -95,7 +95,7 @@ public class LinesGraphBuilder<E> {
     }
 
     public <C extends ch.ubique.backend.geo.coordinate.models.Coordinate> Graph<C, E> build(
-            @NotNull final CoordinateSystem<C> targetCrs) {
+            @NonNull final CoordinateSystem<C> targetCrs) {
         final var sourceConverter = JtsConverter.forCrs(requireNonNullElse(crs, WGS84.crs()));
         final var targetConverter = JtsConverter.forClass(targetCrs.coordinateClass());
         return build().map(

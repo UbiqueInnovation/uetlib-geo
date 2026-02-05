@@ -7,12 +7,12 @@ import ch.ubique.backend.geo.tlm.models.WegType;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 public record TlmTags(
-        @JsonProperty("uuid") @NotNull String uuid,
-        @JsonProperty("type") @NotNull WegType type,
+        @JsonProperty("uuid") @NonNull String uuid,
+        @JsonProperty("type") @NonNull WegType type,
         @JsonProperty("wanderwegType") @Nullable WanderwegType trailType,
         @JsonProperty("stufe") @Nullable Integer level,
         @JsonProperty("belagsart") @Nullable BelagType surfaceType,

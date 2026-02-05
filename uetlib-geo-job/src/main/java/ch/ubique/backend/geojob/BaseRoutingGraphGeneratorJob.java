@@ -22,7 +22,7 @@ import ch.ubique.backend.job.model.properties.enums.JobRunnerKey;
 
 import com.pivovarit.function.ThrowingConsumer;
 
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import org.springframework.context.ApplicationContext;
 
@@ -50,7 +50,7 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
     }
 
     @Override
-    @NotNull
+    @NonNull
     public JobPropertiesConfig propertiesConfig() {
         return JobPropertiesConfig.initial(
                 JobPropertyDefinitions.RUNNER.createProperty(JobRunnerKey.DEDICATED_K8S_JOB),
@@ -77,7 +77,7 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         return JobRunState.DONE;
     }
 
-    @NotNull
+    @NonNull
     private Stream<VectorTileOutput> getVectorTileOutputs(
             final RoutingGraphsWithLayer graphsWithLayer) {
 
@@ -121,12 +121,12 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         return !vertex.routingNeighbors().isEmpty();
     }
 
-    @NotNull
+    @NonNull
     protected Stream<TileOutputFormat> outputFormats() {
         return Stream.of(TileOutputFormat.PBF);
     }
 
-    @NotNull
+    @NonNull
     private Stream<VectorTileOutput> vectorTileOutputs(
             final String layer,
             final VectorTileElementSupplier<Vertex> vertexSupplier,

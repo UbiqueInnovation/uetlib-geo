@@ -3,13 +3,13 @@ package ch.ubique.backend.geo.tlm.models;
 import ch.ubique.backend.geo.tile.vector.models.tlm.TlmPathInfo;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.jspecify.annotations.NonNull;
 import org.locationtech.jts.geom.LineString;
 
-public record TlmPath(@NotNull LineString line, @NotNull @Valid TlmPathInfo info) {
+public record TlmPath(@NonNull LineString line, @NonNull @Valid TlmPathInfo info) {
 
     @Override
     public boolean equals(final Object o) {

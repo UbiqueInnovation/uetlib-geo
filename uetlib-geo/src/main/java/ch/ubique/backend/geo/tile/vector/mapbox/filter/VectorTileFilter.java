@@ -9,7 +9,7 @@ import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTileFeature;
 import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTileLayer;
 
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map.Entry;
 import java.util.Objects;

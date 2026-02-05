@@ -12,8 +12,8 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.utils.SimplifyGeometryUtils;
 import ch.ubique.backend.geo.tile.vector.utils.TileGeometryUtils;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -39,7 +39,7 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
     }
 
     private static Function<Geometry, Optional<Geometry>> includeForOutput(
-            @NotNull final VectorTileElement element) {
+            @NonNull final VectorTileElement element) {
         return tileGeometry ->
                 element.includeForOutput(tileGeometry)
                         ? Optional.of(tileGeometry)
@@ -64,7 +64,7 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
     protected abstract byte[] encodeVectorTile(final VectorTile vectorTile);
 
     protected Optional<Geometry> getTileGeometry(
-            @Nullable final VectorTileElement element, @NotNull final ReferencedEnvelope bounds) {
+            @Nullable final VectorTileElement element, @NonNull final ReferencedEnvelope bounds) {
         if (element == null) {
             return Optional.empty();
         }
@@ -79,13 +79,13 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
                 .flatMap(includeForOutput(element));
     }
 
-    private Optional<Geometry> getSourceGeometry(final @NotNull VectorTileElement element) {
+    private Optional<Geometry> getSourceGeometry(final @NonNull VectorTileElement element) {
         return checkGeometry("Source", element.geometry(), config.validateGeometryAtEveryStep());
     }
 
     private Optional<Geometry> checkGeometry(
-            @NotNull final String context,
-            @NotNull final Geometry geometry,
+            @NonNull final String context,
+            @NonNull final Geometry geometry,
             final boolean validate) {
 
         if (geometry.isEmpty()) {
@@ -113,14 +113,14 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
     }
 
     private Function<Geometry, Optional<Geometry>> convertToTileCoordinates(
-            @NotNull final ReferencedEnvelope bounds) {
+            @NonNull final ReferencedEnvelope bounds) {
         return geometry -> {
             final var tileGeometry = TileGeometryUtils.getTileGeometry(geometry, bounds, config);
             return checkGeometry("Tile", tileGeometry, config.validateGeometryAtEveryStep());
         };
     }
 
-    private Optional<Geometry> simplifyIfNeeded(@NotNull final Geometry geometry) {
+    private Optional<Geometry> simplifyIfNeeded(@NonNull final Geometry geometry) {
         final var tolerance = config.simplifyTolerance();
         if (tolerance > 0) {
             final var simplified = SimplifyGeometryUtils.simplify(geometry, tolerance);
@@ -130,7 +130,7 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
         return Optional.of(geometry);
     }
 
-    private Optional<Geometry> smoothingIfNeeded(@NotNull final Geometry geometry) {
+    private Optional<Geometry> smoothingIfNeeded(@NonNull final Geometry geometry) {
         if (config.smoothing() > 0) {
             try {
                 final var smooth = SimplifyGeometryUtils.smooth(geometry, config.smoothing());
@@ -143,17 +143,17 @@ abstract class AbstractVectorTileEncoder implements TileEncoder {
         return Optional.of(geometry);
     }
 
-    private Optional<Geometry> clip(@NotNull final Geometry geometry) {
+    private Optional<Geometry> clip(@NonNull final Geometry geometry) {
         final var clipped = tileBoundsPlusClipBuffer.intersection(geometry);
         return checkGeometry("Clipped", clipped, config.validateGeometryAtEveryStep());
     }
 
-    private Optional<Geometry> toIntegerGrid(@NotNull final Geometry geometry) {
+    private Optional<Geometry> toIntegerGrid(@NonNull final Geometry geometry) {
         final var intGeometry = GeometryPrecisionReducer.reduce(geometry, new PrecisionModel(1));
         return checkGeometry("Integer", intGeometry, config.validateGeometryAtEveryStep());
     }
 
-    private Optional<Geometry> finalCheck(@NotNull final Geometry geometry) {
+    private Optional<Geometry> finalCheck(@NonNull final Geometry geometry) {
         return checkGeometry("Final check", geometry, true);
     }
 
