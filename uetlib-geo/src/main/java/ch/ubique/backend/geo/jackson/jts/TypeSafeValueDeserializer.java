@@ -17,6 +17,8 @@ package ch.ubique.backend.geo.jackson.jts;
 
 import static java.util.Objects.requireNonNull;
 
+import org.jspecify.annotations.Nullable;
+
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.DeserializationContext;
@@ -58,7 +60,7 @@ public class TypeSafeValueDeserializer<T> extends ValueDeserializer<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public T deserialize(final JsonParser p, final DeserializationContext context) {
+    public @Nullable T deserialize(final JsonParser p, final DeserializationContext context) {
         final var obj = delegate.deserialize(p, context);
         if (obj == null) {
             return null;

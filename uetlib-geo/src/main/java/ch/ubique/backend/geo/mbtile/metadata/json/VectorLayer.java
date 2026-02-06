@@ -6,13 +6,16 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotEmpty;
+
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@NullUnmarked
 public class VectorLayer {
 
     @NonNull
@@ -38,11 +41,11 @@ public class VectorLayer {
     @JsonProperty("fields")
     private Map<String, FieldType> fields;
 
-    public String getId() {
+    public @NonNull String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(@NonNull final String id) {
         this.id = id;
     }
 
@@ -50,7 +53,7 @@ public class VectorLayer {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -58,7 +61,7 @@ public class VectorLayer {
         return minzoom;
     }
 
-    public void setMinzoom(Integer minzoom) {
+    public void setMinzoom(final Integer minzoom) {
         this.minzoom = minzoom;
     }
 
@@ -66,7 +69,7 @@ public class VectorLayer {
         return maxzoom;
     }
 
-    public void setMaxzoom(Integer maxzoom) {
+    public void setMaxzoom(final Integer maxzoom) {
         this.maxzoom = maxzoom;
     }
 
@@ -74,14 +77,14 @@ public class VectorLayer {
         return fields;
     }
 
-    public void setFields(Map<String, FieldType> fields) {
+    public void setFields(final Map<String, FieldType> fields) {
         this.fields = fields;
     }
 
-    public void addField(String fieldName, FieldType fieldType) {
-        if (this.fields == null) {
+    public void addField(final String fieldName, final FieldType fieldType) {
+        if (fields == null) {
             this.fields = new HashMap<>();
         }
-        this.fields.put(fieldName, fieldType);
+        fields.put(fieldName, fieldType);
     }
 }

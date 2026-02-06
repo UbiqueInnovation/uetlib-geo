@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.tile.vector.models.tlm;
 
+import org.jspecify.annotations.Nullable;
+
 public enum Structure {
     BRIDGE,
     TUNNEL,
@@ -15,7 +17,7 @@ public enum Structure {
     STAIRS,
     FORD;
 
-    public static Structure parse(final String value) {
+    public static @Nullable Structure parse(final String value) {
         return switch (value.toLowerCase()) {
             case "keine", "in/auf gebaeude" -> null;
             case "bruecke" -> BRIDGE;

@@ -9,6 +9,7 @@ import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 import com.google.common.base.Predicates;
 
 import org.apache.commons.lang3.function.Consumers;
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
@@ -154,11 +155,11 @@ public class OsmParserWithStore {
         onNode.accept(node);
     }
 
-    public WGS84Coordinate getNodeCoordinate(final long id) {
+    public @Nullable WGS84Coordinate getNodeCoordinate(final long id) {
         return nodeCoordinates.get(id);
     }
 
-    public WGS84Coordinate getRepresentativeCoordinate(final Entity entity) {
+    public @Nullable WGS84Coordinate getRepresentativeCoordinate(final Entity entity) {
         return switch (entity) {
             case final Node node -> OsmUtils.getCoordinate(node);
             case final Way way -> getRepresentativeCoordinate(way);
@@ -167,7 +168,7 @@ public class OsmParserWithStore {
         };
     }
 
-    private WGS84Coordinate getRepresentativeCoordinate(final Way way) {
+    private @Nullable WGS84Coordinate getRepresentativeCoordinate(final Way way) {
         final var lineString = createLineString(way.getId());
         if (lineString == null) {
             return null;
@@ -185,7 +186,7 @@ public class OsmParserWithStore {
                         .project(centroid));
     }
 
-    private WGS84Coordinate getRepresentativeCoordinate(final Relation relation) {
+    private @Nullable WGS84Coordinate getRepresentativeCoordinate(final Relation relation) {
         final var geometry = getMultiPolygon(relation);
         if (geometry.isEmpty()) {
             return relation.getMembers().stream()
@@ -198,7 +199,7 @@ public class OsmParserWithStore {
         return JtsConverter.WGS84.toBackendLib(centroid);
     }
 
-    private WGS84Coordinate getRepresentativeCoordinate(final RelationMember member) {
+    private @Nullable WGS84Coordinate getRepresentativeCoordinate(final RelationMember member) {
         final var lineString = createLineString(member);
         if (lineString != null) {
             return getRepresentativeCoordinate(lineString);
@@ -227,26 +228,29 @@ public class OsmParserWithStore {
         return JtsUtil.toJtsMultiPolygon(polygonizer.getPolygons());
     }
 
-    public LineString createLineString(final Way way) {
+    public @Nullable LineString createLineString(final Way way) {
         return createLineString(way.getId());
     }
 
-    public LineString createLineString(final RelationMember member) {
+    public @Nullable LineString createLineString(final RelationMember member) {
         if (member.getMemberType() != EntityType.Way) {
             return null;
         }
         return createLineString(member.getMemberId());
     }
 
-    private LineString createLineString(final long wayId) {
+    private @Nullable LineString createLineString(final long wayId) {
         final var nodeIds = wayNodeIds.get(wayId);
         if (nodeIds == null) {
             return null;
         }
+        final var coordinates = nodeIds.stream().map(this::getNodeCoordinate).toList();
+        if (coordinates.isEmpty() || coordinates.stream().anyMatch(Objects::isNull)) {
+            return null;
+        }
         return new GeometryFactory(new PrecisionModel(), CoordinateSystems.WGS84.srid())
                 .createLineString(
-                        nodeIds.stream()
-                                .map(this::getNodeCoordinate)
+                        coordinates.stream().map(Objects::requireNonNull)
                                 .map(WGS84Coordinate::toJts)
                                 .toArray(Coordinate[]::new));
     }

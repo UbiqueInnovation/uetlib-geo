@@ -4,6 +4,8 @@ import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.graph.models.dijkstra.SearchVertex;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -34,7 +36,7 @@ public class Dijkstra<V, E> {
         return this;
     }
 
-    public SearchVertex<V, E> findNext() {
+    public @Nullable SearchVertex<V, E> findNext() {
         while (!queue.isEmpty()) {
             final var cur = queue.poll();
             if (visited.contains(cur.vertex())) {
@@ -57,7 +59,7 @@ public class Dijkstra<V, E> {
         return null;
     }
 
-    public SearchVertex<V, E> find(final Vertex<V, E> target) {
+    public @Nullable SearchVertex<V, E> find(final Vertex<V, E> target) {
         SearchVertex<V, E> current;
         while ((current = findNext()) != null) {
             if (current.vertex().equals(target)) {

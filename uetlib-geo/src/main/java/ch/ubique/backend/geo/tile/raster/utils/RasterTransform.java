@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.tile.raster.utils;
 
-import com.pivovarit.function.exception.WrappedException;
+import ch.ubique.backend.geo.common.exceptions.UncheckedTransformException;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -22,7 +22,7 @@ public class RasterTransform {
         try {
             inverseTransform = transform.createInverse();
         } catch (final NoninvertibleTransformException e) {
-            throw new WrappedException(e);
+            throw new UncheckedTransformException(e);
         }
 
         final var srcPoint = new Point2D.Double();

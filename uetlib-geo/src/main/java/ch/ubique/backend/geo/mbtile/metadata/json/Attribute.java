@@ -5,11 +5,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.jspecify.annotations.NullUnmarked;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@NullUnmarked
 public class Attribute {
 
     @SuppressWarnings("java:S1700")
@@ -35,7 +38,7 @@ public class Attribute {
         return attribute;
     }
 
-    public void setAttribute(String attribute) {
+    public void setAttribute(final String attribute) {
         this.attribute = attribute;
     }
 
@@ -43,7 +46,7 @@ public class Attribute {
         return count;
     }
 
-    public void setCount(Integer count) {
+    public void setCount(final Integer count) {
         this.count = count;
     }
 
@@ -51,7 +54,7 @@ public class Attribute {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(final String type) {
         this.type = type;
     }
 
@@ -59,22 +62,22 @@ public class Attribute {
         return values;
     }
 
-    public void setValues(List<Object> values) {
+    public void setValues(final List<Object> values) {
         this.values = values;
     }
 
-    public void addValue(Object value) {
-        if (this.values == null) {
+    public void addValue(final Object value) {
+        if (values == null) {
             this.values = new ArrayList<>();
         }
-        this.values.add(value);
+        values.add(value);
     }
 
     public Long getMin() {
         return min;
     }
 
-    public void setMin(Long min) {
+    public void setMin(final Long min) {
         this.min = min;
     }
 
@@ -82,7 +85,7 @@ public class Attribute {
         return max;
     }
 
-    public void setMax(Long max) {
+    public void setMax(final Long max) {
         this.max = max;
     }
 }

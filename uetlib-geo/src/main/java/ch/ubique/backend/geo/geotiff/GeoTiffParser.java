@@ -17,6 +17,6 @@ public class GeoTiffParser {
             throws IOException {
         final var hints = new Hints(Hints.DEFAULT_COORDINATE_REFERENCE_SYSTEM, referenceSystem);
         final var reader = new GeoTiffReader(inputStream, hints);
-        return reader.read(null);
+        return reader.read();
     }
 }

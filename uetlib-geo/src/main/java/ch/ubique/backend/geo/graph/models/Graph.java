@@ -2,10 +2,8 @@ package ch.ubique.backend.geo.graph.models;
 
 import static java.util.Objects.requireNonNullElse;
 
-import org.jspecify.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
-
 import org.apache.commons.lang3.function.Suppliers;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,7 +14,7 @@ import java.util.stream.Stream;
  * @param <V> type of the vertex properties
  * @param <E> type of the edge properties
  */
-public class Graph<V, E> {
+public class Graph<V extends @Nullable Object, E extends @Nullable Object> {
     public static final long DEFAULT_GRAPH_ID = 0;
 
     private final long graphId;
@@ -38,10 +36,11 @@ public class Graph<V, E> {
     }
 
     public Vertex<V, E> getOrAddVertex(final Vertex<V, E> vertex) {
-        if (!vertices.containsKey(vertex.getId())) {
-            addVertex(vertex);
+        final var existingVertex = vertices.get(vertex.getId());
+        if (existingVertex == null) {
+            return addVertex(vertex);
         }
-        return vertices.get(vertex.getId());
+        return existingVertex;
     }
 
     public Vertex<V, E> addVertex(final int vertexId, final V properties) {
@@ -68,20 +67,13 @@ public class Graph<V, E> {
         return getOrAddVertex(vertexId, id -> properties);
     }
 
-    public Vertex<V, E> getOrAddVertex(final int vertexId, final IntFunction<V> properties) {
+    public Vertex<V, E> getOrAddVertex(
+            final int vertexId, final IntFunction<@Nullable V> properties) {
         return vertices.computeIfAbsent(vertexId, id -> new Vertex<>(id, properties.apply(id)));
     }
 
     public Optional<Edge<V, E>> getEdge(final int u, final int v) {
         return getVertex(u).flatMap(vertex -> vertex.getEdgeTo(v));
-    }
-
-    public Edge<V, E> getOrAddUndirectedEdge(final int u, final int v) {
-        return getOrAddUndirectedEdge(u, v, null);
-    }
-
-    public Edge<V, E> getOrAddUndirectedEdge(final Vertex<V, E> u, final Vertex<V, E> v) {
-        return getOrAddUndirectedEdge(u, v, null);
     }
 
     public Edge<V, E> getOrAddUndirectedEdge(final int u, final int v, final E properties) {
@@ -116,11 +108,6 @@ public class Graph<V, E> {
 
     public Edge<V, E> getOrAddUndirectedEdge(final Edge<V, E> edge) {
         return getOrAddUndirectedEdge(edge.getU(), edge.getV(), edge.getProperties());
-    }
-
-    /** Gets or adds a <strong>directed</strong> edge */
-    public Edge<V, E> getOrAddDirectedEdge(final int u, final int v) {
-        return getOrAddDirectedEdge(u, v, null);
     }
 
     /** Gets or adds a <strong>directed</strong> edge */
@@ -225,8 +212,8 @@ public class Graph<V, E> {
      * @param <T> the edge property type of the mapped graph
      */
     public <S, T> Graph<S, T> map(
-            @NonNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
-            @NonNull final Function<Edge<V, E>, T> edgePropertyMapper) {
+            final Function<Vertex<V, E>, S> vertexPropertyMapper,
+            final Function<Edge<V, E>, T> edgePropertyMapper) {
         return filterAndMap(null, vertexPropertyMapper, null, edgePropertyMapper);
     }
 
@@ -255,11 +242,11 @@ public class Graph<V, E> {
      * @return A new Graph (filtered and mapped) with the same {@link #graphId} as the old graph
      * @see #filterAndMap(LongUnaryOperator, Predicate, Function, Predicate, Function)
      */
-    public <S, T> Graph<S, T> filterAndMap(
+    public <S extends @Nullable Object, T extends @Nullable Object> Graph<S, T> filterAndMap(
             @Nullable final Predicate<Vertex<V, E>> nullableVertexFilter,
-            @NonNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
+            final Function<Vertex<V, E>, S> vertexPropertyMapper,
             @Nullable final Predicate<Edge<V, E>> nullableEdgeFilter,
-            @NonNull final Function<Edge<V, E>, T> edgePropertyMapper) {
+            final Function<Edge<V, E>, T> edgePropertyMapper) {
         return filterAndMap(
                 i -> i,
                 nullableVertexFilter,
@@ -281,12 +268,12 @@ public class Graph<V, E> {
      * @return A new Graph (filtered and mapped) with the same {@link #graphId} as the old graph
      * @see #filterAndMap(Predicate, Function, Predicate, Function)
      */
-    public <S, T> Graph<S, T> filterAndMap(
-            @NonNull final LongUnaryOperator idMapper,
+    public <S extends @Nullable Object, T extends @Nullable Object> Graph<S, T> filterAndMap(
+            final LongUnaryOperator idMapper,
             @Nullable final Predicate<Vertex<V, E>> nullableVertexFilter,
-            @NonNull final Function<Vertex<V, E>, S> vertexPropertyMapper,
+            final Function<Vertex<V, E>, S> vertexPropertyMapper,
             @Nullable final Predicate<Edge<V, E>> nullableEdgeFilter,
-            @NonNull final Function<Edge<V, E>, T> edgePropertyMapper) {
+            final Function<Edge<V, E>, T> edgePropertyMapper) {
 
         final var graph = new Graph<S, T>(idMapper.applyAsLong(graphId));
 

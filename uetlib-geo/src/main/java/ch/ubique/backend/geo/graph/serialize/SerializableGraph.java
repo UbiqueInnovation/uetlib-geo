@@ -1,13 +1,13 @@
 package ch.ubique.backend.geo.graph.serialize;
 
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
 
-record SerializableGraph<V, E>(
+record SerializableGraph<V extends @Nullable Object, E extends @Nullable Object>(
         long graphId,
-        @NonNull Collection<SerializableVertex> vertices,
-        @NonNull Collection<SerializableEdge> edges,
-        @NonNull List<V> vertexProperties,
-        @NonNull List<E> edgeProperties) {}
+        Collection<SerializableVertex> vertices,
+        Collection<SerializableEdge> edges,
+        List<V> vertexProperties,
+        List<E> edgeProperties) {}

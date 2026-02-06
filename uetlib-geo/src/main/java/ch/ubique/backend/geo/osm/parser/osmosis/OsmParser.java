@@ -2,6 +2,9 @@ package ch.ubique.backend.geo.osm.parser.osmosis;
 
 import ch.ubique.backend.core.utils.IndeterminateProgressLogger;
 
+import com.google.common.util.concurrent.Runnables;
+
+import org.apache.commons.lang3.function.Consumers;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.domain.v0_6.Bound;
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
@@ -13,21 +16,20 @@ import org.slf4j.MDC;
 
 import java.io.InputStream;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class OsmParser {
 
     private final InputStream inputStream;
 
-    private Consumer<Way> onWay;
-    private Consumer<Node> onNode;
-    private Consumer<Relation> onRelation;
-    private Consumer<Bound> onBound;
-    private Consumer<Map<String, Object>> onMetadata;
+    private Consumer<Way> onWay = Consumers.nop();
+    private Consumer<Node> onNode = Consumers.nop();
+    private Consumer<Relation> onRelation = Consumers.nop();
+    private Consumer<Bound> onBound = Consumers.nop();
+    private Consumer<Map<String, Object>> onMetadata = Consumers.nop();
 
-    private Runnable onComplete;
-    private Runnable onClose;
+    private Runnable onComplete = Runnables.doNothing();
+    private Runnable onClose = Runnables.doNothing();
 
     private final IndeterminateProgressLogger nodeProgressLogger;
     private final IndeterminateProgressLogger wayProgressLogger;
@@ -99,40 +101,32 @@ public class OsmParser {
                         final var entity = entityContainer.getEntity();
 
                         if (entity instanceof final Way way) {
-                            invoke(onWay, way);
+                            onWay.accept(way);
                             wayProgressLogger.step();
                         } else if (entity instanceof final Node node) {
-                            invoke(onNode, node);
+                            onNode.accept(node);
                             nodeProgressLogger.step();
                         } else if (entity instanceof final Relation relation) {
-                            invoke(onRelation, relation);
+                            onRelation.accept(relation);
                             relationProgressLogger.step();
                         } else if (entity instanceof final Bound bound) {
-                            invoke(onBound, bound);
+                            onBound.accept(bound);
                         }
                     }
 
                     @Override
                     public void initialize(final Map<String, Object> metaData) {
-                        invoke(onMetadata, metaData);
+                        onMetadata.accept(metaData);
                     }
 
                     @Override
                     public void complete() {
-                        invoke(onComplete);
+                        onComplete.run();
                     }
 
                     @Override
                     public void close() {
-                        invoke(onClose);
-                    }
-
-                    private <T> void invoke(final Consumer<T> consumer, final T arg) {
-                        Optional.ofNullable(consumer).ifPresent(c -> c.accept(arg));
-                    }
-
-                    private void invoke(final Runnable runnable) {
-                        Optional.ofNullable(runnable).ifPresent(Runnable::run);
+                        onClose.run();
                     }
                 });
         reader.run();

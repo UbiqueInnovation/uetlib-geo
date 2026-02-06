@@ -11,8 +11,7 @@ import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 import ch.ubique.backend.geo.spatial.TypedStrTree;
 import ch.ubique.backend.geo.utils.InterpolationUtils;
 
-import org.jspecify.annotations.NonNull;
-
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.algorithm.LineIntersector;
 import org.locationtech.jts.algorithm.RobustLineIntersector;
 import org.locationtech.jts.geom.Coordinate;
@@ -37,8 +36,7 @@ public class LinesToGraphUtil<T> {
     private final LineIntersector lineIntersector;
 
     private LinesToGraphUtil(
-            @NonNull final Collection<LineWithInfo<T>> lines,
-            @NonNull final LinesToGraphConfig<T> config) {
+            final Collection<LineWithInfo<T>> lines, final LinesToGraphConfig<T> config) {
         this.config = config;
         this.lines = lines;
         this.graph = new Graph<>();
@@ -48,8 +46,7 @@ public class LinesToGraphUtil<T> {
     }
 
     public static <S> Graph<RoutingVertex, RoutingCompleteEdge> buildGraph(
-            @NonNull final Collection<LineWithInfo<S>> lines,
-            @NonNull final LinesToGraphConfig<S> config) {
+            final Collection<LineWithInfo<S>> lines, final LinesToGraphConfig<S> config) {
         final var builder = new LinesToGraphUtil<>(lines, config);
         builder.createGraph();
         builder.findIntersections();
@@ -248,7 +245,7 @@ public class LinesToGraphUtil<T> {
         return config.routingEdgeFunction().toRoutingEdge(cU, cV, info);
     }
 
-    private Coordinate intersection(
+    private @Nullable Coordinate intersection(
             final Edge<RoutingVertex, RoutingCompleteEdge> a,
             final Edge<RoutingVertex, RoutingCompleteEdge> b) {
         lineIntersector.computeIntersection(

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * For an example on how to subclass this, check out the definition of {@link FeatureCollection}.
@@ -20,9 +22,12 @@ public class GenericFeatureCollection<
 
     private static final String TYPE = "FeatureCollection";
 
-    private Collection<F> features;
+    private @Nullable Collection<F> features;
 
     public Collection<F> getFeatures() {
+        if (features == null) {
+            return List.of();
+        }
         return features;
     }
 
@@ -39,7 +44,7 @@ public class GenericFeatureCollection<
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("#features", features.size())
+                .append("#features", getFeatures().size())
                 .toString();
     }
 }

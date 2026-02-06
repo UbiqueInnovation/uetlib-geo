@@ -2,6 +2,8 @@ package ch.ubique.backend.geo.tile.raster.models;
 
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 
+import org.jspecify.annotations.Nullable;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,7 +11,7 @@ import java.util.Optional;
 
 import javax.imageio.ImageIO;
 
-public record RasterTile(TileInfo tileInfo, BufferedImage data) {
+public record RasterTile(TileInfo tileInfo, @Nullable BufferedImage data) {
 
     public static RasterTile empty(final TileInfo tileInfo) {
         return new RasterTile(tileInfo, null);

@@ -5,7 +5,7 @@ import ch.ubique.backend.geo.tile.common.models.TileLevelsDefinition;
 import ch.ubique.backend.geo.tile.common.models.ZoomLevel;
 import ch.ubique.backend.geo.tile.raster.models.RasterTile;
 
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -30,7 +31,7 @@ public abstract class RasterTileGenerator {
 
     private final double sourceTileWidth;
 
-    private final double[] customEmptyPixelValue;
+    private final double @Nullable [] customEmptyPixelValue;
 
     protected RasterTileGenerator(
             final TileLevelsDefinition levelsDefinition,
@@ -45,7 +46,7 @@ public abstract class RasterTileGenerator {
             final double sourceTileWidth,
             final double sourceTileHeight,
             final int outputResolution,
-            final double[] customEmptyPixelValue) {
+            final double @Nullable [] customEmptyPixelValue) {
         this.outputResolution = outputResolution;
         this.sourceTileWidth = sourceTileWidth;
         this.customEmptyPixelValue = customEmptyPixelValue;
@@ -63,7 +64,7 @@ public abstract class RasterTileGenerator {
             final TileInfo current,
             final Set<TileInfo> children) {
         for (final var child : children) {
-            pendingParents.get(child).remove(current);
+            Objects.requireNonNull(pendingParents.get(child)).remove(current);
             if (pendingParents.get(child).isEmpty()) {
                 pendingParents.remove(child);
                 ready.remove(child);
@@ -145,7 +146,6 @@ public abstract class RasterTileGenerator {
         }
     }
 
-    @NonNull
     private List<TileInfo> getTileTopLevelTileInfos() {
         final var maxLevel = levelsDefinition.minZoomLevel();
         return IntStream.range(0, maxLevel.tilesX())
@@ -198,12 +198,13 @@ public abstract class RasterTileGenerator {
             return RasterTile.empty(currentInfo);
         }
 
-        final var anyChild = nonEmptyChildren.getFirst();
-        final var colorModel = anyChild.data().getColorModel();
+        final var anyNonEmptyChild = nonEmptyChildren.getFirst();
+        final var anyNonEmptyData = Objects.requireNonNull(anyNonEmptyChild.data());
+        final var colorModel = anyNonEmptyData.getColorModel();
         final var raster =
                 colorModel.createCompatibleWritableRaster(outputResolution, outputResolution);
         final var data =
-                new BufferedImage(colorModel, raster, anyChild.data().isAlphaPremultiplied(), null);
+                new BufferedImage(colorModel, raster, anyNonEmptyData.isAlphaPremultiplied(), null);
 
         if (customEmptyPixelValue != null) {
             for (var x = 0; x < data.getWidth(); ++x) {
@@ -273,10 +274,11 @@ public abstract class RasterTileGenerator {
                             croppedHeight);
             final var affineTransform = new AffineTransform();
             affineTransform.translate(-leftCrop, -topCrop);
+            final var childData = Objects.requireNonNull(child.data());
             affineTransform.scale(
-                    1.0 * scaledWidth / child.data().getWidth(),
-                    1.0 * scaledHeight / child.data().getHeight());
-            RasterTransform.transform(child.data().getData(), target.getRaster(), affineTransform);
+                    1.0 * scaledWidth / childData.getWidth(),
+                    1.0 * scaledHeight / childData.getHeight());
+            RasterTransform.transform(childData.getData(), target.getRaster(), affineTransform);
         }
 
         return new RasterTile(currentInfo, data);

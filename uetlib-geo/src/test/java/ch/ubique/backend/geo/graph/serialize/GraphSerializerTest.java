@@ -11,8 +11,10 @@ import ch.ubique.backend.geo.geojson.models.jts.GenericFeature;
 import ch.ubique.backend.geo.graph.models.Edge;
 import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
+import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
 import ch.ubique.backend.geo.graph.utils.LinesGraphBuilder;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.locationtech.jts.geom.LineString;
@@ -40,17 +42,19 @@ class GraphSerializerTest {
         final var lines =
                 featureCollection.getFeatures().stream()
                         .map(GenericFeature::getGeometry)
-                        .map(LineString.class::cast);
+                        .map(LineString.class::cast)
+                        .map(Objects::requireNonNull)
+                        .map(line -> new LineWithInfo<>(line, ""));
 
         final var graph =
-                new LinesGraphBuilder<>(2, 5)
-                        .addLinesWithoutInfo(lines)
+                new LinesGraphBuilder<@NonNull String>(2, 5)
+                        .addLines(lines)
                         .createVerticesForIntersections()
                         .build(CoordinateSystems.WGS84);
 
         final var serialized = new GraphSerializer<>(graph).writeToBytes();
         final var deserializedGraph =
-                new GraphDeserializer<>(WGS84Coordinate.class, Object.class).read(serialized);
+                new GraphDeserializer<>(WGS84Coordinate.class, String.class).read(serialized);
         assertTrue(graphsEqual(graph, deserializedGraph));
     }
 

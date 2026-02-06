@@ -7,10 +7,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 import ch.ubique.backend.geo.geojson.models.jts.GenericFeature;
+import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
 import ch.ubique.backend.geo.graph.utils.LinesGraphBuilder;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.locationtech.jts.geom.LineString;
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.Objects;
 
 class VertexSpeedTest {
 
@@ -41,11 +44,13 @@ class VertexSpeedTest {
         final var lines =
                 featureCollection.getFeatures().stream()
                         .map(GenericFeature::getGeometry)
-                        .map(LineString.class::cast);
+                        .map(LineString.class::cast)
+                        .filter(Objects::nonNull)
+                        .map(line -> new LineWithInfo<@NonNull Object>(line, ""));
 
         final var graph =
                 new LinesGraphBuilder<>(2)
-                        .addLinesWithoutInfo(lines)
+                        .addLines(lines)
                         .createVerticesForIntersections()
                         .build(CoordinateSystems.WGS84);
         assertThat(graph).isNotNull();

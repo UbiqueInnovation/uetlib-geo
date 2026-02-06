@@ -16,7 +16,6 @@
 package ch.ubique.backend.geo.jackson.jts;
 
 import org.jspecify.annotations.Nullable;
-
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -39,7 +38,7 @@ import tools.jackson.databind.module.SimpleModule;
  */
 public class JtsModule extends SimpleModule {
 
-    private final GeometryFactory geometryFactory;
+    private final @Nullable GeometryFactory geometryFactory;
     private final int decimalPlaces;
 
     /** Creates a new {@link JtsModule}. */

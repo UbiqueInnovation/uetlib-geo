@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 import ch.ubique.backend.geo.geojson.models.jts.GenericFeature;
+import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.locationtech.jts.geom.LineString;
@@ -15,6 +17,7 @@ import org.locationtech.jts.geom.LineString;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.Objects;
 
 class LinesGraphBuilderTest {
 
@@ -35,19 +38,21 @@ class LinesGraphBuilderTest {
                 featureCollection.getFeatures().stream()
                         .map(GenericFeature::getGeometry)
                         .map(LineString.class::cast)
+                        .filter(Objects::nonNull)
+                        .map(line -> new LineWithInfo<>(line, ""))
                         .toList();
-        final var builder = new LinesGraphBuilder<>(2);
-        lines.forEach(builder::addLineWithoutInfo);
+        final var builder = new LinesGraphBuilder<@NonNull String>(2);
+        builder.addLines(lines);
         final var graph = builder.createVerticesForIntersections().build(CoordinateSystems.WGS84);
         assertNotNull(graph);
         assertFalse(graph.isEmpty());
         assertTrue(graph.getDirectedEdges().size() > featureCollection.getFeatures().size());
 
         final var graphWithDuplicateAddedLines =
-                new LinesGraphBuilder<>(2)
-                        .addLinesWithoutInfo(lines)
-                        .addLineWithoutInfo(lines.getFirst())
-                        .addLine(lines.getLast(), null)
+                new LinesGraphBuilder<@NonNull String>(2)
+                        .addLines(lines)
+                        .addLine(lines.getFirst())
+                        .addLine(lines.getLast())
                         .createVerticesForIntersections()
                         .build(CoordinateSystems.WGS84);
 
