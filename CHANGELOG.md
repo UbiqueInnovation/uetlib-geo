@@ -1,5 +1,19 @@
 # CHANGELOG
 
+
+
+## 3.0.0
+
+### Features
+
+- Use Jspecify and `@NullMarked` for module
+
+### Breaking Changes
+
+- Removed deprecated `GeoPackageParser`
+- Some method signatures changed for nullability compliance
+
+
 ## 2.2.0
 
 ### Improvements
@@ -19,7 +33,8 @@
 
 ### Breaking Changes
 
-- `ObjectMapperUtils` replaced by `JsonMapperUtils`. This one should not be used directly anymore in a Spring Boot App
+- `ObjectMapperUtils` replaced by `JsonMapperUtils`. This one should not be used directly anymore in
+  a Spring Boot App
   to create a bean. For that, use the new autoconfiguration in module `uetlib-spring-boot-geo`
   instead.
   registers the necessary `JsonMapper` config and your config has to define one of the available
@@ -34,8 +49,8 @@
   +     return new UetlibJacksonGeoJtsLv95JsonMapperBuilderCustomizer();
   + }
   ```
-  If you has additional customizations, add them as separate `JsonMapperBuilderCustomizer` beans. All these customizers
-  are applied to the Spring Boot autoconfigured bean.
+  If you have additional customizations, add them as separate `JsonMapperBuilderCustomizer` beans.
+  All these customizers are applied to the Spring Boot autoconfigured bean.
 
 ## 1.1.10
 

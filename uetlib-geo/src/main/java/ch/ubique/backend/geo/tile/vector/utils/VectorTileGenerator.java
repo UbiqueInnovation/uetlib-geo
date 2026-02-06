@@ -5,20 +5,19 @@ import ch.ubique.backend.geo.tile.common.encoder.TileEncoderFactory;
 import ch.ubique.backend.geo.tile.common.models.Tile;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.common.utils.TileGenerator;
+import ch.ubique.backend.geo.tile.processing.stats.TileSizeStatsUtil;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 
-import ch.ubique.backend.geo.tile.processing.stats.TileSizeStatsUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.jspecify.annotations.NonNull;
-
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
@@ -77,9 +76,8 @@ public class VectorTileGenerator implements TileGenerator {
         envelopeCache.invalidateAll();
     }
 
-    @NonNull
     private Collection<TileInfo> getTileInfos(
-            final int level, final Collection<ReferencedEnvelope> outputEnvelopes) {
+            final int level, @Nullable final Collection<ReferencedEnvelope> outputEnvelopes) {
         return output.config().tileLevelsDefinition().tileInfos(level, outputEnvelopes).toList();
     }
 
@@ -109,13 +107,11 @@ public class VectorTileGenerator implements TileGenerator {
         }
     }
 
-    @NonNull
     private VectorTile createTile(final TileInfo tileInfo) {
         final var elementsOnTile = elementsOnTile(tileInfo).toList();
         return new VectorTile(tileInfo, elementsOnTile);
     }
 
-    @NonNull
     private BinaryTile generateTile(final Tile tile) {
         final var encoder = TileEncoderFactory.getEncoder(output.config());
         return encoder.encode(tile);
@@ -126,7 +122,6 @@ public class VectorTileGenerator implements TileGenerator {
                 .ifPresent(consumer -> consumer.uncheck().accept(binaryTile));
     }
 
-    @NonNull
     private Stream<VectorTileElement> elementsOnTile(final TileInfo tileInfo) {
         final var level = tileInfo.level();
         final var tileEnvelope = tileInfo.envelope();

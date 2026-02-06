@@ -7,6 +7,7 @@ import static java.util.function.Predicate.not;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -15,17 +16,13 @@ import java.util.stream.Stream;
  * @param <V> type of the vertex properties
  * @param <E> type of the edge properties
  */
-public final class Vertex<V, E> {
+public final class Vertex<V extends @Nullable Object, E extends @Nullable Object> {
     private final int id;
 
     private Collection<Edge<V, E>> outgoingEdges;
     private Collection<Edge<V, E>> incomingEdges;
 
     private V properties;
-
-    public Vertex(final int id) {
-        this(id, null);
-    }
 
     public Vertex(final int id, final V properties) {
         this.id = id;
@@ -119,7 +116,7 @@ public final class Vertex<V, E> {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (this == o) {
             return true;
         }

@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.tile.vector.mapbox.tilejson.builder;
 import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.TileJsonVectorLayer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,9 +12,9 @@ import java.util.stream.Collectors;
 
 public class TileJsonVectorLayerBuilder {
     private final String id;
-    private String description;
-    private Integer minZoom;
-    private Integer maxZoom;
+    private @Nullable String description;
+    private @Nullable Integer minZoom;
+    private @Nullable Integer maxZoom;
     private final Map<String, TileJsonVectorLayerFieldBuilder> fieldValuesBuilder =
             new ConcurrentHashMap<>();
 

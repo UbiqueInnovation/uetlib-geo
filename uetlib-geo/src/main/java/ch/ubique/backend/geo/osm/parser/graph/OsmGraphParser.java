@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class OsmGraphParser {
 
@@ -85,8 +86,8 @@ public class OsmGraphParser {
         final var properties = new OsmEdgeProperties(tags);
 
         for (var i = 0; i < nodeIds.size() - 1; ++i) {
-            final var u = nodeIdToVertexId.get(nodeIds.get(i));
-            final var v = nodeIdToVertexId.get(nodeIds.get(i + 1));
+            final int u = Objects.requireNonNull(nodeIdToVertexId.get(nodeIds.get(i)));
+            final int v = Objects.requireNonNull(nodeIdToVertexId.get(nodeIds.get(i + 1)));
 
             final var existingEdge = graph.getEdge(u, v);
             if (existingEdge.isPresent()) {

@@ -7,21 +7,22 @@ import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.gdal.common.GdalDataSetFormat;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.*;
 
 public final class GdalWarpOptions {
-    private Collection<String> sourceNoDataValues;
-    private Collection<String> targetNoDataValues;
-    private WidthAndHeight<Integer> targetSize;
-    private GdalResamplingMethod resamplingMethod;
-    private String sourceSpatialReferenceSystem;
-    private String targetSpatialReferenceSystem;
-    private GdalDataSetFormat outputFormat;
-    private Path sourcePath;
-    private Path targetPath;
-    private List<String> additionalArguments;
+    private @Nullable Collection<String> sourceNoDataValues;
+    private @Nullable Collection<String> targetNoDataValues;
+    private @Nullable WidthAndHeight<Integer> targetSize;
+    private @Nullable GdalResamplingMethod resamplingMethod;
+    private @Nullable String sourceSpatialReferenceSystem;
+    private @Nullable String targetSpatialReferenceSystem;
+    private @Nullable GdalDataSetFormat outputFormat;
+    private @Nullable Path sourcePath;
+    private @Nullable Path targetPath;
+    private @Nullable List<String> additionalArguments;
 
     private GdalWarpOptions() {}
 

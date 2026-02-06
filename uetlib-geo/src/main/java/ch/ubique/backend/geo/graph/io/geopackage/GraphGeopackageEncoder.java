@@ -31,7 +31,9 @@ import java.nio.file.Files;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoCloseable {
 
@@ -40,7 +42,7 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
     private final GeoPackage geoPackage;
     private final ObjectMapper objectMapper;
 
-    private String layerPrefix;
+    private @Nullable String layerPrefix;
 
     public GraphGeopackageEncoder(
             final Function<V, C> vertexToCoordinate, final CoordinateSystem<C> coordinateSystem)
@@ -190,17 +192,20 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
         return bounds;
     }
 
-    private Map<String, Object> toMap(final Object object) {
+    private Map<String, Object> toMap(final @Nullable Object object) {
+        if (object == null) {
+            return Map.of();
+        }
         return objectMapper
-                .convertValue(object, new TypeReference<Map<String, Object>>() {})
+                .convertValue(object, new TypeReference<Map<String, @Nullable Object>>() {})
                 .entrySet()
                 .stream()
                 .map(e -> Pair.of(e.getKey(), serializeAttributeValue(e.getValue())))
                 .filter(e -> e.getValue() != null)
-                .collect(MapCollectors.entriesToMap());
+                .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
     }
 
-    private Object serializeAttributeValue(final Object value) {
+    private @Nullable Object serializeAttributeValue(final @Nullable Object value) {
         return switch (value) {
             case null -> null;
             case final Boolean bool -> bool;
@@ -215,7 +220,7 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
     }
 
     @SuppressWarnings("java:S5443")
-    private static File getOrCreateFile(final File targetFile) throws IOException {
+    private static File getOrCreateFile(final @Nullable File targetFile) throws IOException {
         if (targetFile != null) {
             return targetFile;
         } else {

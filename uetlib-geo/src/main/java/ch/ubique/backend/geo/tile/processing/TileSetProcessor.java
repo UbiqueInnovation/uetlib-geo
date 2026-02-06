@@ -1,9 +1,9 @@
 package ch.ubique.backend.geo.tile.processing;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 
-import ch.ubique.backend.core.utils.MapCollectors;
 import ch.ubique.backend.core.utils.ProgressLogger;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.processing.tasks.TileSetTask;
@@ -14,7 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class TileSetProcessor implements AutoCloseable {
 
@@ -65,13 +67,14 @@ public class TileSetProcessor implements AutoCloseable {
             final var levelCounts =
                     task.selectedTiles().stream().collect(groupingBy(TileInfo::level, counting()));
             this.progressLoggers =
-                    levelCounts.keySet().stream()
+                    levelCounts.entrySet().stream()
                             .collect(
-                                    MapCollectors.toMapWithValueMapper(
-                                            level ->
+                                    Collectors.toMap(
+                                            Entry::getKey,
+                                            e ->
                                                     new ProgressLogger(
-                                                            "Level " + level + ": ",
-                                                            levelCounts.get(level))));
+                                                            "Level " + e.getKey() + ": ",
+                                                            e.getValue())));
         }
 
         private Runnable createRunnable(final TileInfo tileInfo) {
@@ -81,7 +84,8 @@ public class TileSetProcessor implements AutoCloseable {
         private void runForTile(final TileInfo tileInfo) {
             try {
                 task.execute(tileInfo);
-                progressLoggers.get(tileInfo.level()).step();
+                final var progressLogger = requireNonNull(progressLoggers.get(tileInfo.level()));
+                progressLogger.step();
             } catch (final Exception e) {
                 logger.info("Could not run task for {}: {}", tileInfo, e.getMessage());
                 thrownExceptions.put(tileInfo, e);

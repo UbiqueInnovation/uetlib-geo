@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.geom.Geometry;
 
 /**
@@ -16,15 +17,15 @@ import org.locationtech.jts.geom.Geometry;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GenericFeature<P, T extends GenericFeature<P, T>> {
 
-    @JsonInclude private String id;
+    @JsonInclude private @Nullable String id;
 
     @JsonInclude private String type = "Feature";
 
-    @JsonInclude private P properties;
+    @JsonInclude private @Nullable P properties;
 
-    @JsonInclude private Geometry geometry;
+    @JsonInclude private @Nullable Geometry geometry;
 
-    public String getId() {
+    public @Nullable String getId() {
         return id;
     }
 
@@ -34,7 +35,7 @@ public class GenericFeature<P, T extends GenericFeature<P, T>> {
         return (T) this;
     }
 
-    public P getProperties() {
+    public @Nullable P getProperties() {
         return properties;
     }
 
@@ -44,7 +45,7 @@ public class GenericFeature<P, T extends GenericFeature<P, T>> {
         return (T) this;
     }
 
-    public Geometry getGeometry() {
+    public @Nullable Geometry getGeometry() {
         return geometry;
     }
 

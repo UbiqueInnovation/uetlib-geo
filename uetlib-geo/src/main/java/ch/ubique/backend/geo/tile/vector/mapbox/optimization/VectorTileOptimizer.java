@@ -51,8 +51,9 @@ public class VectorTileOptimizer {
         }
 
         final var combinedFeatures =
-                positions.keySet().stream()
-                        .sorted(Comparator.comparing(key -> average(positions.get(key))))
+                positions.entrySet().stream()
+                        .sorted(Comparator.comparing(entry -> average(entry.getValue())))
+                        .map(Map.Entry::getKey)
                         .map(groups::get)
                         .flatMap(VectorTileOptimizer::combineGeometries)
                         .toList();

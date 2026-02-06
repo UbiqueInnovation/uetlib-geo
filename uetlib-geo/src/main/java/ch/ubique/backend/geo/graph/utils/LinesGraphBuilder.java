@@ -18,9 +18,8 @@ import ch.ubique.backend.geo.graph.routing.utils.Snapping3dPointIndex;
 import ch.ubique.backend.geo.spatial.TypedStrTree;
 import ch.ubique.backend.geo.utils.InterpolationUtils;
 
-import org.jspecify.annotations.NonNull;
-
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.algorithm.LineIntersector;
 import org.locationtech.jts.algorithm.RobustLineIntersector;
 import org.locationtech.jts.geom.Coordinate;
@@ -51,7 +50,7 @@ public class LinesGraphBuilder<E> {
     private final LineIntersector lineIntersector;
     private final double snapTolerance;
     private final ToIntFunction<E> levelExtractor;
-    private CoordinateReferenceSystem crs;
+    private @Nullable CoordinateReferenceSystem crs;
 
     public LinesGraphBuilder(final double snapTolerance) {
         this(snapTolerance, Graph.DEFAULT_GRAPH_ID);
@@ -66,7 +65,9 @@ public class LinesGraphBuilder<E> {
     }
 
     public LinesGraphBuilder(
-            final double snapTolerance, final long graphId, final ToIntFunction<E> levelExtractor) {
+            final double snapTolerance,
+            final long graphId,
+            @Nullable final ToIntFunction<E> levelExtractor) {
         this(false, snapTolerance, graphId, levelExtractor);
     }
 
@@ -74,7 +75,7 @@ public class LinesGraphBuilder<E> {
             final boolean isDirected,
             final double snapTolerance,
             final long graphId,
-            final ToIntFunction<E> levelExtractor) {
+            final @Nullable ToIntFunction<E> levelExtractor) {
         this.isDirected = isDirected;
         this.snapTolerance = snapTolerance;
         this.levelExtractor = requireNonNullElse(levelExtractor, ignored -> 0);
@@ -95,7 +96,7 @@ public class LinesGraphBuilder<E> {
     }
 
     public <C extends ch.ubique.backend.geo.coordinate.models.Coordinate> Graph<C, E> build(
-            @NonNull final CoordinateSystem<C> targetCrs) {
+            final CoordinateSystem<C> targetCrs) {
         final var sourceConverter = JtsConverter.forCrs(requireNonNullElse(crs, WGS84.crs()));
         final var targetConverter = JtsConverter.forClass(targetCrs.coordinateClass());
         return build().map(
@@ -103,10 +104,6 @@ public class LinesGraphBuilder<E> {
                                 targetConverter.transform(
                                         sourceConverter.toBackendLib(vertex.getProperties())),
                         Edge::getProperties);
-    }
-
-    public LinesGraphBuilder<E> addLineWithoutInfo(final LineString lineString) {
-        return addLine(lineString, null);
     }
 
     public LinesGraphBuilder<E> addLine(final LineString lineString, final E info) {
@@ -149,15 +146,6 @@ public class LinesGraphBuilder<E> {
 
     public LinesGraphBuilder<E> addLines(final Collection<LineWithInfo<E>> lines) {
         return addLines(lines.stream());
-    }
-
-    public LinesGraphBuilder<E> addLinesWithoutInfo(final Stream<LineString> lines) {
-        lines.forEach(this::addLineWithoutInfo);
-        return this;
-    }
-
-    public LinesGraphBuilder<E> addLinesWithoutInfo(final Collection<LineString> lines) {
-        return addLinesWithoutInfo(lines.stream());
     }
 
     public LinesGraphBuilder<E> createVerticesForIntersections() {
@@ -307,7 +295,8 @@ public class LinesGraphBuilder<E> {
         return new Envelope(edge.getU().getProperties(), edge.getV().getProperties());
     }
 
-    private Coordinate intersection(final Edge<Coordinate, E> a, final Edge<Coordinate, E> b) {
+    private @Nullable Coordinate intersection(
+            final Edge<Coordinate, E> a, final Edge<Coordinate, E> b) {
         lineIntersector.computeIntersection(
                 a.getFrom().getProperties(),
                 a.getTo().getProperties(),

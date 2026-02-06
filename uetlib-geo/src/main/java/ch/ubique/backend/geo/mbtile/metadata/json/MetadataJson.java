@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotEmpty;
 
+import org.jspecify.annotations.NullUnmarked;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +18,7 @@ import java.util.List;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@NullUnmarked
 public class MetadataJson {
 
     @JsonProperty("vector_layers")
@@ -30,22 +33,22 @@ public class MetadataJson {
         return vectorLayers;
     }
 
-    public void setVectorLayers(List<VectorLayer> vectorLayers) {
+    public void setVectorLayers(final List<VectorLayer> vectorLayers) {
         this.vectorLayers = vectorLayers;
     }
 
-    public void addVectorLayer(VectorLayer vectorLayer) {
-        if (this.vectorLayers == null) {
+    public void addVectorLayer(final VectorLayer vectorLayer) {
+        if (vectorLayers == null) {
             this.vectorLayers = new ArrayList<>();
         }
-        this.vectorLayers.add(vectorLayer);
+        vectorLayers.add(vectorLayer);
     }
 
     public Tilestats getTilestats() {
         return tilestats;
     }
 
-    public void setTilestats(Tilestats tilestats) {
+    public void setTilestats(final Tilestats tilestats) {
         this.tilestats = tilestats;
     }
 }

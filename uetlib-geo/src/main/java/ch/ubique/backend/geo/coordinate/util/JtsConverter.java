@@ -10,8 +10,6 @@ import ch.ubique.backend.geo.geojson.models.jts.GenericFeature;
 import ch.ubique.backend.geo.geojson.models.jts.GenericFeatureCollection;
 import ch.ubique.backend.geo.utils.transform.JtsTransform;
 
-import org.jspecify.annotations.NonNull;
-
 import org.eclipse.emf.common.util.WrappedException;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -21,6 +19,7 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.transform.PassThroughTransform;
+import org.jspecify.annotations.NonNull;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.Coordinate;
 
@@ -164,7 +163,11 @@ public class JtsConverter<C extends ch.ubique.backend.geo.coordinate.models.Coor
 
     /** Transforms the given feature into the current spatial reference system. */
     public <F extends GenericFeature<P, F>, P> F transform(final F feature) {
-        final var transformedGeometry = transform(feature.getGeometry());
+        final var geometry = feature.getGeometry();
+        if (geometry == null) {
+            return feature;
+        }
+        final var transformedGeometry = transform(geometry);
         return feature.setGeometry(transformedGeometry);
     }
 

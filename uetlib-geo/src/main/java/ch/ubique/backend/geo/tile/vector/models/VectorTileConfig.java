@@ -1,5 +1,10 @@
 package ch.ubique.backend.geo.tile.vector.models;
 
+import static ch.ubique.backend.core.utils.NumberUtils.requirePositive;
+
+import static java.util.Objects.requireNonNull;
+
+import ch.ubique.backend.core.jackson.JsonMapperUtils;
 import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.constants.WebMercatorTileDefinitions;
 import ch.ubique.backend.geo.tile.common.constants.Wgs84TileDefinitions;
@@ -8,26 +13,22 @@ import ch.ubique.backend.geo.tile.common.models.TileOutputFormat;
 import ch.ubique.backend.geo.tile.common.models.YAxisDirection;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileGenerator;
 
-import tools.jackson.databind.ObjectMapper;
-
-import org.jspecify.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.event.Level;
+
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static ch.ubique.backend.core.utils.NumberUtils.requirePositive;
-import static java.util.Objects.requireNonNull;
-
 public record VectorTileConfig(
-        @NonNull YAxisDirection yAxisDirection,
-        @NonNull TileLevelsDefinition tileLevelsDefinition,
+        YAxisDirection yAxisDirection,
+        TileLevelsDefinition tileLevelsDefinition,
         @Nullable Integer maxElementsPerTile,
         @PositiveOrZero double simplifyTolerance,
         @PositiveOrZero double smoothing,
@@ -35,12 +36,12 @@ public record VectorTileConfig(
         boolean validateElements,
         boolean validateGeometryAtEveryStep,
         boolean checkCoordinateSystemBounds,
-        @NonNull Level emptyGeometryLogLevel,
+        Level emptyGeometryLogLevel,
         @Positive int extent,
-        @NonNull TileOutputFormat outputFormat,
+        TileOutputFormat outputFormat,
         @Nullable Collection<ReferencedEnvelope> outputEnvelopes,
-        @NonNull Set<Integer> zoomLevels,
-        @NonNull ObjectMapper objectMapper,
+        Set<Integer> zoomLevels,
+        ObjectMapper objectMapper,
         @Positive int vectorTileGeneratorParallelism) {
 
     public static VectorTileConfigBuilder lv95() {
@@ -82,14 +83,14 @@ public record VectorTileConfig(
         if (isMaxZoomLevel) {
             return Optional.empty();
         } else {
-            return Optional.ofNullable(maxElementsPerTile);
+            return Optional.<Integer>ofNullable(maxElementsPerTile);
         }
     }
 
     public static class VectorTileConfigBuilder {
         private YAxisDirection yAxisDirection = YAxisDirection.DOWN;
-        private TileLevelsDefinition tileLevelsDefinition;
-        private Integer maxElementsPerTile;
+        private @Nullable TileLevelsDefinition tileLevelsDefinition;
+        private @Nullable Integer maxElementsPerTile;
         private double simplifyTolerance;
         private double smoothing;
         private int clipBuffer;
@@ -98,21 +99,21 @@ public record VectorTileConfig(
         private boolean checkCoordinateSystemBounds = true;
         private int extent = 4096;
         private TileOutputFormat outputFormat = TileOutputFormat.PBF;
-        private Collection<ReferencedEnvelope> outputEnvelopes;
-        private Set<Integer> zoomLevels;
-        private ObjectMapper objectMapper;
+        private Collection<ReferencedEnvelope> outputEnvelopes = new ArrayList<>();
+        private Set<Integer> zoomLevels = new HashSet<>();
+        private ObjectMapper objectMapper = JsonMapperUtils.jsonMapper();
         private Level emptyGeometryLogLevel = Level.WARN;
         private int vectorTileGeneratorParallelism = 64;
 
         private VectorTileConfigBuilder() {}
 
-        private VectorTileConfigBuilder(@NonNull final YAxisDirection yAxisDirection) {
+        private VectorTileConfigBuilder(final YAxisDirection yAxisDirection) {
             requireNonNull(yAxisDirection, "yAxisDirection must be non-null");
             this.yAxisDirection = yAxisDirection;
         }
 
         public VectorTileConfigBuilder tileLevelsDefinition(
-                @NonNull final TileLevelsDefinition tileLevelsDefinition) {
+                final TileLevelsDefinition tileLevelsDefinition) {
             requireNonNull(tileLevelsDefinition, "tileLevelsDefinition must be non-null");
             this.tileLevelsDefinition = tileLevelsDefinition;
             return this;
@@ -181,7 +182,7 @@ public record VectorTileConfig(
             return this;
         }
 
-        public VectorTileConfigBuilder outputFormat(@NonNull final TileOutputFormat outputFormat) {
+        public VectorTileConfigBuilder outputFormat(final TileOutputFormat outputFormat) {
             requireNonNull(outputFormat, "outputFormat must be non-null");
             this.outputFormat = outputFormat;
             return this;
@@ -219,17 +220,15 @@ public record VectorTileConfig(
             return this;
         }
 
-        public VectorTileConfigBuilder objectMapper(@NonNull final ObjectMapper objectMapper) {
+        public VectorTileConfigBuilder objectMapper(final ObjectMapper objectMapper) {
             requireNonNull(objectMapper, "objectMapper must be non-null");
             this.objectMapper = objectMapper;
             return this;
         }
 
-        public VectorTileConfigBuilder emptyGeometryLogLevel(
-                @NonNull final Level emptyGeometryLogLevel) {
+        public VectorTileConfigBuilder emptyGeometryLogLevel(final Level emptyGeometryLogLevel) {
             this.emptyGeometryLogLevel =
-                    requireNonNull(
-                            emptyGeometryLogLevel, "emptyGeometryLogLevel must not be null");
+                    requireNonNull(emptyGeometryLogLevel, "emptyGeometryLogLevel must not be null");
             return this;
         }
 
@@ -248,16 +247,15 @@ public record VectorTileConfig(
             return this;
         }
 
-        private void validate() {
+        public VectorTileConfig build() {
             requireNonNull(yAxisDirection, "yAxisDirection must not be null");
+            requireNonNull(tileLevelsDefinition, "tileLevelsDefinition must not be null");
             requirePositive(extent, "extent must be positive");
             requireNonNull(outputFormat, "outputFormat must be positive");
             requireNonNull(emptyGeometryLogLevel, "emptyGeometryLogLevel must not be null");
-            requirePositive(vectorTileGeneratorParallelism, "vectorTileGeneratorParallelism must be positive");
-        }
-
-        public VectorTileConfig build() {
-            validate();
+            requirePositive(
+                    vectorTileGeneratorParallelism,
+                    "vectorTileGeneratorParallelism must be positive");
             return new VectorTileConfig(
                     yAxisDirection,
                     tileLevelsDefinition,

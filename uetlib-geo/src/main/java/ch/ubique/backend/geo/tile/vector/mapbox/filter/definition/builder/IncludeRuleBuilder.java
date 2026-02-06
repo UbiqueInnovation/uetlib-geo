@@ -4,15 +4,18 @@ import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterRule;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterRuleType;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.TagFilterRule;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class IncludeRuleBuilder implements FilterRuleBuilder {
 
-    private TagFilterRule tagRule;
-    protected Collection<String> layers;
-    protected Map<String, Object> tags;
+    private @Nullable TagFilterRule tagRule;
+    protected @Nullable Collection<String> layers;
+    protected @Nullable Map<String, Object> tags;
 
     public IncludeRuleBuilder layer(final String layer) {
         return layers(layer);
@@ -43,6 +46,10 @@ public class IncludeRuleBuilder implements FilterRuleBuilder {
 
     @Override
     public FilterRule build() {
-        return new FilterRule(FilterRuleType.INCLUDE, layers, tags, tagRule);
+        return new FilterRule(
+                FilterRuleType.INCLUDE,
+                Objects.requireNonNullElseGet(layers, List::of),
+                Objects.requireNonNullElseGet(tags, Map::of),
+                tagRule);
     }
 }

@@ -4,10 +4,9 @@ import ch.ubique.backend.core.utils.IntervalUtils;
 import ch.ubique.backend.geo.coordinate.models.Coordinate;
 import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 
-import org.jspecify.annotations.NonNull;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.geom.Envelope;
 
 import java.util.ArrayList;
@@ -26,7 +25,8 @@ import java.util.stream.Stream;
  */
 public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels) {
 
-    public TileLevelsDefinition(final Coordinate origin, final List<ZoomLevel> zoomLevels) {
+    public TileLevelsDefinition(
+            final Coordinate origin, final @Nullable List<ZoomLevel> zoomLevels) {
         if (zoomLevels == null || zoomLevels.isEmpty()) {
             throw new IllegalArgumentException("Zoom levels are not allowed to be null or empty");
         }
@@ -145,7 +145,6 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
     }
 
     /** Return given zoom level object */
-    @NonNull
     public ZoomLevel getZoomLevel(final int level) {
         return getZoomLevelOptional(level).orElseThrow();
     }
@@ -176,7 +175,8 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
      * Returns a collection of all tile infos at level otherLevel that overlap with the given
      * TileInfo
      */
-    private Set<TileInfo> overlappingTileInfos(final TileInfo current, final ZoomLevel otherLevel) {
+    private Set<TileInfo> overlappingTileInfos(
+            final TileInfo current, final @Nullable ZoomLevel otherLevel) {
         if (otherLevel == null) {
             return Set.of();
         }
@@ -225,7 +225,7 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
     }
 
     public Stream<TileInfo> tileInfos(
-            final int level, final Collection<ReferencedEnvelope> outputEnvelopes) {
+            final int level, final @Nullable Collection<ReferencedEnvelope> outputEnvelopes) {
         if (CollectionUtils.isEmpty(outputEnvelopes)) {
             return tileInfos(level);
         }
@@ -233,7 +233,8 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
         return outputEnvelopes.stream().flatMap(envelope -> tileInfos(level, envelope)).distinct();
     }
 
-    public Stream<TileInfo> tileInfos(final int level, final ReferencedEnvelope outputEnvelope) {
+    public Stream<TileInfo> tileInfos(
+            final int level, final @Nullable ReferencedEnvelope outputEnvelope) {
         if (outputEnvelope == null) {
             return tileInfos(level);
         }

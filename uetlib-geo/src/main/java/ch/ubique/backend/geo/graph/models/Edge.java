@@ -1,9 +1,8 @@
 package ch.ubique.backend.geo.graph.models;
 
-import org.jspecify.annotations.NonNull;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -11,18 +10,14 @@ import java.util.Optional;
  * @param <V> type of the vertex properties
  * @param <E> type of the edge properties
  */
-public final class Edge<V, E> {
+public final class Edge<V extends @Nullable Object, E extends @Nullable Object> {
 
     private final Vertex<V, E> u;
     private final Vertex<V, E> v;
 
     private E properties;
 
-    public Edge(@NonNull final Vertex<V, E> u, @NonNull final Vertex<V, E> v) {
-        this(u, v, null);
-    }
-
-    public Edge(@NonNull final Vertex<V, E> u, @NonNull final Vertex<V, E> v, final E properties) {
+    public Edge(final Vertex<V, E> u, final Vertex<V, E> v, final E properties) {
         this.u = u;
         this.v = v;
         this.properties = properties;
