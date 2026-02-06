@@ -5,11 +5,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.jspecify.annotations.NullUnmarked;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@NullUnmarked
 public class Tilestats {
 
     @JsonProperty("layerCount")
@@ -22,7 +25,7 @@ public class Tilestats {
         return layerCount;
     }
 
-    public void setLayerCount(Integer layerCount) {
+    public void setLayerCount(final Integer layerCount) {
         this.layerCount = layerCount;
     }
 
@@ -30,14 +33,14 @@ public class Tilestats {
         return layers;
     }
 
-    public void setLayers(List<Layer> layers) {
+    public void setLayers(final List<Layer> layers) {
         this.layers = layers;
     }
 
-    public void addLayer(Layer layer) {
-        if (this.layers == null) {
+    public void addLayer(final Layer layer) {
+        if (layers == null) {
             this.layers = new ArrayList<>();
         }
-        this.layers.add(layer);
+        layers.add(layer);
     }
 }

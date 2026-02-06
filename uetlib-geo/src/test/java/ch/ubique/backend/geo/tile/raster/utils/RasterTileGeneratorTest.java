@@ -4,6 +4,7 @@ import ch.ubique.backend.geo.tile.common.constants.SwissConstants;
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
 import ch.ubique.backend.geo.tile.raster.models.RasterTile;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class RasterTileGeneratorTest {
         final var generator =
                 new RasterTileGenerator(tileLevelsDefinition, sourceTileSize, sourceTileSize, 256) {
                     @Override
-                    protected RasterTile getSourceTile(final TileInfo tileInfo) {
+                    protected @NonNull RasterTile getSourceTile(final @NonNull TileInfo tileInfo) {
                         Assertions.assertFalse(queriedSourceTiles.contains(tileInfo));
                         queriedSourceTiles.add(tileInfo);
                         return tileWithRandomColor(tileInfo);
@@ -77,12 +78,12 @@ class RasterTileGeneratorTest {
                 new RasterTileGenerator(
                         tileLevelsDefinition, sourceTileSize, sourceTileSize, outputResolution) {
                     @Override
-                    protected RasterTile getSourceTile(final TileInfo tileInfo) {
+                    protected @NonNull RasterTile getSourceTile(final @NonNull TileInfo tileInfo) {
                         return tileWithRandomColor(tileInfo);
                     }
 
                     @Override
-                    protected void onTileGenerated(final RasterTile rasterTile) {
+                    protected void onTileGenerated(final @NonNull RasterTile rasterTile) {
                         generatedTiles.add(rasterTile);
                     }
                 };

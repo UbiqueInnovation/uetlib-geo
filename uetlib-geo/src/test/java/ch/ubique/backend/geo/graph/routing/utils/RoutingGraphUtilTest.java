@@ -7,10 +7,13 @@ import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
 import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 
+@NullMarked
 class RoutingGraphUtilTest {
 
     private static void routingGraphTests(
@@ -30,24 +33,24 @@ class RoutingGraphUtilTest {
 
     @Test
     void testSimple() {
-        final var testGraph = new Graph<Coordinate, RoutingCompleteEdge>();
+        final var testGraph = new Graph<Coordinate, @Nullable RoutingCompleteEdge>();
 
         testGraph.addVertex(0, new WGS84Coordinate(0, 0).toJts());
         testGraph.addVertex(1, new WGS84Coordinate(0, 1).toJts());
         testGraph.addVertex(2, new WGS84Coordinate(1, 0).toJts());
         testGraph.addVertex(3, new WGS84Coordinate(1, 1).toJts());
 
-        testGraph.getOrAddUndirectedEdge(0, 1);
-        testGraph.getOrAddUndirectedEdge(1, 2);
-        testGraph.getOrAddUndirectedEdge(2, 3);
-        testGraph.getOrAddUndirectedEdge(3, 0);
+        testGraph.getOrAddUndirectedEdge(0, 1, null);
+        testGraph.getOrAddUndirectedEdge(1, 2, null);
+        testGraph.getOrAddUndirectedEdge(2, 3, null);
+        testGraph.getOrAddUndirectedEdge(3, 0, null);
 
         routingGraphTests(toRoutingGraph(testGraph));
     }
 
     @Test
     void test() {
-        final var testGraph = new Graph<Coordinate, RoutingCompleteEdge>();
+        final var testGraph = new Graph<Coordinate, @Nullable RoutingCompleteEdge>();
 
         testGraph.addVertex(0, new WGS84Coordinate(0, 0).toJts());
         testGraph.addVertex(1, new WGS84Coordinate(0, 1).toJts());
@@ -58,16 +61,16 @@ class RoutingGraphUtilTest {
         testGraph.addVertex(6, new WGS84Coordinate(4, 9).toJts());
         testGraph.addVertex(7, new WGS84Coordinate(5, 11).toJts());
 
-        testGraph.getOrAddUndirectedEdge(0, 1);
-        testGraph.getOrAddUndirectedEdge(1, 2);
-        testGraph.getOrAddUndirectedEdge(2, 3);
-        testGraph.getOrAddUndirectedEdge(3, 0);
-        testGraph.getOrAddUndirectedEdge(0, 2);
-        testGraph.getOrAddUndirectedEdge(0, 5);
-        testGraph.getOrAddUndirectedEdge(5, 4);
-        testGraph.getOrAddUndirectedEdge(5, 5);
-        testGraph.getOrAddUndirectedEdge(5, 6);
-        testGraph.getOrAddUndirectedEdge(5, 7);
+        testGraph.getOrAddUndirectedEdge(0, 1, null);
+        testGraph.getOrAddUndirectedEdge(1, 2, null);
+        testGraph.getOrAddUndirectedEdge(2, 3, null);
+        testGraph.getOrAddUndirectedEdge(3, 0, null);
+        testGraph.getOrAddUndirectedEdge(0, 2, null);
+        testGraph.getOrAddUndirectedEdge(0, 5, null);
+        testGraph.getOrAddUndirectedEdge(5, 4, null);
+        testGraph.getOrAddUndirectedEdge(5, 5, null);
+        testGraph.getOrAddUndirectedEdge(5, 6, null);
+        testGraph.getOrAddUndirectedEdge(5, 7, null);
 
         routingGraphTests(toRoutingGraph(testGraph));
     }

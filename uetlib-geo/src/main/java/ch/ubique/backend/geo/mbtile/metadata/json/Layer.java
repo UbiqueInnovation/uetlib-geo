@@ -5,11 +5,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.jspecify.annotations.NullUnmarked;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@NullUnmarked
 public class Layer {
 
     @SuppressWarnings("java:S1700")
@@ -32,7 +35,7 @@ public class Layer {
         return layer;
     }
 
-    public void setLayer(String layer) {
+    public void setLayer(final String layer) {
         this.layer = layer;
     }
 
@@ -40,7 +43,7 @@ public class Layer {
         return count;
     }
 
-    public void setCount(Integer count) {
+    public void setCount(final Integer count) {
         this.count = count;
     }
 
@@ -48,7 +51,7 @@ public class Layer {
         return geometry;
     }
 
-    public void setGeometry(String geometry) {
+    public void setGeometry(final String geometry) {
         this.geometry = geometry;
     }
 
@@ -56,7 +59,7 @@ public class Layer {
         return attributeCount;
     }
 
-    public void setAttributeCount(Integer attributeCount) {
+    public void setAttributeCount(final Integer attributeCount) {
         this.attributeCount = attributeCount;
     }
 
@@ -64,14 +67,14 @@ public class Layer {
         return attributes;
     }
 
-    public void setAttributes(List<Attribute> attributes) {
+    public void setAttributes(final List<Attribute> attributes) {
         this.attributes = attributes;
     }
 
-    public void addAttribute(Attribute attribute) {
-        if (this.attributes == null) {
+    public void addAttribute(final Attribute attribute) {
+        if (attributes == null) {
             this.attributes = new ArrayList<>();
         }
-        this.attributes.add(attribute);
+        attributes.add(attribute);
     }
 }

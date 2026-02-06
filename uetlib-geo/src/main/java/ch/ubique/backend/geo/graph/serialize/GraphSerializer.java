@@ -8,10 +8,9 @@ import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.graph.models.Vertex;
 import ch.ubique.backend.geo.jackson.JsonMapperJtsUtils;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jspecify.annotations.Nullable;
 
 import tools.jackson.databind.ObjectMapper;
 
@@ -19,7 +18,6 @@ import java.io.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 public final class GraphSerializer<V, E> {
@@ -88,15 +86,14 @@ public final class GraphSerializer<V, E> {
     private SerializableVertex toSerializable(
             final Vertex<V, E> vertex, final Map<V, Integer> indexMap) {
         return new SerializableVertex(
-                vertex.getId(),
-                Optional.ofNullable(vertex.getProperties()).map(indexMap::get).orElse(null));
+                vertex.getId(), Objects.requireNonNull(indexMap.get(vertex.getProperties())));
     }
 
     private SerializableEdge toSerializable(final Edge<V, E> edge, final Map<E, Integer> indexMap) {
         return new SerializableEdge(
                 edge.getU().getId(),
                 edge.getV().getId(),
-                Optional.ofNullable(edge.getProperties()).map(indexMap::get).orElse(null));
+                Objects.requireNonNull(indexMap.get(edge.getProperties())));
     }
 
     private static <E> Map<E, Integer> indexMap(final List<E> list) {

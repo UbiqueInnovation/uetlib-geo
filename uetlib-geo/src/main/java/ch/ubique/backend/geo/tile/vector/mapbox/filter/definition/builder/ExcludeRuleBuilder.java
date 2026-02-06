@@ -3,14 +3,17 @@ package ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.builder;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterRule;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterRuleType;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class ExcludeRuleBuilder implements FilterRuleBuilder {
 
-    protected Collection<String> layers;
-    protected Map<String, Object> tags;
+    protected @Nullable Collection<String> layers;
+    protected @Nullable Map<String, Object> tags;
 
     public ExcludeRuleBuilder layer(final String layer) {
         return layers(layer);
@@ -36,6 +39,10 @@ public class ExcludeRuleBuilder implements FilterRuleBuilder {
 
     @Override
     public FilterRule build() {
-        return new FilterRule(FilterRuleType.EXCLUDE, layers, tags, null);
+        return new FilterRule(
+                FilterRuleType.EXCLUDE,
+                Objects.requireNonNullElseGet(layers, List::of),
+                Objects.requireNonNullElseGet(tags, Map::of),
+                null);
     }
 }

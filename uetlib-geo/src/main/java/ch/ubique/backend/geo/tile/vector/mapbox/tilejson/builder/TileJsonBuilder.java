@@ -5,23 +5,26 @@ import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.TileJson;
 import ch.ubique.backend.geo.tile.vector.mapbox.tilejson.TileJsonCenter;
 
-import org.jspecify.annotations.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 
-import java.util.Comparator;
 import org.apache.commons.collections4.CollectionUtils;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@NullUnmarked
 public class TileJsonBuilder {
 
     private List<String> tiles;
     private String attribution;
-    private BoundingBox<WGS84Coordinate> bounds;
+    private BoundingBox<@NonNull WGS84Coordinate> bounds;
     private TileJsonCenter center;
     private List<String> data;
     private String description;
@@ -57,7 +60,7 @@ public class TileJsonBuilder {
         return this;
     }
 
-    public TileJsonBuilder bounds(@Nullable final BoundingBox<WGS84Coordinate> bounds) {
+    public TileJsonBuilder bounds(@Nullable final BoundingBox<@NonNull WGS84Coordinate> bounds) {
         this.bounds = bounds;
         return this;
     }

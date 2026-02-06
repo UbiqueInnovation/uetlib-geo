@@ -3,6 +3,7 @@ package ch.ubique.backend.geo.utils.duration;
 import ch.ubique.backend.core.utils.DurationUtils;
 
 import java.time.Duration;
+import org.jspecify.annotations.Nullable;
 
 public class BikeDuration {
 
@@ -16,7 +17,7 @@ public class BikeDuration {
     public static Duration calculateDuration(
             final double distance,
             final double elevationDiff,
-            final Double speed,
+            final @Nullable Double speed,
             final BikeType bikeType) {
 
         if (distance == 0) {
@@ -98,7 +99,7 @@ public class BikeDuration {
         return DurationUtils.ofFractionalSeconds(distance / vn);
     }
 
-    private static double vhKmh(final Double speed, final BikeType bikeType) {
+    private static double vhKmh(final @Nullable Double speed, final BikeType bikeType) {
         final var defaultSpeed = (bikeType == BikeType.MOUNTAIN_BIKE) ? 16.0 : 18.0;
 
         // Use the default speed if input is null

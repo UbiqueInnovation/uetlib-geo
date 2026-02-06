@@ -6,7 +6,7 @@ import ch.ubique.backend.geo.graph.models.Graph;
 import ch.ubique.backend.geo.jackson.JsonMapperJtsUtils;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
@@ -17,9 +17,8 @@ import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Optional;
 
-public final class GraphDeserializer<V, E> {
+public final class GraphDeserializer<V extends @Nullable Object, E extends @Nullable Object> {
 
     private final ObjectMapper objectMapper;
 
@@ -31,7 +30,7 @@ public final class GraphDeserializer<V, E> {
     }
 
     public GraphDeserializer(
-            final ObjectMapper objectMapper,
+            final @Nullable ObjectMapper objectMapper,
             final Class<V> vertexPropertyClass,
             final Class<E> edgePropertyClass) {
         this.objectMapper =
@@ -65,12 +64,12 @@ public final class GraphDeserializer<V, E> {
             public Type getType() {
                 return new ParameterizedType() {
                     @Override
-                    public Type @NonNull [] getActualTypeArguments() {
+                    public Type[] getActualTypeArguments() {
                         return new Type[] {vertexPropertyType, edgePropertyType};
                     }
 
                     @Override
-                    public @NonNull Type getRawType() {
+                    public Type getRawType() {
                         return SerializableGraph.class;
                     }
 
@@ -84,21 +83,15 @@ public final class GraphDeserializer<V, E> {
     }
 
     private void addVertex(
-            final Graph<V, E> graph,
-            final SerializableVertex vertex,
-            @NonNull final List<V> properties) {
-        graph.addVertex(
-                vertex.id(),
-                Optional.ofNullable(vertex.propertyKey()).map(properties::get).orElse(null));
+            final Graph<V, E> graph, final SerializableVertex vertex, final List<V> properties) {
+        graph.addVertex(vertex.id(), properties.get(vertex.propertyKey()));
     }
 
     private void addEdge(
-            final Graph<V, E> graph,
-            final SerializableEdge edge,
-            @NonNull final List<E> properties) {
+            final Graph<V, E> graph, final SerializableEdge edge, final List<E> properties) {
         graph.addDirectedEdge(
                 graph.getVertex(edge.u()).orElseThrow(),
                 graph.getVertex(edge.v()).orElseThrow(),
-                Optional.ofNullable(edge.propertyKey()).map(properties::get).orElse(null));
+                properties.get(edge.propertyKey()));
     }
 }
