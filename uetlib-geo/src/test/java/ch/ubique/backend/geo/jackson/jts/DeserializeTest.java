@@ -25,7 +25,7 @@ import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
-public class DeserializeTest {
+class DeserializeTest {
     private final ObjectMapper mapper;
 
     public DeserializeTest() {
@@ -33,7 +33,7 @@ public class DeserializeTest {
     }
 
     @Test
-    public void throws_for_invalid_coordinates() {
+    void throws_for_invalid_coordinates() {
         // GIVEN
         final var json =
                 "{\"multiPolygon\":{\"type\":\"MultiPolygon\","
@@ -51,7 +51,7 @@ public class DeserializeTest {
     }
 
     @Test
-    public void throws_for_invalid_coordinate_elements() {
+    void throws_for_invalid_coordinate_elements() {
         // GIVEN
         final var json = "{\"point\":{\"type\":\"Point\",\"coordinates\":[[1,2],[3,4]]}}}";
 
