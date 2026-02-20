@@ -6,17 +6,15 @@ import ch.ubique.backend.geo.mbtile.metadata.constants.MbtileFormat;
 import ch.ubique.backend.geo.mbtile.metadata.constants.MetadataKey;
 import ch.ubique.backend.geo.mbtile.metadata.json.MetadataJson;
 
-import tools.jackson.databind.ObjectMapper;
-
+import org.jspecify.annotations.Nullable;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.core.support.SqlBinaryValue;
-import org.springframework.jdbc.core.support.SqlLobValue;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.core.JacksonException;
 
-import java.sql.Types;
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -97,7 +95,7 @@ public class JdbcMbtileDataServiceImpl implements MbtileDataService {
                 new MapSqlParameterSource("name", key.getValue()));
     }
 
-    private Boolean metadataExists(final MetadataKey key) {
+    private @Nullable Boolean metadataExists(final MetadataKey key) {
         return jt.queryForObject(
                 "select exists(select * from metadata where name = :name)",
                 new MapSqlParameterSource("name", key.getValue()),

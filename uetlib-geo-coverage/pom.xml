@@ -13,6 +13,10 @@
 
     <artifactId>uetlib-geo-coverage</artifactId>
 
+        <properties>
+        <artifact-package-name>ch.ubique.backend.geo.coverage</artifact-package-name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>ch.ubique</groupId>
