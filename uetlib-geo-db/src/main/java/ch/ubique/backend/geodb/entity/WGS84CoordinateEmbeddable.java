@@ -5,6 +5,8 @@ import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
+import org.jspecify.annotations.Nullable;
+
 @Embeddable
 public class WGS84CoordinateEmbeddable {
 
@@ -15,12 +17,12 @@ public class WGS84CoordinateEmbeddable {
     private double longitude;
 
     @Column(name = "elevation")
-    private Double elevation;
+    private @Nullable Double elevation;
 
     public WGS84CoordinateEmbeddable() {}
 
     public WGS84CoordinateEmbeddable(
-            final double latitude, final double longitude, final Double elevation) {
+            final double latitude, final double longitude, final @Nullable Double elevation) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.elevation = elevation;
@@ -53,11 +55,11 @@ public class WGS84CoordinateEmbeddable {
         this.longitude = longitude;
     }
 
-    public Double getElevation() {
+    public @Nullable Double getElevation() {
         return elevation;
     }
 
-    public void setElevation(final Double elevation) {
+    public void setElevation(final @Nullable Double elevation) {
         this.elevation = elevation;
     }
 }

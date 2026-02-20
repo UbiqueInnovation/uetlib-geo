@@ -5,6 +5,8 @@ import ch.ubique.backend.geo.coordinate.models.LV03Coordinate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
+import org.jspecify.annotations.Nullable;
+
 @Embeddable
 public class LV03CoordinateEmbeddable {
 
@@ -15,11 +17,12 @@ public class LV03CoordinateEmbeddable {
     private double north;
 
     @Column(name = "elevation")
-    private Double elevation;
+    private @Nullable Double elevation;
 
     public LV03CoordinateEmbeddable() {}
 
-    public LV03CoordinateEmbeddable(final double east, final double north, final Double elevation) {
+    public LV03CoordinateEmbeddable(
+            final double east, final double north, final @Nullable Double elevation) {
         this.east = east;
         this.north = north;
         this.elevation = elevation;
@@ -50,11 +53,11 @@ public class LV03CoordinateEmbeddable {
         this.north = north;
     }
 
-    public Double getElevation() {
+    public @Nullable Double getElevation() {
         return elevation;
     }
 
-    public void setElevation(final Double elevation) {
+    public void setElevation(final @Nullable Double elevation) {
         this.elevation = elevation;
     }
 }

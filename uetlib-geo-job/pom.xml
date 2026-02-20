@@ -13,6 +13,10 @@
 
     <artifactId>uetlib-geo-job</artifactId>
 
+    <properties>
+        <artifact-package-name>ch.ubique.backend.geojob</artifact-package-name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>ch.ubique</groupId>

@@ -86,6 +86,7 @@
                             <arg>-Xplugin:ErrorProne \
                                 -XepDisableAllChecks \
                                 -Xep:NullAway:ERROR \
+                                -Xep:RequireExplicitNullMarking:ERROR \
                                 -XepDisableWarningsInGeneratedCode \
                                 -XepExcludedPaths:.*/src/test/java/.* \
                                 -XepOpt:NullAway:TreatGeneratedAsUnannotated=true \
@@ -130,7 +131,7 @@
                     <groupId>de.westemeyer</groupId>
                     <artifactId>artifact-version-maven-plugin</artifactId>
                     <configuration>
-                        <packageName>ch.ubique.geo</packageName>
+                        <packageName>${artifact-package-name}</packageName>
                     </configuration>
                 </plugin>
             </plugins>
