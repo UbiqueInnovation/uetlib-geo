@@ -5,6 +5,8 @@ import ch.ubique.backend.geo.coordinate.models.WebMercatorCoordinate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
+import org.jspecify.annotations.Nullable;
+
 @Embeddable
 public class WebMercatorCoordinateEmbeddable {
 
@@ -15,11 +17,12 @@ public class WebMercatorCoordinateEmbeddable {
     private double y;
 
     @Column(name = "elevation")
-    private Double elevation;
+    private @Nullable Double elevation;
 
     public WebMercatorCoordinateEmbeddable() {}
 
-    public WebMercatorCoordinateEmbeddable(final double x, final double y, final Double elevation) {
+    public WebMercatorCoordinateEmbeddable(
+            final double x, final double y, final @Nullable Double elevation) {
         this.x = x;
         this.y = y;
         this.elevation = elevation;
@@ -53,11 +56,11 @@ public class WebMercatorCoordinateEmbeddable {
         this.y = y;
     }
 
-    public Double getElevation() {
+    public @Nullable Double getElevation() {
         return elevation;
     }
 
-    public void setElevation(final Double elevation) {
+    public void setElevation(final @Nullable Double elevation) {
         this.elevation = elevation;
     }
 }

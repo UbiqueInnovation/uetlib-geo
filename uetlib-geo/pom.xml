@@ -13,6 +13,10 @@
     <artifactId>uetlib-geo</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <artifact-package-name>ch.ubique.backend.geo</artifact-package-name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>ch.ubique</groupId>
