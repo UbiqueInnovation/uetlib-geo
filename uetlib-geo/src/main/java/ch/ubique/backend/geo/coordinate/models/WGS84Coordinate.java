@@ -4,6 +4,7 @@ import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -23,12 +24,14 @@ public record WGS84Coordinate(
                         maximum = "90",
                         example = "47.265",
                         description = "specifies the north–south position")
+                @JsonProperty(required = true)
                 double latitude,
         @Schema(
                         minimum = "-180",
                         maximum = "180",
                         example = "11.392",
                         description = "specifies the east–west position")
+                @JsonProperty(required = true)
                 double longitude,
         @Schema(
                         minimum = "-413",
