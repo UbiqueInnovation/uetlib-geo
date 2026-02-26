@@ -72,13 +72,13 @@ open module uetlib.geo {
     exports ch.ubique.backend.geo.utils;
     exports ch.ubique.backend.geo.utils.duration;
     exports ch.ubique.backend.geo.utils.transform;
-
     exports crosby.binary to
             osmosis.pbf2;
 
     requires static org.jspecify;
     requires static io.swagger.v3.oas.annotations;
     requires artifact.version.service;
+    requires artifact.version.core;
     requires com.github.benmanes.caffeine;
     requires com.google.common;
     requires com.pivovarit.function;
