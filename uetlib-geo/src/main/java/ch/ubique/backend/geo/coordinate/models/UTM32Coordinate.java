@@ -19,14 +19,14 @@ public record UTM32Coordinate(
                         maximum = "3473041.38",
                         example = "465596",
                         description = "specifies the east position")
-                @JsonProperty
+                @JsonProperty(required = true)
                 double east,
         @Schema(
                         minimum = "3638086.74",
                         maximum = "9494203.2",
                         example = "5228847",
                         description = "specifies the north position")
-                @JsonProperty
+                @JsonProperty(required = true)
                 double north,
         @Schema(
                         minimum = "-413",
