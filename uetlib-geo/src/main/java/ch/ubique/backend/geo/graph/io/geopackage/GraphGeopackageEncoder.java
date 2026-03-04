@@ -86,9 +86,10 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
         layer.setSrid(coordinateSystem.srid());
         geoPackage.create(layer, featureType);
         try (final var transaction = new DefaultTransaction()) {
-            final var writer = geoPackage.writer(layer, true, null, transaction);
-            for (final var vertex : graph.getVertices()) {
-                writeFeature(vertex, writer);
+            try (final var writer = geoPackage.writer(layer, true, null, transaction)) {
+                for (final var vertex : graph.getVertices()) {
+                    writeFeature(vertex, writer);
+                }
             }
             transaction.commit();
         }
@@ -101,9 +102,10 @@ public class GraphGeopackageEncoder<V, C extends Coordinate> implements AutoClos
         layer.setSrid(coordinateSystem.srid());
         geoPackage.create(layer, featureType);
         try (final var transaction = new DefaultTransaction()) {
-            final var writer = geoPackage.writer(layer, true, null, transaction);
-            for (final var edge : graph.getDirectedEdges()) {
-                writeFeature(edge, writer);
+            try (final var writer = geoPackage.writer(layer, true, null, transaction)) {
+                for (final var edge : graph.getDirectedEdges()) {
+                    writeFeature(edge, writer);
+                }
             }
             transaction.commit();
         }
