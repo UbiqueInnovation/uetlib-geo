@@ -8,8 +8,6 @@ import ch.ubique.backend.core.service.DataAndInput;
 import ch.ubique.backend.core.service.InputCollectionLoaderService;
 import ch.ubique.backend.geo.utils.GeotoolsUtils;
 
-import org.jspecify.annotations.NonNull;
-
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.FileUtils;
@@ -18,6 +16,7 @@ import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.api.filter.Filter;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.files.ShpFileType;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +33,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ShapefileParser implements InputCollectionLoaderService<SimpleFeature> {
 
@@ -156,22 +156,17 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
                         DataStoreFinder.getDataStore(
                                 Map.of("url", shapeFile.toFile().toURI().toURL()));
         dataStore.setCharset(StandardCharsets.UTF_8);
-
-        final var typeName = dataStore.getTypeNames()[0];
-
-        final var source = dataStore.getFeatureSource(typeName);
-        final var filter = Filter.INCLUDE;
-
-        final var featureIterator = source.getFeatures(filter).features();
-
-        final var features = GeotoolsUtils.stream(featureIterator).toList();
-
-        logger.debug("Parsed {} features", features.size());
-
-        featureIterator.close();
-        dataStore.dispose();
-
-        return features;
+        try {
+            final var typeName = dataStore.getTypeNames()[0];
+            final var source = dataStore.getFeatureSource(typeName);
+            final var filter = Filter.INCLUDE;
+            final var featureIterator = source.getFeatures(filter).features();
+            final var features = GeotoolsUtils.withIterator(featureIterator, Stream::toList);
+            logger.debug("Parsed {} features", features.size());
+            return features;
+        } finally {
+            dataStore.dispose();
+        }
     }
 
     private ByteFile toByteFile(final ArchiveEntry archiveEntry) throws IOException {
