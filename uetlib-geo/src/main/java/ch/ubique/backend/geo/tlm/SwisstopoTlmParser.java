@@ -53,42 +53,54 @@ public class SwisstopoTlmParser implements AutoCloseable {
 
     public static Collection<TlmPath> parsePaths(final FileProvider fileProvider)
             throws IOException {
-        try (final var parser = new SwisstopoTlmParser(fileProvider);
-                final var reader = parser.getReader("tlm_strassen_strasse")) {
-            return parser.parseLayer(reader)
-                    .map(f -> new TlmPath((LineString) f.geometry(), f.info().asPathInfo()))
-                    .toList();
+        try (final var parser = new SwisstopoTlmParser(fileProvider)) {
+            final var reader = parser.getReader("tlm_strassen_strasse");
+            return GeotoolsUtils.withReader(
+                    reader,
+                    stream ->
+                            stream.map(parser::parseFeature)
+                                    .map(
+                                            f ->
+                                                    new TlmPath(
+                                                            (LineString) f.geometry(),
+                                                            f.info().asPathInfo()))
+                                    .toList());
         }
     }
 
     public Collection<TlmFeature<LineString, TlmPathInfo>> parsePaths() throws IOException {
-        try (final var reader = getReader("tlm_strassen_strasse")) {
-            return parseLayer(reader).map(SwisstopoTlmParser::toTlmPath).toList();
-        }
+        final var reader = getReader("tlm_strassen_strasse");
+        return GeotoolsUtils.withReader(
+                reader,
+                stream ->
+                        stream.map(this::parseFeature).map(SwisstopoTlmParser::toTlmPath).toList());
     }
 
     public Collection<TlmFeature<LineString, RailwayInfo>> parseRailways() throws IOException {
-        try (final var reader = getReader("tlm_oev_eisenbahn")) {
-            return parseLayer(reader).map(SwisstopoTlmParser::toRailway).toList();
-        }
+        final var reader = getReader("tlm_oev_eisenbahn");
+        return GeotoolsUtils.withReader(
+                reader,
+                stream ->
+                        stream.map(this::parseFeature).map(SwisstopoTlmParser::toRailway).toList());
     }
 
     public Collection<TlmFeature<Geometry, UnstructuredTlmInfo>> parseLayer(final String layerName)
             throws IOException {
         logger.info("Parsing layer {}.", layerName);
-        try (final var reader = getReader(layerName)) {
-            return parseLayer(reader).toList();
-        }
+        final var reader = getReader(layerName);
+        return GeotoolsUtils.withReader(reader, stream -> stream.map(this::parseFeature).toList());
     }
 
-    /** Make sure to close the reader! E.g., use try-with-resource */
+    /**
+     * Prefer {@link GeotoolsUtils#withReader} or close the returned stream from parseLayer(reader).
+     */
     public SimpleFeatureReader getReader(final String layerName) throws IOException {
         return geoPackage.reader(geoPackage.feature(layerName), null, null);
     }
 
+    /** Caller must close the returned stream, e.g. via try-with-resources. */
     public Stream<TlmFeature<Geometry, UnstructuredTlmInfo>> parseLayer(
             final SimpleFeatureReader reader) {
-
         return GeotoolsUtils.stream(reader).map(this::parseFeature);
     }
 
