@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 2.2.0
+
+### Improvements
+
+- Close GeoTools readers, iterators and writers deterministically to avoid resource leaks, and add
+  lifecycle-safe `GeotoolsUtils.withReader/withIterator` helper APIs with tests.
+- Add usage guidance comments: prefer `withReader`/`withIterator`; `stream(...)` variants should be
+  used only when the returned stream is explicitly closed.
+
 ## 2.1.0
 
 ### Updates
