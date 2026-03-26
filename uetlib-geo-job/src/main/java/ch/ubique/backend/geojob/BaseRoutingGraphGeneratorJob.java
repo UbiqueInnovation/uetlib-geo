@@ -2,8 +2,6 @@ package ch.ubique.backend.geojob;
 
 import static ch.ubique.backend.geo.coordinate.constants.CoordinateSystems.LV95;
 
-import ch.ubique.backend.core.service.DataAndInput;
-import ch.ubique.backend.core.service.InputDataLoaderService;
 import ch.ubique.backend.geo.graph.routing.GraphType;
 import ch.ubique.backend.geo.graph.routing.RoutingGraphsWithLayer;
 import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.Vertex;
@@ -14,7 +12,8 @@ import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileConfig;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 import ch.ubique.backend.geo.tile.vector.utils.VectorTileElementSupplier;
-import ch.ubique.backend.job.BaseInputJob;
+import ch.ubique.backend.job.BaseStateJob;
+import ch.ubique.backend.job.model.JobRunContext;
 import ch.ubique.backend.job.model.JobRunState;
 import ch.ubique.backend.job.model.properties.JobPropertiesConfig;
 import ch.ubique.backend.job.model.properties.JobPropertyDefinitions;
@@ -22,35 +21,24 @@ import ch.ubique.backend.job.model.properties.enums.JobRunnerKey;
 
 import com.pivovarit.function.ThrowingConsumer;
 
-import org.jspecify.annotations.NonNull;
-
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused") // used in backends
-public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
+public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseStateJob<T> {
 
-    private final InputDataLoaderService<T> service;
-
-    protected BaseRoutingGraphGeneratorJob(
-            final ApplicationContext applicationContext, final InputDataLoaderService<T> service) {
+    protected BaseRoutingGraphGeneratorJob(final ApplicationContext applicationContext) {
         super(applicationContext);
-        this.service = service;
     }
 
-    protected abstract Stream<RoutingGraphsWithLayer> getGraphs(T data);
+    protected abstract Stream<RoutingGraphsWithLayer> createGraphs(T state) throws IOException;
 
     protected abstract void saveGraph(final RoutingGraphOutput output) throws IOException;
 
     @Override
-    protected boolean isInputFileUploadEnabled() {
-        return false;
-    }
-
-    @Override
-    @NonNull
     public JobPropertiesConfig propertiesConfig() {
         return JobPropertiesConfig.initial(
                 JobPropertyDefinitions.RUNNER.createProperty(JobRunnerKey.DEDICATED_K8S_JOB),
@@ -59,14 +47,10 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
     }
 
     @Override
-    protected final DataAndInput<T> loadInputs() throws Exception {
-        return service.loadData();
-    }
-
-    @Override
-    protected final JobRunState processInputs(final T data) throws Exception {
+    protected JobRunState processState(final T latestState, final JobRunContext jobRunContext)
+            throws IOException, ExecutionException, InterruptedException {
         logger.info("Getting graphs.");
-        final var graphs = getGraphs(data);
+        final var graphs = createGraphs(latestState);
 
         logger.info("Mapping graphs to outputs");
         final var outputs = graphs.flatMap(this::getVectorTileOutputs);
@@ -77,7 +61,6 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         return JobRunState.DONE;
     }
 
-    @NonNull
     private Stream<VectorTileOutput> getVectorTileOutputs(
             final RoutingGraphsWithLayer graphsWithLayer) {
 
@@ -121,12 +104,10 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseInputJob<T> {
         return !vertex.routingNeighbors().isEmpty();
     }
 
-    @NonNull
     protected Stream<TileOutputFormat> outputFormats() {
         return Stream.of(TileOutputFormat.PBF);
     }
 
-    @NonNull
     private Stream<VectorTileOutput> vectorTileOutputs(
             final String layer,
             final VectorTileElementSupplier<Vertex> vertexSupplier,
