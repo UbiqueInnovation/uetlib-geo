@@ -1,6 +1,8 @@
 # CHANGELOG
 
+## 3.1.0
 
+- `BaseRoutingGraphGeneratorJob` is now based on `BaseStateJob`
 
 ## 3.0.0
 
