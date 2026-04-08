@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.1.1
+
+- Added `distanceComparator` and `streamSortedByDistance` to `WGS84SphericalDistanceCalculator`
+
 ## 3.1.0
 
 - `BaseRoutingGraphGeneratorJob` is now based on `BaseStateJob`
@@ -14,7 +18,6 @@
 
 - Removed deprecated `GeoPackageParser`
 - Some method signatures changed for nullability compliance
-
 
 ## 2.2.0
 

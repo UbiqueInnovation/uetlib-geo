@@ -7,7 +7,14 @@ import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
 import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 import ch.ubique.backend.geo.coordinate.util.distance.DistanceCalculator;
+
+import org.apache.commons.lang3.stream.Streams;
+import org.apache.commons.lang3.tuple.Pair;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+
+import java.util.Comparator;
+import java.util.function.ToDoubleFunction;
+import java.util.stream.Stream;
 
 /**
  * This calculator assumes a spherical earth. This implies an error of up to 0.5% compared to
@@ -37,14 +44,54 @@ public class WGS84SphericalDistanceCalculator implements DistanceCalculator<WGS8
     }
 
     public static double greatCircleDistance(final WGS84Coordinate c1, final WGS84Coordinate c2) {
-        final var latDistance = toRadians(c2.latitude() - c1.latitude());
+        return 2 * asin(sqrt(haversineTheta(c1, c2)));
+    }
+
+    public static double haversine(final double alpha) {
+        final var haversineSqrt = sin(alpha / 2);
+        return haversineSqrt * haversineSqrt;
+    }
+
+    public static double haversineTheta(final WGS84Coordinate c1, final WGS84Coordinate c2) {
+        final var latRadians1 = toRadians(c1.latitude());
+        final var latRadians2 = toRadians(c2.latitude());
+        final var latDistance = latRadians2 - latRadians1;
         final var lonDistance = toRadians(c2.longitude() - c1.longitude());
-        final var a =
-                pow(sin(latDistance / 2), 2)
-                        + cos(toRadians(c1.latitude()))
-                                * cos(toRadians(c2.latitude()))
-                                * pow(sin(lonDistance / 2), 2);
-        return 2 * asin(sqrt(a));
+        return haversine(latDistance)
+                + cos(latRadians1) * cos(latRadians2) * haversine(lonDistance);
+    }
+
+    public static Comparator<WGS84Coordinate> distanceComparator(final WGS84Coordinate reference) {
+        return Comparator.comparingDouble(distanceComparisonKey(reference));
+    }
+
+    public static ToDoubleFunction<WGS84Coordinate> distanceComparisonKey(
+            final WGS84Coordinate reference) {
+
+        // precompute common terms
+        final var refLatRad = toRadians(reference.latitude());
+        final var refLonRad = toRadians(reference.longitude());
+        final var cosRefLat = cos(refLatRad);
+
+        // Compute value for comparison
+        return c -> {
+            final var latRad = toRadians(c.latitude());
+            final var lonRad = toRadians(c.longitude());
+            final var latDistance = latRad - refLatRad;
+            final var lonDistance = lonRad - refLonRad;
+
+            return pow(sin(latDistance / 2), 2)
+                    + cosRefLat * cos(latRad) * pow(sin(lonDistance / 2), 2);
+        };
+    }
+
+    public static Stream<WGS84Coordinate> streamSortedByDistance(
+            final Iterable<WGS84Coordinate> coordinates, final WGS84Coordinate reference) {
+        final var keyFunc = distanceComparisonKey(reference);
+        return Streams.of(coordinates)
+                .map(c -> Pair.of(c, keyFunc.applyAsDouble(c)))
+                .sorted(Comparator.comparingDouble(Pair::getValue))
+                .map(Pair::getKey);
     }
 
     /**
