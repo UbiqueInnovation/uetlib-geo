@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <uetlib-core.version>2.2.1</uetlib-core.version>
+        <uetlib-core.version>2.2.2</uetlib-core.version>
         <uetlib-test.version>2.0.1</uetlib-test.version>
         <uetlib-db.version>2.0.1</uetlib-db.version>
 
