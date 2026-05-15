@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package ch.ubique.geo;
+
+option optimize_for = SPEED;
+
+// Java specific options
+option java_multiple_files = true;
+option java_package = " ch.ubique.backend.geo.tile.smartdrawing.protobuf";
+option java_outer_classname = "SmartDrawingProtos";
+
+
+message TopologyTile {
+  repeated Vertex vertices = 1;
+  repeated Edge edges = 2;
+
+  message Vertex {
+    sint64 id = 1;
+    float x = 2;
+    float y = 3;
+    optional sint32 elevation = 4; // Elevation is centimeters above sea level
+  }
+
+  message Edge {
+    sint64 u = 1;
+    sint64 v = 2;
+
+    // weights: arrays are used to support multiple disciplines
+    // e.g. hiking uses weights[0], cycling weights[1], etc.
+    // optimization: if symmetric we need one array, otherwise we need 2 (unless it's a oneway)
+    repeated uint32 weights = 3; // present iff edge is symmetric
+    repeated uint32 forwardsWeights = 4; // present not symmetric, and usable in forwards direction
+    repeated uint32 backwardsWeights = 5; // present not symmetric, and usable in backwards direction
+
+    optional sint64 multiEdgeVariant = 6; // only set there are multiple edges (u, v)
+
+    optional bool isHighway = 7; // to support highway feature (see e.g. SwitzerlandMobility)
+  }
+}
+
+message GeometryTile {
+
+  repeated Way ways = 1;
+
+  // Dictionary encoding for keys and values, analog to MVT
+  repeated string keys = 2;
+  repeated Value values = 3;
+
+  // Info on geometry encoding
+  uint32 extent = 4;
+  bool hasElevation = 5;
+
+  message Way {
+    // Convention: u <= v. If you want geometry for (v, u), reverse the coordinates
+    sint64 u = 1;
+    sint64 v = 2;
+
+    // Encoding analog to MVT
+    repeated uint32 tags = 3 [packed = true];
+
+    // Encoding strategy based on MVT, but simpler (no commands) and with optional elevation
+    // - the field stores the encoded coordinate deltas for the line
+    // - if hasElevation is true: the list looks a following [d0x, d0y, d0z, d1x, d1y, d1z, ... ]
+    // - otherwise: [d0x, d0y, d1x, d1y, ... ]
+    // - each element in the list is zig-zag encoded
+    // - dx, dy are in respect to the envelope
+    // - dz is in centimeters. dz0 is elevation above sea level in cm
+    repeated uint32 encodedCoordinates = 4 [packed = true];
+
+    optional sint64 multiEdgeVariant = 6; // see TopologyTile
+  }
+
+  message Value {
+    // Exactly one of these values must be present in a valid message
+    optional string string_value = 1;
+    optional float float_value = 2;
+    optional double double_value = 3;
+    optional int64 int_value = 4;
+    optional bool bool_value = 5;
+  }
+}

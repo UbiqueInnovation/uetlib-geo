@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.2.0
+
+- Added a new smart drawing protobuf format, see [smart_drawing.proto](uetlib-geo/src/main/proto/smart_drawing.proto)
+
 ## 3.1.1
 
 - Added `distanceComparator` and `streamSortedByDistance` to `WGS84SphericalDistanceCalculator`
