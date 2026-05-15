@@ -38,7 +38,7 @@ class LayerDecoder {
     private static VectorTileFeature decodeFeature(
             final Feature feature, final List<String> keys, final List<Object> values) {
         final var tags = decodeTags(feature.getTagsList(), keys, values);
-        final var commands = CommandsDecoder.decode(feature.getGeometryList());
+        final var commands = CommandsDecoder.COMMANDS_DECODER_2D.decode(feature.getGeometryList());
         final var geometry = GeometryDecoder.decode(feature.getType(), commands);
         return new VectorTileFeature(feature.getId(), geometry, tags);
     }

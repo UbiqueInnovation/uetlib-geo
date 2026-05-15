@@ -10,16 +10,23 @@ import java.util.List;
 
 public class CommandsDecoder {
 
-    private CommandsDecoder() {}
+    private final boolean decodeZ;
 
-    public static List<Command> decode(final List<Integer> commands) {
+    public static final CommandsDecoder COMMANDS_DECODER_2D = new CommandsDecoder(false);
+    public static final CommandsDecoder COMMANDS_DECODER_3D = new CommandsDecoder(true);
+
+    private CommandsDecoder(final boolean decodeZ) {
+        this.decodeZ = decodeZ;
+    }
+
+    public List<Command> decode(final List<Integer> commands) {
         final List<Command> decodedCommands = new ArrayList<>();
 
         final var iterator = commands.iterator();
         while (iterator.hasNext()) {
             final var decoded = decodeCommandInstruction(iterator.next());
             final var commandKey = decoded.getKey();
-            final var count = decoded.getValue();
+            final int count = decoded.getValue();
 
             decodedCommands.add(
                     switch (commandKey) {
@@ -31,12 +38,13 @@ public class CommandsDecoder {
         return decodedCommands;
     }
 
-    private static List<Delta> parseDeltas(final Iterator<Integer> iterator, final int count) {
+    private List<Delta> parseDeltas(final Iterator<Integer> iterator, final int count) {
         final List<Delta> deltas = new ArrayList<>();
         for (var i = 0; i < count; ++i) {
-            final var dx = decodeParameterInteger(iterator.next());
-            final var dy = decodeParameterInteger(iterator.next());
-            deltas.add(new Delta(dx, dy));
+            final var dx = decodeZigZag(iterator.next());
+            final var dy = decodeZigZag(iterator.next());
+            final var dz = decodeZ ? decodeZigZag(iterator.next()) : null;
+            deltas.add(new Delta(dx, dy, dz));
         }
         return deltas;
     }
@@ -48,7 +56,7 @@ public class CommandsDecoder {
         return Pair.of(commandKey, count);
     }
 
-    private static int decodeParameterInteger(final int encoded) {
+    public static int decodeZigZag(final int encoded) {
         return ((encoded >> 1) ^ (-(encoded & 1)));
     }
 }

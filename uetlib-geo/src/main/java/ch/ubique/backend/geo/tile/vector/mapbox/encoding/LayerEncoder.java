@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.tile.vector.mapbox.encoding;
 
+import static ch.ubique.backend.geo.tile.vector.mapbox.encoding.CommandsEncoder.COMMANDS_ENCODER_2D;
+
 import ch.ubique.backend.geo.vectortile.protobuf.Tile;
 
 import org.locationtech.jts.geom.Geometry;
@@ -24,7 +26,7 @@ class LayerEncoder {
             final long id, final Geometry geometry, final Map<String, ?> attributes) {
 
         // no need to add empty geometry
-        if (geometry == null || geometry.isEmpty()) {
+        if (geometry.isEmpty()) {
             return;
         }
 
@@ -46,7 +48,9 @@ class LayerEncoder {
     }
 
     private static Stream<Integer> getTags(final Map.Entry<String, ?> entry, final Layer layer) {
-        return Stream.of(layer.indexOfKey(entry.getKey()), layer.indexOfValue(entry.getValue()));
+        return Stream.of(
+                layer.tagsEncoder.indexOfKey(entry.getKey()),
+                layer.tagsEncoder.indexOfValue(entry.getValue()));
     }
 
     Tile.Layer encode() {
@@ -54,8 +58,9 @@ class LayerEncoder {
                 .setVersion(2)
                 .setName(layer.name)
                 .setExtent(layer.extent)
-                .addAllKeys(layer.keys())
-                .addAllValues(layer.values().stream().map(ValueEncoder::encodeValue).toList())
+                .addAllKeys(layer.tagsEncoder.keys())
+                .addAllValues(
+                        layer.tagsEncoder.values().stream().map(ValueEncoder::encodeValue).toList())
                 .addAllFeatures(layer.features().stream().map(this::encodeFeature).toList())
                 .build();
     }
@@ -67,36 +72,16 @@ class LayerEncoder {
             builder.setId(feature.id);
         }
         return builder.setType(geometryEncoder.getGeomType())
-                .addAllGeometry(CommandsEncoder.encode(geometryEncoder.encode()))
+                .addAllGeometry(COMMANDS_ENCODER_2D.encode(geometryEncoder.encode()))
                 .addAllTags(feature.tags)
                 .build();
     }
 
     private record Layer(
-            String name,
-            int extent,
-            List<LayerEncoder.Feature> features,
-            Map<String, Integer> keyMap,
-            Map<Object, Integer> valueMap) {
+            String name, int extent, List<LayerEncoder.Feature> features, TagsEncoder tagsEncoder) {
 
         private Layer(final String name, final int extent) {
-            this(name, extent, new ArrayList<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
-        }
-
-        private Integer indexOfKey(final String key) {
-            return keyMap.computeIfAbsent(key, ignored -> keyMap.size());
-        }
-
-        private Integer indexOfValue(final Object value) {
-            return valueMap.computeIfAbsent(value, ignored -> valueMap.size());
-        }
-
-        private Collection<String> keys() {
-            return keyMap.keySet();
-        }
-
-        private Collection<Object> values() {
-            return valueMap.keySet();
+            this(name, extent, new ArrayList<>(), new TagsEncoder());
         }
     }
 
