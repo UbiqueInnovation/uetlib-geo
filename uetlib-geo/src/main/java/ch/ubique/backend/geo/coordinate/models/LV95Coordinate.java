@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.coordinate.models;
 
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -38,6 +40,11 @@ public record LV95Coordinate(
     @JsonIgnore
     public Optional<Double> optionalElevation() {
         return Optional.ofNullable(elevation);
+    }
+
+    @Override
+    public CoordinateSystem<LV95Coordinate> coordinateSystem() {
+        return CoordinateSystems.LV95;
     }
 
     @Override

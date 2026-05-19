@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.coordinate.models;
 
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,6 +46,11 @@ public record WGS84Coordinate(
 
     public WGS84Coordinate(final double latitude, final double longitude) {
         this(latitude, longitude, null);
+    }
+
+    @Override
+    public CoordinateSystem<WGS84Coordinate> coordinateSystem() {
+        return CoordinateSystems.WGS84;
     }
 
     public WGS84Coordinate withElevation(final @Nullable Double elevation) {

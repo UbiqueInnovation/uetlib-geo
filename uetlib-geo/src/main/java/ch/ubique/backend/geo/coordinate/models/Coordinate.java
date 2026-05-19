@@ -1,6 +1,6 @@
 package ch.ubique.backend.geo.coordinate.models;
 
-import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 
@@ -11,17 +11,20 @@ public sealed interface Coordinate
                 WGS84Coordinate,
                 WebMercatorCoordinate {
 
+    @SuppressWarnings("java:S1452")
+    CoordinateSystem<? extends Coordinate> coordinateSystem();
+
     default int srid() {
-        return CoordinateSystems.forClass(getClass()).srid();
+        return coordinateSystem().srid();
     }
 
     default CoordinateReferenceSystem crs() {
-        return CoordinateSystems.forClass(getClass()).crs();
+        return coordinateSystem().crs();
     }
 
     org.locationtech.jts.geom.Coordinate toJts();
 
     default org.locationtech.jts.geom.Point toJtsPoint() {
-        return CoordinateSystems.forClass(getClass()).geometryFactory().createPoint(toJts());
+        return coordinateSystem().geometryFactory().createPoint(toJts());
     }
 }

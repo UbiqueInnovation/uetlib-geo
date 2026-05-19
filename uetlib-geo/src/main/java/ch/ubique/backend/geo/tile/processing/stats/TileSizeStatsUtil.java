@@ -19,6 +19,10 @@ public class TileSizeStatsUtil {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Map<TileInfo, Double> tileSizes = new ConcurrentHashMap<>();
 
+    public void addMeasurement(final TileInfo tileInfo, final int size) {
+        tileSizes.put(tileInfo, (double) size);
+    }
+
     public void addMeasurement(final BinaryTile binaryTile) {
         tileSizes.put(binaryTile.info(), (double) binaryTile.bytes().length);
     }

@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.coordinate.models;
 
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 import ch.ubique.backend.geo.coordinate.util.JtsConverter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,6 +30,11 @@ public record WebMercatorCoordinate(
 
     public WebMercatorCoordinate withElevation(final @Nullable Double elevation) {
         return new WebMercatorCoordinate(x, y, elevation);
+    }
+
+    @Override
+    public CoordinateSystem<WebMercatorCoordinate> coordinateSystem() {
+        return CoordinateSystems.WEB_MERCATOR;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.coordinate.models;
 
+import ch.ubique.backend.geo.coordinate.constants.CoordinateSystem;
 import ch.ubique.backend.geo.coordinate.constants.CoordinateSystems;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -8,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.Optional;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record UTM32Coordinate(
@@ -43,6 +44,11 @@ public record UTM32Coordinate(
 
     public UTM32Coordinate withElevation(final @Nullable Double elevation) {
         return new UTM32Coordinate(east, north, elevation);
+    }
+
+    @Override
+    public CoordinateSystem<UTM32Coordinate> coordinateSystem() {
+        return CoordinateSystems.UTM32;
     }
 
     @JsonIgnore
