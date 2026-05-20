@@ -11,19 +11,21 @@ option java_outer_classname = "SmartDrawingProtos";
 
 
 message TopologyTile {
-  repeated Vertex vertices = 1;
-  repeated Edge edges = 2;
 
-  message Vertex {
-    sint64 id = 1;
-    float x = 2;
-    float y = 3;
-    optional sint32 elevation = 4; // Elevation is centimeters above sea level
-  }
+  // Info on coordinate encoding
+  uint32 extent = 1;
+  bool hasElevation = 2;
+
+  // Each vertex is given by [dId, dx, dy, (dz)]
+  // all deltas, except dId, are zig-zag encoded
+  // dz is present if hasElevation is true; unit: centimeters above sea level
+  repeated uint64 encodedVertices = 3 [packed = true];
+
+  repeated Edge edges = 4;
 
   message Edge {
-    sint64 u = 1;
-    sint64 v = 2;
+    uint32 uIdx = 1; // The position of u in the encodedVertices array
+    uint32 vIdx = 2; // The position of v in the en
 
     // weights: arrays are used to support multiple disciplines
     // e.g. hiking uses weights[0], cycling weights[1], etc.

@@ -54,6 +54,29 @@ class CommandsEncoderTest {
     })
     void testEncodeZigZag(final int input, final int expected) {
         final var encoded = CommandsEncoder.encodeZigZag(input);
+        final var encodedLong = CommandsEncoder.encodeZigZag((long) input);
+        assertEquals(encoded, (int) encodedLong);
+        assertEquals(expected, encoded);
+        assertEquals(input, CommandsDecoder.decodeZigZag(encoded));
+        assertEquals(input, CommandsDecoder.decodeZigZag(encodedLong));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "0, 0",
+        "1, 2",
+        "-1, 1",
+        "2147483647, 4294967294",
+        "-2147483648, 4294967295",
+        "2147483648, 4294967296",
+        "-2147483649, 4294967297",
+        "4611686018427387903, 9223372036854775806",
+        "-4611686018427387904, 9223372036854775807",
+        "1000000000000000000, 2000000000000000000",
+        "-1000000000000000000, 1999999999999999999"
+    })
+    void testEncodeZigZagLong(final long input, final long expected) {
+        final var encoded = CommandsEncoder.encodeZigZag(input);
         assertEquals(expected, encoded);
         assertEquals(input, CommandsDecoder.decodeZigZag(encoded));
     }

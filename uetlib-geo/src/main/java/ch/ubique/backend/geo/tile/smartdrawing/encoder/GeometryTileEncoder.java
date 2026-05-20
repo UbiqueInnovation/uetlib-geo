@@ -61,16 +61,16 @@ public class GeometryTileEncoder {
 
     private class Encoder {
         private final TagsEncoder tagsEncoder;
-        private final LineStringEncoder lineStringEncoder;
+        private final TileCoordinateEncoder tileCoordinateEncoder;
         private final CommandsEncoder commandsEncoder;
 
         private Encoder() throws TransformException {
             tagsEncoder = new TagsEncoder();
             commandsEncoder = encodeElevation ? COMMANDS_ENCODER_3D : COMMANDS_ENCODER_2D;
-            lineStringEncoder = new LineStringEncoder(extent, tileEnvelope);
+            tileCoordinateEncoder = new TileCoordinateEncoder(extent, tileEnvelope);
         }
 
-        private GeometryTile encode() throws TransformException {
+        private GeometryTile encode() {
             final var builder =
                     GeometryTile.newBuilder().setExtent(extent).setHasElevation(encodeElevation);
 
@@ -82,8 +82,7 @@ public class GeometryTileEncoder {
             return builder.build();
         }
 
-        private Way encodeWay(final SmartDrawingEdge edge, final TagsEncoder tagsEncoder)
-                throws TransformException {
+        private Way encodeWay(final SmartDrawingEdge edge, final TagsEncoder tagsEncoder) {
             final var wayBuilder = Way.newBuilder().setU(edge.u().id()).setV(edge.v().id());
 
             final var multiEdgeVariant = edge.multiEdgeVariant();
@@ -101,9 +100,8 @@ public class GeometryTileEncoder {
             return wayBuilder.build();
         }
 
-        private List<Integer> encodeGeometry(final LineString lineString)
-                throws TransformException {
-            final var tileCoordinates = lineStringEncoder.computeTileCoordinates(lineString);
+        private List<Integer> encodeGeometry(final LineString lineString) {
+            final var tileCoordinates = tileCoordinateEncoder.computeTileCoordinates(lineString);
             final var deltas = new DeltaEncoder(encodeElevation).visitCoordinates(tileCoordinates);
             return commandsEncoder.encodeDeltas(deltas);
         }

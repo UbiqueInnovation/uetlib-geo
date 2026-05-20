@@ -51,4 +51,8 @@ public class CommandsEncoder {
     public static int encodeZigZag(final int value) {
         return (value << 1) ^ (value >> 31);
     }
+
+    public static long encodeZigZag(final long value) {
+        return (value << 1) ^ (value >> 63);
+    }
 }

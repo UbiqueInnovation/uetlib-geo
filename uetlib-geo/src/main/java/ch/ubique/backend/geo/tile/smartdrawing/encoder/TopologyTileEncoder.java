@@ -1,5 +1,7 @@
 package ch.ubique.backend.geo.tile.smartdrawing.encoder;
 
+import static ch.ubique.backend.geo.tile.vector.mapbox.encoding.CommandsEncoder.encodeZigZag;
+
 import static com.google.common.primitives.Ints.asList;
 
 import ch.ubique.backend.geo.tile.smartdrawing.models.SmartDrawingEdge;
@@ -7,26 +9,45 @@ import ch.ubique.backend.geo.tile.smartdrawing.models.SmartDrawingVertex;
 import ch.ubique.backend.geo.tile.smartdrawing.protobuf.TopologyTile;
 import ch.ubique.backend.geo.tile.smartdrawing.protobuf.TopologyTile.Edge;
 import ch.ubique.backend.geo.tile.smartdrawing.protobuf.TopologyTile.Edge.Builder;
-import ch.ubique.backend.geo.tile.smartdrawing.protobuf.TopologyTile.Vertex;
 
-import org.locationtech.jts.geom.Coordinate;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class TopologyTileEncoder {
 
     private int weightEpsilon;
-    private final Collection<SmartDrawingEdge> edges;
 
-    public TopologyTileEncoder() {
-        edges = new ArrayList<>();
+    private int extent = 4096;
+    private boolean encodeElevation = true;
+
+    private final ReferencedEnvelope tileEnvelope;
+
+    private final List<SmartDrawingEdge> edges;
+
+    public TopologyTileEncoder(final ReferencedEnvelope tileEnvelope) {
+        this.tileEnvelope = tileEnvelope;
+        this.edges = new ArrayList<>();
     }
 
-    /** weight differences smaller than this are considered equal */
+    public TopologyTileEncoder extent(final int extent) {
+        this.extent = extent;
+        return this;
+    }
+
+    public TopologyTileEncoder encodeElevation(final boolean encodeElevation) {
+        this.encodeElevation = encodeElevation;
+        return this;
+    }
+
+    /** maximum allowed encoding error for weights */
     public TopologyTileEncoder weightEpsilon(final int weightEpsilon) {
         this.weightEpsilon = weightEpsilon;
         return this;
@@ -37,60 +58,84 @@ public class TopologyTileEncoder {
         return this;
     }
 
-    public TopologyTileEncoder add(final Collection<SmartDrawingEdge> edges) {
+    public TopologyTileEncoder addAll(final Collection<SmartDrawingEdge> edges) {
         this.edges.addAll(edges);
         return this;
     }
 
     public TopologyTile encode() {
+
+        final var sortedVertices = sortedVertices();
+
         return TopologyTile.newBuilder()
-                .addAllVertices(buildVertices())
-                .addAllEdges(buildEdges())
+                .setExtent(extent)
+                .setHasElevation(encodeElevation)
+                .addAllEncodedVertices(encodedVertices(sortedVertices))
+                .addAllEdges(buildEdges(sortedVertices))
                 .build();
     }
 
-    private List<Vertex> buildVertices() {
-        if (edges.isEmpty()) {
+    private List<Long> encodedVertices(final List<SmartDrawingVertex> vertices) {
+        if (vertices.isEmpty()) {
             return List.of();
         }
 
-        final var coordinateClass = edges.iterator().next().u().coordinate().getClass();
+        final var coordinateClass = vertices.getFirst().coordinate().getClass();
 
+        final var numComponents = encodeElevation ? 4 : 3;
+        final var encoded = new ArrayList<Long>(vertices.size() * numComponents);
+        final var coordinateEncoder = new TileCoordinateEncoder(extent, tileEnvelope);
+
+        var lastId = 0L;
+        var lastX = 0L;
+        var lastY = 0L;
+        var lastZ = 0L;
+
+        for (final var vertex : vertices) {
+            if (!vertex.coordinate().getClass().equals(coordinateClass)) {
+                throw new IllegalArgumentException("All coordinates must be of the same class");
+            }
+            final var id = vertex.id();
+            final var worldCoordinate = vertex.coordinate().toJts();
+            final var tileCoordinate = coordinateEncoder.computeTileCoordinate(worldCoordinate);
+            final var x = tileCoordinate.x();
+            final var y = tileCoordinate.y();
+            encoded.add(id - lastId);
+            encoded.add(encodeZigZag(x - lastX));
+            encoded.add(encodeZigZag(y - lastY));
+            lastId = id;
+            lastX = x;
+            lastY = y;
+            if (encodeElevation) {
+                final var z = tileCoordinate.requireZ();
+                encoded.add(encodeZigZag(z - lastZ));
+                lastZ = z;
+            }
+        }
+        return encoded;
+    }
+
+    private List<SmartDrawingVertex> sortedVertices() {
         return edges.stream()
                 .flatMap(e -> Stream.of(e.u(), e.v()))
                 .sorted(Comparator.comparingLong(SmartDrawingVertex::id))
                 .distinct()
-                .map(v -> buildVertex(v, coordinateClass))
                 .toList();
     }
 
-    private TopologyTile.Vertex buildVertex(
-            final SmartDrawingVertex vertex, final Class<?> expectedCoordinateClass) {
-        if (!vertex.coordinate().getClass().equals(expectedCoordinateClass)) {
-            throw new IllegalArgumentException("All coordinates must be of the same class");
+    private Collection<TopologyTile.Edge> buildEdges(
+            final List<SmartDrawingVertex> sortedVertices) {
+        final var indexOfVertices = HashMap.<Long, Integer>newHashMap(sortedVertices.size());
+        for (var i = 0; i < sortedVertices.size(); i++) {
+            indexOfVertices.put(sortedVertices.get(i).id(), i);
         }
-        final var coordinate = vertex.coordinate().toJts();
-        final var vertexBuilder =
-                Vertex.newBuilder()
-                        .setId(vertex.id())
-                        .setX((float) coordinate.x)
-                        .setY((float) coordinate.y);
-        final var elevation = coordinate.getZ();
-        if (elevation != Coordinate.NULL_ORDINATE) {
-            final var elevationCentimeters = (int) Math.round(elevation * 100);
-            vertexBuilder.setElevation(elevationCentimeters);
-        }
-        return vertexBuilder.build();
-    }
-
-    private Collection<TopologyTile.Edge> buildEdges() {
         final var canonicalEdges =
                 edges.stream().map(SmartDrawingEdge::canonicalDirection).sorted().toList();
 
         validateDuplicateEdges(canonicalEdges);
 
         return canonicalEdges.stream()
-                .map(edge -> buildEdge(edge, edge.multiEdgeVariant()))
+                .map(edge -> buildEdge(edge, edge.multiEdgeVariant(), indexOfVertices))
                 .toList();
     }
 
@@ -128,8 +173,12 @@ public class TopologyTileEncoder {
 
     private TopologyTile.Edge buildEdge(
             final SmartDrawingEdge edge,
-            final @org.jspecify.annotations.Nullable Long multiEdgeVariant) {
-        final var edgeBuilder = Edge.newBuilder().setU(edge.u().id()).setV(edge.v().id());
+            final @Nullable Long multiEdgeVariant,
+            final HashMap<Long, Integer> indexOfVertices) {
+        final var edgeBuilder =
+                Edge.newBuilder()
+                        .setUIdx(Objects.requireNonNull(indexOfVertices.get(edge.u().id())))
+                        .setVIdx(Objects.requireNonNull(indexOfVertices.get(edge.v().id())));
         setWeights(edge, edgeBuilder);
         if (multiEdgeVariant != null) {
             edgeBuilder.setMultiEdgeVariant(multiEdgeVariant);
