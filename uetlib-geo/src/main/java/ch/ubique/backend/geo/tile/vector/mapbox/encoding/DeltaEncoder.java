@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.tile.vector.mapbox.encoding;
 
+import ch.ubique.backend.geo.coordinate.models.IntCoordinate;
 import ch.ubique.backend.geo.tile.vector.mapbox.commands.*;
 
 import org.locationtech.jts.geom.*;
@@ -20,6 +21,14 @@ public class DeltaEncoder {
         this.encodeZ = encodeZ;
     }
 
+    public List<Delta> visitCoordinates(final List<IntCoordinate> coordinates) {
+        final var deltas = new ArrayList<Delta>();
+        for (final var coordinate : coordinates) {
+            deltas.add(visitCoordinate(coordinate));
+        }
+        return deltas;
+    }
+
     public List<Delta> visitCoordinates(final Coordinate[] coordinates) {
         final var deltas = new ArrayList<Delta>();
         for (final var coordinate : coordinates) {
@@ -37,24 +46,17 @@ public class DeltaEncoder {
     }
 
     private Delta visitCoordinate(final Coordinate coordinate) {
-        final var px = (int) Math.round(coordinate.x);
-        final var py = (int) Math.round(coordinate.y);
-        final var pz = getZ(coordinate);
+        return visitCoordinate(new IntCoordinate(coordinate));
+    }
+
+    private Delta visitCoordinate(final IntCoordinate coordinate) {
+        final var px = coordinate.x();
+        final var py = coordinate.y();
+        final var pz = encodeZ ? coordinate.requireZ() : 0;
         final var delta = new Delta(px - cx, py - cy, encodeZ ? (pz - cz) : null);
         cx = px;
         cy = py;
         cz = pz;
         return delta;
-    }
-
-    private int getZ(final Coordinate coordinate) {
-        if (!encodeZ) {
-            return 0;
-        }
-        final var z = coordinate.getZ();
-        if (Double.isNaN(z)) {
-            throw new IllegalArgumentException("Coordinate has no z component");
-        }
-        return (int) Math.round(z);
     }
 }
