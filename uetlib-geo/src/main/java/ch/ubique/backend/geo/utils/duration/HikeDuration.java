@@ -40,16 +40,17 @@ public class HikeDuration {
             return Duration.ZERO;
         }
 
-        final var minutesPerMeter = minutesPerKilometer(distance, elevationDiff) / 1000;
+        final var slope = elevationDiff / distance;
+        final var minutesPerMeter = pace(slope) / 1000;
         final var duration = distance * minutesPerMeter * 60; // [s]
 
         return DurationUtils.ofFractionalSeconds(duration);
     }
 
-    private static double minutesPerKilometer(final double distance, final double elevationDiff) {
+    public static double pace(final double slopePercent) {
 
         // 10ths (schweizmobil formula) instead of % (official formula)
-        final var slope = (elevationDiff * 10.0) / distance;
+        final var slope = 10 * slopePercent;
 
         // The swiss hiking formula is used between -25% and +25%
         // but schweiz mobil use -40% and +40%
