@@ -7,7 +7,7 @@
     <parent>
         <groupId>ch.ubique</groupId>
         <artifactId>uetlib-parent</artifactId>
-        <version>2026.3.0</version>
+        <version>2026.05.0</version>
     </parent>
 
     <artifactId>uetlib-geo-parent</artifactId>
@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <uetlib-core.version>2.2.2</uetlib-core.version>
+        <uetlib-core.version>2.3.1</uetlib-core.version>
         <uetlib-test.version>2.0.1</uetlib-test.version>
         <uetlib-db.version>2.0.1</uetlib-db.version>
 
