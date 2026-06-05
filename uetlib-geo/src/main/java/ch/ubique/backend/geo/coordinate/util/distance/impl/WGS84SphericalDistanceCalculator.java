@@ -80,8 +80,7 @@ public class WGS84SphericalDistanceCalculator implements DistanceCalculator<WGS8
             final var latDistance = latRad - refLatRad;
             final var lonDistance = lonRad - refLonRad;
 
-            return pow(sin(latDistance / 2), 2)
-                    + cosRefLat * cos(latRad) * pow(sin(lonDistance / 2), 2);
+            return haversine(latDistance) + cosRefLat * cos(latRad) * haversine(lonDistance);
         };
     }
 
