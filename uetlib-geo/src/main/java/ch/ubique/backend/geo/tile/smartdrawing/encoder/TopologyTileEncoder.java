@@ -9,6 +9,7 @@ import ch.ubique.backend.geo.tile.smartdrawing.models.SmartDrawingVertex;
 import ch.ubique.backend.geo.tile.smartdrawing.protobuf.TopologyTile;
 import ch.ubique.backend.geo.tile.smartdrawing.protobuf.TopologyTile.Edge;
 import ch.ubique.backend.geo.tile.smartdrawing.protobuf.TopologyTile.Edge.Builder;
+import ch.ubique.backend.geo.tile.smartdrawing.utils.SmartDrawingUtil;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.jspecify.annotations.Nullable;
@@ -183,8 +184,8 @@ public class TopologyTileEncoder {
         if (multiEdgeVariant != null) {
             edgeBuilder.setMultiEdgeVariant(multiEdgeVariant);
         }
-        if (edge.isHighway()) {
-            edgeBuilder.setIsHighway(true);
+        if (edge.isHighway().length > 0) {
+            edgeBuilder.setIsHighway(SmartDrawingUtil.booleanArrayToInt(edge.isHighway()));
         }
         return edgeBuilder.build();
     }

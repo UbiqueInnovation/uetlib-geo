@@ -36,21 +36,23 @@ message TopologyTile {
 
     optional sint64 multiEdgeVariant = 6; // only set there are multiple edges (u, v)
 
-    optional bool isHighway = 7; // to support highway feature (see e.g. SwitzerlandMobility)
+    // to support highway feature (see e.g. SwitzerlandMobility)
+    // encoded as bitfield
+    optional uint32 isHighway = 7;
   }
 }
 
 message GeometryTile {
 
-  repeated Way ways = 1;
+  // Info on geometry encoding
+  uint32 extent = 1;
+  bool hasElevation = 2;
+
+  repeated Way ways = 3;
 
   // Dictionary encoding for keys and values, analog to MVT
-  repeated string keys = 2;
-  repeated Value values = 3;
-
-  // Info on geometry encoding
-  uint32 extent = 4;
-  bool hasElevation = 5;
+  repeated string keys = 4;
+  repeated Value values = 5;
 
   message Way {
     // Convention: u <= v. If you want geometry for (v, u), reverse the coordinates

@@ -1,5 +1,6 @@
 package ch.ubique.backend.geo.tile.smartdrawing.models;
 
+import org.apache.commons.lang3.compare.ComparableUtils;
 import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.geom.LineString;
 
@@ -14,7 +15,7 @@ public record SmartDrawingEdge(
         int[] forwardWeights,
         int[] backwardWeights,
         @Nullable Long multiEdgeVariant,
-        boolean isHighway)
+        boolean[] isHighway)
         implements Comparable<SmartDrawingEdge> {
 
     public SmartDrawingEdge {
@@ -30,6 +31,27 @@ public record SmartDrawingEdge(
                 .equals2D(v.coordinate().toJts())) {
             throw new IllegalArgumentException(
                     "Last coordinate of geometry does not match end vertex");
+        }
+
+        final var numDisciplines =
+                ComparableUtils.max(forwardWeights.length, backwardWeights.length);
+
+        if (numDisciplines == 0) {
+            throw new IllegalArgumentException("No weights for disciplines provided");
+        }
+        if (forwardWeights.length > 0 && forwardWeights.length != numDisciplines) {
+            throw new IllegalArgumentException(
+                    "forwardWeights length " + forwardWeights.length + " does not match numDisciplines "
+                            + numDisciplines);
+        }
+        if (backwardWeights.length > 0 && backwardWeights.length != numDisciplines) {
+            throw new IllegalArgumentException(
+                    "backwardWeights length " + backwardWeights.length + " does not match numDisciplines "
+                            + numDisciplines);
+        }
+        if (isHighway.length > 0 && isHighway.length != numDisciplines) {
+            throw new IllegalArgumentException(
+                    "isHighway length " + isHighway.length + " does not match numDisciplines " + numDisciplines);
         }
     }
 
