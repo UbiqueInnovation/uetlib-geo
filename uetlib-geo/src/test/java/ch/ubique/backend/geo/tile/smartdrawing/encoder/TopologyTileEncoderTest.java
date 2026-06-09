@@ -55,7 +55,7 @@ class TopologyTileEncoderTest {
                         new int[] {10},
                         new int[] {10},
                         null,
-                        false);
+                        new boolean[0]);
 
         final var tile =
                 new TopologyTileEncoder(TILE_ENVELOPE).encodeElevation(false).add(edge).encode();
@@ -118,10 +118,10 @@ class TopologyTileEncoderTest {
                         .createLineString(
                                 new Coordinate[] {u.coordinate().toJts(), v.coordinate().toJts()}),
                 Map.of(),
-                new int[] {},
-                new int[] {},
+                new int[] {0},
+                new int[] {0},
                 null,
-                false);
+                new boolean[0]);
     }
 
     @Test
@@ -140,7 +140,7 @@ class TopologyTileEncoderTest {
                         new int[] {10, 20},
                         new int[] {15, 25},
                         null,
-                        false);
+                        new boolean[0]);
 
         final var tile =
                 new TopologyTileEncoder(TILE_ENVELOPE).encodeElevation(false).add(edge).encode();
@@ -170,7 +170,7 @@ class TopologyTileEncoderTest {
                         new int[] {10},
                         new int[] {},
                         null,
-                        false);
+                        new boolean[0]);
         final var tile1 =
                 new TopologyTileEncoder(TILE_ENVELOPE).encodeElevation(false).add(edge1).encode();
         assertThat(tile1.getEdges(0).getForwardsWeightsList()).containsExactly(10);
@@ -190,7 +190,7 @@ class TopologyTileEncoderTest {
                         new int[] {},
                         new int[] {20},
                         null,
-                        false);
+                        new boolean[0]);
         final var tile2 =
                 new TopologyTileEncoder(TILE_ENVELOPE).encodeElevation(false).add(edge2).encode();
         assertThat(tile2.getEdges(0).getBackwardsWeightsList()).containsExactly(20);
@@ -214,7 +214,7 @@ class TopologyTileEncoderTest {
                         new int[] {100},
                         new int[] {105},
                         null,
-                        false);
+                        new boolean[0]);
 
         // Without epsilon (default 0)
         final var tile1 =
@@ -261,7 +261,7 @@ class TopologyTileEncoderTest {
                         new int[] {10},
                         new int[] {20},
                         null,
-                        false);
+                        new boolean[0]);
 
         final var tile =
                 new TopologyTileEncoder(TILE_ENVELOPE).encodeElevation(false).add(edge).encode();
@@ -312,40 +312,38 @@ class TopologyTileEncoderTest {
                                     v1.coordinate().toJts(), v2.coordinate().toJts()
                                 }),
                         Map.of(),
-                        new int[] {},
-                        new int[] {},
+                        new int[] {0},
+                        new int[] {0},
                         123L,
-                        true);
+                        new boolean[] {true});
 
         final var tile =
                 new TopologyTileEncoder(TILE_ENVELOPE).encodeElevation(false).add(edge).encode();
 
         assertThat(tile.getEdges(0).getMultiEdgeVariant()).isEqualTo(123L);
-        assertThat(tile.getEdges(0).getIsHighway()).isTrue();
+        assertThat(tile.getEdges(0).getIsHighway()).isEqualTo(1);
     }
 
     @Test
     void testMismatchedWeightLengths() {
         final var v1 = new SmartDrawingVertex(1, new WGS84Coordinate(47.0, 8.0));
         final var v2 = new SmartDrawingVertex(2, new WGS84Coordinate(47.1, 8.1));
-        final var edge =
-                new SmartDrawingEdge(
-                        v1,
-                        v2,
-                        GF.createLineString(
-                                new Coordinate[] {
-                                    v1.coordinate().toJts(), v2.coordinate().toJts()
-                                }),
-                        Map.of(),
-                        new int[] {10},
-                        new int[] {20, 30},
-                        null,
-                        false);
-
-        final var encoder = new TopologyTileEncoder(TILE_ENVELOPE).encodeElevation(false).add(edge);
-        assertThatThrownBy(encoder::encode)
+        assertThatThrownBy(
+                () ->
+                        new SmartDrawingEdge(
+                                v1,
+                                v2,
+                                GF.createLineString(
+                                        new Coordinate[] {
+                                            v1.coordinate().toJts(), v2.coordinate().toJts()
+                                        }),
+                                Map.of(),
+                                new int[] {10},
+                                new int[] {20, 30},
+                                null,
+                                new boolean[0]))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Forward and backward weights must have the same length");
+                .hasMessage("forwardWeights length 1 does not match numDisciplines 2");
     }
 
     @Test
@@ -365,7 +363,7 @@ class TopologyTileEncoderTest {
                         new int[] {10},
                         new int[] {10},
                         1L,
-                        false);
+                        new boolean[0]);
         final var edge2 =
                 new SmartDrawingEdge(
                         v1,
@@ -378,7 +376,7 @@ class TopologyTileEncoderTest {
                         new int[] {20},
                         new int[] {20},
                         2L,
-                        false);
+                        new boolean[0]);
 
         final var tile =
                 new TopologyTileEncoder(TILE_ENVELOPE)
@@ -409,7 +407,7 @@ class TopologyTileEncoderTest {
                         new int[] {10},
                         new int[] {10},
                         1L,
-                        false);
+                        new boolean[0]);
         final var edge2 =
                 new SmartDrawingEdge(
                         v1,
@@ -422,7 +420,7 @@ class TopologyTileEncoderTest {
                         new int[] {20},
                         new int[] {20},
                         1L,
-                        false);
+                        new boolean[0]);
 
         final var encoder =
                 new TopologyTileEncoder(TILE_ENVELOPE).encodeElevation(false).add(edge1).add(edge2);
@@ -450,7 +448,7 @@ class TopologyTileEncoderTest {
                         new int[] {10},
                         new int[] {10},
                         null,
-                        false);
+                        new boolean[0]);
         final var edge2 =
                 new SmartDrawingEdge(
                         v1,
@@ -463,7 +461,7 @@ class TopologyTileEncoderTest {
                         new int[] {20},
                         new int[] {20},
                         null,
-                        false);
+                        new boolean[0]);
 
         final var encoder =
                 new TopologyTileEncoder(TILE_ENVELOPE).encodeElevation(false).add(edge1).add(edge2);
