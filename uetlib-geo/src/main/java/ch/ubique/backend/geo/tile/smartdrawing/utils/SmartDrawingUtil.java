@@ -6,8 +6,10 @@ public final class SmartDrawingUtil {
 
     public static int booleanArrayToInt(final boolean[] booleans) {
         var n = 0;
-        for (final var b : booleans) {
-            n = (n << 1) + (b ? 1 : 0);
+        for (int  i = 0; i < booleans.length; i++) {
+            if (booleans[i]) {
+                n |= 1 << i;
+            }
         }
         return n;
     }

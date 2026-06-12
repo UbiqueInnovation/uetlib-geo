@@ -1,7 +1,5 @@
 package ch.ubique.backend.geo.tile.smartdrawing.encoder;
 
-import static ch.ubique.backend.geo.tile.vector.mapbox.encoding.CommandsEncoder.encodeZigZag;
-
 import static com.google.common.primitives.Ints.asList;
 
 import ch.ubique.backend.geo.tile.smartdrawing.models.SmartDrawingEdge;
@@ -102,14 +100,14 @@ public class TopologyTileEncoder {
             final var x = tileCoordinate.x();
             final var y = tileCoordinate.y();
             encoded.add(id - lastId);
-            encoded.add(encodeZigZag(x - lastX));
-            encoded.add(encodeZigZag(y - lastY));
+            encoded.add(x - lastX);
+            encoded.add(y - lastY);
             lastId = id;
             lastX = x;
             lastY = y;
             if (encodeElevation) {
                 final var z = tileCoordinate.requireZ();
-                encoded.add(encodeZigZag(z - lastZ));
+                encoded.add(z - lastZ);
                 lastZ = z;
             }
         }

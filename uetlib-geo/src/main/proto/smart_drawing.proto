@@ -16,10 +16,9 @@ message TopologyTile {
   uint32 extent = 1;
   bool hasElevation = 2;
 
-  // Each vertex is given by [dId, dx, dy, (dz)]
-  // all deltas, except dId, are zig-zag encoded
+  // Each vertex is given by deltas [dId, dx, dy, (dz)].
   // dz is present if hasElevation is true; unit: centimeters above sea level
-  repeated uint64 encodedVertices = 3 [packed = true];
+  repeated sint64 encodedVertices = 3 [packed = true];
 
   repeated Edge edges = 4;
 
@@ -37,7 +36,8 @@ message TopologyTile {
     optional sint64 multiEdgeVariant = 6; // only set there are multiple edges (u, v)
 
     // to support highway feature (see e.g. SwitzerlandMobility)
-    // encoded as bitfield
+    // encoded as bitfield. The i-th least-significant bit corresponds
+    // to the discipline at weight index i (isHighway & (1 << i))
     optional uint32 isHighway = 7;
   }
 }
