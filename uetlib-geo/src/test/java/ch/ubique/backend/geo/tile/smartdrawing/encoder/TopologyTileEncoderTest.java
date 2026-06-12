@@ -1,8 +1,6 @@
 package ch.ubique.backend.geo.tile.smartdrawing.encoder;
 
 import static ch.ubique.backend.geo.coordinate.constants.CoordinateSystems.WEB_MERCATOR;
-import static ch.ubique.backend.geo.tile.vector.mapbox.decoding.CommandsDecoder.decodeZigZag;
-import static ch.ubique.backend.geo.tile.vector.mapbox.encoding.CommandsEncoder.encodeZigZag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -41,7 +39,7 @@ class TopologyTileEncoderTest {
 
     @Test
     void testEncodeSingleEdge() {
-        final var v1 = new SmartDrawingVertex(1, new WGS84Coordinate(7.0, 8.0));
+        final var v1 = new SmartDrawingVertex(-3, new WGS84Coordinate(7.0, 8.0));
         final var v2 = new SmartDrawingVertex(2, new WGS84Coordinate(7.3, 8.1));
         final var edge =
                 new SmartDrawingEdge(
@@ -63,20 +61,19 @@ class TopologyTileEncoderTest {
 
         assertThat(tile.getEncodedVerticesCount()).isEqualTo(2 * 3);
         final var encoded = tile.getEncodedVerticesList();
-        assertThat(encoded.get(0)).isEqualTo(1); // id 1
-        assertThat(decodeZigZag(encoded.get(1))).isEqualTo(Math.round(8.0 / 10 * extent)); // x
-        assertThat(decodeZigZag(encoded.get(2)))
-                .isEqualTo(Math.round((10 - 7.0) / 10 * extent)); // y
+        assertThat(encoded.get(0)).isEqualTo(-3); // id 1
+        assertThat(encoded.get(1)).isEqualTo(Math.round(8.0 / 10 * extent)); // x
+        assertThat(encoded.get(2)).isEqualTo(Math.round((10 - 7.0) / 10 * extent)); // y
 
-        assertThat(encoded.get(3)).isEqualTo(1); // id 2 - id 1
-        assertThat(decodeZigZag(encoded.get(4))).isEqualTo(Math.round(0.1 / 10 * extent)); // dx
-        assertThat(decodeZigZag(encoded.get(5))).isEqualTo(Math.round(-0.3 / 10 * extent)); // dx
+        assertThat(encoded.get(3)).isEqualTo(5); // id 2 - id -3
+        assertThat(encoded.get(4)).isEqualTo(Math.round(0.1 / 10 * extent)); // dx
+        assertThat(encoded.get(5)).isEqualTo(Math.round(-0.3 / 10 * extent)); // dx
 
         final var vertexIds = getVertexIds(tile);
 
         assertThat(tile.getEdgesCount()).isEqualTo(1);
         final var encodedEdge = tile.getEdges(0);
-        assertThat(vertexIds[encodedEdge.getUIdx()]).isEqualTo(1);
+        assertThat(vertexIds[encodedEdge.getUIdx()]).isEqualTo(-3);
         assertThat(vertexIds[encodedEdge.getVIdx()]).isEqualTo(2);
         assertThat(encodedEdge.getWeightsList()).containsExactly(10);
         assertThat(encodedEdge.getForwardsWeightsCount()).isZero();
@@ -103,8 +100,8 @@ class TopologyTileEncoderTest {
 
         assertThat(tile.getEncodedVerticesCount()).isEqualTo(2 * 4);
         final var encoded = tile.getEncodedVerticesList();
-        assertThat(encoded.get(3)).isEqualTo(encodeZigZag(12346)); // v1 elevation
-        assertThat(encoded.get(7)).isEqualTo(encodeZigZag(-12346)); // v2 elevation - v1 elevation
+        assertThat(encoded.get(3)).isEqualTo(12346); // v1 elevation
+        assertThat(encoded.get(7)).isEqualTo(-12346); // v2 elevation - v1 elevation
     }
 
     private static @NonNull SmartDrawingEdge createEdge(
@@ -329,19 +326,19 @@ class TopologyTileEncoderTest {
         final var v1 = new SmartDrawingVertex(1, new WGS84Coordinate(47.0, 8.0));
         final var v2 = new SmartDrawingVertex(2, new WGS84Coordinate(47.1, 8.1));
         assertThatThrownBy(
-                () ->
-                        new SmartDrawingEdge(
-                                v1,
-                                v2,
-                                GF.createLineString(
-                                        new Coordinate[] {
-                                            v1.coordinate().toJts(), v2.coordinate().toJts()
-                                        }),
-                                Map.of(),
-                                new int[] {10},
-                                new int[] {20, 30},
-                                null,
-                                new boolean[0]))
+                        () ->
+                                new SmartDrawingEdge(
+                                        v1,
+                                        v2,
+                                        GF.createLineString(
+                                                new Coordinate[] {
+                                                    v1.coordinate().toJts(), v2.coordinate().toJts()
+                                                }),
+                                        Map.of(),
+                                        new int[] {10},
+                                        new int[] {20, 30},
+                                        null,
+                                        new boolean[0]))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("forwardWeights length 1 does not match numDisciplines 2");
     }
