@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.2.1
+
+- Amendments to new smart drawing protobuf format. Technically, a format breaking change.
+
 ## 3.2.0
 
 - Added a new smart drawing protobuf format, see [smart_drawing.proto](uetlib-geo/src/main/proto/smart_drawing.proto)
