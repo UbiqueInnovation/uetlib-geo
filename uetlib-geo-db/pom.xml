@@ -17,8 +17,8 @@
 
     <artifactId>uetlib-geo-db</artifactId>
 
-            <dependencyManagement>
-    <dependencies>
+    <dependencyManagement>
+        <dependencies>
             <dependency>
                 <groupId>ch.ubique</groupId>
                 <artifactId>uetlib-db</artifactId>
