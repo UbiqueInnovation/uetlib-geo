@@ -17,8 +17,8 @@
         <artifact-package-name>ch.ubique.backend.geo</artifact-package-name>
     </properties>
 
-        <dependencyManagement>
-        <dependencies>
+            <dependencyManagement>
+    <dependencies>
             <dependency>
                 <groupId>ch.ubique</groupId>
                 <artifactId>uetlib-core</artifactId>
@@ -27,7 +27,7 @@
         </dependencies>
     </dependencyManagement>
 
-<dependencies>
+    <dependencies>
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>uetlib-core</artifactId>
