@@ -17,11 +17,25 @@
 
     <artifactId>uetlib-geo-db</artifactId>
 
-    <dependencies>
+        <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.ubique</groupId>
+                <artifactId>uetlib-db</artifactId>
+                <version>${uetlib-db.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.ubique</groupId>
+                <artifactId>uetlib-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+<dependencies>
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>uetlib-geo</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -32,7 +46,6 @@
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>uetlib-db</artifactId>
-            <version>${uetlib-db.version}</version>
         </dependency>
     </dependencies>
 </project>

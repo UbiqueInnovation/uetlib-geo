@@ -17,21 +17,38 @@
         <artifact-package-name>ch.ubique.backend.geo.coverage</artifact-package-name>
     </properties>
 
-    <dependencies>
+        <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.ubique</groupId>
+                <artifactId>uetlib-geo-job</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.ubique</groupId>
+                <artifactId>uetlib-geo-db</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.ubique</groupId>
+                <artifactId>uetlib-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+<dependencies>
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>uetlib-geo</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>uetlib-geo-db</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>uetlib-geo-job</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

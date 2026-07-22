@@ -17,17 +17,30 @@
         <artifact-package-name>ch.ubique.backend.geojob</artifact-package-name>
     </properties>
 
-    <dependencies>
+        <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.ubique</groupId>
+                <artifactId>uetlib-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.ubique</groupId>
+                <artifactId>uetlib-job</artifactId>
+                <version>4.0.3</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+<dependencies>
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>uetlib-job</artifactId>
-            <version>4.0.3</version>
         </dependency>
 
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>uetlib-geo</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>
