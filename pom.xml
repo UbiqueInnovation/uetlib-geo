@@ -112,5 +112,9 @@
             <name>backend</name>
             <url>https://artifactory.ubique.ch/artifactory/backend</url>
         </repository>
-    </distributionManagement>ve
+    </distributionManagement>
+
+    <scm child.scm.url.inherit.append.path="false">
+        <url>https://github.com/UbiqueInnovation/uetlib-geo</url>
+    </scm>
 </project>
