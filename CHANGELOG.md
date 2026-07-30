@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.2.2
+
+- updated actions to not run tests twice for sonar
+
 ## 3.2.1
 
 - Amendments to new smart drawing protobuf format. Technically, a format breaking change.
