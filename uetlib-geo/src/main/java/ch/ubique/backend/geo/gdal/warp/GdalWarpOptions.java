@@ -30,7 +30,7 @@ public final class GdalWarpOptions {
         return new GdalWarpOptions();
     }
 
-    public GdalWarpOptions additionalArguments(final List<String> additionalArguments) {
+    public GdalWarpOptions additionalArguments(final @Nullable List<String> additionalArguments) {
         this.additionalArguments = additionalArguments;
         return this;
     }
@@ -89,7 +89,8 @@ public final class GdalWarpOptions {
         return sourceNoDataValues(List.of(sourceNoDataValues));
     }
 
-    public GdalWarpOptions sourceNoDataValues(final Collection<String> sourceNoDataValues) {
+    public GdalWarpOptions sourceNoDataValues(
+            final @Nullable Collection<String> sourceNoDataValues) {
         this.sourceNoDataValues = sourceNoDataValues;
         return this;
     }
@@ -98,17 +99,18 @@ public final class GdalWarpOptions {
         return targetNoDataValues(List.of(targetNoDataValues));
     }
 
-    public GdalWarpOptions targetNoDataValues(final Collection<String> targetNoDataValues) {
+    public GdalWarpOptions targetNoDataValues(
+            final @Nullable Collection<String> targetNoDataValues) {
         this.targetNoDataValues = targetNoDataValues;
         return this;
     }
 
-    public GdalWarpOptions targetSize(final WidthAndHeight<Integer> targetSize) {
+    public GdalWarpOptions targetSize(final @Nullable WidthAndHeight<Integer> targetSize) {
         this.targetSize = targetSize;
         return this;
     }
 
-    public GdalWarpOptions resamplingMethod(final GdalResamplingMethod resamplingMethod) {
+    public GdalWarpOptions resamplingMethod(final @Nullable GdalResamplingMethod resamplingMethod) {
         this.resamplingMethod = resamplingMethod;
         return this;
     }
@@ -121,7 +123,11 @@ public final class GdalWarpOptions {
      *     make the last call take precedence.
      */
     public GdalWarpOptions sourceCoordinateSystem(
-            final CoordinateSystem<?> sourceCoordinateSystem) {
+            final @Nullable CoordinateSystem<?> sourceCoordinateSystem) {
+        if (sourceCoordinateSystem == null) {
+            this.sourceSpatialReferenceSystem = null;
+            return this;
+        }
         this.sourceSpatialReferenceSystem = "EPSG:" + sourceCoordinateSystem.srid();
         return this;
     }
@@ -134,7 +140,7 @@ public final class GdalWarpOptions {
      * @see #sourceCoordinateSystem(CoordinateSystem) to set the source SRS by EPSG code. Calling
      *     one after the other will make the last call take precedence.
      */
-    public GdalWarpOptions sourceSRSString(final String sourceSRS) {
+    public GdalWarpOptions sourceSRSString(final @Nullable String sourceSRS) {
         this.sourceSpatialReferenceSystem = sourceSRS;
         return this;
     }
@@ -147,7 +153,11 @@ public final class GdalWarpOptions {
      *     make the last call take precedence.
      */
     public GdalWarpOptions targetCoordinateSystem(
-            final CoordinateSystem<?> targetCoordinateSystem) {
+            final @Nullable CoordinateSystem<?> targetCoordinateSystem) {
+        if (targetCoordinateSystem == null) {
+            this.targetSpatialReferenceSystem = null;
+            return this;
+        }
         this.targetSpatialReferenceSystem = "EPSG:" + targetCoordinateSystem.srid();
         return this;
     }
@@ -160,22 +170,22 @@ public final class GdalWarpOptions {
      * @see #targetCoordinateSystem(CoordinateSystem) to set the target SRS by EPSG code. Calling
      *     one after the other will make the last call take precedence.
      */
-    public GdalWarpOptions targetSRSString(final String targetSRS) {
+    public GdalWarpOptions targetSRSString(final @Nullable String targetSRS) {
         this.targetSpatialReferenceSystem = targetSRS;
         return this;
     }
 
-    public GdalWarpOptions outputFormat(final GdalDataSetFormat outputFormat) {
+    public GdalWarpOptions outputFormat(final @Nullable GdalDataSetFormat outputFormat) {
         this.outputFormat = outputFormat;
         return this;
     }
 
-    public GdalWarpOptions sourceFile(final Path sourceFile) {
+    public GdalWarpOptions sourceFile(final @Nullable Path sourceFile) {
         this.sourcePath = sourceFile;
         return this;
     }
 
-    public GdalWarpOptions targetFile(final Path targetFile) {
+    public GdalWarpOptions targetFile(final @Nullable Path targetFile) {
         this.targetPath = targetFile;
         return this;
     }
