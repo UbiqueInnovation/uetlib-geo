@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.2.3
+
+- Nullability for `GdalWarpOptions` setters.
+
 ## 3.2.2
 
 - updated actions to not run tests twice for sonar
