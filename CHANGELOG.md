@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 3.2.4
+
+- latest uetlib parent
+- version updates
+
 ## 3.2.3
 
 - Nullability for `GdalWarpOptions` setters.
