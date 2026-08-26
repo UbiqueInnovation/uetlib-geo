@@ -26,7 +26,7 @@ class OsmGraphParserTest {
                         .build();
 
         try (final var inputStream =
-                URI.create("https://download.geofabrik.de/europe/liechtenstein-latest.osm.pbf")
+                URI.create("https://osm-fixture.example.invalid/europe/liechtenstein-latest.osm.pbf")
                         .toURL()
                         .openStream()) {
             final var graph =
