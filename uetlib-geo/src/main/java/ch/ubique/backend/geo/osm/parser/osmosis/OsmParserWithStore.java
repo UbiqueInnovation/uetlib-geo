@@ -195,8 +195,14 @@ public class OsmParserWithStore {
                     .findFirst()
                     .orElse(null);
         }
-        final var centroid = geometry.getCentroid().getCoordinate();
-        return JtsConverter.WGS84.toBackendLib(centroid);
+        return getAreaRepresentativeCoordinate(geometry);
+    }
+
+    static WGS84Coordinate getAreaRepresentativeCoordinate(final MultiPolygon geometry) {
+        final var centroid = geometry.getCentroid();
+        final var representativePoint =
+                geometry.covers(centroid) ? centroid : geometry.getInteriorPoint();
+        return JtsConverter.WGS84.toBackendLib(representativePoint.getCoordinate());
     }
 
     private @Nullable WGS84Coordinate getRepresentativeCoordinate(final RelationMember member) {
@@ -250,7 +256,8 @@ public class OsmParserWithStore {
         }
         return new GeometryFactory(new PrecisionModel(), CoordinateSystems.WGS84.srid())
                 .createLineString(
-                        coordinates.stream().map(Objects::requireNonNull)
+                        coordinates.stream()
+                                .map(Objects::requireNonNull)
                                 .map(WGS84Coordinate::toJts)
                                 .toArray(Coordinate[]::new));
     }

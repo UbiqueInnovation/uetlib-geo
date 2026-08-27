@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.ubique.backend.core.io.FileProvider;
 
@@ -14,6 +15,9 @@ import com.google.common.base.Predicates;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import org.openstreetmap.osmosis.core.domain.v0_6.Bound;
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.Relation;
@@ -130,5 +134,36 @@ class OsmParserWithStoreTest {
                             }
                         })
                 .parse(fileProvider);
+    }
+
+    @Test
+    void relationRepresentativeCoordinateIsInsideConcavePolygon() throws ParseException {
+        final var polygon =
+                (Polygon)
+                        new WKTReader()
+                                .read(
+                                        "POLYGON ((7 46, 7.04 46, 7.04 46.04, 7.03 46.04, "
+                                                + "7.03 46.01, 7.01 46.01, 7.01 46.04, "
+                                                + "7 46.04, 7 46))");
+        final var geometry = polygon.getFactory().createMultiPolygon(new Polygon[] {polygon});
+        assertFalse(geometry.covers(geometry.getCentroid()));
+
+        final var representativeCoordinate =
+                OsmParserWithStore.getAreaRepresentativeCoordinate(geometry);
+        assertTrue(geometry.covers(representativeCoordinate.toJtsPoint()));
+    }
+
+    @Test
+    void relationRepresentativeCoordinateKeepsCentroidWhenItIsInside() throws ParseException {
+        final var polygon =
+                (Polygon) new WKTReader().read("POLYGON ((7 46, 8 46, 8 47, 7 47, 7 46))");
+        final var geometry = polygon.getFactory().createMultiPolygon(new Polygon[] {polygon});
+        final var centroid = geometry.getCentroid();
+
+        final var representativeCoordinate =
+                OsmParserWithStore.getAreaRepresentativeCoordinate(geometry);
+
+        assertEquals(centroid.getX(), representativeCoordinate.longitude());
+        assertEquals(centroid.getY(), representativeCoordinate.latitude());
     }
 }
