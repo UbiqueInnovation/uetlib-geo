@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ch.ubique.backend.core.io.FileProvider;
+import ch.ubique.backend.geo.coordinate.util.JtsConverter;
+import ch.ubique.backend.geo.coordinate.util.JtsUtil;
 
 import com.google.common.base.Predicates;
 
@@ -57,8 +59,11 @@ class OsmParserWithStoreTest {
 
     private void verifyWay(final Way way) {
         assertNotNull(way);
-        assertNotNull(parser.getRepresentativeCoordinate(way));
-        assertNotNull(parser.createLineString(way));
+        final var lineString = parser.createLineString(way);
+        assertNotNull(lineString);
+        assertEquals(
+                JtsConverter.WGS84.toBackendLib(JtsUtil.representativeCoordinate(lineString)),
+                parser.getRepresentativeCoordinate(way));
         assertThatCollection(way.getWayNodes())
                 .allMatch(node -> parser.getNodeCoordinate(node.getNodeId()) != null);
     }
@@ -75,7 +80,16 @@ class OsmParserWithStoreTest {
                 assertNull(lineString);
             }
         }
-        if (hasAnyGeometries) {
+        final var geometry = parser.getMultiPolygon(relation);
+        if (!geometry.isEmpty()) {
+            final var expected =
+                    JtsConverter.WGS84.toBackendLib(
+                            JtsUtil.representativeCoordinate(geometry));
+            final var actual = parser.getRepresentativeCoordinate(relation);
+            assertNotNull(actual);
+            assertEquals(expected.longitude(), actual.longitude(), 1e-12);
+            assertEquals(expected.latitude(), actual.latitude(), 1e-12);
+        } else if (hasAnyGeometries) {
             assertNotNull(parser.getRepresentativeCoordinate(relation));
         }
     }
