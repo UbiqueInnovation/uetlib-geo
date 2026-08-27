@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 3.2.5
+
+### Improvements
+
+- Keep representative OSM area coordinates within their geometries.
+- Use the Ubique Geofabrik mirror.
+
 ## 3.2.4
 
 - latest uetlib parent

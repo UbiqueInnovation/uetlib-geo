@@ -195,8 +195,7 @@ public class OsmParserWithStore {
                     .findFirst()
                     .orElse(null);
         }
-        final var centroid = geometry.getCentroid().getCoordinate();
-        return JtsConverter.WGS84.toBackendLib(centroid);
+        return JtsConverter.WGS84.toBackendLib(JtsUtil.representativeCoordinate(geometry));
     }
 
     private @Nullable WGS84Coordinate getRepresentativeCoordinate(final RelationMember member) {
