@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -177,13 +176,7 @@ public class OsmParserWithStore {
     }
 
     private static WGS84Coordinate getRepresentativeCoordinate(final LineString lineString) {
-        final var centroid = lineString.getCentroid().getCoordinate();
-        // Project linestring onto the closest segment
-        return JtsConverter.WGS84.toBackendLib(
-                JtsUtil.segments(lineString).stream()
-                        .min(Comparator.comparing(segment -> segment.distance(centroid)))
-                        .orElseThrow()
-                        .project(centroid));
+        return JtsConverter.WGS84.toBackendLib(JtsUtil.representativeCoordinate(lineString));
     }
 
     private @Nullable WGS84Coordinate getRepresentativeCoordinate(final Relation relation) {

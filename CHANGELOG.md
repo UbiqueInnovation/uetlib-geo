@@ -4,7 +4,7 @@
 
 ### Improvements
 
-- Keep representative OSM area coordinates within their geometries.
+- Use consistent representative coordinates for OSM ways and areas.
 - Use the Ubique Geofabrik mirror.
 
 ## 3.2.4
