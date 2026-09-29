@@ -7,6 +7,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Objects;
 
 public class GeoPackageSqlReader {
 
@@ -23,9 +24,13 @@ public class GeoPackageSqlReader {
     }
 
     public Collection<String> getAttributeTables() {
-        return jdbcTemplate.queryForList(
-                "SELECT table_name FROM gpkg_contents WHERE data_type = 'attributes'",
-                String.class);
+        return jdbcTemplate
+                .queryForList(
+                        "SELECT table_name FROM gpkg_contents WHERE data_type = 'attributes'",
+                        String.class)
+                .stream()
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     public Collection<ColumnInfo> columnsInfos(final String tableName) {
@@ -36,7 +41,6 @@ public class GeoPackageSqlReader {
                                 rs.getString("name"),
                                 rs.getString("type"),
                                 rs.getBoolean("notnull")),
-                tableName
-                );
+                tableName);
     }
 }
