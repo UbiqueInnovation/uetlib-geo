@@ -3,9 +3,8 @@ package ch.ubique.backend.geo.graph.routing.models;
 import ch.ubique.backend.geo.graph.routing.protobuf.RoutingGraphTile.SurfaceType;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 
-import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
-
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;

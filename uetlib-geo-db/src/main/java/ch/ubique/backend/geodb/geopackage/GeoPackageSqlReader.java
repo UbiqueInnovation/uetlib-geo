@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Objects;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class GeoPackageSqlReader {
 
     private final JdbcTemplate jdbcTemplate;
@@ -36,7 +37,7 @@ public class GeoPackageSqlReader {
     public Collection<ColumnInfo> columnsInfos(final String tableName) {
         return jdbcTemplate.query(
                 "SELECT * FROM pragma_table_info(?)",
-                (rs, rowNum) ->
+                (rs, _) ->
                         new ColumnInfo(
                                 rs.getString("name"),
                                 rs.getString("type"),

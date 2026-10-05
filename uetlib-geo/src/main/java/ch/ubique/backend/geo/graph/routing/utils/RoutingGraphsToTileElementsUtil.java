@@ -6,11 +6,10 @@ import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
 import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile;
 import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.Neighbor;
 import ch.ubique.backend.geo.graph.routing.models.RoutingGraphTile.RoutingNeighbor;
-import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 import ch.ubique.backend.geo.graph.routing.models.RoutingShortcutEdge;
+import ch.ubique.backend.geo.graph.routing.models.RoutingVertex;
 
 import org.jspecify.annotations.NonNull;
-
 import org.locationtech.jts.geom.GeometryFactory;
 
 import java.util.Collection;

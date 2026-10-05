@@ -7,8 +7,8 @@ import ch.ubique.backend.geo.tlm.models.WegType;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public record TlmTags(
         @JsonProperty("uuid") @NonNull String uuid,

@@ -16,7 +16,6 @@
 package ch.ubique.backend.geo.jackson.jts;
 
 import org.jspecify.annotations.Nullable;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;

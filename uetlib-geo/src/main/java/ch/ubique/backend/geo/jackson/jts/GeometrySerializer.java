@@ -74,8 +74,7 @@ public class GeometrySerializer extends ValueSerializer<Geometry> {
     public void serialize(
             final Geometry geometry,
             final JsonGenerator generator,
-            final SerializationContext provider)
-            {
+            final SerializationContext provider) {
         switch (geometry) {
             case null -> generator.writeNull();
             case final Polygon polygon -> serialize(polygon, generator);

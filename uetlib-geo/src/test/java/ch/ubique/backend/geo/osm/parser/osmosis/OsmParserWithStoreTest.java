@@ -83,8 +83,7 @@ class OsmParserWithStoreTest {
         final var geometry = parser.getMultiPolygon(relation);
         if (!geometry.isEmpty()) {
             final var expected =
-                    JtsConverter.WGS84.toBackendLib(
-                            JtsUtil.representativeCoordinate(geometry));
+                    JtsConverter.WGS84.toBackendLib(JtsUtil.representativeCoordinate(geometry));
             final var actual = parser.getRepresentativeCoordinate(relation);
             assertNotNull(actual);
             assertEquals(expected.longitude(), actual.longitude(), 1e-12);

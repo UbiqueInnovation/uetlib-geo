@@ -1,12 +1,13 @@
 package ch.ubique.backend.geo.tile.processing.tasks;
 
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
+import ch.ubique.backend.geo.tile.processing.stats.TileSizeStatsUtil;
 import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 
-import ch.ubique.backend.geo.tile.processing.stats.TileSizeStatsUtil;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public abstract class ModifyTileSetTask extends CreateTileSetTask {
 

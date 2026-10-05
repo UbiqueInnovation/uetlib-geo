@@ -3,8 +3,8 @@ package ch.ubique.backend.geo.tile.vector.mapbox.encoding;
 import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTile;
 import ch.ubique.backend.geo.tile.vector.mapbox.models.VectorTileLayer;
 import ch.ubique.backend.geo.vectortile.protobuf.Tile;
-
 import ch.ubique.backend.geo.vectortile.protobuf.Tile.Layer;
+
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.*;

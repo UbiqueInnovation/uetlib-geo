@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.tile.vector.mapbox.tilejson.jackson;
 
 import ch.ubique.backend.geo.coordinate.models.BoundingBox;
 import ch.ubique.backend.geo.coordinate.models.WGS84Coordinate;
+
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ValueSerializer;

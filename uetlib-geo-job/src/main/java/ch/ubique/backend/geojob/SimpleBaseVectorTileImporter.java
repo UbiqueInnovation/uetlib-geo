@@ -7,7 +7,6 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.models.VectorTileOutput;
 
 import org.jspecify.annotations.NonNull;
-
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;

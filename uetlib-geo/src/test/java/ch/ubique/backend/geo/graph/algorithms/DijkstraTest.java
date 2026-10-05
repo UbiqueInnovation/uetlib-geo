@@ -77,7 +77,10 @@ class DijkstraTest {
         assertNotNull(results);
         assertEquals(5, results.size());
         TestGeoJsonUtil.saveGeoJson(
-                results.stream().map(SearchUtils::computePath).map(TestGeoJsonUtil::toFeature).toList(),
+                results.stream()
+                        .map(SearchUtils::computePath)
+                        .map(TestGeoJsonUtil::toFeature)
+                        .toList(),
                 "dijkstra-test");
 
         final var resultsByTarget =

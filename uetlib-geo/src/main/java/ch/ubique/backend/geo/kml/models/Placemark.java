@@ -1,6 +1,5 @@
 package ch.ubique.backend.geo.kml.models;
 
-
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.HashMap;
