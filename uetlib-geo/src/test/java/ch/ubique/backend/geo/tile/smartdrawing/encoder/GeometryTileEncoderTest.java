@@ -31,7 +31,8 @@ class GeometryTileEncoderTest {
                         new Coordinate[] {new Coordinate(0, 0), new Coordinate(10, 10)});
         final Map<String, Object> tags = Map.of("name", "test");
         final var edge =
-                new SmartDrawingEdge(v1, v2, line, tags, new int[] {0}, new int[] {0}, null, new boolean[0]);
+                new SmartDrawingEdge(
+                        v1, v2, line, tags, new int[] {0}, new int[] {0}, null, new boolean[0]);
 
         final var tile =
                 new GeometryTileEncoder(envelope)
@@ -71,7 +72,8 @@ class GeometryTileEncoderTest {
                         new Coordinate[] {v1.coordinate().toJts(), v2.coordinate().toJts()});
         final Map<String, Object> tags = Map.of();
         final var edge =
-                new SmartDrawingEdge(v1, v2, line, tags, new int[] {0}, new int[] {0}, null, new boolean[0]);
+                new SmartDrawingEdge(
+                        v1, v2, line, tags, new int[] {0}, new int[] {0}, null, new boolean[0]);
 
         final var tile = new GeometryTileEncoder(envelope).extent(100).add(edge).encode();
 
@@ -90,17 +92,14 @@ class GeometryTileEncoderTest {
         final var v1 = new SmartDrawingVertex(1, new WGS84Coordinate(0, 0));
         final var v2 = new SmartDrawingVertex(2, new WGS84Coordinate(1, 1));
         final var line =
-                GF.createLineString(
-                        new Coordinate[] {new Coordinate(0, 0), new Coordinate(1, 1)});
+                GF.createLineString(new Coordinate[] {new Coordinate(0, 0), new Coordinate(1, 1)});
         final Map<String, Object> tags = Map.of();
         final var edge =
-                new SmartDrawingEdge(v1, v2, line, tags, new int[] {0}, new int[] {0}, 123L, new boolean[0]);
+                new SmartDrawingEdge(
+                        v1, v2, line, tags, new int[] {0}, new int[] {0}, 123L, new boolean[0]);
 
         final var tile =
-                new GeometryTileEncoder(envelope)
-                        .encodeElevation(false)
-                        .add(edge)
-                        .encode();
+                new GeometryTileEncoder(envelope).encodeElevation(false).add(edge).encode();
 
         assertThat(tile.getWays(0).getMultiEdgeVariant()).isEqualTo(123L);
     }
@@ -112,12 +111,12 @@ class GeometryTileEncoderTest {
         final var v1 = new SmartDrawingVertex(1, new WGS84Coordinate(0, 0));
         final var v2 = new SmartDrawingVertex(2, new WGS84Coordinate(1, 1));
         final var line =
-                GF.createLineString(
-                        new Coordinate[] {new Coordinate(0, 0), new Coordinate(1, 1)});
+                GF.createLineString(new Coordinate[] {new Coordinate(0, 0), new Coordinate(1, 1)});
         final Map<String, Object> tags =
                 Map.of("str", "val", "int", 123, "float", 1.23f, "bool", true);
         final var edge =
-                new SmartDrawingEdge(v1, v2, line, tags, new int[] {0}, new int[] {0}, null, new boolean[0]);
+                new SmartDrawingEdge(
+                        v1, v2, line, tags, new int[] {0}, new int[] {0}, null, new boolean[0]);
 
         final var tile =
                 new GeometryTileEncoder(envelope)

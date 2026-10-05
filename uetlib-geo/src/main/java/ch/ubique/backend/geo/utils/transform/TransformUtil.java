@@ -1,10 +1,11 @@
 package ch.ubique.backend.geo.utils.transform;
 
-import java.awt.Rectangle;
 import org.geotools.api.referencing.operation.MathTransform;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.renderer.lite.RendererUtilities;
+
+import java.awt.Rectangle;
 
 public class TransformUtil {
 

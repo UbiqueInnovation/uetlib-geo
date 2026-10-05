@@ -41,17 +41,24 @@ public record SmartDrawingEdge(
         }
         if (forwardWeights.length > 0 && forwardWeights.length != numDisciplines) {
             throw new IllegalArgumentException(
-                    "forwardWeights length " + forwardWeights.length + " does not match numDisciplines "
+                    "forwardWeights length "
+                            + forwardWeights.length
+                            + " does not match numDisciplines "
                             + numDisciplines);
         }
         if (backwardWeights.length > 0 && backwardWeights.length != numDisciplines) {
             throw new IllegalArgumentException(
-                    "backwardWeights length " + backwardWeights.length + " does not match numDisciplines "
+                    "backwardWeights length "
+                            + backwardWeights.length
+                            + " does not match numDisciplines "
                             + numDisciplines);
         }
         if (isHighway.length > 0 && isHighway.length != numDisciplines) {
             throw new IllegalArgumentException(
-                    "isHighway length " + isHighway.length + " does not match numDisciplines " + numDisciplines);
+                    "isHighway length "
+                            + isHighway.length
+                            + " does not match numDisciplines "
+                            + numDisciplines);
         }
     }
 

@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import ch.ubique.backend.geo.graph.algorithms.ConnectedComponents;
 import ch.ubique.backend.geo.graph.routing.models.LineWithInfo;
-
 import ch.ubique.backend.geo.graph.routing.models.RoutingCompleteEdge;
 import ch.ubique.backend.geo.utils.TestGeoJsonUtil;
+
 import com.pivovarit.function.ThrowingFunction;
 
 import org.junit.jupiter.api.Assertions;

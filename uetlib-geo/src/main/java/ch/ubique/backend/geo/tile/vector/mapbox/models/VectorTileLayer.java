@@ -1,6 +1,5 @@
 package ch.ubique.backend.geo.tile.vector.mapbox.models;
 
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 

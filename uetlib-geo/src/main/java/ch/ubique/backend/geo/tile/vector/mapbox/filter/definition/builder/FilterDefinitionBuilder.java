@@ -2,6 +2,7 @@ package ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.builder;
 
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterDefinition;
 import ch.ubique.backend.geo.tile.vector.mapbox.filter.definition.FilterRule;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

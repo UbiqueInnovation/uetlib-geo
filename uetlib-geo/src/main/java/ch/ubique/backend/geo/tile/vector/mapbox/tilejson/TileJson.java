@@ -11,13 +11,15 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import tools.jackson.databind.annotation.JsonDeserialize;
-import tools.jackson.databind.annotation.JsonSerialize;
 
-import org.jspecify.annotations.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 import java.util.List;
 import java.util.Map;
@@ -31,8 +33,7 @@ public record TileJson(
         @JsonProperty("bounds")
                 @JsonDeserialize(using = TileJsonBoundsDeserializer.class)
                 @JsonSerialize(using = TileJsonBoundsSerializer.class)
-                @Nullable
-                BoundingBox<WGS84Coordinate> bounds,
+                @Nullable BoundingBox<WGS84Coordinate> bounds,
         @JsonProperty("center") @Nullable TileJsonCenter center,
         @JsonProperty("data") @Nullable List<String> data,
         @JsonProperty("description") @Nullable String description,

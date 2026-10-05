@@ -12,11 +12,10 @@ import ch.ubique.backend.geo.tile.vector.models.VectorTileElement;
 import ch.ubique.backend.geo.tile.vector.utils.SimplifyGeometryUtils;
 import ch.ubique.backend.geo.tile.vector.utils.TileGeometryUtils;
 
-import org.jspecify.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
-
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.slf4j.Logger;
