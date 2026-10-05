@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import ch.ubique.backend.geo.tile.vector.mapbox.VectorTileEncodingConfig;
 import ch.ubique.backend.geo.vectortile.protobuf.Tile;
+
 import org.junit.jupiter.api.Test;
 
 class ValueEncoderTest {

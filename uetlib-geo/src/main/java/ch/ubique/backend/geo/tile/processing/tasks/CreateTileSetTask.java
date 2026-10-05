@@ -1,8 +1,8 @@
 package ch.ubique.backend.geo.tile.processing.tasks;
 
 import ch.ubique.backend.geo.tile.common.models.TileInfo;
-import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 import ch.ubique.backend.geo.tile.processing.stats.TileSizeStatsUtil;
+import ch.ubique.backend.geo.tile.vector.models.BinaryTile;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElseGet;
 
 import org.jspecify.annotations.NonNull;
-
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.Map;

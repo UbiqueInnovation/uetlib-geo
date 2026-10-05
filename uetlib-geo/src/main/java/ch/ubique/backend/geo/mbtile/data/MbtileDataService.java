@@ -5,9 +5,9 @@ import ch.ubique.backend.geo.mbtile.metadata.constants.MbtileFormat;
 import ch.ubique.backend.geo.mbtile.metadata.constants.MetadataKey;
 import ch.ubique.backend.geo.mbtile.metadata.json.MetadataJson;
 
-import java.util.List;
-
 import tools.jackson.core.JacksonException;
+
+import java.util.List;
 
 public interface MbtileDataService {
     void insertReplaceMetadata(MetadataKey key, String value);

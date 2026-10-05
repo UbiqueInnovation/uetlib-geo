@@ -22,9 +22,6 @@ import ch.ubique.backend.geo.tlm.models.WegType;
 import ch.ubique.backend.geo.utils.TestGeoJsonUtil;
 import ch.ubique.backend.geo.utils.duration.HikeDuration;
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.json.JsonMapper;
-
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -34,6 +31,9 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.net.URI;

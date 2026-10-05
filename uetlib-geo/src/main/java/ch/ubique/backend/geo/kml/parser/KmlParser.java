@@ -10,9 +10,8 @@ import ch.ubique.backend.geo.kml.models.Placemark;
 import ch.ubique.backend.geo.kml.models.Style;
 import ch.ubique.backend.geo.kml.models.StyleMap;
 
-import org.jspecify.annotations.NonNull;
-
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;

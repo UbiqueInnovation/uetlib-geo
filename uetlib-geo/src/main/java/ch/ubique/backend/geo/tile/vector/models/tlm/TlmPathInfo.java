@@ -2,8 +2,8 @@ package ch.ubique.backend.geo.tile.vector.models.tlm;
 
 import ch.ubique.backend.geo.tlm.models.*;
 
-import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public record TlmPathInfo(
         @NonNull UnstructuredTlmInfo unstructured,

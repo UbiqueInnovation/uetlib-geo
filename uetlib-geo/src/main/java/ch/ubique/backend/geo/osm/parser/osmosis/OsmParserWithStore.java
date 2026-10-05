@@ -242,7 +242,8 @@ public class OsmParserWithStore {
         }
         return new GeometryFactory(new PrecisionModel(), CoordinateSystems.WGS84.srid())
                 .createLineString(
-                        coordinates.stream().map(Objects::requireNonNull)
+                        coordinates.stream()
+                                .map(Objects::requireNonNull)
                                 .map(WGS84Coordinate::toJts)
                                 .toArray(Coordinate[]::new));
     }

@@ -1,8 +1,5 @@
 package ch.ubique.backend.geo.tile.vector.mapbox.encoding;
 
-
-
-
 import java.util.*;
 
 public class TagsEncoder {

@@ -8,7 +8,6 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
 import java.util.List;
 
 public class TileJsonBoundsDeserializer extends ValueDeserializer<BoundingBox<WGS84Coordinate>> {

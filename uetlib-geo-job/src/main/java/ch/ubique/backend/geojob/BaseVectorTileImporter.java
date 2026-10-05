@@ -8,7 +8,6 @@ import ch.ubique.backend.job.BaseInputJob;
 import ch.ubique.backend.job.model.JobRunState;
 
 import org.jspecify.annotations.NonNull;
-
 import org.springframework.context.ApplicationContext;
 
 import java.util.Collection;

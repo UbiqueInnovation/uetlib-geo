@@ -3,7 +3,6 @@ package ch.ubique.backend.geo.geometry.exception;
 import ch.ubique.backend.geo.coordinate.models.BoundingBox;
 
 import org.jspecify.annotations.NonNull;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
