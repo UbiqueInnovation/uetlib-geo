@@ -27,7 +27,7 @@
             <dependency>
                 <groupId>ch.ubique</groupId>
                 <artifactId>uetlib-job</artifactId>
-                <version>5.1.0</version>
+                <version>5.1.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
