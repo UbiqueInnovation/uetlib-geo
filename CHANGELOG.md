@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 3.3.0
+
+### Improvements
+
+- Add `SemicircleUtil` for converting degrees, radians and semicircle units used by GPS devices and protocols, including
+  Garmin-compatible signed 32-bit encoding and decoding.
+- version updates
+
 ## 3.2.5
 
 ### Improvements
