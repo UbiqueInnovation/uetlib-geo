@@ -1,0 +1,439 @@
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "EPSG:2056"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": 1,
+      "properties": {
+        "Name": " pasture ",
+        "none": null,
+        "truth": true,
+        "count": 123,
+        "negative": -4,
+        "decimal": 1.25,
+        "nested": {
+          "values": [
+            1,
+            "hello",
+            null
+          ]
+        },
+        "type": "ordinary-property",
+        "id": "property-id"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2600000.123456,
+          1200000
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "string-id",
+      "properties": {
+        "Name": " pasture ",
+        "none": null,
+        "truth": true,
+        "count": 123,
+        "negative": -4,
+        "decimal": 1.25,
+        "nested": {
+          "values": [
+            1,
+            "hello",
+            null
+          ]
+        },
+        "type": "ordinary-property",
+        "id": "property-id"
+      },
+      "geometry": {
+        "type": "MultiPoint",
+        "coordinates": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 3,
+      "properties": {
+        "Name": " pasture ",
+        "none": null,
+        "truth": true,
+        "count": 123,
+        "negative": -4,
+        "decimal": 1.25,
+        "nested": {
+          "values": [
+            1,
+            "hello",
+            null
+          ]
+        },
+        "type": "ordinary-property",
+        "id": "property-id"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            -1,
+            -2
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 4,
+      "properties": {
+        "Name": " pasture ",
+        "none": null,
+        "truth": true,
+        "count": 123,
+        "negative": -4,
+        "decimal": 1.25,
+        "nested": {
+          "values": [
+            1,
+            "hello",
+            null
+          ]
+        },
+        "type": "ordinary-property",
+        "id": "property-id"
+      },
+      "geometry": {
+        "type": "MultiLineString",
+        "coordinates": [
+          [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              4
+            ]
+          ],
+          [
+            [
+              5,
+              6
+            ],
+            [
+              7,
+              8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 5,
+      "properties": {
+        "Name": " pasture ",
+        "none": null,
+        "truth": true,
+        "count": 123,
+        "negative": -4,
+        "decimal": 1.25,
+        "nested": {
+          "values": [
+            1,
+            "hello",
+            null
+          ]
+        },
+        "type": "ordinary-property",
+        "id": "property-id"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2600000.123456,
+              1200000
+            ],
+            [
+              2600010,
+              1200000
+            ],
+            [
+              2600010,
+              1200010
+            ],
+            [
+              2600000.123456,
+              1200000
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 6,
+      "properties": {
+        "Name": " pasture ",
+        "none": null,
+        "truth": true,
+        "count": 123,
+        "negative": -4,
+        "decimal": 1.25,
+        "nested": {
+          "values": [
+            1,
+            "hello",
+            null
+          ]
+        },
+        "type": "ordinary-property",
+        "id": "property-id"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2600000.123456,
+              1200000
+            ],
+            [
+              2600010,
+              1200000
+            ],
+            [
+              2600010,
+              1200010
+            ],
+            [
+              2600000.123456,
+              1200000
+            ]
+          ],
+          [
+            [
+              2600002,
+              1200002
+            ],
+            [
+              2600003,
+              1200003
+            ],
+            [
+              2600003,
+              1200002
+            ],
+            [
+              2600002,
+              1200002
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 7,
+      "properties": {
+        "Name": " pasture ",
+        "none": null,
+        "truth": true,
+        "count": 123,
+        "negative": -4,
+        "decimal": 1.25,
+        "nested": {
+          "values": [
+            1,
+            "hello",
+            null
+          ]
+        },
+        "type": "ordinary-property",
+        "id": "property-id"
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                2600000.123456,
+                1200000
+              ],
+              [
+                2600010,
+                1200000
+              ],
+              [
+                2600010,
+                1200010
+              ],
+              [
+                2600000.123456,
+                1200000
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 8,
+      "properties": {
+        "Name": " pasture ",
+        "none": null,
+        "truth": true,
+        "count": 123,
+        "negative": -4,
+        "decimal": 1.25,
+        "nested": {
+          "values": [
+            1,
+            "hello",
+            null
+          ]
+        },
+        "type": "ordinary-property",
+        "id": "property-id"
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                2600000.123456,
+                1200000
+              ],
+              [
+                2600010,
+                1200000
+              ],
+              [
+                2600010,
+                1200010
+              ],
+              [
+                2600000.123456,
+                1200000
+              ]
+            ],
+            [
+              [
+                2600002,
+                1200002
+              ],
+              [
+                2600003,
+                1200003
+              ],
+              [
+                2600003,
+                1200002
+              ],
+              [
+                2600002,
+                1200002
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                2600000.123456,
+                1200000
+              ],
+              [
+                2600010,
+                1200000
+              ],
+              [
+                2600010,
+                1200010
+              ],
+              [
+                2600000.123456,
+                1200000
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 9,
+      "properties": {
+        "Name": " pasture ",
+        "none": null,
+        "truth": true,
+        "count": 123,
+        "negative": -4,
+        "decimal": 1.25,
+        "nested": {
+          "values": [
+            1,
+            "hello",
+            null
+          ]
+        },
+        "type": "ordinary-property",
+        "id": "property-id"
+      },
+      "geometry": {
+        "type": "GeometryCollection",
+        "geometries": [
+          {
+            "type": "Point",
+            "coordinates": [
+              1,
+              2
+            ]
+          },
+          {
+            "type": "LineString",
+            "coordinates": [
+              [
+                1,
+                2
+              ],
+              [
+                3,
+                4
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

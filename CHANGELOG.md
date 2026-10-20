@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 3.4.0
+
+### New Features
+
+- Add GeoBuf encoding with typed properties, feature IDs, CRS metadata and configurable coordinate precision.
+
 ## 3.3.0
 
 ### Improvements
