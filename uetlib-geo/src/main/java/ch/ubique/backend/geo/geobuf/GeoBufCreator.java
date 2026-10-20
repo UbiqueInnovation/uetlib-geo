@@ -2,25 +2,39 @@ package ch.ubique.backend.geo.geobuf;
 
 import static java.util.Objects.requireNonNull;
 
-import ch.ubique.backend.geo.geobuf.protobuf.Data;
+import ch.ubique.backend.geo.geobuf.protobuf.GeoBuf;
+import ch.ubique.backend.geo.geojson.models.jts.Feature;
+import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.CodedOutputStream;
+
+import org.jspecify.annotations.Nullable;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 
 import tools.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
- * Encodes GeoJSON using the Mapbox GeoBuf schema, delta-encoded coordinates and shared property
- * keys. Precision is expressed in the input coordinate system; no coordinate transformation is
- * performed.
+ * Encodes GeoJSON and Java/JTS features using the Mapbox GeoBuf schema, delta-encoded coordinates
+ * and shared property keys. Precision is expressed in the input coordinate system; no coordinate
+ * transformation is performed.
  */
 public final class GeoBufCreator {
     private final int precision;
@@ -38,42 +52,23 @@ public final class GeoBufCreator {
 
     /** Retains feature IDs, properties and foreign members such as CRS and bounding boxes. */
     public byte[] toGeoBufNative(final JsonNode geoJson) {
-        return new Encoder(precision).encode(geoJson);
+        return new Encoder(precision).encode(GeoBufInputs.fromJson(geoJson));
+    }
+
+    public byte[] toGeoBufNative(final Geometry geometry) {
+        return new Encoder(precision).encode(GeoBufInputs.fromGeometry(geometry));
+    }
+
+    public byte[] toGeoBufNative(final Feature feature) {
+        return new Encoder(precision).encode(GeoBufInputs.fromFeature(feature));
+    }
+
+    public byte[] toGeoBufNative(final FeatureCollection collection) {
+        return new Encoder(precision).encode(GeoBufInputs.fromCollection(collection));
     }
 
     private static final class Encoder {
-        private static final String COORDINATES = "coordinates";
-        private static final String FEATURE = "Feature";
-        private static final String GEOMETRY_COLLECTION = "GeometryCollection";
-        private static final String FEATURES = "features";
-        private static final String FEATURE_COLLECTION = "FeatureCollection";
-        private static final String GEOMETRIES = "geometries";
-        private static final String GEOMETRY = "geometry";
-        private static final String POLYGON = "Polygon";
-        private static final String POINT = "Point";
-        private static final String MULTI_POINT = "MultiPoint";
-        private static final String LINE_STRING = "LineString";
-        private static final String MULTI_LINE_STRING = "MultiLineString";
-        private static final String MULTI_POLYGON = "MultiPolygon";
         private static final String PROPERTIES = "properties";
-        private static final Map<String, Data.Geometry.Type> GEOMETRY_TYPES =
-                Map.of(
-                        POINT,
-                        Data.Geometry.Type.POINT,
-                        MULTI_POINT,
-                        Data.Geometry.Type.MULTIPOINT,
-                        LINE_STRING,
-                        Data.Geometry.Type.LINESTRING,
-                        MULTI_LINE_STRING,
-                        Data.Geometry.Type.MULTILINESTRING,
-                        POLYGON,
-                        Data.Geometry.Type.POLYGON,
-                        MULTI_POLYGON,
-                        Data.Geometry.Type.MULTIPOLYGON,
-                        GEOMETRY_COLLECTION,
-                        Data.Geometry.Type.GEOMETRYCOLLECTION);
-        private static final Set<String> FEATURE_MEMBERS =
-                Set.of("type", "id", PROPERTIES, GEOMETRY);
         private final int precision;
         private final double scale;
         private final Map<String, Integer> keys = new LinkedHashMap<>();
@@ -84,274 +79,264 @@ public final class GeoBufCreator {
             scale = Math.pow(10, precision);
         }
 
-        byte[] encode(final JsonNode json) {
+        byte[] encode(final GeoBufInput input) {
             // First pass: infer dimensions and store each property name once in a shared
             // dictionary.
-            analyze(json);
-            final var data =
-                    Data.newBuilder()
+            analyze(input);
+            final var header =
+                    GeoBuf.newBuilder()
                             .setPrecision(precision)
                             .setDimensions(dimensions == 0 ? 2 : dimensions)
-                            .addAllKeys(keys.keySet());
+                            .addAllKeys(keys.keySet())
+                            .build();
             // Protocol Buffers packs the message, including signed coordinate deltas, into bytes.
             return serialize(
                             output -> {
-                                data.build().writeTo(output);
-                                switch (type(json)) {
-                                    case FEATURE_COLLECTION ->
+                                header.writeTo(output);
+                                switch (input) {
+                                    case GeoBufInput.Collection collection ->
                                             output.writeBytes(
-                                                    Data.FEATURE_COLLECTION_FIELD_NUMBER,
-                                                    collection(json));
-                                    case FEATURE ->
+                                                    GeoBuf.FEATURE_COLLECTION_FIELD_NUMBER,
+                                                    collection(collection));
+                                    case GeoBufInput.Feature feature ->
                                             output.writeBytes(
-                                                    Data.FEATURE_FIELD_NUMBER, feature(json));
-                                    default ->
+                                                    GeoBuf.FEATURE_FIELD_NUMBER, feature(feature));
+                                    case GeoBufInput.Shape shape ->
                                             output.writeMessage(
-                                                    Data.GEOMETRY_FIELD_NUMBER, geometry(json));
+                                                    GeoBuf.GEOMETRY_FIELD_NUMBER, geometry(shape));
                                 }
                             })
                     .toByteArray();
         }
 
-        private void analyze(final JsonNode node) {
-            if (!node.isObject()) {
-                throw new IllegalArgumentException("Expected a GeoJSON object");
-            }
-            switch (type(node)) {
-                case FEATURE_COLLECTION -> analyzeFeatureCollection(node);
-                case FEATURE -> analyzeFeature(node);
-                case GEOMETRY_COLLECTION -> {
-                    if (!node.path(GEOMETRIES).isArray()) {
-                        throw new IllegalArgumentException("Expected a GeoJSON geometries array");
-                    }
-                    for (final var geometry : node.path(GEOMETRIES)) {
+        private void analyze(final GeoBufInput input) {
+            switch (input) {
+                case GeoBufInput.Collection collection ->
+                        collection.features().forEach(this::analyze);
+                case GeoBufInput.Feature feature -> {
+                    final var geometry = feature.geometry();
+                    if (geometry != null) {
                         analyze(geometry);
                     }
+                    final var properties = feature.properties();
+                    if (properties == null) {
+                        saveKey(PROPERTIES);
+                    } else {
+                        properties.keySet().forEach(this::saveKey);
+                    }
                 }
-                default -> {
-                    final int depth =
-                            switch (type(node)) {
-                                case POINT -> 0;
-                                case MULTI_POINT, LINE_STRING -> 1;
-                                case MULTI_LINE_STRING, POLYGON -> 2;
-                                case MULTI_POLYGON -> 3;
-                                default ->
-                                        throw new IllegalArgumentException(
-                                                "Unknown GeoJSON geometry: " + type(node));
-                            };
-                    analyzeCoordinates(node.path(COORDINATES), depth);
-                }
+                case GeoBufInput.Shape shape -> analyzeShape(shape);
             }
-            for (final var property : node.properties()) {
-                if (!special(property.getKey(), type(node))) {
-                    saveKey(property.getKey());
-                }
-            }
+            input.foreignMembers().keySet().forEach(this::saveKey);
         }
 
-        private void analyzeFeatureCollection(final JsonNode node) {
-            if (!node.path(FEATURES).isArray()) {
-                throw new IllegalArgumentException("Expected a GeoJSON features array");
+        private void analyzeShape(final GeoBufInput.Shape shape) {
+            if (!shape.children().isEmpty()) {
+                shape.children().forEach(this::analyze);
+                return;
             }
-            for (final var feature : node.path(FEATURES)) {
-                if (!FEATURE.equals(type(feature))) {
-                    throw new IllegalArgumentException("Expected a GeoJSON Feature");
-                }
-                analyze(feature);
+            if (shape.geometry() instanceof Point point && point.isEmpty()) {
+                throw new IllegalArgumentException("GeoBuf requires a nonempty point");
             }
+            shape.geometry().apply(this::analyzePosition);
         }
 
-        private void analyzeFeature(final JsonNode node) {
-            final var geometry = node.path(GEOMETRY);
-            if (!geometry.isNull()) {
-                analyze(geometry);
-            }
-            final var properties = node.path(PROPERTIES);
-            if (!properties.isObject() && !properties.isNull()) {
-                throw new IllegalArgumentException("Feature properties must be an object or null");
-            }
-            for (final var property : properties.properties()) {
-                saveKey(property.getKey());
-            }
-            if (node.path(PROPERTIES).isNull()) {
-                saveKey(PROPERTIES);
-            }
-        }
-
-        private void analyzeCoordinates(final JsonNode coordinates, final int depth) {
-            if (!coordinates.isArray()) {
-                throw new IllegalArgumentException("Expected coordinate array");
-            }
-            if (depth == 0) {
-                analyzePoint(coordinates);
-            } else {
-                for (final var child : coordinates) {
-                    analyzeCoordinates(child, depth - 1);
-                }
-            }
-        }
-
-        private void analyzePoint(final JsonNode point) {
+        private void analyzePosition(final Coordinate coordinate) {
+            final int axes = Double.isNaN(coordinate.getZ()) ? 2 : 3;
             if (dimensions == 0) {
-                dimensions = point.size();
+                dimensions = axes;
             }
-            if (point.size() != dimensions || dimensions < 2 || dimensions > 3) {
+            if (dimensions != axes || !Double.isNaN(coordinate.getM())) {
                 throw new IllegalArgumentException(
-                        "GeoBuf requires consistent 2D or 3D coordinates");
+                        "GeoBuf requires consistent 2D or 3D coordinates without measures");
             }
-            for (final var coordinate : point) {
-                if (!coordinate.isNumber()
-                        || !Double.isFinite(coordinate.asDouble())
-                        || Math.abs(coordinate.asDouble() * scale) > 9_007_199_254_740_991d) {
+            for (int axis = 0; axis < dimensions; axis++) {
+                final double value = coordinate.getOrdinate(axis);
+                if (!Double.isFinite(value) || Math.abs(value * scale) > 9_007_199_254_740_991d) {
                     throw new IllegalArgumentException(
                             "Coordinate exceeds GeoBuf's interoperable integer range");
                 }
             }
         }
 
-        private ByteString collection(final JsonNode node) {
+        private ByteString collection(final GeoBufInput.Collection collection) {
             return serialize(
                     output -> {
-                        for (final var feature : node.path(FEATURES)) {
+                        for (final var feature : collection.features()) {
                             output.writeBytes(
-                                    Data.FeatureCollection.FEATURES_FIELD_NUMBER, feature(feature));
+                                    GeoBuf.FeatureCollection.FEATURES_FIELD_NUMBER,
+                                    feature(feature));
                         }
-                        final var values = new ArrayList<Data.Value>();
-                        Data.FeatureCollection.newBuilder()
-                                .addAllCustomProperties(properties(node, true, values))
+                        final var values = new ArrayList<GeoBuf.Value>();
+                        GeoBuf.FeatureCollection.newBuilder()
+                                .addAllCustomProperties(
+                                        properties(collection.foreignMembers(), values))
                                 .addAllValues(values)
                                 .build()
                                 .writeTo(output);
                     });
         }
 
-        private ByteString feature(final JsonNode node) {
-            final var result = Data.Feature.newBuilder();
-            if (!node.path(GEOMETRY).isNull()) {
-                result.setGeometry(geometry(node.path(GEOMETRY)));
+        private ByteString feature(final GeoBufInput.Feature feature) {
+            final var result = GeoBuf.Feature.newBuilder();
+            final var geometry = feature.geometry();
+            if (geometry != null) {
+                result.setGeometry(geometry(geometry));
             }
-            final var id = node.path("id");
-            if (id.isString()) {
-                result.setId(id.asString());
-            } else if (id.isIntegralNumber() && id.bigIntegerValue().bitLength() <= 63) {
-                result.setIntId(id.asLong());
-            } else if (!id.isMissingNode()) {
-                throw new IllegalArgumentException(
-                        "Feature ID must be a string or signed 64-bit integer");
+            if (feature.id() instanceof String text) {
+                result.setId(text);
+            } else if (feature.id() instanceof Long number) {
+                result.setIntId(number);
             }
-            final var propertyValues = new ArrayList<Data.Value>();
-            result.addAllProperties(properties(node.path(PROPERTIES), false, propertyValues));
+            final var propertyValues = new ArrayList<GeoBuf.Value>();
+            result.addAllProperties(properties(feature.properties(), propertyValues));
             result.addAllValues(propertyValues);
             // Mapbox resets its value table after each properties field. Keep the ordinary and
             // custom groups in wire order instead of letting generated serialization merge them.
-            final var customValues = new ArrayList<Data.Value>();
-            final var custom = Data.Feature.newBuilder();
-            if (node.path(PROPERTIES).isNull()) {
+            final var customValues = new ArrayList<GeoBuf.Value>();
+            final var custom = GeoBuf.Feature.newBuilder();
+            if (feature.properties() == null) {
                 custom.addAllCustomProperties(List.of(requireNonNull(keys.get(PROPERTIES)), 0));
-                customValues.add(Data.Value.getDefaultInstance());
+                customValues.add(GeoBuf.Value.getDefaultInstance());
             }
-            custom.addAllCustomProperties(properties(node, true, customValues));
+            custom.addAllCustomProperties(properties(feature.foreignMembers(), customValues));
             custom.addAllValues(customValues);
             return result.build().toByteString().concat(custom.build().toByteString());
         }
 
-        private Data.Geometry geometry(final JsonNode node) {
-            final var result =
-                    Data.Geometry.newBuilder()
-                            .setType(requireNonNull(GEOMETRY_TYPES.get(type(node))));
-            final var coords = node.path(COORDINATES);
-            switch (type(node)) {
-                case POINT -> {
-                    for (final var coordinate : coords) {
-                        // Scale decimal coordinates to integers on the requested precision grid.
-                        result.addCoords(Math.round(coordinate.asDouble() * scale));
+        private GeoBuf.Geometry geometry(final GeoBufInput.Shape shape) {
+            final var result = GeoBuf.Geometry.newBuilder();
+            switch (shape.geometry()) {
+                case Point point -> {
+                    result.setType(GeoBuf.Geometry.Type.POINT);
+                    // A zero origin gives the absolute coordinates used by standalone points.
+                    position(point.getCoordinateSequence(), 0, new long[dimensions], result);
+                }
+                case LineString line -> {
+                    result.setType(GeoBuf.Geometry.Type.LINESTRING);
+                    line(line.getCoordinateSequence(), false, result);
+                }
+                case Polygon polygon -> {
+                    result.setType(GeoBuf.Geometry.Type.POLYGON);
+                    polygon(polygon, polygon.getNumInteriorRing() > 0, result);
+                }
+                case MultiPoint points -> {
+                    result.setType(GeoBuf.Geometry.Type.MULTIPOINT);
+                    final var previous = new long[dimensions];
+                    for (int index = 0; index < points.getNumGeometries(); index++) {
+                        final var point = (Point) points.getGeometryN(index);
+                        position(point.getCoordinateSequence(), 0, previous, result);
                     }
                 }
-                case MULTI_POINT, LINE_STRING -> line(coords, false, result);
-                case MULTI_LINE_STRING, POLYGON ->
-                        multiLine(coords, POLYGON.equals(type(node)), result);
-                case MULTI_POLYGON -> multiPolygon(coords, result);
-                case GEOMETRY_COLLECTION -> {
-                    for (final var child : node.path(GEOMETRIES)) {
-                        result.addGeometries(geometry(child));
-                    }
+                case MultiLineString lines -> {
+                    result.setType(GeoBuf.Geometry.Type.MULTILINESTRING);
+                    multiLine(lines, result);
                 }
-                default -> throw new IllegalArgumentException("Unknown GeoJSON geometry");
+                case MultiPolygon polygons -> {
+                    result.setType(GeoBuf.Geometry.Type.MULTIPOLYGON);
+                    multiPolygon(polygons, result);
+                }
+                case GeometryCollection _ -> {
+                    result.setType(GeoBuf.Geometry.Type.GEOMETRYCOLLECTION);
+                    shape.children().forEach(child -> result.addGeometries(geometry(child)));
+                }
+                default -> throw new IllegalArgumentException("Unsupported JTS geometry");
             }
-            final var values = new ArrayList<Data.Value>();
-            result.addAllCustomProperties(properties(node, true, values));
+            final var values = new ArrayList<GeoBuf.Value>();
+            result.addAllCustomProperties(properties(shape.foreignMembers(), values));
             return result.addAllValues(values).build();
         }
 
-        private void multiLine(
-                final JsonNode lines, final boolean closed, final Data.Geometry.Builder result) {
-            if (lines.size() != 1) {
-                for (final var ring : lines) {
-                    result.addLengths(ring.size() - (closed ? 1 : 0));
+        private void multiLine(final MultiLineString lines, final GeoBuf.Geometry.Builder result) {
+            for (int index = 0; index < lines.getNumGeometries(); index++) {
+                final var line = (LineString) lines.getGeometryN(index);
+                if (lines.getNumGeometries() != 1) {
+                    result.addLengths(line.getNumPoints());
                 }
-            }
-            for (final var ring : lines) {
-                line(ring, closed, result);
+                line(line.getCoordinateSequence(), false, result);
             }
         }
 
-        private void multiPolygon(final JsonNode polygons, final Data.Geometry.Builder result) {
+        private void multiPolygon(
+                final MultiPolygon polygons, final GeoBuf.Geometry.Builder result) {
             // Lengths retain the polygon/ring boundaries within the flat coordinate stream.
-            if (polygons.size() != 1 || polygons.path(0).size() != 1) {
-                result.addLengths(polygons.size());
-                for (final var polygon : polygons) {
-                    result.addLengths(polygon.size());
-                    for (final var ring : polygon) {
-                        result.addLengths(ring.size() - 1);
-                    }
-                }
+            final boolean includeLengths =
+                    polygons.getNumGeometries() != 1
+                            || ((Polygon) polygons.getGeometryN(0)).getNumInteriorRing() != 0;
+            if (includeLengths) {
+                result.addLengths(polygons.getNumGeometries());
             }
-            for (final var polygon : polygons) {
-                for (final var ring : polygon) {
-                    line(ring, true, result);
+            for (int index = 0; index < polygons.getNumGeometries(); index++) {
+                final var polygon = (Polygon) polygons.getGeometryN(index);
+                if (includeLengths) {
+                    result.addLengths(polygon.getNumInteriorRing() + 1);
                 }
+                polygon(polygon, includeLengths, result);
             }
+        }
+
+        private void polygon(
+                final Polygon polygon,
+                final boolean includeLengths,
+                final GeoBuf.Geometry.Builder result) {
+            for (int index = 0; index <= polygon.getNumInteriorRing(); index++) {
+                final var ring = ring(polygon, index);
+                if (includeLengths) {
+                    result.addLengths(ring.getNumPoints() - 1);
+                }
+                line(ring.getCoordinateSequence(), true, result);
+            }
+        }
+
+        private static LineString ring(final Polygon polygon, final int index) {
+            return index == 0 ? polygon.getExteriorRing() : polygon.getInteriorRingN(index - 1);
         }
 
         private void line(
-                final JsonNode line, final boolean closed, final Data.Geometry.Builder result) {
-            if (closed && line.size() < 4) {
+                final CoordinateSequence line,
+                final boolean closed,
+                final GeoBuf.Geometry.Builder result) {
+            // JTS enforces ring length and XY closure. GeoBuf also omits the closing Z value.
+            if (closed
+                    && (line.size() == 0
+                            || dimensions == 3 && line.getZ(0) != line.getZ(line.size() - 1))) {
                 throw new IllegalArgumentException(
-                        "A polygon ring needs at least four coordinates");
-            }
-            if (closed) {
-                for (int axis = 0; axis < dimensions; axis++) {
-                    if (line.path(0).path(axis).asDouble()
-                            != line.path(line.size() - 1).path(axis).asDouble()) {
-                        throw new IllegalArgumentException("Polygon ring is not closed");
-                    }
-                }
+                        "GeoBuf requires a nonempty ring closed in every dimension");
             }
             // Start each line/ring at zero; subsequent points store differences from their
             // neighbor.
             final var previous = new long[dimensions];
             // The decoder restores the closing point of a polygon ring, so omit that duplicate
             // here.
-            for (int point = 0; point < line.size() - (closed ? 1 : 0); point++) {
-                for (int axis = 0; axis < dimensions; axis++) {
-                    // Scale to integers and store deltas for compact varint encoding.
-                    final long value = Math.round(line.path(point).path(axis).asDouble() * scale);
-                    result.addCoords(value - previous[axis]);
-                    previous[axis] = value;
-                }
+            for (int index = 0; index < line.size() - (closed ? 1 : 0); index++) {
+                position(line, index, previous, result);
+            }
+        }
+
+        private void position(
+                final CoordinateSequence sequence,
+                final int index,
+                final long[] previous,
+                final GeoBuf.Geometry.Builder result) {
+            for (int axis = 0; axis < dimensions; axis++) {
+                // Scale to integers and store deltas for compact varint encoding.
+                final long value = Math.round(sequence.getOrdinate(index, axis) * scale);
+                result.addCoords(value - previous[axis]);
+                previous[axis] = value;
             }
         }
 
         private List<Integer> properties(
-                final JsonNode node, final boolean custom, final List<Data.Value> values) {
+                final @Nullable Map<String, @Nullable Object> properties,
+                final List<GeoBuf.Value> values) {
             final var indexes = new ArrayList<Integer>();
-            for (final var property : node.properties()) {
-                if (custom && special(property.getKey(), type(node))) {
-                    continue;
-                }
-                indexes.add(requireNonNull(keys.get(property.getKey())));
-                indexes.add(values.size());
-                values.add(value(property.getValue()));
+            if (properties != null) {
+                properties.forEach(
+                        (key, value) -> {
+                            indexes.add(requireNonNull(keys.get(key)));
+                            indexes.add(values.size());
+                            values.add(value(value));
+                        });
             }
             return indexes;
         }
@@ -373,46 +358,37 @@ public final class GeoBufCreator {
             void write(CodedOutputStream output) throws IOException;
         }
 
-        private static Data.Value value(final JsonNode node) {
+        private static GeoBuf.Value value(final @Nullable Object value) {
             // Use native protobuf types for simple values; preserve nested objects/arrays as JSON.
-            final var value = Data.Value.newBuilder();
-            if (node.isString()) {
-                value.setStringValue(node.asString());
-            } else if (node.isBoolean()) {
-                value.setBoolValue(node.asBoolean());
-            } else if (node.isIntegralNumber() && node.bigIntegerValue().bitLength() <= 63) {
-                final long number = node.asLong();
-                if (number >= 0) {
-                    value.setPosIntValue(number);
+            final var result = GeoBuf.Value.newBuilder();
+            if (value instanceof String text) {
+                result.setStringValue(text);
+            } else if (value instanceof Boolean bool) {
+                result.setBoolValue(bool);
+            } else if (value instanceof Number number && isLongInteger(number)) {
+                if (number.longValue() >= 0) {
+                    result.setPosIntValue(number.longValue());
                 } else {
-                    value.setNegIntValue(-number);
+                    result.setNegIntValue(-number.longValue());
                 }
-            } else if (node.isIntegralNumber()) {
-                value.setJsonValue(node.toString());
-            } else if (node.isNumber()) {
-                value.setDoubleValue(node.asDouble());
-            } else if (!node.isNull()) {
-                value.setJsonValue(node.toString());
+            } else if (value instanceof Number number && !(value instanceof BigInteger)) {
+                result.setDoubleValue(number.doubleValue());
+            } else if (value != null) {
+                result.setJsonValue(GeoBufInputs.jsonValue(value));
             }
-            return value.build();
+            return result.build();
+        }
+
+        private static boolean isLongInteger(final Number value) {
+            return value instanceof Byte
+                    || value instanceof Short
+                    || value instanceof Integer
+                    || value instanceof Long
+                    || value instanceof BigInteger integer && integer.bitLength() <= 63;
         }
 
         private void saveKey(final String key) {
-            keys.computeIfAbsent(key, ignored -> keys.size());
-        }
-
-        private static String type(final JsonNode node) {
-            return node.path("type").asString();
-        }
-
-        private static boolean special(final String key, final String type) {
-            return "type".equals(key)
-                    || switch (type) {
-                        case FEATURE_COLLECTION -> FEATURES.equals(key);
-                        case FEATURE -> FEATURE_MEMBERS.contains(key);
-                        case GEOMETRY_COLLECTION -> GEOMETRIES.equals(key);
-                        default -> COORDINATES.equals(key);
-                    };
+            keys.computeIfAbsent(key, _ -> keys.size());
         }
     }
 }
