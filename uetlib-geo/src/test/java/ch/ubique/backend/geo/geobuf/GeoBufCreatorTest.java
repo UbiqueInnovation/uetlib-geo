@@ -4,7 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import static java.util.Objects.requireNonNull;
 
-import ch.ubique.backend.geo.geobuf.protobuf.Data;
+import ch.ubique.backend.geo.geobuf.protobuf.GeoBuf;
+import ch.ubique.backend.geo.geojson.models.jts.Feature;
+import ch.ubique.backend.geo.geojson.models.jts.FeatureCollection;
+import ch.ubique.backend.geo.jackson.JsonMapperJtsUtils;
 
 import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.WireFormat;
@@ -13,11 +16,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.locationtech.jts.geom.CoordinateXY;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 class GeoBufCreatorTest {
     private final JsonMapper mapper = JsonMapper.builder().build();
@@ -27,10 +34,10 @@ class GeoBufCreatorTest {
     void matchesMapboxReferenceEncoder(final String name, final int dimensions) throws IOException {
         // Reference outputs from mapbox/geobuf 4.0.0 and pbf 5.1.2.
         final var input = mapper.readTree(resource(name + ".json"));
-        final var actual = Data.parseFrom(new GeoBufCreator().toGeoBufNative(input));
+        final var actual = GeoBuf.parseFrom(new GeoBufCreator().toGeoBufNative(input));
         // The reference omits default precision/dimensions; our encoder writes them explicitly.
         final var expected =
-                Data.parseFrom(resource(name + ".geobuf")).toBuilder()
+                GeoBuf.parseFrom(resource(name + ".geobuf")).toBuilder()
                         .setPrecision(6)
                         .setDimensions(dimensions)
                         .build();
@@ -44,12 +51,12 @@ class GeoBufCreatorTest {
                         """
                         {"type":"Feature","id":1,"geometry":null,"properties":null}
                         """);
-        final var result = Data.parseFrom(new GeoBufCreator().toGeoBufNative(input));
+        final var result = GeoBuf.parseFrom(new GeoBufCreator().toGeoBufNative(input));
         assertFalse(result.getFeature().hasGeometry());
         assertEquals(1, result.getFeature().getIntId());
         assertEquals("properties", result.getKeys(0));
         assertEquals(List.of(0, 0), result.getFeature().getCustomPropertiesList());
-        assertEquals(Data.Value.getDefaultInstance(), result.getFeature().getValues(0));
+        assertEquals(GeoBuf.Value.getDefaultInstance(), result.getFeature().getValues(0));
     }
 
     @Test
@@ -106,6 +113,12 @@ class GeoBufCreatorTest {
                 """,
                 """
                 {"type":"Feature","geometry":null,"properties":[]}
+                """,
+                """
+                {"type":"Point","coordinates":[1,2,3,4]}
+                """,
+                """
+                {"type":"Polygon","coordinates":[[[0,0,1],[1,0,1],[0,1,1],[0,0,2]]]}
                 """
             })
     void rejectsMalformedGeoJsonStructure(final String input) {
@@ -122,7 +135,7 @@ class GeoBufCreatorTest {
                         {"type":"Polygon","coordinates":[[[0.0,0.0],[1,0],[0,1],[-0.0,0.0]]]}
                         """);
         final var geometry =
-                Data.parseFrom(new GeoBufCreator().toGeoBufNative(input)).getGeometry();
+                GeoBuf.parseFrom(new GeoBufCreator().toGeoBufNative(input)).getGeometry();
         assertEquals(6, geometry.getCoordsCount());
     }
 
@@ -137,11 +150,81 @@ class GeoBufCreatorTest {
                 featureCollectionPayload(actual));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"all-geometries", "three-dimensional"})
+    void encodesJtsGeometriesWithoutJsonSerialization(final String name) throws IOException {
+        final var input = mapper.readTree(resource(name + ".json"));
+        final var features = input.has("features") ? input.path("features") : List.of(input);
+        final var jtsMapper = JsonMapperJtsUtils.jsonMapperLv95();
+        final var creator = new GeoBufCreator();
+        for (final var feature : features) {
+            final var json = feature.path("geometry");
+            final var geometry = jtsMapper.treeToValue(json, Geometry.class);
+            assertArrayEquals(creator.toGeoBufNative(json), creator.toGeoBufNative(geometry));
+        }
+    }
+
+    @Test
+    void encodesExistingFeatureAndFeatureCollectionModels() {
+        final var geometry =
+                new GeometryFactory().createPoint(new CoordinateXY(2600000.1, 1200000));
+        final var feature =
+                new Feature()
+                        .setId("pasture-1")
+                        .setGeometry(geometry)
+                        .setProperties(Map.of("name", "pasture"));
+        final var json =
+                mapper.readTree(
+                        """
+                {"type":"Feature","id":"pasture-1","properties":{"name":"pasture"},
+                "geometry":{"type":"Point","coordinates":[2600000.1,1200000]}}
+                """);
+        final var creator = new GeoBufCreator();
+        assertArrayEquals(creator.toGeoBufNative(json), creator.toGeoBufNative(feature));
+        final var collection = new FeatureCollection().setFeatures(List.of(feature, new Feature()));
+        final var collectionJson = mapper.createObjectNode().put("type", "FeatureCollection");
+        collectionJson
+                .putArray("features")
+                .add(json)
+                .addObject()
+                .put("type", "Feature")
+                .putNull("properties")
+                .putNull("geometry");
+        assertArrayEquals(
+                creator.toGeoBufNative(collectionJson), creator.toGeoBufNative(collection));
+    }
+
+    @Test
+    void preservesForeignMembersOnNestedGeometryCollections() throws IOException {
+        final var input =
+                mapper.readTree(
+                        """
+                {"type":"GeometryCollection","label":"outer","geometries":[
+                  {"type":"Point","coordinates":[1,2],"label":"point"},
+                  {"type":"GeometryCollection","label":"inner","geometries":[
+                    {"type":"LineString","coordinates":[[1,2],[3,4]],"label":"line"}
+                  ]}
+                ]}
+                """);
+        final var result = GeoBuf.parseFrom(new GeoBufCreator().toGeoBufNative(input));
+        final var outer = result.getGeometry();
+        final var inner = outer.getGeometries(1);
+        assertEquals(List.of("label"), result.getKeysList());
+        for (final var geometry :
+                List.of(outer, outer.getGeometries(0), inner, inner.getGeometries(0))) {
+            assertEquals(List.of(0, 0), geometry.getCustomPropertiesList());
+        }
+        assertEquals("outer", outer.getValues(0).getStringValue());
+        assertEquals("point", outer.getGeometries(0).getValues(0).getStringValue());
+        assertEquals("inner", inner.getValues(0).getStringValue());
+        assertEquals("line", inner.getGeometries(0).getValues(0).getStringValue());
+    }
+
     private static byte[] featureCollectionPayload(final byte[] data) throws IOException {
         final var input = CodedInputStream.newInstance(data);
         while (!input.isAtEnd()) {
             final int tag = input.readTag();
-            if (WireFormat.getTagFieldNumber(tag) == Data.FEATURE_COLLECTION_FIELD_NUMBER) {
+            if (WireFormat.getTagFieldNumber(tag) == GeoBuf.FEATURE_COLLECTION_FIELD_NUMBER) {
                 return input.readByteArray();
             }
             input.skipField(tag);

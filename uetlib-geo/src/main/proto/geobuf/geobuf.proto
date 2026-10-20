@@ -27,9 +27,9 @@ package ch.ubique.geo;
 // Java specific options
 option java_multiple_files = true;
 option java_package = "ch.ubique.backend.geo.geobuf.protobuf";
-option java_outer_classname = "GeobufProtos";
+option java_outer_classname = "GeoBufProtos";
 
-message Data {
+message GeoBuf {
   repeated string keys = 1; // global arrays of unique keys
 
   optional uint32 dimensions = 2 [default = 2]; // max coordinate dimensions
