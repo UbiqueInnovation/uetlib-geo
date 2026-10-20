@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "label": "collection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": 42,
+      "properties": {"name": "pasture", "zone": 1},
+      "label": "extra feature data",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2600000.123456, 1200000],
+        "label": "extra geometry data"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"name": "other pasture"},
+      "label": "other extra data",
+      "geometry": null
+    }
+  ]
+}
