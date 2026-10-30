@@ -1,0 +1,94 @@
+package ch.ubique.uetlib.geo.graph.serialize;
+
+import static java.util.Objects.requireNonNullElseGet;
+
+import ch.ubique.uetlib.geo.graph.models.Graph;
+import ch.ubique.uetlib.geo.jackson.JsonMapperJtsUtils;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.jspecify.annotations.Nullable;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+
+public final class GraphDeserializer<V extends @Nullable Object, E extends @Nullable Object> {
+
+    private final ObjectMapper objectMapper;
+
+    private final Type vertexPropertyType;
+    private final Type edgePropertyType;
+
+    public GraphDeserializer(final Class<V> vertexPropertyClass, final Class<E> edgePropertyClass) {
+        this(null, vertexPropertyClass, edgePropertyClass);
+    }
+
+    public GraphDeserializer(
+            final @Nullable ObjectMapper objectMapper,
+            final Class<V> vertexPropertyClass,
+            final Class<E> edgePropertyClass) {
+        this.objectMapper =
+                requireNonNullElseGet(objectMapper, JsonMapperJtsUtils::jsonMapperWgs84);
+        this.vertexPropertyType = vertexPropertyClass;
+        this.edgePropertyType = edgePropertyClass;
+    }
+
+    public Graph<V, E> read(final byte[] bytes) throws IOException {
+        try (final var inputStream = new ByteArrayInputStream(bytes)) {
+            return read(inputStream);
+        }
+    }
+
+    public Graph<V, E> read(final InputStream inputStream) throws IOException {
+        final var serializableGraph =
+                objectMapper.readValue(new GzipCompressorInputStream(inputStream), typeReference());
+        final var graph = new Graph<V, E>(serializableGraph.graphId());
+        serializableGraph
+                .vertices()
+                .forEach(vertex -> addVertex(graph, vertex, serializableGraph.vertexProperties()));
+        serializableGraph
+                .edges()
+                .forEach(edge -> addEdge(graph, edge, serializableGraph.edgeProperties()));
+        return graph;
+    }
+
+    private TypeReference<SerializableGraph<V, E>> typeReference() {
+        return new TypeReference<>() {
+            @Override
+            public Type getType() {
+                return new ParameterizedType() {
+                    @Override
+                    public Type[] getActualTypeArguments() {
+                        return new Type[] {vertexPropertyType, edgePropertyType};
+                    }
+
+                    @Override
+                    public Type getRawType() {
+                        return SerializableGraph.class;
+                    }
+
+                    @Override
+                    public Type getOwnerType() {
+                        return SerializableGraph.class.getGenericSuperclass();
+                    }
+                };
+            }
+        };
+    }
+
+    private void addVertex(
+            final Graph<V, E> graph, final SerializableVertex vertex, final List<V> properties) {
+        graph.addVertex(vertex.id(), properties.get(vertex.propertyKey()));
+    }
+
+    private void addEdge(
+            final Graph<V, E> graph, final SerializableEdge edge, final List<E> properties) {
+        graph.addDirectedEdge(
+                graph.getVertex(edge.u()).orElseThrow(),
+                graph.getVertex(edge.v()).orElseThrow(),
+                properties.get(edge.propertyKey()));
+    }
+}

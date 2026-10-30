@@ -1,0 +1,175 @@
+package ch.ubique.uetlib.geo.tile.vector.utils;
+
+import ch.ubique.uetlib.core.utils.ProgressLogger;
+import ch.ubique.uetlib.geo.tile.common.encoder.TileEncoderFactory;
+import ch.ubique.uetlib.geo.tile.common.models.Tile;
+import ch.ubique.uetlib.geo.tile.common.models.TileInfo;
+import ch.ubique.uetlib.geo.tile.common.utils.TileGenerator;
+import ch.ubique.uetlib.geo.tile.processing.stats.TileSizeStatsUtil;
+import ch.ubique.uetlib.geo.tile.vector.models.BinaryTile;
+import ch.ubique.uetlib.geo.tile.vector.models.VectorTile;
+import ch.ubique.uetlib.geo.tile.vector.models.VectorTileElement;
+import ch.ubique.uetlib.geo.tile.vector.models.VectorTileOutput;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.jspecify.annotations.Nullable;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+public class VectorTileGenerator implements TileGenerator {
+
+    private static final Logger logger = LoggerFactory.getLogger(VectorTileGenerator.class);
+
+    private final VectorTileOutput output;
+
+    private final ExecutorService executorService;
+    private final Cache<VectorTileElement, Envelope> envelopeCache;
+
+    private final TileSizeStatsUtil tileSizes;
+
+    public VectorTileGenerator(final VectorTileOutput output, final int parallelism) {
+        this.output = output;
+        final var threadFactory =
+                new ThreadFactoryBuilder().setNameFormat("vector-tile-%d").build();
+        this.executorService = Executors.newFixedThreadPool(parallelism, threadFactory);
+        final var cacheBuilder = Caffeine.newBuilder();
+        this.envelopeCache = cacheBuilder.build();
+        this.tileSizes = new TileSizeStatsUtil();
+    }
+
+    public static void generateTiles(final VectorTileOutput output) {
+        generateTiles(output, 64);
+    }
+
+    public static void generateTiles(final VectorTileOutput output, final int parallelism) {
+        final var generator = new VectorTileGenerator(output, parallelism);
+        generator.generateTiles();
+    }
+
+    @Override
+    public void generateTiles() {
+        logger.info("Generating tiles now.");
+        output.config().zoomLevels().stream()
+                .sorted()
+                .map(z -> getTileInfos(z, output.config().outputEnvelopes()))
+                .forEach(this::submitTasksToGenerateTilesForInfos);
+        logger.info("Submitted tasks for all levels.");
+
+        waitForCompletion();
+
+        tileSizes.logStats();
+
+        envelopeCache.invalidateAll();
+    }
+
+    private Collection<TileInfo> getTileInfos(
+            final int level, @Nullable final Collection<ReferencedEnvelope> outputEnvelopes) {
+        return output.config().tileLevelsDefinition().tileInfos(level, outputEnvelopes).toList();
+    }
+
+    private void submitTasksToGenerateTilesForInfos(final Collection<TileInfo> tileInfos) {
+        final var currentLevel = tileInfos.stream().findFirst().orElseThrow().level();
+        logger.info("Submitting tasks for {} tiles of level {}.", tileInfos.size(), currentLevel);
+        final var prefix = String.format("Level %d: ", currentLevel);
+        final var mdcContextMap = MDC.getCopyOfContextMap();
+        final var progressLogger = new ProgressLogger(prefix, tileInfos.size(), mdcContextMap);
+
+        for (final var tileInfo : tileInfos) {
+            executorService.submit(
+                    Executors.callable(
+                            progressLogger.watchRunnable(
+                                    () -> createGenerateAndConsumeTile(tileInfo))));
+        }
+    }
+
+    private void createGenerateAndConsumeTile(final TileInfo tileInfo) {
+        try {
+            final var tile = createTile(tileInfo);
+            final var binaryTile = generateTile(tile);
+            tileSizes.addMeasurement(binaryTile);
+            consumeTile(binaryTile);
+        } catch (final Exception e) {
+            logger.warn("Could not create tile {}.", tileInfo, e);
+        }
+    }
+
+    private VectorTile createTile(final TileInfo tileInfo) {
+        final var elementsOnTile = elementsOnTile(tileInfo).toList();
+        return new VectorTile(tileInfo, elementsOnTile);
+    }
+
+    private BinaryTile generateTile(final Tile tile) {
+        final var encoder = TileEncoderFactory.getEncoder(output.config());
+        return encoder.encode(tile);
+    }
+
+    private void consumeTile(final BinaryTile binaryTile) {
+        Optional.ofNullable(output.tileConsumer())
+                .ifPresent(consumer -> consumer.uncheck().accept(binaryTile));
+    }
+
+    private Stream<VectorTileElement> elementsOnTile(final TileInfo tileInfo) {
+        final var level = tileInfo.level();
+        final var tileEnvelope = tileInfo.envelope();
+        final var envelopeGeometry = JTS.toGeometry(tileEnvelope);
+
+        final var elementsOnTile =
+                output.elements(tileInfo).stream()
+                        .filter(isOnTile(level, tileEnvelope, envelopeGeometry));
+
+        final var limit = output.config().getLimit(tileInfo.level());
+        if (limit.isEmpty()) {
+            return elementsOnTile;
+        }
+
+        return elementsOnTile
+                .sorted(Comparator.comparingDouble(VectorTileElement::score).reversed())
+                .limit(limit.get());
+    }
+
+    private Predicate<VectorTileElement> isOnTile(
+            final int level,
+            final ReferencedEnvelope tileEnvelope,
+            final Polygon envelopeGeometry) {
+
+        return element -> {
+            TileGeometryUtils.ensureCrsMatch(element.geometry(), tileEnvelope);
+
+            if (!element.showElement(level)) {
+                return false;
+            }
+
+            if (element.geometry() instanceof final Point point) {
+                return tileEnvelope.covers(point.getCoordinate());
+            }
+
+            final var elementEnvelope = envelopeCache.get(element, VectorTileElement::boundingBox);
+            return tileEnvelope.intersects(elementEnvelope)
+                    && envelopeGeometry.intersects(element.geometry());
+        };
+    }
+
+    private void waitForCompletion() {
+        try {
+            executorService.shutdown();
+            final var terminatedInTime = executorService.awaitTermination(14, TimeUnit.DAYS);
+            if (!terminatedInTime) {
+                throw new IllegalStateException("Timout elapsed before termination.");
+            }
+            logger.info("Generated all tiles.");
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}

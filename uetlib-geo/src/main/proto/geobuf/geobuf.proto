@@ -26,7 +26,7 @@ package ch.ubique.geo;
 
 // Java specific options
 option java_multiple_files = true;
-option java_package = "ch.ubique.backend.geo.geobuf.protobuf";
+option java_package = "ch.ubique.uetlib.geo.geobuf.protobuf";
 option java_outer_classname = "GeoBufProtos";
 
 message GeoBuf {
