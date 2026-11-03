@@ -18,6 +18,8 @@
     <url>https://github.com/UbiqueInnovation/uetlib-geo</url>
 
         <properties>
+        <central.publishing.skip>true</central.publishing.skip>
+
         <artifact-package-name>ch.ubique.uetlib.geo.coverage</artifact-package-name>
     </properties>
 

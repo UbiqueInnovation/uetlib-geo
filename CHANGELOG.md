@@ -2,6 +2,8 @@
 
 ## 4.0.0 (unreleased)
 
+- Rename geo integration packages to `ch.ubique.uetlib.geo.db` and `ch.ubique.uetlib.geo.job`.
+
 ### Breaking changes
 
 - Move Java packages from `ch.ubique.backend` to `ch.ubique.uetlib`, including class-name resources. Existing Spring configuration property keys are unchanged.
