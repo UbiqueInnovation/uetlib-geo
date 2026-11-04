@@ -8,7 +8,7 @@ See [CHANGELOG.md](CHANGELOG.md)
 
 ## GPS angle conversions
 
-`ch.ubique.uetlib.geo.coordinate.util.SemicircleUtil` converts degrees and radians
+`ch.uetlib.geo.coordinate.util.SemicircleUtil` converts degrees and radians
 into semicircle units (one semicircle is 180 degrees), and back. Semicircles are
 used beyond Garmin and FIT: GPS navigation messages also express orbital angles
 in this unit. Their field scales differ, so a GPS protocol using semicircles does
