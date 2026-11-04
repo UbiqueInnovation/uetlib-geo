@@ -6,7 +6,7 @@ option optimize_for = SPEED;
 
 // Java specific options
 option java_multiple_files = true;
-option java_package = "ch.ubique.uetlib.geo.graph.routing.protobuf";
+option java_package = "ch.uetlib.geo.graph.routing.protobuf";
 option java_outer_classname = "RoutingGraphTileProtos";
 
 
