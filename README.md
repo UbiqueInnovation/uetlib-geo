@@ -36,6 +36,12 @@ encode as `Integer.MIN_VALUE` and decode to -180 degrees. Non-finite and out-of-
 input is rejected. Validate latitude bounds and handle any protocol-specific
 reserved values separately.
 
+## Spring Boot integration
+
+`ch.uetlib:uetlib-geo-spring-boot` provides geospatial JSON customizers and Springdoc auto-configuration.
+It belongs to this reactor and follows the geo version. Its packages are `ch.uetlib.geo.spring.boot`.
+It replaces `uetlib-spring-boot-geo`; class names remain unchanged.
+
 ## License
 
 Except where otherwise noted, original uetlib code is licensed under the [Apache License 2.0](LICENSE). Third-party files retain their original license terms; see [NOTICE](NOTICE) and any third-party notices in this repository.

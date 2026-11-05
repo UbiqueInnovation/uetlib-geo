@@ -49,6 +49,7 @@
         <module>uetlib-geo</module>
         <module>uetlib-geo-db</module>
         <module>uetlib-geo-job</module>
+        <module>uetlib-geo-spring-boot</module>
         <module>uetlib-geo-coverage</module>
     </modules>
 

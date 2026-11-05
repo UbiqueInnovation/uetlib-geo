@@ -40,6 +40,11 @@
                 <artifactId>uetlib-geo</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>ch.uetlib</groupId>
+                <artifactId>uetlib-geo-spring-boot</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -55,6 +60,10 @@
         <dependency>
             <groupId>ch.uetlib</groupId>
             <artifactId>uetlib-geo-job</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.uetlib</groupId>
+            <artifactId>uetlib-geo-spring-boot</artifactId>
         </dependency>
     </dependencies>
 </project>
