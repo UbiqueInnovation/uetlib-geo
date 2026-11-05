@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 4.0.0 (unreleased)
+## 4.0.0
 
 - Move `uetlib-spring-boot-geo` into the geo repository as `uetlib-geo-spring-boot`, with packages under `ch.uetlib.geo.spring.boot`; update consumers and migration mappings.
 
