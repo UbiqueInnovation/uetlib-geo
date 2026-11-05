@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ch.uetlib</groupId>
+        <artifactId>uetlib-geo-parent</artifactId>
+        <version>5.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>uetlib-geo-spring-boot</artifactId>
+    <packaging>jar</packaging>
+
+    <name>uetlib-geo-spring-boot</name>
+    <description>Spring Boot integration for geospatial JSON and OpenAPI support.</description>
+    <url>https://github.com/UbiqueInnovation/uetlib-geo</url>
+
+    <properties>
+        <artifact-package-name>ch.uetlib.geo.spring.boot</artifact-package-name>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.uetlib</groupId>
+                <artifactId>uetlib-spring-boot</artifactId>
+                <version>4.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.uetlib</groupId>
+                <artifactId>uetlib-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- uetlib -->
+        <dependency>
+            <groupId>ch.uetlib</groupId>
+            <artifactId>uetlib-spring-boot</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.uetlib</groupId>
+            <artifactId>uetlib-geo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
