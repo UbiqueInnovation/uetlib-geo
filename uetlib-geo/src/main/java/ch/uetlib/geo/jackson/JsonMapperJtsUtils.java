@@ -3,7 +3,9 @@ package ch.uetlib.geo.jackson;
 import ch.uetlib.core.jackson.JsonMapperUtils;
 import ch.uetlib.geo.coordinate.constants.CoordinateSystems;
 import ch.uetlib.geo.jackson.jts.JtsModule;
+
 import org.locationtech.jts.geom.GeometryFactory;
+
 import tools.jackson.databind.json.JsonMapper;
 
 public final class JsonMapperJtsUtils {
