@@ -1,0 +1,16 @@
+uetlib-geo
+Copyright 2026 Ubique Innovation AG
+
+Original uetlib code is licensed under the Apache License, Version 2.0.
+Third-party files retain their original copyrights and license terms.
+
+This product includes code adapted from 52°North jackson-datatype-jts.
+Copyright 2019-2025 52°North Spatial Information Research GmbH.
+The retained source headers identify this code under Apache-2.0.
+
+OSM binary schemas: Copyright (c) 2010 Scott A. Crosby; MIT license.
+GeoBuf schema: Copyright (c) 2026 Mapbox; ISC license.
+See LICENSES for the retained schema license texts.
+
+Vector tile schema: adapted from the Mapbox Vector Tile Specification
+(https://github.com/mapbox/vector-tile-spec); specification text under CC BY 3.0.
