@@ -6,32 +6,43 @@
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>ch.ubique</groupId>
+        <groupId>ch.uetlib</groupId>
         <artifactId>uetlib-geo-parent</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>uetlib-geo-coverage</artifactId>
 
+    <name>uetlib-geo-coverage</name>
+    <description>Geospatial models, codecs and database integration.</description>
+    <url>https://github.com/UbiqueInnovation/uetlib-geo</url>
+
         <properties>
-        <artifact-package-name>ch.ubique.backend.geo.coverage</artifact-package-name>
+        <central.publishing.skip>true</central.publishing.skip>
+
+        <artifact-package-name>ch.uetlib.geo.coverage</artifact-package-name>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>ch.ubique</groupId>
+                <groupId>ch.uetlib</groupId>
                 <artifactId>uetlib-geo-job</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ch.ubique</groupId>
+                <groupId>ch.uetlib</groupId>
                 <artifactId>uetlib-geo-db</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ch.ubique</groupId>
+                <groupId>ch.uetlib</groupId>
                 <artifactId>uetlib-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.uetlib</groupId>
+                <artifactId>uetlib-geo-spring-boot</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
@@ -39,16 +50,20 @@
 
     <dependencies>
         <dependency>
-            <groupId>ch.ubique</groupId>
+            <groupId>ch.uetlib</groupId>
             <artifactId>uetlib-geo</artifactId>
         </dependency>
         <dependency>
-            <groupId>ch.ubique</groupId>
+            <groupId>ch.uetlib</groupId>
             <artifactId>uetlib-geo-db</artifactId>
         </dependency>
         <dependency>
-            <groupId>ch.ubique</groupId>
+            <groupId>ch.uetlib</groupId>
             <artifactId>uetlib-geo-job</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.uetlib</groupId>
+            <artifactId>uetlib-geo-spring-boot</artifactId>
         </dependency>
     </dependencies>
 </project>

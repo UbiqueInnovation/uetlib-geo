@@ -1,0 +1,20 @@
+package ch.uetlib.geo.geojson.models.jts;
+
+import ch.uetlib.geo.jackson.jts.GeometryDeserializer;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+
+import org.locationtech.jts.geom.*;
+
+import tools.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(contentUsing = GeometryDeserializer.class)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = Polygon.class, name = "Polygon"),
+    @JsonSubTypes.Type(value = MultiPolygon.class, name = "MultiPolygon"),
+    @JsonSubTypes.Type(value = LineString.class, name = "LineString"),
+    @JsonSubTypes.Type(value = MultiLineString.class, name = "MultiLineString"),
+    @JsonSubTypes.Type(value = Point.class, name = "Point"),
+    @JsonSubTypes.Type(value = MultiPoint.class, name = "MultiPoint"),
+})
+public @interface DeserializableJtsGeometry {}

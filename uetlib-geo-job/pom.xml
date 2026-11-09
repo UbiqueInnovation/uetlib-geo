@@ -6,40 +6,44 @@
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>ch.ubique</groupId>
+        <groupId>ch.uetlib</groupId>
         <artifactId>uetlib-geo-parent</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>uetlib-geo-job</artifactId>
 
+    <name>uetlib-geo-job</name>
+    <description>Geospatial models, codecs and database integration.</description>
+    <url>https://github.com/UbiqueInnovation/uetlib-geo</url>
+
     <properties>
-        <artifact-package-name>ch.ubique.backend.geojob</artifact-package-name>
+        <artifact-package-name>ch.uetlib.geo.job</artifact-package-name>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>ch.ubique</groupId>
+                <groupId>ch.uetlib</groupId>
                 <artifactId>uetlib-geo</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>ch.ubique</groupId>
+                <groupId>ch.uetlib</groupId>
                 <artifactId>uetlib-job</artifactId>
-                <version>5.2.1</version>
+                <version>6.0.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <dependency>
-            <groupId>ch.ubique</groupId>
+            <groupId>ch.uetlib</groupId>
             <artifactId>uetlib-job</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>ch.ubique</groupId>
+            <groupId>ch.uetlib</groupId>
             <artifactId>uetlib-geo</artifactId>
         </dependency>
     </dependencies>
