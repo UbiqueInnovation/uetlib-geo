@@ -18,13 +18,10 @@ package ch.uetlib.geo.jackson.jts;
 
 /** JSON field names. */
 public enum Field {
-    /** The {@value} field. */
     TYPE("type"),
 
-    /** The {@value} field. */
     GEOMETRIES("geometries"),
 
-    /** The {@value} field. */
     COORDINATES("coordinates");
 
     private final String value;

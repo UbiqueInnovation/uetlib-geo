@@ -1,9 +1,12 @@
 # CHANGELOG
 
+## 4.0.4
+
+- Replace the disabled internal Geofabrik download test with a small synthetic offline OSM fixture and graph assertions.
+
 ## 4.0.3
 
 - Document attribution for the vector tile schema.
-- Update shared Maven build and publish workflows to v0.2.4.
 
 ## 4.0.2
 
