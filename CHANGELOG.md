@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.0.5
+
+- Use shared Maven build and publish workflows at `v1.0.0` to enforce formatting checks in CI.
+
 ## 4.0.4
 
 - Replace the disabled internal Geofabrik download test with a small synthetic offline OSM fixture and graph assertions.
