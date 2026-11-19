@@ -1,5 +1,7 @@
 package ch.uetlib.geo.tile.vector.models.tlm;
 
+import java.util.Locale;
+
 public enum TrafficRestriction {
     NONE,
     CLOSED,
@@ -13,7 +15,7 @@ public enum TrafficRestriction {
     RACING_TRACK;
 
     public static TrafficRestriction parse(final String value) {
-        return switch (value.toLowerCase()) {
+        return switch (value.toLowerCase(Locale.ROOT)) {
             case "keine" -> NONE;
             case "gesperrt" -> CLOSED;
             case "allgemeines fahrverbot" -> TRAFFIC_BAN;

@@ -57,10 +57,10 @@ public class CommandsDecoder {
     }
 
     public static int decodeZigZag(final int encoded) {
-        return ((encoded >> 1) ^ (-(encoded & 1)));
+        return ((encoded >> 1) ^ -(encoded & 1));
     }
 
     public static long decodeZigZag(final long encoded) {
-        return ((encoded >> 1) ^ (-(encoded & 1)));
+        return ((encoded >> 1) ^ -(encoded & 1));
     }
 }

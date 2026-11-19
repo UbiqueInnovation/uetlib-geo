@@ -89,10 +89,8 @@ public class VectorTileGenerator implements TileGenerator {
         final var progressLogger = new ProgressLogger(prefix, tileInfos.size(), mdcContextMap);
 
         for (final var tileInfo : tileInfos) {
-            executorService.submit(
-                    Executors.callable(
-                            progressLogger.watchRunnable(
-                                    () -> createGenerateAndConsumeTile(tileInfo))));
+            executorService.execute(
+                    progressLogger.watchRunnable(() -> createGenerateAndConsumeTile(tileInfo)));
         }
     }
 

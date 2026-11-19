@@ -8,6 +8,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+// equals and hashCode are overridden, so the array components are not compared by reference.
+@SuppressWarnings("ArrayRecordComponent")
 public record BinaryTile(TileInfo info, TileOutputFormat format, byte[] bytes) {
 
     @SuppressWarnings("unused")
@@ -19,11 +21,9 @@ public record BinaryTile(TileInfo info, TileOutputFormat format, byte[] bytes) {
             return true;
         }
 
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof final BinaryTile that)) {
             return false;
         }
-
-        final var that = (BinaryTile) o;
 
         return new EqualsBuilder()
                 .append(info, that.info)

@@ -55,12 +55,12 @@ public record UnstructuredTlmInfo(Map<String, Object> properties) implements Tlm
     }
 
     private static Boolean parseBoolean(final String value) {
-        return switch (value.toLowerCase()) {
+        return switch (value.toLowerCase(Locale.ROOT)) {
             case "wahr" -> true;
             case "falsch" -> false;
             default ->
                     throw new IllegalStateException(
-                            "Unexpected boolean value: " + value.toLowerCase());
+                            "Unexpected boolean value: " + value.toLowerCase(Locale.ROOT));
         };
     }
 

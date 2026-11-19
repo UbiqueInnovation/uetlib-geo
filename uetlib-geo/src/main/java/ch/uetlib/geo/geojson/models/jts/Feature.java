@@ -11,6 +11,8 @@ import java.util.Map;
 public class Feature extends GenericFeature<Map<String, Object>, Feature> {
 
     @JsonIgnore
+    @SuppressWarnings(
+            "TypeParameterUnusedInFormals") // public API: callers rely on the inferred type
     public <V> @Nullable V getProperty(final String key) {
         if (getProperties() == null) {
             return null;

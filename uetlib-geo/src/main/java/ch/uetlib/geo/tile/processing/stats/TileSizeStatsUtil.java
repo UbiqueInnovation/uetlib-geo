@@ -40,7 +40,7 @@ public class TileSizeStatsUtil {
     public void logInfosForLargestTiles() {
         logger.info("Finding largest tiles.");
         tileSizes.entrySet().stream()
-                .sorted(Comparator.comparing(entry -> -entry.getValue()))
+                .sorted(Comparator.comparingDouble(entry -> -entry.getValue()))
                 .limit(10)
                 .forEach(
                         entry ->

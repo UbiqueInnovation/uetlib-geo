@@ -182,7 +182,7 @@ public class Graph<V extends @Nullable Object, E extends @Nullable Object> {
 
             Vertex<V, E> previous = null;
             var current = start;
-            final var potentialCycle = new LinkedList<Vertex<V, E>>();
+            final var potentialCycle = new ArrayList<Vertex<V, E>>();
             while (current.getNeighborsCount() == 2) {
 
                 if (current.equals(start) && !potentialCycle.isEmpty()) {

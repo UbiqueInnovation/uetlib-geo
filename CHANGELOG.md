@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## UNRELEASED
+
+- Fix the warnings of Error Prone's default checks: TLM values and enum names convert case with `Locale.ROOT`,
+  `VectorTileGenerator` no longer discards task failures, `ArrayList` and `ArrayDeque` replace `LinkedList`,
+  comparators use primitive keys, and `@NonNull` is removed from primitive `RailwayInfo` components.
+
 ## 4.0.5
 
 - Build pull requests, including forks, and pushes to `main` instead of every branch push; use shared Maven

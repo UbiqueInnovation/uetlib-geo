@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -57,7 +56,7 @@ public class KmlParser {
     @SuppressWarnings("java:S2755")
     public static KmlDocument parse(final InputStream inputStream) throws IOException {
 
-        final List<Placemark> placemarks = new LinkedList<>();
+        final List<Placemark> placemarks = new ArrayList<>();
         final Map<String, Style> styles = new HashMap<>();
         final Map<String, StyleMap> styleMaps = new HashMap<>();
 
@@ -321,12 +320,12 @@ public class KmlParser {
 
     @NonNull
     private static WGS84Coordinate toWgs84Coordinate(final String value) {
-        final var split = value.split(",");
+        final var split = value.split(",", -1);
         final var lon = Double.parseDouble(split[0]);
         final var lat = Double.parseDouble(split[1]);
         final var wgs84Coordinate = new WGS84Coordinate(lat, lon);
 
-        if (split.length > 2) {
+        if (split.length > 2 && !split[2].isBlank()) {
             final var elevation = Double.parseDouble(split[2]);
             return wgs84Coordinate.withElevation(elevation);
         }
