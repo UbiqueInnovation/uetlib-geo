@@ -5,6 +5,7 @@ import ch.uetlib.geo.tlm.models.TlmPath;
 
 import org.locationtech.jts.geom.Geometry;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -20,6 +21,6 @@ public record TlmTileElement(long id, Geometry geometry, TlmTags tags)
         return Optional.ofNullable(tags.trailType())
                 .map(Objects::toString)
                 .orElseGet(() -> tags.type().toString())
-                .toLowerCase();
+                .toLowerCase(Locale.ROOT);
     }
 }

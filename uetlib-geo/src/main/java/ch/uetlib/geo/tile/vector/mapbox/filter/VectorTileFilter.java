@@ -70,11 +70,8 @@ public class VectorTileFilter {
             final VectorTileFeature feature, final Entry<String, Object> entry) {
         final var featureValue = feature.tags().get(entry.getKey());
         final var filterValue = entry.getValue();
-        if (filterValue == featureValue) {
-            return true;
-        }
         if (filterValue == null) {
-            return false;
+            return featureValue == null;
         }
         if (filterValue instanceof final Number a && featureValue instanceof final Number b) {
             return a.doubleValue() == b.doubleValue() && a.longValue() == b.longValue();

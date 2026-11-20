@@ -299,7 +299,7 @@ public final class GeoBufCreator {
             // JTS enforces ring length and XY closure. GeoBuf also omits the closing Z value.
             if (closed
                     && (line.size() == 0
-                            || dimensions == 3 && line.getZ(0) != line.getZ(line.size() - 1))) {
+                            || (dimensions == 3 && line.getZ(0) != line.getZ(line.size() - 1)))) {
                 throw new IllegalArgumentException(
                         "GeoBuf requires a nonempty ring closed in every dimension");
             }
@@ -384,7 +384,7 @@ public final class GeoBufCreator {
                     || value instanceof Short
                     || value instanceof Integer
                     || value instanceof Long
-                    || value instanceof BigInteger integer && integer.bitLength() <= 63;
+                    || (value instanceof BigInteger integer && integer.bitLength() <= 63);
         }
 
         private void saveKey(final String key) {

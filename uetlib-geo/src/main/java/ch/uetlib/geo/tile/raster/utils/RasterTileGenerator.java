@@ -9,10 +9,10 @@ import org.jspecify.annotations.Nullable;
 
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -93,7 +93,7 @@ public abstract class RasterTileGenerator {
 
         // Stack and visited needed for DFS
         // Initially we start with all top-level tile-infos in the stack.
-        final var stack = new LinkedList<>(getTileTopLevelTileInfos());
+        final var stack = new ArrayDeque<>(getTileTopLevelTileInfos());
         final var visited = new HashSet<TileInfo>();
 
         // Memoization: Save elements that have already been computed

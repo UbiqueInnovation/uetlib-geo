@@ -2,7 +2,7 @@ package ch.uetlib.geo.graph.utils;
 
 import static ch.uetlib.geo.coordinate.constants.CoordinateSystems.WGS84;
 
-import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNullElse;
 
 import ch.uetlib.core.utils.IndeterminateProgressLogger;
@@ -319,12 +319,13 @@ public class LinesGraphBuilder<E> {
                         .toList();
 
         logger.info("Found {} candidates. Going to merge now.", candidates.size());
-        final var counter = new AtomicInteger(0);
+        int counter = 0;
         for (final var mergeCandidate : candidates) {
-            final var main = mergeCandidate.stream().max(comparing(Vertex::degree)).orElseThrow();
+            final var main =
+                    mergeCandidate.stream().max(comparingInt(Vertex::degree)).orElseThrow();
             final var verticesToMerge =
                     mergeCandidate.stream()
-                            .filter(v -> v != main)
+                            .filter(v -> !v.equals(main))
                             .filter(v -> v.degree() <= 1) // Only merge at endpoints
                             .toList();
             for (final var vertexToMerge : verticesToMerge) {
@@ -335,15 +336,15 @@ public class LinesGraphBuilder<E> {
                         .incomingEdges()
                         .forEach(e -> graph.addDirectedEdge(e.getFrom(), main, e.getProperties()));
                 graph.removeVertex(vertexToMerge);
-                counter.incrementAndGet();
+                ++counter;
             }
         }
-        logger.info("Merged {} vertices.", counter.get());
+        logger.info("Merged {} vertices.", counter);
     }
 
     private record VertexKey(double x, double y, Double z, int level) {
 
-        public VertexKey(final Coordinate coordinate, final int level) {
+        VertexKey(final Coordinate coordinate, final int level) {
             this(coordinate.x, coordinate.y, coordinate.getZ(), level);
         }
     }

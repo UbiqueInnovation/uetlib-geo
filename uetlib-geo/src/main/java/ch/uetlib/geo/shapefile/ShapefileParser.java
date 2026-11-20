@@ -28,7 +28,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
@@ -105,7 +104,7 @@ public class ShapefileParser implements InputCollectionLoaderService<SimpleFeatu
     }
 
     private Collection<ByteFile> downloadFiles() throws IOException {
-        final var byteFiles = new LinkedList<ByteFile>();
+        final var byteFiles = new ArrayList<ByteFile>();
 
         ArchiveEntry zipEntry;
         while ((zipEntry = zipArchiveInputStream.getNextEntry()) != null) {

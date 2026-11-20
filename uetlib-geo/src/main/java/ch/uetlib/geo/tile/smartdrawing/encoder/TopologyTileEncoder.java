@@ -6,7 +6,6 @@ import ch.uetlib.geo.tile.smartdrawing.models.SmartDrawingEdge;
 import ch.uetlib.geo.tile.smartdrawing.models.SmartDrawingVertex;
 import ch.uetlib.geo.tile.smartdrawing.protobuf.TopologyTile;
 import ch.uetlib.geo.tile.smartdrawing.protobuf.TopologyTile.Edge;
-import ch.uetlib.geo.tile.smartdrawing.protobuf.TopologyTile.Edge.Builder;
 import ch.uetlib.geo.tile.smartdrawing.utils.SmartDrawingUtil;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -17,6 +16,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -173,7 +173,7 @@ public class TopologyTileEncoder {
     private TopologyTile.Edge buildEdge(
             final SmartDrawingEdge edge,
             final @Nullable Long multiEdgeVariant,
-            final HashMap<Long, Integer> indexOfVertices) {
+            final Map<Long, Integer> indexOfVertices) {
         final var edgeBuilder =
                 Edge.newBuilder()
                         .setUIdx(Objects.requireNonNull(indexOfVertices.get(edge.u().id())))
@@ -188,7 +188,8 @@ public class TopologyTileEncoder {
         return edgeBuilder.build();
     }
 
-    private void setWeights(final SmartDrawingEdge smartDrawingEdge, final Builder edgeBuilder) {
+    private void setWeights(
+            final SmartDrawingEdge smartDrawingEdge, final Edge.Builder edgeBuilder) {
         final var forwards = smartDrawingEdge.forwardWeights();
         final var backwards = smartDrawingEdge.backwardWeights();
 

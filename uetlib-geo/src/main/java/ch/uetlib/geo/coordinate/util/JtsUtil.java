@@ -2,7 +2,7 @@ package ch.uetlib.geo.coordinate.util;
 
 import static org.locationtech.jts.noding.SegmentStringUtil.extractSegmentStrings;
 
-import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingDouble;
 import static java.util.Objects.requireNonNull;
 
 import ch.uetlib.geo.coordinate.constants.CoordinateSystem;
@@ -515,7 +515,7 @@ public final class JtsUtil {
         if (geometryCollection instanceof final MultiLineString multiLineString) {
             return getLinesStream(multiLineString)
                     .flatMap(JtsUtil::segmentsStream)
-                    .min(comparing(segment -> segment.distance(centroidCoordinate)))
+                    .min(comparingDouble(segment -> segment.distance(centroidCoordinate)))
                     .map(segment -> projectCoordinateToSegment(segment, centroidCoordinate))
                     .orElseThrow();
         }
@@ -525,7 +525,7 @@ public final class JtsUtil {
         return flatGeometriesStream(geometryCollection)
                 .filter(Predicate.not(Geometry::isEmpty))
                 .map(JtsUtil::representativeCoordinate)
-                .min(comparing(c -> c.distance(centroidCoordinate)))
+                .min(comparingDouble(c -> c.distance(centroidCoordinate)))
                 .orElseThrow();
     }
 

@@ -3,6 +3,7 @@ package ch.uetlib.geo.tlm.models;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 public enum WegType {
@@ -34,7 +35,7 @@ public enum WegType {
         if (StringUtils.isBlank(value)) {
             throw new IllegalArgumentException("value must not be blank");
         }
-        final var uppercaseValue = value.toUpperCase().replace(' ', '_');
+        final var uppercaseValue = value.toUpperCase(Locale.ROOT).replace(' ', '_');
         final var parsed = EnumUtils.getEnumIgnoreCase(WegType.class, uppercaseValue);
         if (parsed != null) {
             return parsed;

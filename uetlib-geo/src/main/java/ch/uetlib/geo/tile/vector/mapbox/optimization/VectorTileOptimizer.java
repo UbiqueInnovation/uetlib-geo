@@ -34,7 +34,7 @@ public class VectorTileOptimizer {
     private static VectorTileLayer mergeFeatures(final VectorTileLayer layer) {
 
         record Key(long id, Map<String, Object> tags) {
-            public static Key of(final VectorTileFeature feature) {
+            static Key of(final VectorTileFeature feature) {
                 return new Key(feature.id(), feature.tags());
             }
         }
@@ -52,7 +52,7 @@ public class VectorTileOptimizer {
 
         final var combinedFeatures =
                 positions.entrySet().stream()
-                        .sorted(Comparator.comparing(entry -> average(entry.getValue())))
+                        .sorted(Comparator.comparingDouble(entry -> average(entry.getValue())))
                         .map(Map.Entry::getKey)
                         .map(groups::get)
                         .flatMap(VectorTileOptimizer::combineGeometries)

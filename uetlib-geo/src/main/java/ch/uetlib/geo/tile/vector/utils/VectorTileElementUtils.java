@@ -5,15 +5,10 @@ import ch.uetlib.geo.tile.vector.models.VectorTileElement;
 import ch.uetlib.geo.tile.vector.models.VectorTileElementWithMetadata;
 import ch.uetlib.geo.tile.vector.models.VectorTileElementWithTags;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public final class VectorTileElementUtils {
-
-    private static final Logger logger = LoggerFactory.getLogger(VectorTileElementUtils.class);
 
     private VectorTileElementUtils() {}
 

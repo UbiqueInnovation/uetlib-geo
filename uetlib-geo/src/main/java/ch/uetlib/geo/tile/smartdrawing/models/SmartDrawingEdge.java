@@ -7,6 +7,8 @@ import org.locationtech.jts.geom.LineString;
 import java.util.Map;
 import java.util.Objects;
 
+// equals and hashCode are overridden, so the array components are not compared by reference.
+@SuppressWarnings("ArrayRecordComponent")
 public record SmartDrawingEdge(
         SmartDrawingVertex u,
         SmartDrawingVertex v,

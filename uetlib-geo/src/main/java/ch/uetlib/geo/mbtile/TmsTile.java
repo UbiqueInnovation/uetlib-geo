@@ -8,6 +8,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /** <a href="https://gist.github.com/tmcw/4954720">GitHub Gist</a> (XYZ vs. TMS) */
+// equals and hashCode are overridden, so the array components are not compared by reference.
+@SuppressWarnings("ArrayRecordComponent")
 public record TmsTile(int zoomLevel, int column, int row, byte[] data) {
 
     public TmsTile(final TileInfo tileInfo, final byte[] data) {

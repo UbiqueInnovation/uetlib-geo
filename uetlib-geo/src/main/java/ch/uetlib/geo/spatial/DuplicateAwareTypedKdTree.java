@@ -5,7 +5,6 @@ import org.locationtech.jts.geom.Envelope;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,7 +32,7 @@ public class DuplicateAwareTypedKdTree<T> {
         final var node = kdTree.insert(itemEnv, items.size());
         final var index = kdTree.getData(node);
         if (index == items.size()) {
-            items.add(new LinkedList<>());
+            items.add(new ArrayList<>());
         }
         items.get(index).add(item);
         size.incrementAndGet();

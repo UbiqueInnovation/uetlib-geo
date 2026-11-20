@@ -2,6 +2,8 @@ package ch.uetlib.geo.tile.vector.models.tlm;
 
 import org.jspecify.annotations.Nullable;
 
+import java.util.Locale;
+
 public enum Structure {
     BRIDGE,
     TUNNEL,
@@ -18,7 +20,7 @@ public enum Structure {
     FORD;
 
     public static @Nullable Structure parse(final String value) {
-        return switch (value.toLowerCase()) {
+        return switch (value.toLowerCase(Locale.ROOT)) {
             case "keine", "in/auf gebaeude" -> null;
             case "bruecke" -> BRIDGE;
             case "tunnel" -> TUNNEL;
