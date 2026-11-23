@@ -29,31 +29,27 @@ class OsmParserTest {
                             assertNotNull(coordinate);
                             nodesCounter.incrementAndGet();
                         })
-                .onWay(
-                        way -> {
-                            assertNotNull(way);
-                            waysCounter.incrementAndGet();
-                        })
-                .onRelation(
-                        relation -> {
-                            assertNotNull(relation);
-                            relationsCounter.incrementAndGet();
-                        })
-                .onMetadata(
-                        map -> {
-                            assertNotNull(map);
-                            assertThatMap(map).isNotEmpty();
-                            metadataCounter.incrementAndGet();
-                        })
-                .onBound(
-                        bound -> {
-                            assertNotNull(bound);
-                            assertEquals(9.471078, bound.getLeft());
-                            assertEquals(9.636217, bound.getRight());
-                            assertEquals(47.047740000000005, bound.getBottom());
-                            assertEquals(47.271280000000004, bound.getTop());
-                            boundCounter.incrementAndGet();
-                        })
+                .onWay(way -> {
+                    assertNotNull(way);
+                    waysCounter.incrementAndGet();
+                })
+                .onRelation(relation -> {
+                    assertNotNull(relation);
+                    relationsCounter.incrementAndGet();
+                })
+                .onMetadata(map -> {
+                    assertNotNull(map);
+                    assertThatMap(map).isNotEmpty();
+                    metadataCounter.incrementAndGet();
+                })
+                .onBound(bound -> {
+                    assertNotNull(bound);
+                    assertEquals(9.471078, bound.getLeft());
+                    assertEquals(9.636217, bound.getRight());
+                    assertEquals(47.047740000000005, bound.getBottom());
+                    assertEquals(47.271280000000004, bound.getTop());
+                    boundCounter.incrementAndGet();
+                })
                 .onComplete(completeCounter::incrementAndGet)
                 .onClose(closeCounter::incrementAndGet)
                 .parse();

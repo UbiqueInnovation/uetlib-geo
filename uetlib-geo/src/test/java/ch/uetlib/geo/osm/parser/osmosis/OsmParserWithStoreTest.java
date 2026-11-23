@@ -98,12 +98,11 @@ class OsmParserWithStoreTest {
         parser.needsWay(Predicates.alwaysFalse())
                 .needsRelation(Predicates.alwaysFalse())
                 .onNode(Assertions::assertNotNull)
-                .onWay(
-                        way -> {
-                            assertFalse(parser.hasWayNodes(way));
-                            assertNull(parser.createLineString(way));
-                            assertNull(parser.getRepresentativeCoordinate(way));
-                        })
+                .onWay(way -> {
+                    assertFalse(parser.hasWayNodes(way));
+                    assertNull(parser.createLineString(way));
+                    assertNull(parser.getRepresentativeCoordinate(way));
+                })
                 .parse(fileProvider);
 
         assertThrows(IllegalStateException.class, () -> parser.getRepresentativeCoordinate(null));
@@ -115,33 +114,31 @@ class OsmParserWithStoreTest {
     @Test
     void testNeedsEvenNode() throws IOException {
         parser.needsNode(node -> node.getId() % 2 == 0)
-                .onNode(
-                        node -> {
-                            final var storedCoordinate = parser.getNodeCoordinate(node.getId());
-                            if (node.getId() % 2 == 0) {
-                                assertNotNull(storedCoordinate);
-                            } else {
-                                assertNull(storedCoordinate);
-                            }
-                        })
+                .onNode(node -> {
+                    final var storedCoordinate = parser.getNodeCoordinate(node.getId());
+                    if (node.getId() % 2 == 0) {
+                        assertNotNull(storedCoordinate);
+                    } else {
+                        assertNull(storedCoordinate);
+                    }
+                })
                 .parse(fileProvider);
     }
 
     @Test
     void testNeedsEvenWay() throws IOException {
         parser.needsWay(way -> way.getId() % 2 == 0)
-                .onWay(
-                        way -> {
-                            final var anyCoordinate = parser.getRepresentativeCoordinate(way);
-                            final var lineString = parser.createLineString(way);
-                            if (way.getId() % 2 == 0) {
-                                assertNotNull(anyCoordinate);
-                                assertNotNull(lineString);
-                            } else {
-                                assertNull(anyCoordinate);
-                                assertNull(lineString);
-                            }
-                        })
+                .onWay(way -> {
+                    final var anyCoordinate = parser.getRepresentativeCoordinate(way);
+                    final var lineString = parser.createLineString(way);
+                    if (way.getId() % 2 == 0) {
+                        assertNotNull(anyCoordinate);
+                        assertNotNull(lineString);
+                    } else {
+                        assertNull(anyCoordinate);
+                        assertNull(lineString);
+                    }
+                })
                 .parse(fileProvider);
     }
 }

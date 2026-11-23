@@ -325,20 +325,19 @@ class TopologyTileEncoderTest {
     void testMismatchedWeightLengths() {
         final var v1 = new SmartDrawingVertex(1, new WGS84Coordinate(47.0, 8.0));
         final var v2 = new SmartDrawingVertex(2, new WGS84Coordinate(47.1, 8.1));
-        assertThatThrownBy(
-                        () ->
-                                new SmartDrawingEdge(
-                                        v1,
-                                        v2,
-                                        GF.createLineString(
-                                                new Coordinate[] {
-                                                    v1.coordinate().toJts(), v2.coordinate().toJts()
-                                                }),
-                                        Map.of(),
-                                        new int[] {10},
-                                        new int[] {20, 30},
-                                        null,
-                                        new boolean[0]))
+        assertThatThrownBy(() ->
+                        new SmartDrawingEdge(
+                                v1,
+                                v2,
+                                GF.createLineString(
+                                        new Coordinate[] {
+                                            v1.coordinate().toJts(), v2.coordinate().toJts()
+                                        }),
+                                Map.of(),
+                                new int[] {10},
+                                new int[] {20, 30},
+                                null,
+                                new boolean[0]))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("forwardWeights length 1 does not match numDisciplines 2");
     }

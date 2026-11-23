@@ -5,12 +5,7 @@ import ch.uetlib.geo.coordinate.models.WGS84Coordinate;
 import ch.uetlib.geo.tile.vector.mapbox.tilejson.TileJson;
 import ch.uetlib.geo.tile.vector.mapbox.tilejson.TileJsonCenter;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-
 import org.apache.commons.collections4.CollectionUtils;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
@@ -19,34 +14,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@NullUnmarked
 public class TileJsonBuilder {
 
-    private List<String> tiles;
-    private String attribution;
-    private BoundingBox<@NonNull WGS84Coordinate> bounds;
-    private TileJsonCenter center;
-    private List<String> data;
-    private String description;
-    private Integer fillZoom;
-    private List<String> grids;
-    private String legend;
-    private String name;
-    private String scheme;
-    private String template;
-    private String version;
+    private List<String> tiles = List.of();
+    private @Nullable String attribution;
+    private @Nullable BoundingBox<WGS84Coordinate> bounds;
+    private @Nullable TileJsonCenter center;
+    private @Nullable List<String> data;
+    private @Nullable String description;
+    private @Nullable Integer fillZoom;
+    private @Nullable List<String> grids;
+    private @Nullable String legend;
+    private @Nullable String name;
+    private @Nullable String scheme;
+    private @Nullable String template;
+    private @Nullable String version;
 
     private final Collection<Integer> zoomLevels = ConcurrentHashMap.newKeySet();
     private final Map<String, Object> additionalData = new ConcurrentHashMap<>();
     private final Map<String, TileJsonVectorLayerBuilder> vectorLayerBuilders =
             new ConcurrentHashMap<>();
 
-    public TileJsonBuilder tiles(@NotBlank final String tiles) {
+    public TileJsonBuilder tiles(final String tiles) {
         this.tiles = List.of(tiles);
         return this;
     }
 
-    public TileJsonBuilder tiles(@NotEmpty final Collection<String> tiles) {
+    public TileJsonBuilder tiles(final Collection<String> tiles) {
         this.tiles = tiles.stream().toList();
         return this;
     }
@@ -60,7 +54,7 @@ public class TileJsonBuilder {
         return this;
     }
 
-    public TileJsonBuilder bounds(@Nullable final BoundingBox<@NonNull WGS84Coordinate> bounds) {
+    public TileJsonBuilder bounds(@Nullable final BoundingBox<WGS84Coordinate> bounds) {
         this.bounds = bounds;
         return this;
     }
@@ -95,12 +89,12 @@ public class TileJsonBuilder {
         return this;
     }
 
-    public TileJsonBuilder maxZoom(@Nullable final Integer maxZoom) {
+    public TileJsonBuilder maxZoom(final int maxZoom) {
         zoomLevels.add(maxZoom);
         return this;
     }
 
-    public TileJsonBuilder minZoom(@Nullable final Integer minZoom) {
+    public TileJsonBuilder minZoom(final int minZoom) {
         zoomLevels.add(minZoom);
         return this;
     }

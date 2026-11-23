@@ -1,4 +1,4 @@
-@NullUnmarked
+@NullMarked
 package ch.uetlib.geo.kml.models;
 
-import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.NullMarked;

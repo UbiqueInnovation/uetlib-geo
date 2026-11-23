@@ -26,88 +26,40 @@ class SmartDrawingEdgeTest {
         final Map<String, Object> tags = Map.of();
 
         // All zero length - should fail
-        assertThatThrownBy(
-                        () ->
-                                new SmartDrawingEdge(
-                                        v1,
-                                        v2,
-                                        line,
-                                        tags,
-                                        new int[0],
-                                        new int[0],
-                                        null,
-                                        new boolean[0]))
+        assertThatThrownBy(() ->
+                        new SmartDrawingEdge(
+                                v1, v2, line, tags, new int[0], new int[0], null, new boolean[0]))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("No weights for disciplines provided");
 
         // Same non-zero length - should pass
-        assertThatCode(
-                        () ->
-                                new SmartDrawingEdge(
-                                        v1,
-                                        v2,
-                                        line,
-                                        tags,
-                                        new int[2],
-                                        new int[2],
-                                        null,
-                                        new boolean[2]))
+        assertThatCode(() ->
+                        new SmartDrawingEdge(
+                                v1, v2, line, tags, new int[2], new int[2], null, new boolean[2]))
                 .doesNotThrowAnyException();
 
         // Mixed zero and same non-zero length - should pass
-        assertThatCode(
-                        () ->
-                                new SmartDrawingEdge(
-                                        v1,
-                                        v2,
-                                        line,
-                                        tags,
-                                        new int[2],
-                                        new int[0],
-                                        null,
-                                        new boolean[2]))
+        assertThatCode(() ->
+                        new SmartDrawingEdge(
+                                v1, v2, line, tags, new int[2], new int[0], null, new boolean[2]))
                 .doesNotThrowAnyException();
 
         // Mismatched non-zero lengths - should fail
-        assertThatThrownBy(
-                        () ->
-                                new SmartDrawingEdge(
-                                        v1,
-                                        v2,
-                                        line,
-                                        tags,
-                                        new int[2],
-                                        new int[1],
-                                        null,
-                                        new boolean[2]))
+        assertThatThrownBy(() ->
+                        new SmartDrawingEdge(
+                                v1, v2, line, tags, new int[2], new int[1], null, new boolean[2]))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("backwardWeights length 1 does not match numDisciplines 2");
 
-        assertThatThrownBy(
-                        () ->
-                                new SmartDrawingEdge(
-                                        v1,
-                                        v2,
-                                        line,
-                                        tags,
-                                        new int[2],
-                                        new int[2],
-                                        null,
-                                        new boolean[1]))
+        assertThatThrownBy(() ->
+                        new SmartDrawingEdge(
+                                v1, v2, line, tags, new int[2], new int[2], null, new boolean[1]))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("isHighway length 1 does not match numDisciplines 2");
 
-        assertThatThrownBy(
-                        () ->
-                                new SmartDrawingEdge(
-                                        v1,
-                                        v2,
-                                        line,
-                                        tags,
-                                        new int[1],
-                                        new int[2],
-                                        null,
-                                        new boolean[2]))
+        assertThatThrownBy(() ->
+                        new SmartDrawingEdge(
+                                v1, v2, line, tags, new int[1], new int[2], null, new boolean[2]))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("forwardWeights length 1 does not match numDisciplines 2");
     }

@@ -60,10 +60,9 @@ class VertexSpeedTest {
                 graph.getVertices().stream()
                         .parallel()
                         .limit(10_000_000)
-                        .flatMap(
-                                vertex ->
-                                        vertex.getNeighbors().stream()
-                                                .map(neighbor -> Pair.of(vertex, neighbor)))
+                        .flatMap(vertex ->
+                                vertex.getNeighbors().stream()
+                                        .map(neighbor -> Pair.of(vertex, neighbor)))
                         .toList();
 
         logger.info("Neighbor pairs size: {}", neighborPairs.size());

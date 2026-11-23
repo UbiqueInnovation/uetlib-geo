@@ -150,13 +150,9 @@ public abstract class RasterTileGenerator {
         final var maxLevel = levelsDefinition.minZoomLevel();
         return IntStream.range(0, maxLevel.tilesX())
                 .boxed()
-                .flatMap(
-                        x ->
-                                IntStream.range(0, maxLevel.tilesY())
-                                        .mapToObj(
-                                                y ->
-                                                        levelsDefinition.tileInfo(
-                                                                x, y, maxLevel.level())))
+                .flatMap(x ->
+                        IntStream.range(0, maxLevel.tilesY())
+                                .mapToObj(y -> levelsDefinition.tileInfo(x, y, maxLevel.level())))
                 .toList();
     }
 

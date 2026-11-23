@@ -21,16 +21,6 @@
         <artifact-package-name>ch.uetlib.geo</artifact-package-name>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>ch.uetlib</groupId>
-                <artifactId>uetlib-core</artifactId>
-                <version>3.0.1</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>ch.uetlib</groupId>
@@ -129,4 +119,14 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.uetlib</groupId>
+                <artifactId>uetlib-core</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

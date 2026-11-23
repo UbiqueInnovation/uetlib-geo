@@ -1,24 +1,10 @@
 package ch.uetlib.geo.kml.models;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-public class Icon {
-    private String href;
+import org.jspecify.annotations.Nullable;
 
-    public String getHref() {
-        return href;
-    }
-
-    public Icon setHref(final String href) {
-        this.href = href;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("href", href)
-                .toString();
-    }
-}
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record Icon(@Nullable String href) {}

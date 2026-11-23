@@ -28,12 +28,11 @@ class UetlibSpringBootGeoSpringDocAutoConfigurationTest {
 
         contextRunner
                 .withBean(LocalizedValueModelConverter.class, () -> customConverter)
-                .run(
-                        context -> {
-                            assertThat(context).hasSingleBean(LocalizedValueModelConverter.class);
+                .run(context -> {
+                    assertThat(context).hasSingleBean(LocalizedValueModelConverter.class);
 
-                            assertThat(context.getBean(LocalizedValueModelConverter.class))
-                                    .isSameAs(customConverter);
-                        });
+                    assertThat(context.getBean(LocalizedValueModelConverter.class))
+                            .isSameAs(customConverter);
+                });
     }
 }

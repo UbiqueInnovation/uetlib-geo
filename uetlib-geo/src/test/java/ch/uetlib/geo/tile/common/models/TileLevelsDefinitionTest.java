@@ -126,9 +126,8 @@ final class TileLevelsDefinitionTest {
                 final int finalY = y;
                 assertTrue(
                         tileInfos.stream()
-                                .anyMatch(
-                                        tileInfo ->
-                                                tileInfo.x() == finalX && tileInfo.y() == finalY));
+                                .anyMatch(tileInfo ->
+                                        tileInfo.x() == finalX && tileInfo.y() == finalY));
             }
         }
 
@@ -146,9 +145,8 @@ final class TileLevelsDefinitionTest {
                 final int finalY = y;
                 assertTrue(
                         tileInfos2.stream()
-                                .anyMatch(
-                                        tileInfo ->
-                                                tileInfo.x() == finalX && tileInfo.y() == finalY));
+                                .anyMatch(tileInfo ->
+                                        tileInfo.x() == finalX && tileInfo.y() == finalY));
             }
         }
     }
@@ -167,10 +165,8 @@ final class TileLevelsDefinitionTest {
             final var expected =
                     WebMercatorTileDefinitions.tileDefinitions()
                             .tileInfos(level)
-                            .filter(
-                                    info ->
-                                            info.envelope()
-                                                    .intersects((Envelope) webMercatorChEnvelope))
+                            .filter(info ->
+                                    info.envelope().intersects((Envelope) webMercatorChEnvelope))
                             .map(TileInfo::toString)
                             .collect(Collectors.toUnmodifiableSet());
 
@@ -202,15 +198,9 @@ final class TileLevelsDefinitionTest {
 
             final var expected =
                     IntStream.range(x0 * tilesPerSide, (x0 + 1) * tilesPerSide)
-                            .mapToObj(
-                                    x ->
-                                            IntStream.range(
-                                                            y0 * tilesPerSide,
-                                                            (y0 + 1) * tilesPerSide)
-                                                    .mapToObj(
-                                                            y ->
-                                                                    tileDefinitions.tileInfo(
-                                                                            x, y, level)))
+                            .mapToObj(x ->
+                                    IntStream.range(y0 * tilesPerSide, (y0 + 1) * tilesPerSide)
+                                            .mapToObj(y -> tileDefinitions.tileInfo(x, y, level)))
                             .flatMap(Function.identity())
                             .map(TileInfo::toString)
                             .sorted()

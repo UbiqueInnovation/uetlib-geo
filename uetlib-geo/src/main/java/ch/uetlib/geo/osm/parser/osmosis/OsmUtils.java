@@ -42,11 +42,10 @@ public final class OsmUtils {
             final InputStream inputStream, final Function<Node, Optional<T>> nodeMapper) {
         final var results = new ArrayList<T>();
         OsmParser.from(inputStream)
-                .onNode(
-                        node -> {
-                            final var result = nodeMapper.apply(node);
-                            result.ifPresent(results::add);
-                        })
+                .onNode(node -> {
+                    final var result = nodeMapper.apply(node);
+                    result.ifPresent(results::add);
+                })
                 .parse();
         return results;
     }

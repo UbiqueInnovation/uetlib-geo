@@ -134,11 +134,10 @@ final class GeoBufInputs {
         final var result = new LinkedHashMap<String, @Nullable Object>();
         json.properties().stream()
                 .filter(entry -> !excluded.contains(entry.getKey()))
-                .forEach(
-                        entry ->
-                                result.put(
-                                        entry.getKey(),
-                                        MAPPER.convertValue(entry.getValue(), Object.class)));
+                .forEach(entry ->
+                        result.put(
+                                entry.getKey(),
+                                MAPPER.convertValue(entry.getValue(), Object.class)));
         return result;
     }
 

@@ -54,10 +54,9 @@ class TileSetProcessorTest {
                     NotImplementedException.class,
                     () -> generator.executeTask(notImplementedFailure));
             final var oomFailure =
-                    taskFromRunnable(
-                            () -> {
-                                throw new OutOfMemoryError();
-                            });
+                    taskFromRunnable(() -> {
+                        throw new OutOfMemoryError();
+                    });
             assertThrows(CompletionException.class, () -> generator.executeTask(oomFailure));
         }
     }
@@ -123,10 +122,9 @@ class TileSetProcessorTest {
     }
 
     private static <E extends Exception> TileSetTask<Exception> failingTask(final E exception) {
-        return taskFromRunnable(
-                () -> {
-                    throw exception;
-                });
+        return taskFromRunnable(() -> {
+            throw exception;
+        });
     }
 
     private static <E extends Exception> TileSetTask<E> taskFromRunnable(

@@ -59,11 +59,10 @@ public class SwisstopoTlmParser implements AutoCloseable {
                     reader,
                     stream ->
                             stream.map(parser::parseFeature)
-                                    .map(
-                                            f ->
-                                                    new TlmPath(
-                                                            (LineString) f.geometry(),
-                                                            f.info().asPathInfo()))
+                                    .map(f ->
+                                            new TlmPath(
+                                                    (LineString) f.geometry(),
+                                                    f.info().asPathInfo()))
                                     .toList());
         }
     }

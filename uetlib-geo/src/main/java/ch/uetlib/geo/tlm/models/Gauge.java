@@ -2,9 +2,9 @@ package ch.uetlib.geo.tlm.models;
 
 public enum Gauge {
     STANDARD,
-    /** <= 1m */
+    /** {@code <=} 1m */
     NARROW,
-    /** <= 75cm */
+    /** {@code <=} 75cm */
     SMALL,
     STANDARD_AND_NARROW;
 

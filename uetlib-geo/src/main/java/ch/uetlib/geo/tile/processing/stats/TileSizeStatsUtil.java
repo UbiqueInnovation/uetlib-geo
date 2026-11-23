@@ -42,12 +42,11 @@ public class TileSizeStatsUtil {
         tileSizes.entrySet().stream()
                 .sorted(Comparator.comparingDouble(entry -> -entry.getValue()))
                 .limit(10)
-                .forEach(
-                        entry ->
-                                logger.info(
-                                        "{}: {}",
-                                        entry.getKey().path(),
-                                        FileUtils.byteCountToDisplaySize(entry.getValue())));
+                .forEach(entry ->
+                        logger.info(
+                                "{}: {}",
+                                entry.getKey().path(),
+                                FileUtils.byteCountToDisplaySize(entry.getValue())));
     }
 
     public void logStatsForLevel(final Integer level) {
