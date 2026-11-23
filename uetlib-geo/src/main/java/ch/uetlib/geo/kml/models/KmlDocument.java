@@ -1,38 +1,16 @@
 package ch.uetlib.geo.kml.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import jakarta.validation.Valid;
+
 import java.util.Collection;
 import java.util.Map;
 
-public class KmlDocument {
-
-    private Collection<Placemark> placemarks;
-    private Map<String, StyleMap> styleMaps;
-    private Map<String, Style> styles;
-
-    public Collection<Placemark> getPlacemarks() {
-        return placemarks;
-    }
-
-    public KmlDocument setPlacemarks(final Collection<Placemark> placemarks) {
-        this.placemarks = placemarks;
-        return this;
-    }
-
-    public Map<String, StyleMap> getStyleMaps() {
-        return styleMaps;
-    }
-
-    public KmlDocument setStyleMaps(final Map<String, StyleMap> styleMaps) {
-        this.styleMaps = styleMaps;
-        return this;
-    }
-
-    public Map<String, Style> getStyles() {
-        return styles;
-    }
-
-    public KmlDocument setStyles(final Map<String, Style> styles) {
-        this.styles = styles;
-        return this;
-    }
-}
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record KmlDocument(
+        Collection<@Valid Placemark> placemarks,
+        Map<String, StyleMap> styleMaps,
+        Map<String, Style> styles) {}

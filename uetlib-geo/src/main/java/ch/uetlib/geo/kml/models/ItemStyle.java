@@ -1,58 +1,16 @@
 package ch.uetlib.geo.kml.models;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-public class ItemStyle {
+import jakarta.validation.Valid;
 
-    private String color;
-    private Double scale;
-    private Double width;
-    private Icon icon;
+import org.jspecify.annotations.Nullable;
 
-    public String getColor() {
-        return color;
-    }
-
-    public ItemStyle setColor(final String color) {
-        this.color = color;
-        return this;
-    }
-
-    public Double getScale() {
-        return scale;
-    }
-
-    public ItemStyle setScale(final Double scale) {
-        this.scale = scale;
-        return this;
-    }
-
-    public Double getWidth() {
-        return width;
-    }
-
-    public ItemStyle setWidth(final Double width) {
-        this.width = width;
-        return this;
-    }
-
-    public Icon getIcon() {
-        return icon;
-    }
-
-    public ItemStyle setIcon(final Icon icon) {
-        this.icon = icon;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("color", color)
-                .append("scale", scale)
-                .append("width", width)
-                .append("icon", icon)
-                .toString();
-    }
-}
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record ItemStyle(
+        @Nullable String color,
+        @Nullable Double scale,
+        @Nullable Double width,
+        @Nullable @Valid Icon icon) {}

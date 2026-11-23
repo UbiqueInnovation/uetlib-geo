@@ -2,6 +2,17 @@
 
 ## 4.1.0
 
+- **Breaking:** Convert the six `ch.uetlib.geo.kml.models` classes and the five metadata models
+  (`Attribute`, `Layer`, `VectorLayer`, `MetadataJson`, `Tilestats`) in
+  `ch.uetlib.geo.mbtile.metadata.json` to records with package-level `@NullMarked` and explicit
+  `@Nullable` optional components. Replace no-argument construction and setters with record
+  constructors, and bean getters with component accessors (for example, `getName()` becomes `name()`).
+  The metadata `addValue`, `addAttribute`, `addLayer`, `addVectorLayer` and `addField` helpers are removed;
+  assemble collections before construction. JSON property names and null omission are preserved.
+  JSON deserialization now requires `MetadataJson.vector_layers` and `VectorLayer.id`/`fields`.
+  Records now use component-based equality, hash codes and string representations; collection and
+  geometry components remain mutable. `TileJsonBuilder` remains a builder.
+
 - `uetlib-parent` updated to
   `2026.11.5`: [Changelog/2026.11.5](https://github.com/UbiqueInnovation/uetlib-parent/blob/main/CHANGELOG.md#2026115) [Diff/2026.11.1-2026.11.5](https://github.com/UbiqueInnovation/uetlib-parent/compare/v2026.11.1...v2026.11.5)
 - `uetlib-core` updated to

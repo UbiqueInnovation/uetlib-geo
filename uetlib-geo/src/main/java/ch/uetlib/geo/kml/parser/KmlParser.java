@@ -11,7 +11,6 @@ import ch.uetlib.geo.kml.models.Style;
 import ch.uetlib.geo.kml.models.StyleMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jspecify.annotations.NonNull;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -93,10 +92,7 @@ public class KmlParser {
             }
 
             logger.info("Parsing KML finished");
-            return new KmlDocument()
-                    .setPlacemarks(placemarks)
-                    .setStyleMaps(styleMaps)
-                    .setStyles(styles);
+            return new KmlDocument(placemarks, styleMaps, styles);
         } catch (final XMLStreamException e) {
             throw new IOException(e);
         }
@@ -105,7 +101,11 @@ public class KmlParser {
     @SuppressWarnings("java:S3776")
     private static Placemark parsePlacemark(final XMLStreamReader reader)
             throws XMLStreamException {
-        final var placemark = new Placemark();
+        String name = null;
+        String description = null;
+        String styleId = null;
+        Geometry geometry = null;
+        final Map<String, String> extendedData = new HashMap<>();
         while (!isEndElement(reader, "Placemark")) {
             reader.next();
             final var eventType = reader.getEventType();
@@ -113,22 +113,22 @@ public class KmlParser {
                 continue;
             }
             switch (reader.getLocalName()) {
-                case "name" -> placemark.setName(reader.getElementText());
-                case "description" -> placemark.setDescription(reader.getElementText());
-                case "styleUrl" -> placemark.setStyleId(reader.getElementText().replace("#", ""));
+                case "name" -> name = reader.getElementText();
+                case "description" -> description = reader.getElementText();
+                case "styleUrl" -> styleId = reader.getElementText().replace("#", "");
                 case POINT, LINE_STRING, LINEAR_RING, POLYGON, MULTI_GEOMETRY ->
-                        placemark.setGeometry(parseGeometry(reader));
+                        geometry = parseGeometry(reader);
                 case "SimpleData" -> {
                     final var key = reader.getAttributeValue(0);
                     final var value = reader.getElementText();
-                    placemark.getExtendedData().put(key, value);
+                    extendedData.put(key, value);
                 }
                 default -> {
                     /* NO-OP */
                 }
             }
         }
-        return placemark;
+        return new Placemark(name, description, styleId, geometry, extendedData);
     }
 
     private static Geometry parseGeometry(final XMLStreamReader reader) throws XMLStreamException {
@@ -232,42 +232,47 @@ public class KmlParser {
     }
 
     private static Style parseStyle(final XMLStreamReader reader) throws XMLStreamException {
-        final var style = new Style();
+        ItemStyle iconStyle = null;
+        ItemStyle labelStyle = null;
+        ItemStyle lineStyle = null;
         while (!isEndElement(reader, "Style")) {
             reader.next();
             if (isStartEvent(reader)) {
                 final var elementName = reader.getLocalName();
                 switch (elementName) {
-                    case "IconStyle" -> style.setIconStyle(parseItemStyle(reader, elementName));
-                    case "LabelStyle" -> style.setLabelStyle(parseItemStyle(reader, elementName));
-                    case "LineStyle" -> style.setLineStyle(parseItemStyle(reader, elementName));
+                    case "IconStyle" -> iconStyle = parseItemStyle(reader, elementName);
+                    case "LabelStyle" -> labelStyle = parseItemStyle(reader, elementName);
+                    case "LineStyle" -> lineStyle = parseItemStyle(reader, elementName);
                     default -> {
                         /* NO-OP */
                     }
                 }
             }
         }
-        return style;
+        return new Style(iconStyle, labelStyle, lineStyle);
     }
 
     private static ItemStyle parseItemStyle(final XMLStreamReader reader, final String endTag)
             throws XMLStreamException {
-        final var style = new ItemStyle();
+        String color = null;
+        Double scale = null;
+        Double width = null;
+        Icon icon = null;
         while (!isEndElement(reader, endTag)) {
             reader.next();
             if (isStartEvent(reader)) {
                 switch (reader.getLocalName()) {
-                    case "color" -> style.setColor(reader.getElementText());
-                    case "scale" -> style.setScale(Double.parseDouble(reader.getElementText()));
-                    case "tileWidth" -> style.setWidth(Double.parseDouble(reader.getElementText()));
-                    case "Icon" -> style.setIcon(parseIcon(reader));
+                    case "color" -> color = reader.getElementText();
+                    case "scale" -> scale = Double.parseDouble(reader.getElementText());
+                    case "tileWidth" -> width = Double.parseDouble(reader.getElementText());
+                    case "Icon" -> icon = parseIcon(reader);
                     default -> {
                         /* NO-OP */
                     }
                 }
             }
         }
-        return style;
+        return new ItemStyle(color, scale, width, icon);
     }
 
     private static boolean isStartEvent(final XMLStreamReader reader) {
@@ -275,18 +280,19 @@ public class KmlParser {
     }
 
     private static StyleMap parseStyleMap(final XMLStreamReader reader) throws XMLStreamException {
-        final var styleMap = new StyleMap();
+        final Map<String, String> styleMap = new HashMap<>();
         while (!isEndElement(reader, "StyleMap")) {
             reader.next();
             if (isStartElement(reader, "Pair")) {
                 addPairToStyleMap(reader, styleMap);
             }
         }
-        return styleMap;
+        return new StyleMap(styleMap);
     }
 
     @SuppressWarnings("java:S3776")
-    private static void addPairToStyleMap(final XMLStreamReader reader, final StyleMap styleMap)
+    private static void addPairToStyleMap(
+            final XMLStreamReader reader, final Map<String, String> styleMap)
             throws XMLStreamException {
         String key = null;
         String value = null;
@@ -303,22 +309,21 @@ public class KmlParser {
             }
         }
         if (key != null && value != null) {
-            styleMap.getMap().put(key, value);
+            styleMap.put(key, value);
         }
     }
 
     private static Icon parseIcon(final XMLStreamReader reader) throws XMLStreamException {
-        final var icon = new Icon();
+        String href = null;
         while (!isEndElement(reader, "Icon")) {
             reader.next();
             if (isStartElement(reader, "href")) {
-                icon.setHref(reader.getElementText());
+                href = reader.getElementText();
             }
         }
-        return icon;
+        return new Icon(href);
     }
 
-    @NonNull
     private static WGS84Coordinate toWgs84Coordinate(final String value) {
         final var split = value.split(",", -1);
         final var lon = Double.parseDouble(split[0]);
