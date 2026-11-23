@@ -38,8 +38,6 @@
     </developers>
 
     <properties>
-        <explicit-null-marking-level>ERROR</explicit-null-marking-level>
-
         <!-- Sonar-->
         <sonar.projectName>uetlib-geo</sonar.projectName>
         <sonar.coverage.module>uetlib-geo-coverage</sonar.coverage.module>
@@ -100,20 +98,7 @@
                 <artifactId>protobuf-maven-plugin</artifactId>
             </plugin>
         </plugins>
-
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>de.westemeyer</groupId>
-                    <artifactId>artifact-version-maven-plugin</artifactId>
-                    <configuration>
-                        <packageName>${artifact-package-name}</packageName>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
-
 
     <scm child.scm.url.inherit.append.path="false" child.scm.connection.inherit.append.path="false"
          child.scm.developerConnection.inherit.append.path="false">
