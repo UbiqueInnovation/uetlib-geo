@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * according to mbtiles v1.3 specifications
- * (https://github.com/mapbox/mbtiles-spec/blob/master/1.3/spec.md#vector-tileset-metadata)
+ * according to mbtiles v1.3 specifications (<a
+ * href="https://github.com/mapbox/mbtiles-spec/blob/master/1.3/spec.md#vector-tileset-metadata">mapbox/mbtiles-spec</a>)
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
@@ -25,7 +25,10 @@ public class MetadataJson {
     @NotEmpty
     private List<VectorLayer> vectorLayers;
 
-    /** in the geostats format (https://github.com/mapbox/mapbox-geostats#output-the-stats) */
+    /**
+     * in the geostats format (<a
+     * href="https://github.com/mapbox/mapbox-geostats#output-the-stats">mapbox/mapbox-geostats</a>)
+     */
     @JsonProperty("tilestats")
     private Tilestats tilestats;
 

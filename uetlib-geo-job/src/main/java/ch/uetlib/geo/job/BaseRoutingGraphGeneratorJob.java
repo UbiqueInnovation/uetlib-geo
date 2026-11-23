@@ -91,13 +91,12 @@ public abstract class BaseRoutingGraphGeneratorJob<T> extends BaseStateJob<T> {
 
         logger.info("Returning graph outputs");
         return outputFormats()
-                .flatMap(
-                        format ->
-                                vectorTileOutputs(
-                                        graphsWithLayer.layer(),
-                                        vertexSupplier,
-                                        hasHighwayVertices,
-                                        format));
+                .flatMap(format ->
+                        vectorTileOutputs(
+                                graphsWithLayer.layer(),
+                                vertexSupplier,
+                                hasHighwayVertices,
+                                format));
     }
 
     private boolean isRoutingVertex(final Vertex vertex) {
