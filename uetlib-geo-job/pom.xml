@@ -21,21 +21,6 @@
         <artifact-package-name>ch.uetlib.geo.job</artifact-package-name>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>ch.uetlib</groupId>
-                <artifactId>uetlib-geo</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.uetlib</groupId>
-                <artifactId>uetlib-job</artifactId>
-                <version>6.0.2</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>ch.uetlib</groupId>
@@ -47,4 +32,19 @@
             <artifactId>uetlib-geo</artifactId>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.uetlib</groupId>
+                <artifactId>uetlib-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.uetlib</groupId>
+                <artifactId>uetlib-job</artifactId>
+                <version>6.1.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

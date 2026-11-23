@@ -285,19 +285,16 @@ public class Graph<V extends @Nullable Object, E extends @Nullable Object> {
 
         getVertices().stream()
                 .filter(vertexFilter)
-                .forEach(
-                        vertex ->
-                                graph.addVertex(
-                                        vertex.getId(), vertexPropertyMapper.apply(vertex)));
+                .forEach(vertex ->
+                        graph.addVertex(vertex.getId(), vertexPropertyMapper.apply(vertex)));
 
         getDirectedEdges().stream()
                 .filter(edgeFilter)
-                .forEach(
-                        edge ->
-                                graph.addDirectedEdge(
-                                        graph.getVertex(edge.getU().getId()).orElseThrow(),
-                                        graph.getVertex(edge.getV().getId()).orElseThrow(),
-                                        edgePropertyMapper.apply(edge)));
+                .forEach(edge ->
+                        graph.addDirectedEdge(
+                                graph.getVertex(edge.getU().getId()).orElseThrow(),
+                                graph.getVertex(edge.getV().getId()).orElseThrow(),
+                                edgePropertyMapper.apply(edge)));
         return graph;
     }
 

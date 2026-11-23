@@ -21,11 +21,10 @@ import java.util.stream.Stream;
 class LinesToRoutingGraphUtilTest {
     private final LinesToGraphConfig<String> config =
             LinesToGraphConfig.<String>builder()
-                    .routingEdgeFunction(
-                            (from, to, info) -> {
-                                Assertions.assertNotNull(info);
-                                return new RoutingCompleteEdge((float) from.distance(to), null);
-                            })
+                    .routingEdgeFunction((from, to, info) -> {
+                        Assertions.assertNotNull(info);
+                        return new RoutingCompleteEdge((float) from.distance(to), null);
+                    })
                     .build();
 
     @Test
@@ -295,13 +294,9 @@ class LinesToRoutingGraphUtilTest {
 
         Assertions.assertTrue(
                 graphs.routingGraph().getVertices().stream()
-                        .allMatch(
-                                v ->
-                                        graphs.completeGraph()
-                                                        .getVertex(v.getId())
-                                                        .orElseThrow()
-                                                        .degree()
-                                                != 2));
+                        .allMatch(v ->
+                                graphs.completeGraph().getVertex(v.getId()).orElseThrow().degree()
+                                        != 2));
 
         TestGeoJsonUtil.saveGeoJson(
                 TestGeoJsonUtil.routingGraphToFeatures(graphs).toList(), "sac-example");

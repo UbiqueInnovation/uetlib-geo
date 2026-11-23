@@ -21,21 +21,6 @@
         <artifact-package-name>ch.uetlib.geo.spring.boot</artifact-package-name>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>ch.uetlib</groupId>
-                <artifactId>uetlib-spring-boot</artifactId>
-                <version>4.0.2</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.uetlib</groupId>
-                <artifactId>uetlib-geo</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <!-- uetlib -->
         <dependency>
@@ -52,4 +37,19 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.uetlib</groupId>
+                <artifactId>uetlib-spring-boot</artifactId>
+                <version>4.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.uetlib</groupId>
+                <artifactId>uetlib-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

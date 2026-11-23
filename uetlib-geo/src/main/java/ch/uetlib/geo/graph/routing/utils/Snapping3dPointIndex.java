@@ -37,10 +37,9 @@ public class Snapping3dPointIndex {
         return coordinatesAtPlanarLocation.stream()
                 .filter(c -> JtsUtil.zDistance(coordinate, c) <= snapTolerance)
                 .findAny()
-                .orElseGet(
-                        () -> {
-                            coordinatesAtPlanarLocation.add(coordinate);
-                            return coordinate;
-                        });
+                .orElseGet(() -> {
+                    coordinatesAtPlanarLocation.add(coordinate);
+                    return coordinate;
+                });
     }
 }

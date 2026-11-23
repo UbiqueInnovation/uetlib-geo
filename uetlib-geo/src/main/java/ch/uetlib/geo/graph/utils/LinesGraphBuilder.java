@@ -119,19 +119,18 @@ public class LinesGraphBuilder<E> {
         final var level = levelExtractor.applyAsInt(info);
         final var coordinates = lineString.getCoordinateSequence();
         IntStream.range(1, coordinates.size())
-                .forEach(
-                        i -> {
-                            final var c0 = coordinates.getCoordinate(i - 1);
-                            final var c1 = coordinates.getCoordinate(i);
+                .forEach(i -> {
+                    final var c0 = coordinates.getCoordinate(i - 1);
+                    final var c1 = coordinates.getCoordinate(i);
 
-                            final var v0 = getOrCreateVertex(c0, level);
-                            final var v1 = getOrCreateVertex(c1, level);
+                    final var v0 = getOrCreateVertex(c0, level);
+                    final var v1 = getOrCreateVertex(c1, level);
 
-                            upsertDirectedEdge(v0, v1, info);
-                            if (!isDirected) {
-                                upsertDirectedEdge(v1, v0, info);
-                            }
-                        });
+                    upsertDirectedEdge(v0, v1, info);
+                    if (!isDirected) {
+                        upsertDirectedEdge(v1, v0, info);
+                    }
+                });
         return this;
     }
 
@@ -164,11 +163,10 @@ public class LinesGraphBuilder<E> {
                     .map(e -> findIntersection(edge, e))
                     .flatMap(Optional::stream)
                     .findAny()
-                    .ifPresent(
-                            coordinate -> {
-                                splitEdge(edge, coordinate);
-                                intersectionCounter.incrementAndGet();
-                            });
+                    .ifPresent(coordinate -> {
+                        splitEdge(edge, coordinate);
+                        intersectionCounter.incrementAndGet();
+                    });
 
             progressLogger.step();
         }

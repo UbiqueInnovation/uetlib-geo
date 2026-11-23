@@ -218,10 +218,9 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
         final var zoomLevel = getZoomLevel(level);
         return IntStream.range(0, zoomLevel.tilesX())
                 .boxed()
-                .flatMap(
-                        x ->
-                                IntStream.range(0, zoomLevel.tilesY())
-                                        .mapToObj(y -> tileInfo(x, y, level)));
+                .flatMap(x ->
+                        IntStream.range(0, zoomLevel.tilesY())
+                                .mapToObj(y -> tileInfo(x, y, level)));
     }
 
     public Stream<TileInfo> tileInfos(
@@ -246,10 +245,9 @@ public record TileLevelsDefinition(Coordinate origin, List<ZoomLevel> zoomLevels
 
         return findXRangeForZoomLevel(zoomLevel, transformedEnvelope)
                 .boxed()
-                .flatMap(
-                        x ->
-                                findYRangeForZoomLevel(zoomLevel, transformedEnvelope)
-                                        .mapToObj(y -> tileInfo(x, y, level)))
+                .flatMap(x ->
+                        findYRangeForZoomLevel(zoomLevel, transformedEnvelope)
+                                .mapToObj(y -> tileInfo(x, y, level)))
                 .filter(tileInfo -> isDefined(zoomLevel, tileInfo));
     }
 

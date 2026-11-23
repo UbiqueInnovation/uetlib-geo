@@ -59,16 +59,15 @@ public final class TileGeometryUtils {
         final var crs = getCrs(geometry);
         final var coordinateSystemBounds = CoordinateSystems.forCrs(crs).bounds();
         Arrays.stream(geometry.getCoordinates())
-                .forEach(
-                        coordinate -> {
-                            if (!coordinateSystemBounds.covers(coordinate)) {
-                                throw new IllegalArgumentException(
-                                        "The given geometry has a coordinate outside the defined"
-                                                + " bounds of the coordinate system. Violating"
-                                                + " coordinate: "
-                                                + coordinate);
-                            }
-                        });
+                .forEach(coordinate -> {
+                    if (!coordinateSystemBounds.covers(coordinate)) {
+                        throw new IllegalArgumentException(
+                                "The given geometry has a coordinate outside the defined"
+                                        + " bounds of the coordinate system. Violating"
+                                        + " coordinate: "
+                                        + coordinate);
+                    }
+                });
     }
 
     public static MathTransform tileTransform(

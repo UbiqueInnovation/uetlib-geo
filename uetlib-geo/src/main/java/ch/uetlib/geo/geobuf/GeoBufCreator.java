@@ -160,21 +160,18 @@ public final class GeoBufCreator {
         }
 
         private ByteString collection(final GeoBufInput.Collection collection) {
-            return serialize(
-                    output -> {
-                        for (final var feature : collection.features()) {
-                            output.writeBytes(
-                                    GeoBuf.FeatureCollection.FEATURES_FIELD_NUMBER,
-                                    feature(feature));
-                        }
-                        final var values = new ArrayList<GeoBuf.Value>();
-                        GeoBuf.FeatureCollection.newBuilder()
-                                .addAllCustomProperties(
-                                        properties(collection.foreignMembers(), values))
-                                .addAllValues(values)
-                                .build()
-                                .writeTo(output);
-                    });
+            return serialize(output -> {
+                for (final var feature : collection.features()) {
+                    output.writeBytes(
+                            GeoBuf.FeatureCollection.FEATURES_FIELD_NUMBER, feature(feature));
+                }
+                final var values = new ArrayList<GeoBuf.Value>();
+                GeoBuf.FeatureCollection.newBuilder()
+                        .addAllCustomProperties(properties(collection.foreignMembers(), values))
+                        .addAllValues(values)
+                        .build()
+                        .writeTo(output);
+            });
         }
 
         private ByteString feature(final GeoBufInput.Feature feature) {
@@ -331,12 +328,11 @@ public final class GeoBufCreator {
                 final List<GeoBuf.Value> values) {
             final var indexes = new ArrayList<Integer>();
             if (properties != null) {
-                properties.forEach(
-                        (key, value) -> {
-                            indexes.add(requireNonNull(keys.get(key)));
-                            indexes.add(values.size());
-                            values.add(value(value));
-                        });
+                properties.forEach((key, value) -> {
+                    indexes.add(requireNonNull(keys.get(key)));
+                    indexes.add(values.size());
+                    values.add(value(value));
+                });
             }
             return indexes;
         }

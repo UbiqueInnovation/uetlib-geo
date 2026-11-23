@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>ch.uetlib</groupId>
         <artifactId>uetlib-parent</artifactId>
-        <version>2026.11.2</version>
+        <version>2026.11.5</version>
         <relativePath/>
     </parent>
 
@@ -38,7 +38,7 @@
     </developers>
 
     <properties>
-<explicit-null-marking-level>ERROR</explicit-null-marking-level>
+        <explicit-null-marking-level>ERROR</explicit-null-marking-level>
 
         <!-- Sonar-->
         <sonar.projectName>uetlib-geo</sonar.projectName>
@@ -53,16 +53,6 @@
         <module>uetlib-geo-coverage</module>
     </modules>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>ch.uetlib</groupId>
-                <artifactId>uetlib-test</artifactId>
-                <version>3.0.1</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>ch.uetlib</groupId>
@@ -70,6 +60,16 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.uetlib</groupId>
+                <artifactId>uetlib-test</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
@@ -115,8 +115,8 @@
     </build>
 
 
-
-    <scm child.scm.url.inherit.append.path="false" child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false">
+    <scm child.scm.url.inherit.append.path="false" child.scm.connection.inherit.append.path="false"
+         child.scm.developerConnection.inherit.append.path="false">
         <connection>scm:git:https://github.com/UbiqueInnovation/uetlib-geo.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/UbiqueInnovation/uetlib-geo.git</developerConnection>
         <url>https://github.com/UbiqueInnovation/uetlib-geo</url>

@@ -176,9 +176,9 @@ class GeoBufCreatorTest {
         final var json =
                 mapper.readTree(
                         """
-                {"type":"Feature","id":"pasture-1","properties":{"name":"pasture"},
-                "geometry":{"type":"Point","coordinates":[2600000.1,1200000]}}
-                """);
+                        {"type":"Feature","id":"pasture-1","properties":{"name":"pasture"},
+                        "geometry":{"type":"Point","coordinates":[2600000.1,1200000]}}
+                        """);
         final var creator = new GeoBufCreator();
         assertArrayEquals(creator.toGeoBufNative(json), creator.toGeoBufNative(feature));
         final var collection = new FeatureCollection().setFeatures(List.of(feature, new Feature()));
@@ -199,13 +199,13 @@ class GeoBufCreatorTest {
         final var input =
                 mapper.readTree(
                         """
-                {"type":"GeometryCollection","label":"outer","geometries":[
-                  {"type":"Point","coordinates":[1,2],"label":"point"},
-                  {"type":"GeometryCollection","label":"inner","geometries":[
-                    {"type":"LineString","coordinates":[[1,2],[3,4]],"label":"line"}
-                  ]}
-                ]}
-                """);
+                        {"type":"GeometryCollection","label":"outer","geometries":[
+                          {"type":"Point","coordinates":[1,2],"label":"point"},
+                          {"type":"GeometryCollection","label":"inner","geometries":[
+                            {"type":"LineString","coordinates":[[1,2],[3,4]],"label":"line"}
+                          ]}
+                        ]}
+                        """);
         final var result = GeoBuf.parseFrom(new GeoBufCreator().toGeoBufNative(input));
         final var outer = result.getGeometry();
         final var inner = outer.getGeometries(1);
